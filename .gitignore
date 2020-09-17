@@ -1,0 +1,24 @@
+.DS_Store
+node_modules/
+/dist/
+/data/
+data/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+server/db/db.json
+*.zip
+public/
+# static/
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+# simulations/
+db/db.json
+db/data.zip
+# map/
+map-ui/
