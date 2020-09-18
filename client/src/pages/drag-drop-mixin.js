@@ -1,4 +1,4 @@
-const mixin = {
+export default {
   data() {
     return {
       selected: [],
@@ -37,5 +37,3 @@ const mixin = {
 
   },
 };
-
-export default mixin;

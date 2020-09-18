@@ -1,8 +1,12 @@
 
 const path = require('path');
 
+const db = require('../../main/dbms/db');
+
+const { getSimulations } = db;
+
 const {
-  db: { getSimulations },
+  // db: { getSimulations },
   config: { saltPath: { output } },
 } = global.SALT;
 
@@ -25,5 +29,3 @@ async function getSimulationResult(req, res) {
 }
 
 module.exports = getSimulationResult;
-
-

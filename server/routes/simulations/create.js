@@ -28,9 +28,10 @@ const { downloadScenarioByRegion } = require('../../main/service/scenario-downlo
 const { updatetStatus, currentTime } = require('./globals');
 const { ERROR } = require('../../main/status');
 const cloudService = require('../../main/service/cloud-service');
+const db = require('../../main/dbms/db');
 
+const { getSimulations } = db;
 const {
-  db: { getSimulations },
   config: { base },
 } = global.SALT;
 

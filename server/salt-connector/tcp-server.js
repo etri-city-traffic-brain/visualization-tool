@@ -98,7 +98,7 @@ function Server({ port }, queueRegistry) {
   return {
     start() {
       server.listen(port, '127.0.0.1');
-      log(`TCP Server listen on ${chalk.blue(port)}`);
+      log(`SALT-Connector start on ${chalk.blue(port)}...`);
     },
     write: send,
   };

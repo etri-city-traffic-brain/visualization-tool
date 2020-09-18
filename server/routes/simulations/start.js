@@ -16,9 +16,13 @@ const debug = require('debug')('api:create');
 const { RUNNING, ERROR } = require('../../main/status');
 const { updatetStatus, currentTime } = require('./globals');
 
-const {
-  db: { getSimulations: getSimulationTable },
-} = global.SALT;
+const db = require('../../main/dbms/db');
+
+const { getSimulations: getSimulationTable } = db;
+
+// const {
+//   db: { getSimulations: getSimulationTable },
+// } = global.SALT;
 
 // const runSimulator = require('../../main/simulation-manager/simulation-runner');
 const run = require('../../main/simulation-manager/simulation-runner-standalone');

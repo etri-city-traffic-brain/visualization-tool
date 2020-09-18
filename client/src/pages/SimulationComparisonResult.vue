@@ -3,19 +3,32 @@
      <div class="top">
       <div class="center">
         <!-- <h1> <b-badge>{{ simulationId }}</b-badge> </h1> -->
-
-          <b-button-group size="lg">
-
+        <b-button-group size="small">
           <b-button variant="dark" @click="stepBackward"> &lsaquo; </b-button>
-
           <b-button>{{ currentStepTime }}</b-button>
           <b-button variant="dark" @click="stepForward"> &rsaquo; </b-button>
-          </b-button-group>
-          <!-- <b-badge>{{ currentStepTime }}</b-badge> -->
-
+        </b-button-group>
+        <b-input-group size="sm" class="mt-1">
+          <b-input-group-prepend is-text>
+            <b-form-checkbox
+              @change="togglePlay"
+              value="play"
+              unchecked-value="stop"
+            />
+          </b-input-group-prepend>
+          <b-form-input
+            type="range"
+            min="1"
+            :max="slideMax"
+            :value="currentStep"
+            class="slider"
+            @change="onChange"
+            @input="onInput"
+          />
+        </b-input-group>
       </div>
-     </div>
-    <b-container fluid class="m-0 p-0">
+    </div>
+    <b-container fluid class="p-1">
        <b-row class="m-0">
         <!-- CONNECTION -->
         <b-col cols="6" class="p-0">
@@ -41,74 +54,45 @@
             v-bind:style="{height: mapHeight + 'px'}"
           />
         </b-col>
-       </b-row>
-    </b-container>
-    <b-container fluid class="m-0 p-1 pl-2 pr-2">
-      <b-input-group size="sm" >
-        <b-input-group-prepend is-text>
-          <b-form-checkbox
-            @change="togglePlay"
-            value="play"
-            unchecked-value="stop"
-          />
-        </b-input-group-prepend>
-        <!-- <b-input-group-text slot="prepend">
-          {{ currentStepTime }}
-        </b-input-group-text> -->
-        <b-form-input
-          type="range"
-          min="1"
-          :max="slideMax"
-          :value="currentStep"
-          class="slider"
-          @change="onChange"
-          @input="onInput"
-        />
-        <b-button-group>
-          <b-button size="sm" variant="primary" @click="stepBackward"> &lsaquo; </b-button>
-          <b-button size="sm" variant="primary" @click="stepForward"> &rsaquo; </b-button>
-        </b-button-group>
-        <!-- <b-input-group-text slot="append">
-          {{ maxTime }}
-        </b-input-group-text> -->
-      </b-input-group>
-    </b-container>
-    <!-- <b-container fluid v-if="!isReady" class="mt-2"> -->
-      <div class="top" v-if="!isReady">
-        <div class="center">
-      <h1><b-badge class="mb-2" variant="warning"> {{ msg }} </b-badge></h1>
-        </div>
-      </div>
-       <!-- <b-spinner label="Spinning" /> -->
-    <!-- </b-container> -->
-    <b-container fluid class="mt-2" v-if="isReady">
-      <b-card
-        header="스텝별 평균속도"
-        class="mb-2"
-        header-text-variant="white"
-        header-bg-variant="dark"
-      >
-        <!-- <bar-chart :chartData="summary" :height="height"/> -->
-        <line-chart :chartData="summary" :height="height"/>
-      </b-card>
-    </b-container>
+      </b-row>
 
-    <!-- histogram -->
-    <b-container fluid class="mt-2">
-      <b-card-group columns>
+      <b-card
+        bg-variant="secondary"
+        text-variant="light"
+        no-body
+        class="mt-1 p-1"
+        style="max-height: 250px; min-width: 860px"
+      >
         <b-card
+          header="스텝별 평균속도"
+          class="m-0"
           header-text-variant="white"
           header-bg-variant="dark"
+
+        >
+          <!-- <bar-chart :chartData="summary" :height="height"/> -->
+          <line-chart :chartData="summary" :height="50" style="max-height: 250px;"/>
+        </b-card>
+      </b-card>
+      <b-card-group columns style="min-height:150px; max-height: 300px; min-width: 860px;">
+        <b-card
+          bg-variant="secondary"
+          text-variant="light"
+          no-body
           v-for="item in histograms"
           :header="'속도별 차량 분포 (' + item.name + ')'"
           :key="item.name"
-          >
-          <histogram-chart :chartData="item"  v-if="item.isReady"/>
+          class="mt-1 p-1 ml-0 mr-0"
+        >
+          <b-card class="p-1 ml-0 mr-1" >
+            <histogram-chart :chartData="item" :height="135" class="mt-2" v-if="item.isReady"/>
+          </b-card>
         </b-card>
       </b-card-group>
     </b-container>
 
     <!-- congestion pie -->
+    <!--
     <b-container fluid class="mt-2" v-if="isReady">
       <b-card-group columns>
         <b-card
@@ -122,6 +106,13 @@
         </b-card>
       </b-card-group>
     </b-container>
+    -->
+    <div class="top" v-if="!isReady">
+      <div class="center">
+        <h1><b-badge class="mb-2" variant="warning"> {{ msg }} </b-badge></h1>
+      </div>
+    </div>
+
   </div>
 </template>
 <script src="./simulation-comparison-result.js"></script>

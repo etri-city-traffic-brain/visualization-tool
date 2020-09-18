@@ -63,6 +63,7 @@ export default {
       mapHeight: 800, // map view height
       mapManager: null,
       speedsPerStep: {},
+      sidebar: false,
       currentStep: 1,
       slideMax: 0,
       showLoading: false,
@@ -80,7 +81,11 @@ export default {
         pieDataStep: null,
         pieData: null,
         linkSpeeds: [],
-      }
+      },
+      currentZoom: '',
+      currentExtent: '',
+      wsStatus: 'ready',
+      avgSpeed: '27'
     };
   },
   destroyed() {
@@ -98,7 +103,7 @@ export default {
   async mounted() {
     this.simulationId = this.$route.params ? this.$route.params.id : '';
     this.showLoading = true
-    this.mapHeight = window.innerHeight - 180; // update map height to current height
+    this.mapHeight = window.innerHeight - 500; // update map height to current height
     this.map = makeMap({ mapId });
 
     const { simulation, slideMax } = await simulationService.getSimulationInfo(this.simulationId);
@@ -118,8 +123,32 @@ export default {
         )
       }
       return;
-
     })
+
+    this.$on('salt:data', (d) => {
+      this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
+        acc += cur
+        return acc
+      }, 0) / d.roads.length
+    })
+
+    this.$on('map:moved', ({zoom, extent}) => {
+      this.currentZoom = zoom
+      this.currentExtent = [extent.min, extent.max]
+    });
+
+    this.$on('ws:open', () => {
+      this.wsStatus = 'open'
+    });
+    this.$on('ws:error', (error) => {
+      this.wsStatus = 'error'
+      this.makeToast(error.message, 'warning')
+    });
+    this.$on('ws:close', () => {
+      this.wsStatus = 'close'
+      this.makeToast('ws connection closed', 'warning')
+    });
+
     this.mapManager.loadMapData();
     if (this.simulation.status === 'finished') {
       this.slideMax = slideMax;
@@ -136,18 +165,16 @@ export default {
         new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed())
       )
     } else if(this.simulation.status === 'running') {
-      // this.mapRealtimeManager = MapRealtimeManager(this.map, this.simulationId)
       this.wsClient = WebSocketClient(this, this.simulationId)
-
+      this.wsClient.init()
     }
     window.addEventListener('resize', this.resize);
     this.showLoading = false
   },
   methods: {
     ...stepperMixin,
-    // padStr,
     toggleState() {
-      return this.playBtnToggle ? 'Manual' : 'Auto'
+      return this.playBtnToggle ? 'M' : 'A'
     },
     edgeSpeed() {
       if(this.currentEdge && this.currentEdge.speeds) {
@@ -155,9 +182,8 @@ export default {
       }
       return 0
     },
-
     resize() {
-      this.height = window.innerHeight - 180; // update map height to current height
+      this.mapHeight = window.innerHeight - 500; // update map height to current height
     },
     togglePlay() {
       (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()
@@ -165,13 +191,30 @@ export default {
     async stepChanged(step) {
       if(this.simulation.status === 'finished') {
         this.mapManager.changeStep(step);
-        this.pieDataStep = await statisticsService.getPieChart(this.simulationId, step);
-        this.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, step);
+        this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, step);
+        this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, step);
       }
     },
     center(region) {
       if(region === 1) { // 도안
         this.map.setCenter( [127.334706, 36.346159] )
+      }
+    },
+    makeToast(msg, variant='info') {
+      this.$bvToast.toast(msg, {
+        title: 'Notification',
+        autoHideDelay: 5000,
+        appendToast: false,
+        variant,
+        toaster: 'b-toaster-bottom-right'
+      })
+    },
+    async connectWebSocket() {
+      try {
+        // WebSocketClient(this, this.simulationId)
+        this.wsClient.init()
+      } catch(err) {
+        this.makeToast(err.message, 'warning')
       }
     }
   },

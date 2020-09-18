@@ -36,7 +36,7 @@ function fileToString(filePath) {
 function objectToFile(fileNew, fileData) {
   return new Promise((resolve, reject) => {
     const fileNewWriter = writeStream(fileNew)
-      .on('close', () => resolve(`${fileNew} has written`))
+      .on('close', () => resolve(`${fileNew} is written`))
       .on('error', reject);
     const duplex = makeDuplex(fileData);
     duplex.pipe(fileNewWriter);

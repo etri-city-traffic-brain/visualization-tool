@@ -56,6 +56,14 @@ function MapManager(map, simulationId, eventBus) {
         speeds: currentSpeedsPerLink[target.getId()],
       })
     }
+
+    target.setInfoWindow({
+      title: target.properties.LINK_ID,
+      content: JSON.stringify(target.properties, false, 2),
+    });
+
+    target.openInfoWindow();
+
   }
 
   const addEventHandler = geometry =>
@@ -117,6 +125,12 @@ function MapManager(map, simulationId, eventBus) {
     } else {
       await loadMapData(event.type);
     }
+    if(eventBus) {
+      eventBus.$emit('map:moved', {
+        zoom,
+        extent: extent(map)
+      })
+    }
   };
 
   map.on('zoomend moveend', handleZoomEvent);
@@ -124,7 +138,6 @@ function MapManager(map, simulationId, eventBus) {
   return {
     loadMapData,
     changeStep,
-
   };
 }
 

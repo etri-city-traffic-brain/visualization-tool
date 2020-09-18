@@ -4,14 +4,14 @@ const chalk = require('chalk');
 const { log } = console;
 const serialize = obj => JSON.stringify(obj);
 
-
+const debug = require('debug')('salt:connector');
 /**
  * 큐내의 데이터를 wss 에 연결된 클라이언트들에게 전송
  * @param {}} queueRegistry
  * @param {*} wss
  */
 function distributeData(queueRegistry, wss) {
-  log('start worker');
+  log('Message-Distributor started...');
   const send = () => {
     Object.keys(queueRegistry).forEach((simulationid) => {
       const queue = queueRegistry[simulationid];
@@ -96,7 +96,7 @@ function Server({ port }, queueRegistry) {
 
   return {
     start() {
-      log(`WebSocket listen on ${chalk.blue(port)}`);
+      log(`GUI-Connector start on ${chalk.blue(port)}...`);
     },
   };
 }

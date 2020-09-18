@@ -1,27 +1,23 @@
-//    db.js
-//    init lowdb
-//    singleton
-
 const low = require('lowdb');
 const FileAsync = require('lowdb/adapters/FileAsync');
 
-const { simulation: { dbFile } } = require('../../config');
-
 const TABLE_SIMULATION = 'simulations';
-
-let db;
-
-(async () => {
-  db = await low(new FileAsync(dbFile));
-  if (!db.has(TABLE_SIMULATION).value()) {
-    db.defaults({ simulations: [] }).write();
-  }
-})();
-
-function getSimulations() {
-  return db.get(TABLE_SIMULATION);
-}
+const { log } = console;
+let database;
 
 module.exports = {
-  getSimulations,
+  init(file = './db.json') {
+    low(new FileAsync(file))
+      .then((db) => {
+        log('LowDB connected...');
+        database = db;
+        if (!database.has(TABLE_SIMULATION).value()) {
+          database.defaults({ simulations: [] }).write();
+        }
+      })
+      .catch(err => log('LowDB connection failed...', err.message));
+  },
+  getSimulations() {
+    return database.get(TABLE_SIMULATION);
+  },
 };

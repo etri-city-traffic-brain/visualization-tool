@@ -71,10 +71,10 @@ export default {
     },
     statusColor(status) {
       const colors = {
-        running: 'info',
+        running: 'primary',
         error: 'danger',
         ready: 'secondary',
-        finished: 'primary',
+        finished: 'success',
       }
       return colors[status] || 'secondary'
     },

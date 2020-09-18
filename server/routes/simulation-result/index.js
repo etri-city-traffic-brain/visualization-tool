@@ -1,6 +1,9 @@
 const express = require('express');
 
-const { mongoose, findFeatures } = SALT;
+// const { findFeatures } = SALT;
+
+const mongoose = require('mongoose');
+const findFeatures = require('../../routes/map/find-features');
 
 const parseMapReqParam = require('../parse-req-query');
 
@@ -11,7 +14,6 @@ const useDb = name => mongoose.connection.useDb(name);
 const DB_SIMULATION_RESULT = 'simulation_results';
 const DB_MAP = 'map';
 const MAP_LINK = 'links';
-const MAP_CELL = 'cells';
 
 const arrayToObj = (array, key) => array.reduce((acc, cur) => {
   acc[cur[key]] = cur.values;
@@ -20,7 +22,7 @@ const arrayToObj = (array, key) => array.reduce((acc, cur) => {
 
 const makeCellId = ({ properties = {} }) => {
   const { LINK_ID, LANE_ID, SECTION_ID } = properties;
-  if (properties.hasOwnProperty('LANE_ID')) {
+  if (properties.LANE_ID) {
     return `${LINK_ID}_${SECTION_ID}_${LANE_ID}`;
   }
   return `${LINK_ID}`;

@@ -6,7 +6,7 @@
 // process.env.DEBUG = 'server:server';
 const debug = require('debug')('server:server');
 const http = require('http');
-const app = require('../app');
+const { app } = require('../server');
 
 /**
  * Normalize a port into a number, string, or false.

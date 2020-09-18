@@ -123,6 +123,8 @@ export default {
         }));
         tmp.datasets.push(dataset[0]);
         tmp.labels = data.labels;
+        tmp.labels = tmp.labels.map((v, i)=> i)
+
       }
       this.isReady = true;
       this.summary = tmp;

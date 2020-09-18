@@ -1,180 +1,111 @@
 /* eslint-disable no-await-in-loop */
 
-
 /**
- * add simulation result to mongo db collection
+ * add simulation result to MongoDB collection
+ * and generate statistical chart data
  *
  * author: Yeonheon Gu
- *
+ * modified: 2020-09-17
  */
 const debug = require('debug')('api:simulation-result');
+
 const fs = require('fs');
-const path = require('path');
 const csv = require('fast-csv');
 const moment = require('moment');
+const mongoose = require('mongoose');
 
-const util = require('util');
-
-const writeFile = util.promisify(fs.writeFile);
+const config = require('../config');
+const status = require('./status');
 
 const currentTime = () => moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
 const makeChartData = require('../main/chart-data-maker');
 
-const {
-  mongoose,
-  config: {
-    saltPath: {
-      output,
-    },
-  },
-  mongooseUtils: {
-    isConnected,
-  },
-} = global.SALT;
+const { output } = config.saltPath;
 
-const { join } = path;
-const { log, error } = console;
-
-/**
- *
- * @param {String} idStr [linkId][sectionId][laneId]
- */
-// const parseRoadId_0 = (idStr) => {
-//   const groups = idStr.match(/\[-?[0-9]*\]/gi);
-//   return groups.map(v => v.replace(/\[/gi, '').replace(/\]/gi, ''));
-// };
-
-const parseRoadId = (idStr = '') => idStr.split('_');
-
-const getIds = (columnName) => {
-  const ids = parseRoadId(columnName);
-  const get = idx => ids[idx] || '0';
+const subIds = (cellId) => {
+  const subIds = cellId.split('_');
   return {
-    linkId: get(0),
-    sectionId: `${get(0)}_${get(1)}`,
-    cellId: `${get(0)}_${get(1)}_${get(2)}`,
+    linkId: subIds[0],
+    sectionId: `${subIds[0]}_${subIds[1]}`,
+    cellId,
   };
 };
 
-const insertToMongo = async (collectionName, dataTable, updateStatus) => {
-  if (!isConnected(mongoose)) {
-    throw new Error('MongoDB not connected');
-  }
+async function insertToMongo(collectionName, cells) {
   const db = mongoose.connection.useDb('simulation_results');
-  try {
-    await db.collection(collectionName).drop();
-  } catch (err) {
-    // ignore
-  }
+  await db.collection(collectionName).drop();
 
   const collection = db.collection(collectionName);
   await collection.createIndex({ cellId: 1 });
   debug('start bulk insert');
-  let bulk = collection.initializeOrderedBulkOp();
-  const list = Object.keys(dataTable);
-  for (let i = 0; i < list.length; i += 1) {
-    const id = list[i];
-    const target = dataTable[id];
-    bulk.insert({
-      linkId: target.linkId,
-      cellId: target.cellId,
-      values: target.values,
-    });
+  let bulkOperation = collection.initializeOrderedBulkOp();
+  const cellIds = Object.keys(cells);
+  for (let i = 0; i < cellIds.length; i += 1) {
+    bulkOperation.insert(cells[cellIds[i]]);
     if (i % 1000 === 0) {
-      await bulk.execute();
-      updateStatus(`insert ${i}`);
-      bulk = collection.initializeOrderedBulkOp();
+      await bulkOperation.execute();
+      bulkOperation = collection.initializeOrderedBulkOp();
     }
   }
-  await bulk.execute();
+  await bulkOperation.execute();
   debug('finish bulk insert');
-};
+}
 
-// const getSimulationFileName = simulationId => fs.readdirSync(join(output, simulationId)).find(file => file.endsWith('unified.csv') || file.endsWith('.csv'));
-const getSimulationFileName = (simulationId) => {
-  const files = fs.readdirSync(join(output, simulationId));
-  let target = files.find(file => file.endsWith('unified.csv'));
-  if (!target) {
-    target = files.find(file => file.endsWith('.csv'));
-  }
-  return target;
-};
-/**
- * 시뮬레이션 결과를 시각화 용도에 맞도록 변환한다.
- * salt result file location: {baseDir}/{simulationId}/{fileName}.csv
- *
- * @param {String}} simulationId
- */
-function cook({ id: simulationId, duration, period }, updateStatus) {
-  debug('start cooking', simulationId);
-  if (!simulationId) {
+module.exports = ({ id, duration, period }, updateStatus) => {
+  debug('Start cooking simulation result', id);
+  if (!id) {
     return Promise.reject(new Error('simulation id missed'));
   }
-  const outputPath = join(output, simulationId);
+
+  const simulationResultFile = fs.readdirSync(`${output}/${id}`).find(file => file.endsWith('.csv'));
+  if (!simulationResultFile) {
+    return Promise.reject(new Error('simulation result file(csv) not found...'));
+  }
 
   return new Promise((resolve, reject) => {
-    const simulationResultFile = getSimulationFileName(simulationId);
-
-    if (!simulationResultFile) {
-      return reject(new Error('simulation result file(csv) not found...'));
-    }
-    const stream = fs.createReadStream(join(outputPath, simulationResultFile));
+    const stream = fs.createReadStream(`${output}/${id}/${simulationResultFile}`);
     const transform = ([start, , id, , speed]) => ({ start, id, speed });
 
-    const cellMap = {};
+    const cells = {};
     const start = Date.now();
-    let count = 0;
-    const handleData = (row) => {
-      if (row.id && row.id === 'simulation') return;
-      // const cellId = `${row.id}_0_0`;
-      count += 1;
-      if (count % 10000 === 0) {
-        updateStatus(`processing: ${count / 1000}k`);
-      }
-      const { linkId, cellId } = getIds(row.id);
 
-      const cell = cellMap[cellId] || {};
+    const handleData = (row) => {
+      if (row.id && row.id === 'simulation') {
+        return;
+      }
+      const { linkId, cellId } = subIds(row.id);
+
+      const cell = cells[cellId] || {};
       const speed = Number((+row.speed).toFixed(1));
-      cell.values = cell.values || [];
-      cell.values.push(speed);
-      cell.linkId = linkId;
-      cell.cellId = cellId;
       if (speed) {
-        cellMap[cellId] = cell;
+        cell.linkId = linkId;
+        cell.cellId = cellId;
+        cell.values = cell.values || [];
+        cell.values.push(speed);
+        cells[cellId] = cell;
       }
     };
 
     const handleEnd = async () => {
+      stream.close();
       try {
-        // await makeChartData(output, simulationId);
-        await insertToMongo(simulationId, cellMap, updateStatus);
-        debug(`write file to ${output}/${simulationId}/${simulationId}.json`);
-        // await writeFile(`${output}/${simulationId}/${simulationId}.json`, JSON.stringify({
-        //   meta: {duration, period},
-        //   data: cellMap,
-        // }), 'utf-8')
-
-        await makeChartData(output, simulationId, {
+        await insertToMongo(id, cells);
+        await makeChartData(output, id, {
           meta: {
             duration,
             period,
           },
-          data: cellMap,
+          data: cells,
         });
 
-        const used = process.memoryUsage().heapUsed / 1024 / 1024;
-        debug(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
+        const memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
+        debug(`The worker uses approximately ${Math.round(memoryUsed * 100) / 100} MB`);
         debug(`${(Date.now() - start) / 1000} sec`);
-        updateStatus('finished', {
-          ended: currentTime(),
-        });
+        updateStatus(status.FINISHED, { ended: currentTime() });
         resolve(true);
       } catch (err) {
-        updateStatus('error', {
-          error: err.message,
-          ended: currentTime(),
-        });
-        error(err);
+        updateStatus(status.ERROR, { error: err.message, ended: currentTime() });
+        debug(err.message);
         reject(err);
       }
     };
@@ -186,6 +117,4 @@ function cook({ id: simulationId, duration, period }, updateStatus) {
       .on('end', handleEnd)
       .on('error', err => reject(err));
   });
-}
-
-module.exports = cook;
+};

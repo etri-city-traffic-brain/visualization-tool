@@ -24,19 +24,19 @@ module.exports = {
     standalone: 'C:\\home\\ubuntu\\salt\\helpler\\runStandAloneSALT.py',
     distributed: `${base}/helper/runDistributedSALT.py`,
   },
-  dbms: {
-    mongodbUrl: 'mongodb://127.0.0.1:27017/map',
-    mongoOption: {
-      useNewUrlParser: true,
-      autoReconnect: true,
-      reconnectTries: Number.MAX_VALUE,
-      reconnectInterval: 1000,
-      keepAlive: 1,
-      connectTimeoutMS: 30000,
-    },
+
+  mongodbUrl: 'mongodb://127.0.0.1:27017/map',
+  mongoOption: {
+    useNewUrlParser: true,
+    autoReconnect: true,
+    reconnectTries: Number.MAX_VALUE,
+    reconnectInterval: 1000,
+    keepAlive: 1,
+    connectTimeoutMS: 30000,
   },
+
   simulation: {
-    dbFile: './db/db.json', // database file location
+    // dbFile: './db.json', // database file location
     routes: `${base}/routes`,
     routePerDay: [
       'gd_trips_2017_sun_refinement.rou.xml',
@@ -60,5 +60,9 @@ module.exports = {
   },
   predictionService: {
     urlBase: predictionApiBase,
+  },
+  server: {
+    tcpPort: 1337,
+    wsPort: 8082,
   },
 };

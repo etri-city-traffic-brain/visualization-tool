@@ -5,10 +5,11 @@ const {
   updatetStatus,
 } = require('./globals');
 
+const db = require('../../main/dbms/db');
+
+const { getSimulations } = db;
+
 const {
-  db: {
-    getSimulations,
-  },
   services: {
     cloudService,
   },

@@ -2,10 +2,14 @@ const chalk = require('chalk');
 const WebSocketServer = require('./ws-server');
 const TcpServer = require('./tcp-server');
 
+const config = require('../config');
+
+const { tcpPort, wsPort } = config.server;
+
 const { log } = console;
 
-function Server() {
-  log(chalk.yellow('SALT Connector Module starting...'));
+function Server({ tcpPort, wsPort }) {
+  log(chalk.yellow('SALT connector module starting...'));
   const queueRegistry = {
     ['001'.padStart(24, '0')]: {
       dataQueue: [],
@@ -16,10 +20,13 @@ function Server() {
       commandQueue: [],
     },
   };
-  const tcpServer = TcpServer({ port: 1337 }, queueRegistry);
+  const tcpServer = TcpServer({ port: tcpPort }, queueRegistry);
   tcpServer.start();
-  const wsServer = WebSocketServer({ port: 8082 }, queueRegistry);
+  const wsServer = WebSocketServer({ port: wsPort }, queueRegistry);
   wsServer.start();
 }
 
-Server();
+Server({
+  tcpPort,
+  wsPort,
+});

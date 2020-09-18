@@ -8,8 +8,12 @@ const rmdir = util.promisify(require('rimraf'));
 
 const rmDirRemote = require('./rmdir-remote');
 
+const db = require('../../main/dbms/db');
+
+const { getSimulations } = db;
+
 const {
-  db: { getSimulations },
+  // db: { getSimulations },
   config: {
     saltPath: {
       output,

@@ -2,12 +2,14 @@ const fs = require('fs');
 const moment = require('moment');
 const multer = require('multer');
 const path = require('path');
-
+const dbUtils = require('../../main/dbms/db-utils');
 const cookSimulationResult = require('../../main/simulation-result-cooker');
 
+const db = require('../../main/dbms/db');
+
+const { getSimulations } = db;
+
 const {
-  db: { getSimulations },
-  dbUtils,
   config: { saltPath: { output } },
 } = global.SALT;
 

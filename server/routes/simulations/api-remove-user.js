@@ -2,9 +2,13 @@
 
 const debug = require('debug')('api:remove');
 
-const {
-  db: { getSimulations },
-} = global.SALT;
+const db = require('../../main/dbms/db');
+
+const { getSimulations } = db;
+
+// const {
+// db: { getSimulations },
+// } = global.SALT;
 
 const removeSimulation = require('./fn-remove-simulation');
 

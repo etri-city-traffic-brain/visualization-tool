@@ -2,12 +2,14 @@
 
 const cookSimulationResult = require('../../main/simulation-result-cooker');
 const Status = require('../../main/status');
+const dbUtils = require('../../main/dbms/db-utils');
+const db = require('../../main/dbms/db');
 
+const { getSimulations } = db;
 const { FINISHED } = Status;
-const {
-  db: { getSimulations },
-  dbUtils,
-} = global.SALT;
+// const {
+//   db: { getSimulations },
+// } = global.SALT;
 
 const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
 

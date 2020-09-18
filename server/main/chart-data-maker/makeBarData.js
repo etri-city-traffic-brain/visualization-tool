@@ -7,9 +7,7 @@ const streamUtil = require('./promiseStream');
  * @return {object}
  */
 function makeBar(strData) {
-  // const { meta, data } = JSON.parse(strData);
   const { meta, data } = strData;
-  console.log(meta);
   const formater = value => ((value < 10) ? `0${value}` : `${value}`);
 
   let labelValue = 0;
@@ -34,18 +32,6 @@ function makeBar(strData) {
   };
 
   const getAvgSpeed = (linkIds, index) => linkIds.reduce((acc, linkId) => acc + data[linkId].values[index], 0) / linkIds.length;
-  // const datasetReduce = (
-  //   linkIds,
-  //   data,
-  //   index = 0,
-  //   dataset = { backgroundColor: [], data: [] },
-  // ) => {
-  //   if (SIZE === index) return dataset;
-  //   const avgSpeed = getAvgSpeed(linkIds, index);
-  //   dataset.backgroundColor.push(getColor(avgSpeed));
-  //   dataset.data.push(Number(avgSpeed.toFixed(2)));
-  //   return datasetReduce(linkIds, data, index + 1, dataset);
-  // };
 
   const linkIds = Object.keys(data);
   const dataset = { backgroundColor: [], data: [] };
@@ -55,7 +41,7 @@ function makeBar(strData) {
     dataset.data.push(Number(avgSpeed.toFixed(2)));
   }
   const datasets = [
-    dataset
+    dataset,
   ];
   return {
     labels,
@@ -69,15 +55,14 @@ const driver = (from, simulationId, jsonObj) => new Promise((resolve, reject) =>
   }
   const simulationDir = `${from}/${simulationId}`;
   try {
-    const fileOrigin = `${simulationDir}/${simulationId}.json`;
     const fileNew = `${simulationDir}/bar-data.json`;
     // streamUtil.fileToString(fileOrigin).then((strData) => {
     const fileData = makeBar(jsonObj);
     streamUtil.objectToFile(fileNew, fileData)
-    .then((result) => {
-      console.log(result);
-      resolve();
-    }).catch(reject);
+      .then((result) => {
+        console.log(result);
+        resolve();
+      }).catch(reject);
   } catch (err) {
     reject(err);
   }

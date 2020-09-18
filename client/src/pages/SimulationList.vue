@@ -61,24 +61,27 @@
       >
         <template v-slot:cell(num)="row">
           <b-button
-            variant="secondary"
+            variant="dark"
             size="sm"
             @click="row.toggleDetails(); toggleDetails(row.item.id, row.item.status, row.detailsShowing);">
-            {{ row.detailsShowing ? '-' : '+'}}
+            <!-- {{ row.detailsShowing ? '-' : '+'}} -->
+            <b-icon icon="arrow-bar-up" v-if="row.detailsShowing"></b-icon>
+            <b-icon icon="arrow-bar-down" v-else></b-icon>
           </b-button>
         </template>
 
         <template v-slot:cell(id)="row" >
           <div draggable="true" @dragstart="drag" :data-id="row.item.id">
-            <!-- <b class="text-info">{{ row.item.id.toUpperCase() }}</b> -->
-             <h5 class="m-0"><b-badge class="p-2" :variant="statusColor(row.item.status)">{{ row.item.id.toUpperCase() }}</b-badge></h5>
+            <!-- <b class="text-success">{{ row.item.id.toUpperCase() }}</b> -->
+            <b>{{ row.item.id.toUpperCase() }}</b>
+             <!-- <h5 class="m-0"><b-badge class="p-2" :variant="statusColor(row.item.status)">{{ row.item.id.toUpperCase() }}</b-badge></h5> -->
           </div>
         </template>
 
         <template v-slot:cell(status)="row">
-          <b-icon v-if="row.item.status === 'running'" icon="clock" :variant="statusColor(row.item.status)" animation="spin" font-scale="2"></b-icon>
+          <b-icon v-if="row.item.status === 'running'" icon="gear-fill" :variant="statusColor(row.item.status)" animation="spin" font-scale="2"></b-icon>
           <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
-          <b-icon v-else icon="check-square-fill" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
+          <b-icon v-else icon="shield-fill-check" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
         </template>
 
         <template v-slot:cell(actions)="row">
@@ -117,46 +120,42 @@
             :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
             v-if="row.item.status !== 'error'"
             >
-              상세보기
+              <b-icon icon="zoom-in"></b-icon>상세보기
           </b-button>
           <b-button
             size="sm"
             variant="danger"
             class="mr-1"
             @click.stop="removeSimulation(row.item)">
-              <b-icon icon="x" aria-hidden="true"/>
+              <b-icon icon="trash-fill" aria-hidden="true"/>
           </b-button>
         </template>
         <template v-slot:row-details="row">
-          <b-alert class="mb-1 p-2" v-if="row.item.error && row.item.status === 'error'"  show variant="danger">{{row.item.error }}</b-alert>
-          <b-card
-            header-text-variant="white"
-            header-tag="header"
-            header-bg-variant="dark"
-            header="시뮬레이션 결과 업로드"
-            class="mt-2"
-            style="max-width:400px"
+          <b-alert
+            v-if="row.item.error && row.item.status === 'error'"
+            class="mb-1 p-2"
+            variant="danger"
+            show
           >
-            <p>파일을 선택하거나 드래그해서 놓으세요.(.csv)</p>
+            {{row.item.error }}
+          </b-alert>
+          <b-input-group>
             <b-form-file
               accept=".csv"
               v-model="resultFile"
-              :state="Boolean(resultFile)"
-              placeholder="파일 선택...">
+              placeholder="CSV 파일을 선택하거나 드래그해서 놓으세요...">
             </b-form-file>
-            <b-button
-              class="mt-2"
-              variant="dark"
-              @click.prevent="uploadSimulatoinResultFile(row.item)">
-                업로드
+            <b-input-group-append>
+              <b-button
+                variant="secondary"
+                @click.prevent="uploadSimulatoinResultFile(row.item)">
+                  Upload
               </b-button>
-          </b-card>
-
-          <b-button size="sm" class="mt-1" @click="row.toggleDetails">닫기</b-button>
+            </b-input-group-append>
+          </b-input-group>
+          <!-- <b-button size="sm" class="mt-1" @click="row.toggleDetails">닫기</b-button> -->
         </template>
-
       </b-table>
-
        <b-alert
         :show="msg.length > 0"
         :variant="variant"

@@ -8,26 +8,42 @@ function Client(eventBus, simulationId) {
   if (!eventBus) {
     throw new Error('eventBus is null')
   }
-
-  const socket = new WebSocket('ws://localhost:8082');
+  const url = 'ws://localhost:8082'
+  let status = 'ready'
+  let socket = null
 
   const send = obj => socket.send(serialize(obj));
   const close = () => socket.close();
 
-  // Connection opened
-  socket.addEventListener('open', () => {
-    send({
-      type: 0,
-      simulationId,
+  function init() {
+    if(status === 'open') {
+      return
+    }
+    socket = new WebSocket(url);
+    socket.addEventListener('open', () => {
+      send({
+        type: 0,
+        simulationId,
+      });
+      status = 'open'
+      eventBus.$emit('ws:open')
     });
-  });
 
-  // Listen for messages
-  socket.addEventListener('message', (event) => {
-    eventBus.$emit('salt:data', deserialize(event.data))
-  });
+    socket.addEventListener('message', (event) => {
+      eventBus.$emit('salt:data', deserialize(event.data))
+    });
+    socket.addEventListener('close', () => {
+      eventBus.$emit('ws:close', {})
+      status = 'close'
+    })
+    socket.addEventListener('error', () => {
+      eventBus.$emit('ws:error',new Error(`WebSocket connection to ${url} failed`))
+      status = 'error'
+    })
+  }
 
   return {
+    init,
     send,
     close
   }

@@ -84,10 +84,10 @@ const driver = (from, simulationId, jsonObj) => new Promise((resolve, reject) =>
     // promiseStream.fileToString(fileOrigin).then((strData) => {
     const fileData = makeHistogram(jsonObj);
     promiseStream.objectToFile(fileNew, fileData)
-    .then((result) => {
-      console.log(result);
-      resolve();
-    }).catch(err => reject(err));
+      .then((result) => {
+        console.log(result);
+        resolve();
+      }).catch(err => reject(err));
   } catch (err) {
     reject(err);
   }

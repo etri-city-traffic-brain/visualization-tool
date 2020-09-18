@@ -2,21 +2,9 @@
 //    get or update signal information on data platform server
 //    2019
 
-/**
- * get or update signal information on data platform server
- */
 const axios = require('axios');
 
 const { config: { signalService: { urlBase } } } = global.SALT;
-
-/**
- * http://14.33.200.254:9900/rest.api/getSignal?signal_id=571600441&version=1
- * http://14.33.200.254:9900/rest.api/getSignalInfo?signal_id=571600441
- * http://14.33.200.254:9900/rest.api/getConnection?junction_id=571600441
- * http://14.33.200.254:9900/rest.api/updateSignal
- */
-
-// const urlBase = 'http://14.33.200.254:9900/rest.api';
 
 async function getSignal(signalId, version = 1) {
   return axios.get(`${urlBase}/getSignal?signal_id=${signalId}&version=${version}`);

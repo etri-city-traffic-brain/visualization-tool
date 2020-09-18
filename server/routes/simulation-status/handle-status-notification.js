@@ -4,11 +4,11 @@ const cloudService = require('../../main/service/cloud-service');
 const downloader = require('../../main/simulation-manager/downloader');
 const cookSimulationResult = require('../../main/simulation-result-cooker');
 const Status = require('../../main/status');
+const dbUtils = require('../../main/dbms/db-utils');
 
 const { FINISHED } = Status;
 const {
   db: { getSimulations },
-  dbUtils,
   config: {
     saltPath: { output },
   },

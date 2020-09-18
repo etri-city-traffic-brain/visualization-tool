@@ -2,8 +2,11 @@
 //    2019
 const paginate = require('paginate-array');
 
-const { db: { getSimulations } } = global.SALT;
+// const { db: { getSimulations } } = global.SALT;
 
+const db = require('../../main/dbms/db');
+
+const { getSimulations } = db;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 10;
 

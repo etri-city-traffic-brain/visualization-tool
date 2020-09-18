@@ -23,11 +23,19 @@ function drawVehicles({context, map, edges = [], roads}) {
         const cars = calcVehiclesLoc(p1, p2, roadMap[edge.properties.LINK_ID].vehicles)
         for(let i=0; i<cars.length; i++) {
           const car = cars[i]
+
           context.fillStyle = 'rgb(200, 0, 0)';
-          context.beginPath();
-          context.arc(p1.x, p1.y, 5, 0, 2 * Math.PI);
-          context.arc(p2.x, p2.y, 10, 0, 2 * Math.PI);
-          context.stroke();
+
+          // context.save()
+          // context.beginPath();
+          // context.arc(p1.x, p1.y, 2, 0, 2 * Math.PI);
+          // context.arc(p2.x, p2.y, 4, 0, 2 * Math.PI);
+          // context.fillStyle = 'green';
+          // context.fill();
+          // context.lineWidth = 2;
+          // context.strokeStyle = '#003300';
+          // context.stroke();
+          // context.restore()
 
           context.save()
           context.translate(car.start.x + width / 2, car.start.y + height / 2 );

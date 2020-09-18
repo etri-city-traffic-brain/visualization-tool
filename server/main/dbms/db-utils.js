@@ -8,5 +8,5 @@ const simulationStatusUpdater = db => (id, status, param = {}) => {
 }
 
 module.exports = {
-  simulationStatusUpdater: simulationStatusUpdater,
+  simulationStatusUpdater,
 }

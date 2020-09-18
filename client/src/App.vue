@@ -25,12 +25,12 @@
     <transition name="fade">
       <router-view/>
     </transition>
-    <b-container fluid class="mt-2 mb-2 p-2 text-center">
-      도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어
-      <hr class="my-4">
+    <!-- <b-container fluid class="mt-2 mb-2 p-2 text-center"> -->
+      <!-- 도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어 -->
+      <!-- <hr class="my-4"> -->
       <!-- <small class="text-muted">Copyright 2019. ETRI all rights reserved.</small> -->
-      <small class="text-muted">COPYRIGHT ⓒ 2020. <em>MODUTECH</em> Inc. ALL RIGHT RESERVED.</small>
-    </b-container>
+      <!-- <small class="text-muted">COPYRIGHT ⓒ 2020. <em>MODUTECH</em> Inc. ALL RIGHT RESERVED.</small> -->
+    <!-- </b-container> -->
   </div>
 </template>
 

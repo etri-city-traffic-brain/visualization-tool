@@ -1,5 +1,9 @@
 // const { getSimulations } = require('../../main/dbms/db');
-const { getSimulations } = global.SALT.db;
+// const { getSimulations } = global.SALT.db;
+
+const db = require('../../main/dbms/db');
+
+const { getSimulations } = db;
 
 function get(req, res) {
   const { params: { id } } = req;
