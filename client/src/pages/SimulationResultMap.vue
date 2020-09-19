@@ -1,74 +1,50 @@
 <template>
   <b-container fluid class="m-0 p-0">
-    <div class="top">
-      <div >
-        <b-button v-b-toggle.sidebar-1 size="sm" variant="dark">
+    <div class="uniq-top-menu">
+      <div>
+        <b-button @click="sidebar = !sidebar" size="sm" variant="dark">
           <b-icon icon="align-end"/>
         </b-button>
-      <b-button-group v-if="simulation.status === 'finished'">
-        <b-button v-b-modal.modal-xl variant="secondary" size="sm" class="ml-1">
-          <b-icon icon="bar-chart"/>
-        </b-button>
-        <b-button @click="center(1)" class="ml-1" size="sm">
-          도안동
-        </b-button>
-        <b-button @click="makeToast()">Toast</b-button>
-        <!-- <b-toast id="example-toast" title="BootstrapVue" static no-auto-hide>
-      Hello, world! This is a toast message.
-    </b-toast> -->
+        <b-button-group v-if="simulation.status === 'finished'">
+          <b-button v-b-modal.modal-xl variant="secondary" size="sm">
+            <b-icon icon="bar-chart"/>
+          </b-button>
+          <b-button @click="center(1)" class="ml-1" size="sm" variant="dark">
+            도안동
+          </b-button>
+        </b-button-group>
+        <uniq-congestion-color-bar/>
 
-        <!-- <v-switch v-model="running" class="ma-2" label="Disabled"></v-switch> -->
-        <!-- <b-button size="sm" variant="danger" class="ml-1">막힘(~15km)</b-button> -->
-        <!-- <b-button size="sm" variant="warning">정체(16~30km)</b-button> -->
-        <!-- <b-button size="sm" variant="success">워활(31km~)</b-button> -->
-        <!-- <b-form-checkbox v-model="running" name="check-button" switch size="lg"> simulator: {{ running }} </b-form-checkbox> -->
-      </b-button-group>
-
+        <uniq-map-changer :map="map" />
       </div>
     </div>
 
     <b-sidebar
-      id="sidebar-1"
+      title="Properties"
       v-model="sidebar"
       bg-variant="dark"
       text-variant="white"
-      title="Properties"
       shadow
     >
-        <b-card
-        bg-variant="secondary"
-        text-variant="light"
-        class="p-2 ml-1 mr-1"
-        no-body
-      >
-        <h5>
-          <b-badge variant="dark"> {{ simulationId }} </b-badge>
-          <b-badge variant="dark"> {{ simulation.configuration.period / 60}}분 주기 </b-badge>
-        </h5>
-        <h5>
-          <b-badge>시작:</b-badge><b-badge>{{ simulation.configuration.fromDate }} {{ simulation.configuration.fromTime }} </b-badge>
-        </h5>
-        <h5>
-          <b-badge>종료:</b-badge><b-badge>{{ simulation.configuration.toDate }} {{ simulation.configuration.toTime }} </b-badge>
-        </h5>
-      </b-card>
-
-      <template v-slot:footer="{ hide }">
-       <div class="d-flex bg-dark text-light align-items-center px-3 py-2">
-        <strong class="mr-auto">UNIQ</strong>
-        <b-button size="sm" @click="hide">Close</b-button>
-      </div>
-      </template>
-
+      <uniq-simulation-result-ext :simulation="simulation" />
     </b-sidebar>
 
-    <!------------------->
-    <!-- CONTROL PANEL -->
-    <!------------------->
-    <div class="control-panel" v-if="simulation.status === 'finished'" >
-      <b-card bg-variant="secondary" text-variant="light" no-body >
-        <div class="m-0 p-1" >
-          <b-input-group>
+    <!-- MAP CONTAINER -->
+    <b-card
+      bg-variant="secondary"
+      border-variant="secondary"
+      class="mt-0 p-1 uniq-box-panel map"
+      no-body
+      >
+      <div
+        :ref="mapId"
+        :id="mapId"
+        :style="{height: mapHeight + 'px'}"
+      />
+      <!-- CONTROL PANEL -->
+      <div class="uniq-step-player">
+        <b-card bg-variant="secondary" text-variant="light" no-body v-if="simulation.status === 'finished'" >
+          <b-input-group size="sm">
             <b-button-group>
               <b-button size="sm" variant="dark" @click="togglePlay" :pressed.sync="playBtnToggle"> {{ toggleState() }} </b-button>
               <b-button size="sm" variant="dark" @click="stepBackward" class="ml-1"> <b-icon icon="caret-left-fill"/> </b-button>
@@ -87,65 +63,35 @@
               <b-button size="sm" variant="dark">{{ currentStep }} </b-button>
             </b-input-group-append>
           </b-input-group>
-        </div>
-      </b-card>
-    </div>
-
-    <!------------------->
-    <!-- CONTROL PANEL -->
-    <!------------------->
-    <div class="control-panel-2">
-      <b-button-group>
-        <b-button
-          v-for="(value, id) in congestionColor.domain()"
-          v-bind:key="id"
-          :style="{'background-color': congestionColor(value), 'border': 0}"
-          size="sm"
-        >
-          {{ value }}
-        </b-button>
-      </b-button-group>
-    </div>
-
-
-
-    <!-- MAP CONTAINER //-->
-    <!-- <div class="map"
-      :ref="mapId"
-      :id="mapId"
-      :style="{height: mapHeight + 'px'}"
-    /> -->
-
-    <!------------------->
-    <!-- MAP CONTAINER -->
-    <!------------------->
-    <div
-      class="map-2" :ref="mapId" :id="mapId"
-      :style="{height: mapHeight + 'px'}"
-    />
-
-    <div class="loading-container" v-if="showLoading">
-      <div class="loading-vertical-center">
-        <b-icon icon="three-dots" animation="cylon" font-scale="4"></b-icon>
+        </b-card>
       </div>
-    </div>
+      <div class="loading-container" v-if="showLoading">
+        <div class="loading-vertical-center">
+          <b-icon icon="three-dots" animation="cylon" font-scale="4"></b-icon>
+        </div>
+      </div>
+    </b-card>
 
-    <!---------------------->
     <!-- BOTTOM CONTAINER -->
-    <!---------------------->
-    <b-card class="m-0" no-body >
-      <div class="px-1 py-0" v-if="simulation.status === 'finished'">
+    <b-card
+      class="uniq-box-panel mt-0"
+      bg-variant="secondary"
+      border-variant="secondary"
+      no-body
+
+      v-if="simulation.status === 'finished'"
+    >
+      <!-- <div class="px-1 py-0" > -->
       <b-card
         bg-variant="secondary"
         text-variant="light"
-
-        style="min-height:250px; max-height: 250px; min-width: 860px"
+        border-variant="secondary"
         v-if="simulation.status === 'finished'"
         :sub-title="simulationId"
         no-body
-        class="mt-1 p-1"
+        class="p-1"
+        style="border-radius: 0px;"
       >
-      <div class="mt-1 ml-1">
         <h5>
           <b-badge variant="dark"> {{ simulation.configuration.period / 60}}분 주기 </b-badge>
           <b-badge variant="dark"> {{ simulation.configuration.fromDate }} {{ simulation.configuration.fromTime }} </b-badge> ~
@@ -153,24 +99,21 @@
           <b-badge variant="dark"> {{ currentEdge.id || 'NO LINK' }} </b-badge>
           <b-badge variant="light" :style="{'background-color': congestionColor(edgeSpeed())}" > {{ edgeSpeed().toFixed(2) }} km </b-badge>
         </h5>
-      </div>
         <b-card>
           <line-chart :chartData="chart.linkSpeeds" :height="50"/>
         </b-card>
       </b-card>
 
-        <b-card-group deck class="m-0 mt-1"
-          style="min-height:150px; max-height: 300px; min-width: 860px;"
-        >
+      <b-card-group deck class="m-0">
         <b-card
           bg-variant="secondary"
           text-variant="light"
-          sub-title="속도 분포"
+          border-variant="secondary"
           no-body
-          class="p-1 ml-0 mr-1"
+          class="p-1 m-0"
         >
-          속도분포
-          <b-card no-body class="m-0 pt-2">
+          <h5><b-badge variant="dark">속도분포</b-badge></h5>
+          <b-card no-body class="m-0 pt-3">
             <histogram-chart :chartData="chart.histogramData" :height="135" class="mt-1"/>
           </b-card>
         </b-card>
@@ -178,45 +121,44 @@
         <b-card
           bg-variant="secondary"
           text-variant="light"
+          border-variant="secondary"
           sub-title="스텝별 속도 분포"
           no-body
-          class="p-1 ml-0 mr-1"
-
+          class="p-1 m-0"
         >
-          스텝별 속도 분포
-          <b-card no-body class="m-0 pt-2">
-            <histogram-chart class="bar" :chartData="chart.histogramDataStep" :height="135"/>
+          <h5><b-badge variant="dark">스텝별 속도 분포</b-badge></h5>
+          <b-card no-body class="m-0 pt-3">
+            <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="135"/>
           </b-card>
         </b-card>
         <b-card
           bg-variant="secondary"
           text-variant="light"
+          border-variant="secondary"
           sub-title="혼잡도 분포"
           no-body
-          class="p-1 ml-0 mr-1"
-          style="height:170px"
+          class="p-1 m-0"
         >
-        혼잡도 분포
+          <h5><b-badge variant="dark">혼잡도 분포</b-badge></h5>
           <b-card no-body class="m-0 pt-2">
-            <doughnut :chartData="chart.pieData" style="height:110px;width:100%" />
+            <doughnut :chartData="chart.pieData" :height="130" />
           </b-card>
         </b-card>
         <b-card
-        bg-variant="secondary"
+          bg-variant="secondary"
           text-variant="light"
+          border-variant="secondary"
           sub-title="스텝별 혼잡도 분포"
           no-body
-          class="p-1 ml-0 mr-0"
-          style="height:170px"
+          class="p-1 m-0"
         >
-        스텝별 혼잡도 분포
+          <h5><b-badge variant="dark">스텝별 혼잡도 분포</b-badge></h5>
           <b-card no-body class="m-0 pt-2">
-            <doughnut :chartData="chart.pieDataStep" style="height:110px;width:100%" />
+            <doughnut :chartData="chart.pieDataStep" :height="130"/>
           </b-card>
         </b-card>
-         </b-card-group>
-      </div>
-    </b-card>
+      </b-card-group>
+     </b-card>
 
     <b-card
       bg-variant="secondary"
@@ -266,41 +208,32 @@
 <script src="./simulation-result-map.js"> </script>
 
 <style>
+  .uniq-box-panel {
+    min-height:220px;
+    max-height: 500px;
+    min-width: 860px;
+    border-radius: 0px;
+  }
+
   .map {
-    width: 100%;
+    max-height: 800px;
   }
 
-  .map-2 {
-    height: 800px
-  }
-
-  .control-panel {
+  .uniq-step-player {
     z-index: 999;
-    position: fixed;
+    position: absolute;
     width: 300px;
-    top: 90px;
-    right: 50px;
+    /* top: 65px; */
+    bottom: 10px;
+    right: 10px;
   }
 
-  .control-panel-2 {
-    z-index: 999;
-    position: fixed;
-    width: 300px;
-    top: 55px;
-    right: 50px;
-  }
-
-  .control-panel > div {
-    border-radius: 5px;
-  }
-
-  .top {
+  .uniq-top-menu {
     position: fixed;
     z-index:100;
-    top: 55px;
+    top: 60px;
     padding: 0;
-    left: 8px;
-    width: 90%;
+    left: 15px;
     border: 0px solid #73AD21;
   }
 

@@ -114,14 +114,19 @@
               통계
           </b-button>
           -->
+        </template>
+
+         <template v-slot:cell(details)="row">
           <b-button
             size="sm"
             variant="secondary"
             :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
             v-if="row.item.status !== 'error'"
             >
-              <b-icon icon="zoom-in"></b-icon>상세보기
+              <b-icon icon="zoom-in"></b-icon> 상세보기
           </b-button>
+         </template>
+         <template v-slot:cell(del)="row">
           <b-button
             size="sm"
             variant="danger"
@@ -129,7 +134,7 @@
             @click.stop="removeSimulation(row.item)">
               <b-icon icon="trash-fill" aria-hidden="true"/>
           </b-button>
-        </template>
+         </template>
         <template v-slot:row-details="row">
           <b-alert
             v-if="row.item.error && row.item.status === 'error'"

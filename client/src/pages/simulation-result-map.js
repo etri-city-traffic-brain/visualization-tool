@@ -16,13 +16,17 @@ import HistogramChart from '@/components/charts/HistogramChart';
 import Doughnut from '@/components/charts/Doughnut';
 import statisticsService from '@/service/statistics-service';
 import congestionColor from '@/utils/colors';
-
+import * as maptalks from 'maptalks';
 import LineChart from '@/components/charts/LineChart';
 import BarChart from '@/components/charts/BarChart';
 // import D3SpeedBar from '@/components/d3/D3SpeedBar';
 
 import SimulationResult from '@/pages/SimulationResult.vue';
 const mapId = `map-${Math.floor(Math.random() * 100)}`;
+
+import UniqCongestionColorBar from '@/components/CongestionColorBar';
+import UniqSimulationResultExt from '@/components/UniqSimulationResultExt';
+import UniqMapChanger from '@/components/UniqMapChanger';
 
 const dataset = (label, color, data) => ({
   label,
@@ -32,6 +36,7 @@ const dataset = (label, color, data) => ({
   borderWidth: 2,
   pointRadius: 1,
   data,
+
 })
 
 const makeLinkSpeedChartData = (v1, v2, v3) => {
@@ -52,7 +57,10 @@ export default {
     LineChart,
     BarChart,
     HistogramChart,
-    Doughnut
+    Doughnut,
+    UniqCongestionColorBar,
+    UniqSimulationResultExt,
+    UniqMapChanger
   },
   data() {
     return {
@@ -103,7 +111,7 @@ export default {
   async mounted() {
     this.simulationId = this.$route.params ? this.$route.params.id : '';
     this.showLoading = true
-    this.mapHeight = window.innerHeight - 500; // update map height to current height
+    this.mapHeight = window.innerHeight - 500;
     this.map = makeMap({ mapId });
 
     const { simulation, slideMax } = await simulationService.getSimulationInfo(this.simulationId);
@@ -210,12 +218,7 @@ export default {
       })
     },
     async connectWebSocket() {
-      try {
-        // WebSocketClient(this, this.simulationId)
-        this.wsClient.init()
-      } catch(err) {
-        this.makeToast(err.message, 'warning')
-      }
-    }
+      this.wsClient.init()
+    },
   },
 };

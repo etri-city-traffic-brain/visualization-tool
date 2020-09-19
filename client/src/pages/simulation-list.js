@@ -39,7 +39,9 @@ export default {
         { class: "text-center", key: "configuration.period", label: "주기" },
         { class: "text-center", key: "started", label: "시작" },
         { class: "text-center", key: "ended", label: "종료" },
-        { class: "text-center", key: "actions", label: "도구" }
+        { class: "text-center", key: "actions", label: "도구" },
+        { class: "text-center", key: "details", label: "상세" },
+        { class: "text-center", key: "del", label: "삭제" },
       ],
       items: [],
       currentPage: 1,

@@ -39,7 +39,7 @@ export default {
       currentStep: 1,
       slideMax: 0,
       simulation: { configuration: {} },
-      mapHeight: 600, // map view height
+      mapHeight: 400, // map view height
       msg: '',
       pies: [],
       histograms: [],

@@ -6,7 +6,7 @@
       :variant="variant"
       ref="main-nav"
       id="main-nav"
-      class="pl-3 pt-1 pb-0"
+      class="pl-3 pt-1 pb-0 m-0"
     >
       <b-navbar-brand href="#" to="/">SALT</b-navbar-brand>
       <b-collapse is-nav id="nav_dropdown_collapse" >
