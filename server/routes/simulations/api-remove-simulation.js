@@ -2,7 +2,7 @@
 
 const debug = require('debug')('api:remove');
 
-const removeSimulation = require('./fn-remove-simulation');
+const removeSimulation = require('./utils/fn-remove-simulation');
 
 //    remove simulation by simulation_id
 //    have to remove local and remote

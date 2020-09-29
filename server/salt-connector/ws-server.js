@@ -64,25 +64,100 @@ function Server({ port }, queueRegistry) {
           //   speed: 20,
           //   vehicles: [1, 1, 1],
           // },
-          {
-            roadId: '-572700451_0_0',
-            speed: Math.floor(Math.random() * 80) + 20,
-            vehicles: Array(Math.floor(Math.random() * 5)).fill(1),
-          },
+          // {
+          //   roadId: '-572700451_0_0',
+          //   // speed: Math.floor(Math.random() * 80) + 20,
+          //   // vehicles: Array(Math.floor(Math.random() * 5)).fill(1),
+          //   speed: 50,
+          //   vehicles: [0, 0, 0, 0, 0],
+          // },
           {
             roadId: '-572700451_1_0',
-            speed: Math.floor(Math.random() * 80) + 20,
-            vehicles: Array(Math.floor(Math.random() * 5)).fill(1),
+            // speed: Math.floor(Math.random() * 80) + 20,
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(1),
+            speed: 50,
+            vehicles: [0, 1, 1, 0],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            isAdjecent: false,
+          },
+          // {
+          //   roadId: '-572700451_1_1',
+          //   // speed: Math.floor(Math.random() * 80) + 20,
+          //   // vehicles: Array(Math.floor(Math.random() * 5)).fill(1),
+          //   speed: 50,
+          //   vehicles: [1, 1, 0],
+          // },
+          // {
+          //   roadId: '-572700452_4_0',
+          //   // speed: Math.floor(Math.random() * 80) + 20,
+          //   // vehicles: Array(Math.floor(Math.random() * 5)).fill(1),
+          //   speed: 50,
+          //   vehicles: [0, 0, 1],
+          //   isAdjecent: true,
+          // },
+          {
+            roadId: '-572700452_4_1',
+            speed: 20,
+            vehicles: [0, 0, 1, 0],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            isAdjecent: true,
+
+          },
+          {
+            roadId: '572700453_0_0',
+            speed: 20,
+            vehicles: [0, 0, 1],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            // isAdjecent: true,
+
+          },
+          {
+            roadId: '572700453_1_0',
+            speed: 20,
+            vehicles: [0, 0, 1],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            // isAdjecent: true,
+
           },
           {
             roadId: '-572700451_1_1',
-            speed: Math.floor(Math.random() * 80) + 20,
-            vehicles: Array(Math.floor(Math.random() * 5)).fill(1),
+            speed: 50,
+            vehicles: [0, 0, 0],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            isAdjecent: true,
+
           },
           {
-            roadId: '-572700452_4_0',
-            speed: Math.floor(Math.random() * 80) + 20,
-            vehicles: Array(Math.floor(Math.random() * 5)).fill(1),
+            roadId: '572700451_0_1',
+            speed: 50,
+            vehicles: [0, 0, 0],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            // isAdjecent: true,
+
+          },
+          {
+            roadId: '572700451_0_0',
+            speed: 50,
+            vehicles: [1, 1, 0],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            // isAdjecent: true,
+
+          },
+          {
+            roadId: '572700452_0_2',
+            speed: 50,
+            vehicles: [1, 1, 1, 0, 0],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            isAdjecent: true,
+
+          },
+          {
+            roadId: '572707150_2_0',
+            speed: 50,
+            vehicles: [1, 1, 1, 0, 0],
+            // vehicles: Array(Math.floor(Math.random() * 5)).fill(Math.floor(Math.random() * 2)),
+            isAdjecent: false,
+
           },
         ],
       }));

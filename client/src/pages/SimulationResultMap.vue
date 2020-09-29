@@ -31,8 +31,8 @@
 
     <!-- MAP CONTAINER -->
     <b-card
-      bg-variant="secondary"
-      border-variant="secondary"
+      bg-variant="dark"
+      border-variant="dark"
       class="mt-0 p-1 uniq-box-panel map"
       no-body
       >
@@ -72,20 +72,21 @@
       </div>
     </b-card>
 
+
     <!-- BOTTOM CONTAINER -->
     <b-card
       class="uniq-box-panel mt-0"
-      bg-variant="secondary"
-      border-variant="secondary"
+      bg-variant="dark"
+      border-variant="dark"
       no-body
-
+      style="height:400px;overflow:auto"
       v-if="simulation.status === 'finished'"
     >
       <!-- <div class="px-1 py-0" > -->
       <b-card
-        bg-variant="secondary"
+        bg-variant="dark"
         text-variant="light"
-        border-variant="secondary"
+        border-variant="dark"
         v-if="simulation.status === 'finished'"
         :sub-title="simulationId"
         no-body
@@ -161,31 +162,32 @@
      </b-card>
 
     <b-card
-      bg-variant="secondary"
       text-variant="light"
+      bg-variant="dark"
+      border-variant="dark"
       v-if="simulation.status === 'running'"
-      class="p-0 m-1"
-      style="min-height:200px"
+      class="p-0 m-0"
+      style="height:400px; border-radius: 0px;"
       :title="simulationId"
     >
       <!-- <b-card-text>실시간 시뮬레이션 상태 혹은 통계를 보여줌</b-card-text> -->
       <!-- {{ currentZoom }} -->
       <!-- <b-card-text>{{ currentExtent[0] }} {{ currentExtent[1] }} </b-card-text> -->
-      <b-button  size="sm" variant="dark" class="ml-1">
+      <b-button  size="sm" class="ml-1">
         start simulation <b-icon icon="caret-right-fill"/>
       </b-button>
-      <b-button  size="sm" variant="dark" class="ml-1">
+      <b-button  size="sm" class="ml-1">
         <b-icon icon="stop-fill"/>
       </b-button>
-      <b-button  @click="connectWebSocket" size="sm" variant="dark" class="ml-1">
+      <b-button  @click="connectWebSocket" size="sm" class="ml-1">
         connect ws <b-icon icon="plug"> </b-icon>
       </b-button>
-      <b-button  size="sm" variant="dark" class="ml-1">
+      <b-button  size="sm" class="ml-1">
         simulation status:
         <b-icon v-if="simulation.status==='running'" icon="circle-fill" variant="success" animation="throb" font-scale="1"></b-icon>
         <b-icon v-else icon="circle-fill" variant="danger" animation="throb" font-scale="1"></b-icon>
       </b-button>
-      <b-button  size="sm" variant="dark" class="ml-1">
+      <b-button  size="sm" class="ml-1">
         ws status:
         <b-icon v-if="wsStatus==='open'" icon="circle-fill" variant="success" animation="throb" font-scale="1"></b-icon>
         <b-icon v-if="wsStatus==='error'" icon="circle-fill" variant="danger" animation="throb" font-scale="1"></b-icon>
@@ -250,6 +252,22 @@
     top: 50%;
     -ms-transform: translateY(-50%);
     transform: translateY(-50%);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #f8f9fa #343a40;
+  }
+  *::-webkit-scrollbar {
+    width: 12px;
+  }
+  *::-webkit-scrollbar-track {
+    background: #343a40;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #f8f9fa;
+    border-radius: 20px;
+    border: 3px solid #343a40;
   }
 
 </style>

@@ -1,11 +1,9 @@
 const express = require('express');
 
-// const { findFeatures } = SALT;
-
 const mongoose = require('mongoose');
 const findFeatures = require('../../routes/map/find-features');
 
-const parseMapReqParam = require('../parse-req-query');
+const parseMapReqParam = require('../../utils/parse-req-query');
 
 const router = express.Router();
 

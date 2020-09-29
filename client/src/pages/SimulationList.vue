@@ -83,6 +83,9 @@
           <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
           <b-icon v-else icon="shield-fill-check" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
         </template>
+        <template v-slot:cell(statusText)="row">
+          <b-alert :variant="statusColor(row.item.status)" class="m-0 p-0" show size="sm">{{ row.item.status.toUpperCase() }}</b-alert>
+        </template>
 
         <template v-slot:cell(actions)="row">
           <b-button
@@ -179,22 +182,11 @@
         align="center"
         size="sm"
       />
-      <!-- MODAL: SIMULATION CREATION //-->
-      <b-modal
-        title="시뮬레이션 등록"
-        id="create-simulation-modal"
-        ref="create-simulation-modal"
-        size="lg"
-        hide-footer
-      >
-        <simulation-creation
-          @cancel="cancelCreateSimulation"
-          @hide="hideCreateSimulationDialog"
-          :msg="msg"
-          :userId="userState.userId"
-          >
-        </simulation-creation>
-      </b-modal>
+      <simulation-creation-dialog
+        @hide="hideCreateSimulationDialog"
+        :userId="userState.userId"
+        >
+      </simulation-creation-dialog>
     </b-container>
   </div>
 </template>

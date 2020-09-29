@@ -5,16 +5,21 @@
  */
 const { PythonShell } = require('python-shell');
 
+const config = require('../../config');
+
 const {
-  config: {
-    saltPath: { data },
-    salt: { standalone },
-  },
-} = global.SALT;
+  saltPath: { data },
+  salt: { standalone },
+} = config;
+
+// const { getConfigFilePath, getScenarioFilePath } = require('./utils/globals');
 
 module.exports = ({ simulationId }) => new Promise((resolve, reject) => {
   const configFile = `${data}/${simulationId}/salt.config.json`;
   const scenarioFile = `${data}/${simulationId}/salt.scenario.json`;
+
+  // const configFile = getConfigFilePath(simulationId);
+  // const scenarioFile = getScenarioFilePath(simulationId);
 
   const options = {
     mode: 'text',

@@ -474,16 +474,14 @@
       "started": "2020-09-17 18:58:11"
     },
     {
-      "id": "SALT_202009_00852",
+      "id": "SALT_202009_00940",
       "user": "salt_test",
       "description": "...",
-      "status": "preparing",
-      "created": "2020-09-18 17:45:24",
       "configuration": {
-        "region": "11230",
-        "day": 5,
-        "fromDate": "2020-09-18",
-        "toDate": "2020-09-18",
+        "region": "11250",
+        "day": 4,
+        "fromDate": "2020-09-24",
+        "toDate": "2020-09-24",
         "fromTime": "00:00:00",
         "toTime": "23:59:00",
         "period": 1800,
@@ -491,9 +489,122 @@
         "begin": 0,
         "end": 86340,
         "routes": [
-          "gn_fri.xml"
+          "gd_thu.xml"
         ]
-      }
+      },
+      "status": "running",
+      "created": "2020-09-24 16:21:12",
+      "started": "2020-09-24 16:33:07"
+    },
+    {
+      "id": "SALT_202009_00024",
+      "user": "salt_test",
+      "description": "...",
+      "configuration": {
+        "region": 11250,
+        "day": 5,
+        "fromDate": "2020-09-25",
+        "toDate": "2020-09-25",
+        "fromTime": "00:00:00",
+        "toTime": "23:59:00",
+        "period": 1800,
+        "partitions": 0,
+        "begin": 0,
+        "end": 86340,
+        "routes": [
+          "gd_fri.xml"
+        ]
+      },
+      "status": "ready",
+      "created": "2020-09-25 12:59:10"
+    },
+    {
+      "id": "SALT_202009_00447",
+      "user": "salt_test",
+      "description": "...",
+      "configuration": {
+        "region": 11250,
+        "day": 5,
+        "fromDate": "2020-09-25",
+        "toDate": "2020-09-25",
+        "fromTime": "00:00:00",
+        "toTime": "23:59:00",
+        "period": 1800,
+        "partitions": 0,
+        "begin": 0,
+        "end": 86340,
+        "routes": [
+          "gd_fri.xml"
+        ]
+      },
+      "status": "ready",
+      "created": "2020-09-25 13:30:18"
+    },
+    {
+      "id": "SALT_202009_00008",
+      "user": "salt_test",
+      "description": "...",
+      "configuration": {
+        "region": 11250,
+        "day": 5,
+        "fromDate": "2020-09-25",
+        "toDate": "2020-09-25",
+        "fromTime": "00:00:00",
+        "toTime": "23:59:00",
+        "period": 1800,
+        "partitions": 0,
+        "begin": 0,
+        "end": 86340,
+        "routes": [
+          "gd_fri.xml"
+        ]
+      },
+      "status": "ready",
+      "created": "2020-09-25 13:33:16"
+    },
+    {
+      "id": "SALT_202009_00617",
+      "user": "salt_test",
+      "description": "...",
+      "configuration": {
+        "region": 11250,
+        "day": 5,
+        "fromDate": "2020-09-25",
+        "toDate": "2020-09-25",
+        "fromTime": "00:00:00",
+        "toTime": "23:59:00",
+        "period": 1800,
+        "partitions": 0,
+        "begin": 0,
+        "end": 86340,
+        "routes": [
+          "gd_fri.xml"
+        ]
+      },
+      "status": "ready",
+      "created": "2020-09-25 13:40:22"
+    },
+    {
+      "id": "SALT_202009_00543",
+      "user": "salt_test",
+      "description": "...",
+      "configuration": {
+        "region": 11250,
+        "day": 5,
+        "fromDate": "2020-09-25",
+        "toDate": "2020-09-25",
+        "fromTime": "00:00:00",
+        "toTime": "23:59:00",
+        "period": 1800,
+        "partitions": 0,
+        "begin": 0,
+        "end": 86340,
+        "routes": [
+          "gd_fri.xml"
+        ]
+      },
+      "status": "ready",
+      "created": "2020-09-25 14:17:53"
     }
   ]
 }

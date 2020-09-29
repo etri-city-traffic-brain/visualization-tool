@@ -1,6 +1,6 @@
-const { base } = require('../../config');
 const path = require('path');
 const fs = require('fs');
+const { base } = require('../../config');
 
 function downloadData(req, res) {
   const { id } = req.query;
@@ -8,7 +8,6 @@ function downloadData(req, res) {
   const files = fs.readdirSync(path.join(base, 'output', id));
   const simulationResult = files.find(file => file.endsWith('.csv'));
 
-  // const targetFile = path.join(simulationDir, id, 'data.zip');
   res.download(`${base}/output/${id}/${simulationResult}`);
 }
 

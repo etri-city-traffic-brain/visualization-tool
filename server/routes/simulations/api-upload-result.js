@@ -3,17 +3,14 @@ const moment = require('moment');
 const multer = require('multer');
 const path = require('path');
 const dbUtils = require('../../main/dbms/db-utils');
-const cookSimulationResult = require('../../main/simulation-result-cooker');
+const cookSimulationResult = require('../../main/simulation-manager/simulation-result-cooker');
 
-const db = require('../../main/dbms/db');
+const { getSimulations } = require('../../globals');
 
-const { getSimulations } = db;
-
-const {
-  config: { saltPath: { output } },
-} = global.SALT;
+const { saltPath: { output } } = require('../../config');
 
 const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
+
 function getCurrentTimeFormatted() {
   return moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
 }

@@ -1,21 +1,7 @@
 /* eslint-disable no-await-in-loop */
 const debug = require('debug')('api:stop');
 const { Client } = require('ssh2');
-const {
-  updatetStatus,
-} = require('./globals');
-
-const db = require('../../main/dbms/db');
-
-const { getSimulations } = db;
-
-const {
-  services: {
-    cloudService,
-  },
-} = global.SALT;
-
-const getSimulation = id => getSimulations().find({ id }).value();
+const { updatetStatus } = require('../../globals');
 
 async function kill(vmInfo, port) {
   return new Promise((resolve, reject) => {

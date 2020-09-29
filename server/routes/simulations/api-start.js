@@ -13,16 +13,8 @@
  */
 const debug = require('debug')('api:create');
 
-const { RUNNING, ERROR } = require('../../main/status');
-const { updatetStatus, currentTime } = require('./globals');
-
-const db = require('../../main/dbms/db');
-
-const { getSimulations: getSimulationTable } = db;
-
-// const {
-//   db: { getSimulations: getSimulationTable },
-// } = global.SALT;
+// const { RUNNING, ERROR } = require('../../main/simulation-manager/simulatoin-status');
+const { updatetStatus, currentTime, getSimulations } = require('../../globals');
 
 // const runSimulator = require('../../main/simulation-manager/simulation-runner');
 const run = require('../../main/simulation-manager/simulation-runner-standalone');
@@ -37,7 +29,7 @@ const run = require('../../main/simulation-manager/simulation-runner-standalone'
  * @param {VmInfo} vmInfo
  */
 
-const getSimulation = id => getSimulationTable().find({ id }).value();
+const getSimulation = id => getSimulations().find({ id }).value();
 
 /**
  * Start a simulation
@@ -56,15 +48,15 @@ async function start(req, res) {
   }
 
   try {
-    res.json({ id, status: RUNNING, result: '' });
-    updatetStatus(id, RUNNING, { started: currentTime() });
+    res.json({ id, status: 'running', result: '' });
+    updatetStatus(id, 'running', { started: currentTime() });
     const result = await run({ simulationId: id });
   } catch (err) {
-    updatetStatus(id, ERROR, {
+    updatetStatus(id, 'error', {
       error: `fail to start simulation ${err.message}`,
       ended: currentTime(),
     });
-    res.status(500).json({ id, status: ERROR, error: err.message });
+    res.status(500).json({ id, status: 'error', error: err.message });
   }
 }
 

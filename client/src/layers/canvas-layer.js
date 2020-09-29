@@ -45,8 +45,10 @@ function makeCanvasLayer(map, edgeLayer, eventBus) {
     const map = event.target;
     if(map.getZoom() >= MAX_ZOOM) {
       canvasLayer.show()
+      edgeLayer.hide()
     } else {
       canvasLayer.hide()
+      edgeLayer.show()
     }
   });
 

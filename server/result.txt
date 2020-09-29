@@ -1,0 +1,1 @@
+Success!!!['C:\\home\\ubuntu\\salt\\helpler\\runStandAloneSALT.py', '-c', '/home/ubuntu/salt/data/SALT_202009_00940/salt.config.json', '-s', '/home/ubuntu/salt/data/SALT_202009_00940/salt.scenario.json']

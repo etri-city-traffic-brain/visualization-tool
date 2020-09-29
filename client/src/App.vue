@@ -97,4 +97,14 @@ export default {
 #main-nav {
   transition: top 0.3s;
 }
+
+html {
+  background: lightgrey;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 </style>

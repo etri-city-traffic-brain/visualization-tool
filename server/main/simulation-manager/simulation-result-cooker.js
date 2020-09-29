@@ -14,11 +14,11 @@ const csv = require('fast-csv');
 const moment = require('moment');
 const mongoose = require('mongoose');
 
-const config = require('../config');
-const status = require('./status');
+const config = require('../../config');
+const status = require('./simulatoin-status');
 
 const currentTime = () => moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
-const makeChartData = require('../main/chart-data-maker');
+const makeChartData = require('../chart-data-maker');
 
 const { output } = config.saltPath;
 

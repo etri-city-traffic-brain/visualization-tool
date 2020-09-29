@@ -1,15 +1,11 @@
 
 const path = require('path');
 
-const db = require('../../main/dbms/db');
+const { getSimulations } = require('../../globals');
 
-const { getSimulations } = db;
+const config = require('../../config');
 
-const {
-  // db: { getSimulations },
-  config: { saltPath: { output } },
-} = global.SALT;
-
+const { saltPath: { output } } = config;
 async function getSimulationResult(req, res) {
   const { params: { id } } = req;
 

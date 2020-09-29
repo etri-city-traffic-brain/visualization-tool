@@ -1,4 +1,5 @@
-function player(max, callback) {
+
+export default (max, callback) => {
   let position = 0;
   let interval;
 
@@ -43,6 +44,4 @@ function player(max, callback) {
     update,
     status,
   };
-}
-
-export default player;
+};

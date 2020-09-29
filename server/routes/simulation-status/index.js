@@ -8,14 +8,8 @@ const router = require('express').Router();
 
 // const handleSimulationResult = require('./handle-status-notification');
 const handleSimulationStatus = require('./handle-status-notification-standalone');
-const Status = require('../../main/status');
-const db = require('../../main/dbms/db');
-
-const { getSimulations } = db;
-// const {
-//   db: { getSimulations },
-// } = global.SALT;
-
+const Status = require('../../main/simulation-manager/simulatoin-status');
+const { getSimulations } = require('../../globals');
 
 const statusList = Object.values(Status);
 

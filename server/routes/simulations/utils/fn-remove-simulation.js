@@ -6,26 +6,20 @@ const fs = require('fs');
 const util = require('util');
 const rmdir = util.promisify(require('rimraf'));
 
+const mongoose = require('mongoose');
 const rmDirRemote = require('./rmdir-remote');
 
-const db = require('../../main/dbms/db');
+const { getSimulations } = require('../../../globals');
 
-const { getSimulations } = db;
+const mongooseUtils = require('../../../main/dbms/mongo-utils');
+const { cloudService } = require('../../../main/service');
 
 const {
-  // db: { getSimulations },
-  config: {
-    saltPath: {
-      output,
-      data,
-    },
+  saltPath: {
+    output,
+    data,
   },
-  services: {
-    cloudService,
-  },
-  mongoose,
-  mongooseUtils,
-} = global.SALT;
+} = require('../../../config');
 
 /**
  * remove simulation by id

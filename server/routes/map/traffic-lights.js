@@ -7,7 +7,7 @@ const bboxpolygon = require('../../utils/bboxpolygon');
 
 // const findFeatures = require('./find-features');
 // const mongoose = require('../../main/dbms/mongo');
-const parseMapReqParam = require('../parse-req-query');
+const parseMapReqParam = require('../../utils/parse-req-query');
 
 module.exports = async (req, res) => {
   const { extent } = parseMapReqParam(req);

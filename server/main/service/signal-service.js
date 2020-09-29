@@ -4,7 +4,7 @@
 
 const axios = require('axios');
 
-const { config: { signalService: { urlBase } } } = global.SALT;
+const { signalService: { urlBase } } = require('../../config');
 
 async function getSignal(signalId, version = 1) {
   return axios.get(`${urlBase}/getSignal?signal_id=${signalId}&version=${version}`);

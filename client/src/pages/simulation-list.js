@@ -1,7 +1,7 @@
 
 import moment from "moment";
 
-import SimulationCreation from '@/components/SimulationCreation';
+import SimulationCreationDialog from '@/components/SimulationCreation';
 import BarChart from '@/components/charts/BarChart';
 
 import { simulationService, statisticsService } from '@/service'
@@ -27,7 +27,7 @@ export default {
   name: 'SimulationList',
   components: {
     BarChart,
-    SimulationCreation,
+    SimulationCreationDialog,
   },
   mixins: [dragDropMixin, fileMgmtMixin],
   data() {
@@ -36,6 +36,7 @@ export default {
         { class: "text-center", key: "num", label: "#" },
         { class: "text-center", key: "id", label: "시뮬레이션 아이디", },
         { class: "text-center", key: "status", label: "상태" },
+        { class: "text-center", key: "statusText", label: "상태" },
         { class: "text-center", key: "configuration.period", label: "주기" },
         { class: "text-center", key: "started", label: "시작" },
         { class: "text-center", key: "ended", label: "종료" },
@@ -55,7 +56,11 @@ export default {
       dataFile: null,
       warning: null,
       userState,
+      modalShow: false,
     };
+  },
+  mounted() {
+    // setInterval(() => this.updateTable(), 1000)
   },
   methods: {
     calcDuration(configuration) {
@@ -99,7 +104,7 @@ export default {
     showHideResult(value) {
       return value === 'finished';
     },
-    updateTable() {
+    async updateTable() {
       this.$refs['simulations-table'].refresh()
     },
     hideAlert() {
@@ -156,51 +161,56 @@ export default {
       this.updateTable();
     },
     async dataProvider({ currentPage }) {
-      const { data, total } = (await simulationService.getSimulations(this.userState.userId, currentPage)).data;
-      this.totalRows = total;
-      return data;
+      this.isBusy = true
+      try {
+        const { data, total, perPage } = (await simulationService.getSimulations(this.userState.userId, currentPage)).data;
+        this.totalRows = total;
+        this.isBusy = false
+        this.perPage = perPage
+        return data;
+      } catch (err) {
+        this.isBusy = false
+        return []
+      }
     },
     status(text) {
       return variant[text];
     },
     async removeSimulation(param) {
-      const result = await this.$swal({
-        title: `${param.id} 시뮬레이션을 삭제합니다.`,
-        text: 'Please note that you can not cancel it',
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
-      });
+      // const result = await this.$swal({
+      //   title: `${param.id} 시뮬레이션을 삭제합니다.`,
+      //   text: 'Please note that you can not cancel it',
+      //   type: 'warning',
+      //   showCancelButton: true,
+      //   confirmButtonColor: '#3085d6',
+      //   cancelButtonColor: '#d33',
+      //   confirmButtonText: 'Delete',
+      //   cancelButtonText: 'Cancel',
+      // });
 
-      if (!result.value) {
-        return;
-      }
-      this.msg = `${param.id}를 삭제하고 있습니다.`
+      // if (!result.value) {
+      //   return;
+      // }
+      // this.msg = `${param.id}를 삭제하고 있습니다.`
       try {
         await simulationService.remove(param.id);
         this.updateTable();
-        this.msg = `${param.id} is deleted successfully...`
-        this.hideAlert();
+        this.makeToast(`${param.id} is deleted successfully...`)
       } catch (err) {
-        log(err.response);
-        this.msg = err.response.data.error;
-        this.variant = "danger"
-        this.$swal.fire({
-          type: 'error',
-          title: err.message,
-          text: err.response.data.error,
-        })
+        this.makeToast(`fail to delete ${err.message}`, 'warning')
       }
     },
     hideCreateSimulationDialog() {
-      this.$root.$emit('bv::hide::modal', 'create-simulation-modal');
       this.updateTable();
     },
-    cancelCreateSimulation() {
-      this.$root.$emit('bv::hide::modal', 'create-simulation-modal');
-    },
+    makeToast(msg, variant = 'info') {
+      this.$bvToast.toast(msg, {
+        title: variant,
+        variant,
+        autoHideDelay: 3000,
+        appendToast: true,
+        toaster:'b-toaster-bottom-right'
+      })
+    }
   },
 };

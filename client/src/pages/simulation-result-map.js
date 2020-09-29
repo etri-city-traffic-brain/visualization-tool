@@ -9,14 +9,13 @@ import StepPlayer from '@/stepper/step-runner';
 
 import makeMap from '@/map2/make-map';
 import MapManager from '@/map2/map-manager';
-import WebSocketClient from '@/map2/ws-client';
+import WebSocketClient from '@/realtime/ws-client';
 import simulationService from '@/service/simulation-service';
 import stepperMixin from '@/stepper/mixin';
 import HistogramChart from '@/components/charts/HistogramChart';
 import Doughnut from '@/components/charts/Doughnut';
 import statisticsService from '@/service/statistics-service';
 import congestionColor from '@/utils/colors';
-import * as maptalks from 'maptalks';
 import LineChart from '@/components/charts/LineChart';
 import BarChart from '@/components/charts/BarChart';
 // import D3SpeedBar from '@/components/d3/D3SpeedBar';
@@ -111,7 +110,7 @@ export default {
   async mounted() {
     this.simulationId = this.$route.params ? this.$route.params.id : '';
     this.showLoading = true
-    this.mapHeight = window.innerHeight - 500;
+    this.mapHeight = window.innerHeight - 480;
     this.map = makeMap({ mapId });
 
     const { simulation, slideMax } = await simulationService.getSimulationInfo(this.simulationId);
@@ -191,7 +190,7 @@ export default {
       return 0
     },
     resize() {
-      this.mapHeight = window.innerHeight - 500; // update map height to current height
+      this.mapHeight = window.innerHeight - 480; // update map height to current height
     },
     togglePlay() {
       (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()

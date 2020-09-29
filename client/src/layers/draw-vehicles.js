@@ -1,62 +1,44 @@
-import calcVehiclesLoc from './calc-vehicles';
+import makeVehicles from '../vehicles/calc-vehicles';
+import VehicleFactory from '../vehicles/model/factory'
 
-const width = 16;
-const height = 5;
-
-const { log } = console;
-
-function drawVehicles({context, map, edges = [], roads}) {
+function drawVehicles({context, map, edges: cells = [], roads}) {
   const roadMap = roads.reduce((acc, cur) => {
     acc[cur.roadId] = cur
     return acc
   }, {})
 
+  // const tempCarsByLink = {}
 
-  edges
-    .filter(edge => edge.properties.SPEEDLH >= 30)
-    .forEach(edge => {
-      const p1 = map.coordinateToContainerPoint(edge.getLastCoordinate());
-      const p2 = map.coordinateToContainerPoint(edge.getFirstCoordinate());
+  cells
+    .filter(cell => cell.properties.SPEEDLH >= 30)
+    .forEach(cell => {
+      const p1 = map.coordinateToContainerPoint(cell.getLastCoordinate());
+      const p2 = map.coordinateToContainerPoint(cell.getFirstCoordinate());
 
-      if(roadMap[edge.properties.LINK_ID]) {
+      const roadId = cell.properties.LINK_ID
+      const road = roadMap[roadId]
+
+      // isAdjecent link의 속성을 보고서 해야 됨
+      // cell builder 에서 넣어주셈
+      // cell 로는 X
+      if(road) {
+        // const linkId = roadId.slice(0, roadId.indexOf('_'))
+        // const saveVehicels = road.vehicles.slice(0,2)
+        const targetVehicles = road.vehicles.slice()
+
         // const array = new Array(Math.floor(Math.random() * 6)).fill(1)
-        const cars = calcVehiclesLoc(p1, p2, roadMap[edge.properties.LINK_ID].vehicles)
-        for(let i=0; i<cars.length; i++) {
-          const car = cars[i]
+        const vehicles = makeVehicles(p1, p2, targetVehicles, VehicleFactory)
+        let drawCars = vehicles.slice()
+        if(road.isAdjecent) {
+          drawCars = vehicles.slice(4)
+        }
 
-          context.fillStyle = 'rgb(200, 0, 0)';
-
-          // context.save()
-          // context.beginPath();
-          // context.arc(p1.x, p1.y, 2, 0, 2 * Math.PI);
-          // context.arc(p2.x, p2.y, 4, 0, 2 * Math.PI);
-          // context.fillStyle = 'green';
-          // context.fill();
-          // context.lineWidth = 2;
-          // context.strokeStyle = '#003300';
-          // context.stroke();
-          // context.restore()
-
-          context.save()
-          context.translate(car.start.x + width / 2, car.start.y + height / 2 );
-          context.rotate(car.angle);
-          context.fillRect(0 , 0, width, height);
-          context.restore()
+        for(let i=0; i<drawCars.length; i++) {
+          const car = drawCars[i]
+          car.draw(context)
         }
       }
     })
 }
 
 export default drawVehicles
-
-
-// draw by line
-// ctx.save()
-// ctx.beginPath();
-// ctx.moveTo(car.start.x, car.start.y);
-// ctx.lineTo(car.end.x, car.end.y);
-// ctx.lineWidth = 6
-// ctx.strokeStyle = '#' + Math.floor(Math.random()*16777215).toString(16);
-// ctx.strokeStyle = car.color
-// ctx.stroke();
-// ctx.restore()

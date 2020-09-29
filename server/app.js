@@ -12,7 +12,7 @@ const FAVICON = favicon(`${__dirname}/public/favicon.ico`);
 app.set('views', VIEWS);
 app.set('view engine', 'ejs');
 
-app.all('/*', require('./utils/cors'));
+app.all('/*', require('./middleware/cors'));
 
 app.use(FAVICON);
 app.use(morgan('dev'));

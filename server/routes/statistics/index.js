@@ -11,7 +11,8 @@ const makeGrid = require('./chart-maker/makeGrid');
 
 const chartDataReader = require('./chart-maker/makeChartData');
 
-const { config: { saltPath: { output } } } = global.SALT;
+const { saltPath: { output } } = require('../../config');
+
 
 const getChartData = chartDataReader(output);
 
@@ -27,7 +28,7 @@ router.use('/', (req, res, next) => {
 router.get('/summary', async (req, res, next) => {
   const { simulationId } = req.query;
   try {
-    const data = await getChartData(simulationId, 'bar')
+    const data = await getChartData(simulationId, 'bar');
     res.send(data);
   } catch (err) {
     next(err);

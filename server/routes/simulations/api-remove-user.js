@@ -2,16 +2,9 @@
 
 const debug = require('debug')('api:remove');
 
-const db = require('../../main/dbms/db');
+const { getSimulations } = require('../../globals');
 
-const { getSimulations } = db;
-
-// const {
-// db: { getSimulations },
-// } = global.SALT;
-
-const removeSimulation = require('./fn-remove-simulation');
-
+const removeSimulation = require('./utils/fn-remove-simulation');
 
 async function remove(req, res) {
   const { params: { id: user } } = req;
@@ -28,8 +21,3 @@ async function remove(req, res) {
 }
 
 module.exports = remove;
-
-// setTimeout(() => {
-//   const s = getSimulations().filter({ user: 'salt_test' }).value();
-//   console.log(s.length);
-// }, 1000);

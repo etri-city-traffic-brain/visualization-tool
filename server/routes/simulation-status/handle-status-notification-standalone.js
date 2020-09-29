@@ -1,15 +1,11 @@
 
 
-const cookSimulationResult = require('../../main/simulation-result-cooker');
-const Status = require('../../main/status');
+const cookSimulationResult = require('../../main/simulation-manager/simulation-result-cooker');
 const dbUtils = require('../../main/dbms/db-utils');
-const db = require('../../main/dbms/db');
 
-const { getSimulations } = db;
-const { FINISHED } = Status;
-// const {
-//   db: { getSimulations },
-// } = global.SALT;
+const { getSimulations } = require('../../globals');
+
+const { FINISHED } = require('../../main/simulation-manager/simulatoin-status');
 
 const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
 
