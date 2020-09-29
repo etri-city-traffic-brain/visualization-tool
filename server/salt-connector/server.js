@@ -1,29 +1,46 @@
+const debug = require('debug')('salt-connector:server');
 const chalk = require('chalk');
+
 const WebSocketServer = require('./ws-server');
 const TcpServer = require('./tcp-server');
 
-const config = require('../config');
+const { tcpPort, wsPort } = require('../config').server;
 
-const { tcpPort, wsPort } = config.server;
+const serialize = obj => JSON.stringify(obj);
 
-const { log } = console;
+const {
+  distributeData,
+  distributeDataToSalt,
+} = require('./msg-distributor');
 
 function Server({ tcpPort, wsPort }) {
-  log(chalk.yellow('SALT connector module starting...'));
-  const queueRegistry = {
-    ['001'.padStart(24, '0')]: {
-      dataQueue: [],
-      commandQueue: [],
+  debug(chalk.yellow('server start'));
+  const queueRegistry = Object.create(null);
+  const queueManager = {
+    addQueue(simulationId) {
+      queueRegistry[simulationId] = {
+        dataQueue: [],
+        commandQueue: [],
+      };
     },
-    ['002'.padStart(24, '0')]: {
-      dataQueue: [],
-      commandQueue: [],
+    deleteQueue(simulationId) {
+      delete queueRegistry[simulationId];
+    },
+    getQueue(simulationId) {
+      return queueRegistry[simulationId];
+    },
+    getQueueIds() {
+      return Object.keys(queueRegistry);
     },
   };
-  const tcpServer = TcpServer({ port: tcpPort }, queueRegistry);
-  tcpServer.start();
-  const wsServer = WebSocketServer({ port: wsPort }, queueRegistry);
-  wsServer.start();
+
+  const tcpServer = TcpServer({ port: tcpPort }, queueManager);
+  const webSocketServer = WebSocketServer({ port: wsPort }, queueManager);
+
+  [tcpServer, webSocketServer].forEach(server => server.start());
+
+  distributeData(queueManager, webSocketServer.server, serialize);
+  distributeDataToSalt(queueManager, tcpServer);
 }
 
 Server({

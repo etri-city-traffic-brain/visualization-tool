@@ -1,18 +1,18 @@
 import * as maptalks from 'maptalks';
-
+// import extent from '../map-extent';
 import drawVehicles from './draw-vehicles';
 
 const MAX_ZOOM = 19;
 
-function makeCanvasLayer(map, edgeLayer, eventBus) {
-  const canvasLayer = new maptalks.CanvasLayer('c', {
+export default (map, getEdges, eventBus, extent) => {
+  const layer = new maptalks.CanvasLayer('c', {
     forceRenderOnMoving: true,
     forceRenderOnZooming: true
   });
 
   let currentRoads = []
 
-  canvasLayer.draw = function draw (context) {
+  layer.draw = function draw(context) {
     if (map.getZoom() < MAX_ZOOM) {
       return
     }
@@ -20,7 +20,7 @@ function makeCanvasLayer(map, edgeLayer, eventBus) {
     drawVehicles({
       context,
       map,
-      edges: edgeLayer.getGeometries(),
+      edges: getEdges(),
       roads: currentRoads
     })
 
@@ -28,31 +28,32 @@ function makeCanvasLayer(map, edgeLayer, eventBus) {
   };
 
   //draw when map is interacting
-  canvasLayer.drawOnInteracting = function (context, view) {
+  layer.drawOnInteracting = function drawOnInteracting(context, view) {
     this.draw(context, view);
   };
 
-  canvasLayer.show();
+  layer.show();
 
   if (eventBus) {
     eventBus.$on('salt:data', (data) => {
       currentRoads = data.roads
-      canvasLayer.redraw()
+      layer.redraw()
     });
   }
 
-  map.on('zoomend moveend', (event) => {
-    const map = event.target;
+  map.on('zoomend moveend', () => {
     if(map.getZoom() >= MAX_ZOOM) {
-      canvasLayer.show()
-      edgeLayer.hide()
+      layer.show()
     } else {
-      canvasLayer.hide()
-      edgeLayer.show()
+      layer.hide()
+    }
+    if (eventBus) {
+      eventBus.$emit('salt:set', {
+        extent: extent(map),
+        zoom: map.getZoom()
+      })
     }
   });
 
-  return canvasLayer
+  return layer
 }
-
-export default makeCanvasLayer

@@ -16,7 +16,7 @@ const MsgType = {
   STOP: 11,
 };
 
-const SIMULATION_ID_LENGTH = 24;
+const SIMULATION_ID_LENGTH = 17;
 const LOAD_ID_LENGTH = 16;
 
 const {
@@ -41,18 +41,19 @@ const Init = Struct([
 ]);
 
 const Road = Struct([
-  ['roadId', char(LOAD_ID_LENGTH)],
+  ['lenRoadId', uint32],
+  ['roadId', string('lenRoadId')],
   ['speed', uint32],
-  ['vehicleLength', uint32],
-  ['vehicles', array('vehicleLength', int8)],
+  ['numVehicles', uint32],
+  ['vehicles', array('numVehicles', int8)],
   ['currentSignal', int8],
 ]);
 
 // DIRECTION: SALT -> SLAT-VIS
 const Data = Struct([
   ['header', Header],
-  ['roadLength', uint32],
-  ['roads', array('roadLength', Road)],
+  ['numRoads', uint32],
+  ['roads', array('numRoads', Road)],
 ]);
 
 // DIRECTION: SALT -> SLAT-VIS

@@ -1,18 +1,11 @@
+const debug = require('debug')('salt-connector:tcp-server');
 const net = require('net');
 const chalk = require('chalk');
 const {
   Header, Init, Data, Status, MsgType,
 } = require('./msg');
 
-const msgFactory = require('./msg-factory');
-
-const { log } = console;
-
-function SaltMsgHandler(queueRegistry) {
-
-}
-
-function Server({ port }, queueRegistry) {
+function Server({ port }, { getQueue }) {
   const socketToSimulationId = {};
   const simulationIdToSocket = {};
 
@@ -24,24 +17,25 @@ function Server({ port }, queueRegistry) {
   };
 
   const processInit = (socket, buffer) => {
-    const obj = Init(buffer);
-    socketToSimulationId[socket] = obj.simulationId;
-    simulationIdToSocket[obj.simulationId] = socket;
-    log(obj);
-
-    const setMsg = msgFactory.makeSet({
-      extent: [0, 0, 100, 100],
-      roadType: 0,
-    });
-    send(obj.simulationId, setMsg);
+    const initMsg = Init(buffer);
+    const { simulationId } = initMsg;
+    socketToSimulationId[socket] = simulationId;
+    simulationIdToSocket[simulationId] = socket;
+    debug('SALT INIT');
+    const queue = getQueue(simulationId);
+    if (queue) {
+      queue.socket = socket;
+    }
+    debug('myQueue: ', queue);
   };
 
   const processData = (socket, buffer) => {
     const data = Data(buffer);
+    // debug(data);
     const simulationId = socketToSimulationId[socket];
-    log('[data]', simulationId);
+    debug('SALT DATA', simulationId);
 
-    const queue = queueRegistry[simulationId];
+    const queue = getQueue(simulationId);
     if (queue) {
       queue.dataQueue.push(data);
     }
@@ -49,7 +43,7 @@ function Server({ port }, queueRegistry) {
 
   const processStatus = (socket, buffer) => {
     const status = Status(buffer);
-    log(chalk.yellow('status'));
+    debug(chalk.yellow('status'));
   };
 
   const handlers = {
@@ -64,21 +58,19 @@ function Server({ port }, queueRegistry) {
     if (handler) {
       handler(socket, buffer);
     } else {
-      log(chalk.red('cannot find handler'));
+      debug(chalk.red('cannot find handler'));
     }
   };
 
   const handleClose = socket => () => {
-    const sId = socketToSimulationId[socket];
-    delete simulationIdToSocket[sId];
+    debug('handleClose');
+    const simulationId = socketToSimulationId[socket];
+    delete simulationIdToSocket[simulationId];
     delete socketToSimulationId[socket];
-
-    log(socketToSimulationId);
-    log(simulationIdToSocket);
   };
 
   const handleError = socket => () => {
-    log(chalk.green(`[socket-error] ${socket.remoteAddress}:${socket.remotePort}`));
+    debug(chalk.green(`[socket-error] ${socket.remoteAddress}:${socket.remotePort}`));
   };
 
   const server = net.createServer((socket) => {
@@ -88,19 +80,19 @@ function Server({ port }, queueRegistry) {
   });
 
   server.on('connection', (socket) => {
-    log(chalk.green(`[connection] ${socket.remoteAddress}:${socket.remotePort}`));
+    debug(chalk.green(`[connection] ${socket.remoteAddress}:${socket.remotePort}`));
   });
 
   server.on('error', (socket) => {
-    log(chalk.green(`[error] ${socket.remoteAddress}:${socket.remotePort}`));
+    debug(chalk.green(`[error] ${socket.remoteAddress}:${socket.remotePort}`));
   });
 
   return {
     start() {
       server.listen(port, '127.0.0.1');
-      log(`SALT-Connector start on ${chalk.blue(port)}...`);
+      debug(`SALT-Connector start on ${chalk.blue(port)}...`);
     },
-    write: send,
+    send,
   };
 }
 

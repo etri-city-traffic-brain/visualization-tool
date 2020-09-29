@@ -117,7 +117,11 @@ export default {
 
     this.simulation = simulation;
 
-    this.mapManager = MapManager(this.map, this.simulationId, this);
+    this.mapManager = MapManager({
+      map: this.map,
+      simulationId: this.simulationId,
+      eventBus:this
+    });
 
     this.$on('link:selected', (link) => {
       this.currentEdge = link;
@@ -133,6 +137,7 @@ export default {
     })
 
     this.$on('salt:data', (d) => {
+      console.log(d)
       this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
         acc += cur
         return acc
@@ -172,7 +177,10 @@ export default {
         new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed())
       )
     } else if(this.simulation.status === 'running') {
-      this.wsClient = WebSocketClient(this, this.simulationId)
+      this.wsClient = WebSocketClient({
+        simulationId: this.simulationId,
+        eventBus: this
+      })
       this.wsClient.init()
     }
     window.addEventListener('resize', this.resize);

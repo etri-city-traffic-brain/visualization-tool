@@ -40,12 +40,13 @@ test('test DataMsg', (t) => {
       type: 1,
       timestamp: 1,
     },
-    roadLength: 1,
+    numRoads: 1,
     roads: [
       {
-        roadId: '0000000000000001',
+        lenRoadId: 14,
+        roadId: '-572700451_1_0',
         speed: 32,
-        vehicleLength: 1,
+        numVehicles: 1,
         vehicles: [
           1,
         ],

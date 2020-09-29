@@ -3,7 +3,8 @@
 const serialize = obj => JSON.stringify(obj);
 const deserialize = str => JSON.parse(str);
 
-function Client(eventBus, simulationId) {
+const { log } = console
+function Client({simulationId, eventBus}) {
 
   if (!eventBus) {
     throw new Error('eventBus is null')
@@ -12,7 +13,10 @@ function Client(eventBus, simulationId) {
   let status = 'ready'
   let socket = null
 
-  const send = obj => socket.send(serialize(obj));
+  function send(obj) {
+    socket.send(serialize(obj));
+  }
+
   const close = () => socket.close();
 
   function init() {
@@ -39,6 +43,18 @@ function Client(eventBus, simulationId) {
     socket.addEventListener('error', () => {
       eventBus.$emit('ws:error',new Error(`WebSocket connection to ${url} failed`))
       status = 'error'
+    })
+
+    eventBus.$on('salt:set', ({extent, zoom}) => {
+      console.log('fire salt:set')
+      // log('salt:set', JSON.stringify(extent, false, 2))
+      const roadType = zoom >= 19 ? 1 : 0 // 1: cell, 0: link
+      this.send({
+        simulationId,
+        type: 10,
+        extent,
+        roadType
+      })
     })
   }
 

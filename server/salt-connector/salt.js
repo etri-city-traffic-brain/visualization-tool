@@ -3,6 +3,8 @@ const chalk = require('chalk');
 const msgFactory = require('./msg-factory');
 const { Header } = require('./msg');
 
+const roads = require('./salt-roads');
+
 const { log } = console;
 const socket = net.connect({
   port: 1337,
@@ -11,6 +13,7 @@ const socket = net.connect({
 
 // const simulationId = '001'.padStart(24, '0');
 const simulationId = 'SALT_202007_00516';
+
 
 socket.on('connect', () => {
   const init = msgFactory.makeInit({
@@ -26,8 +29,7 @@ socket.on('connect', () => {
         speed: 32,
         numVehicles: 2,
         vehicles: [
-          1, 0,
-        ],
+          1, 0],
         currentSignal: 'r',
       },
     ],
@@ -35,9 +37,6 @@ socket.on('connect', () => {
 
   socket.write(init);
   socket.write(data);
-  // setTimeout(() => {
-  //   socket.write(data);
-  // }, 1000);
 });
 
 socket.on('data', (buffer) => {
@@ -53,3 +52,5 @@ socket.on('close', () => {
 socket.on('error', (err) => {
   log('on error: ', err.code);
 });
+
+// setTimeout(() => socket.destroy(), 5000);

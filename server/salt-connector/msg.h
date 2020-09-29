@@ -31,14 +31,15 @@ struct StatusMsg  {
 // SALT --> SALT-VIS
 struct DataMsg  {
   MsgHeader header;
-  unsigned int roadLength;
-  Road road[roadLength]
+  unsigned int numRoads;
+  Road road[rumRoads]
 }
 
 struct Road  {
-  unsigned char roadId[16]; // cellId or linkId
+  unsigned int lenRoadId
+  unsigned char roadId[lenRoadId]; // cellId or linkId
   unsigned int speed; // road's mean speed
-  unsigned int vehicleLength;
-  unsigned char[vehicleLength]; // SMALL(0), LARGE(1)
+  unsigned int numVehicles;
+  unsigned char[numVehicles]; // SMALL(0), LARGE(1)
   unsigned char currentSignal; // RED(0), GREEN(1)
 }

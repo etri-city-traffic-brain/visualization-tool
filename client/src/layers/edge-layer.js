@@ -58,7 +58,7 @@ export default (map, eventBus) => {
 
   map.on('zoomend moveend', (event) => {
     const map = event.target;
-    if(map.getZoom() >= 20 || map.getZoom() <= 14) {
+    if(map.getZoom() >= 19 || map.getZoom() <= 14) {
       layer.hide()
     } else {
       layer.show()

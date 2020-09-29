@@ -23,13 +23,14 @@ const ZOOM_MINIMUM = 14;
 
 const { log } = console
 
-function MapManager(map, simulationId, eventBus) {
+function MapManager({map, simulationId, eventBus}) {
+  log('map-manager created')
   let currentSpeedsPerLink = {};
   let currentStep = 0;
 
   const edgeLayer = makeEdgeLayer(map, eventBus);
   const gridLayer = makeGridLayer(map)
-  const canvasLayer = makeCanvasLayer(map, edgeLayer, eventBus)
+  const canvasLayer = makeCanvasLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus, extent)
   map.addLayer(edgeLayer)
   map.addLayer(gridLayer)
   map.addLayer(canvasLayer)
