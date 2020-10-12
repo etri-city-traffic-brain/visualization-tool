@@ -17,7 +17,6 @@ const MsgType = {
 };
 
 const SIMULATION_ID_LENGTH = 17;
-const LOAD_ID_LENGTH = 16;
 
 const {
   doublebe,
@@ -25,7 +24,6 @@ const {
   floatbe: float,
   int8,
   array,
-  char,
   string,
 } = Struct.types;
 

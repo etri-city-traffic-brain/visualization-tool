@@ -1,4 +1,6 @@
 // protocol message between SALT and SALT-VIS
+
+#define SIMULATION_ID_LENGTH 17;
 struct MsgHeader {
   unsigned int type; // INIT(0), DATA(1), STATUS(2), SET(10), STOP(11)
   long timestamp; // milliseconds
@@ -18,7 +20,7 @@ struct StopMsg  {
 // SALT-VIS --> SALT
 struct InitMsg  {
   MsgHeader header;
-  unsigned char[24] simulationId;
+  unsigned char[SIMULATION_ID_LENGTH] simulationId;
 }
 
 // SALT --> SALT-VIS
@@ -32,7 +34,7 @@ struct StatusMsg  {
 struct DataMsg  {
   MsgHeader header;
   unsigned int numRoads;
-  Road road[rumRoads]
+  Road roads[rumRoads]
 }
 
 struct Road  {
@@ -40,6 +42,6 @@ struct Road  {
   unsigned char roadId[lenRoadId]; // cellId or linkId
   unsigned int speed; // road's mean speed
   unsigned int numVehicles;
-  unsigned char[numVehicles]; // SMALL(0), LARGE(1)
+  unsigned char vehicles[numVehicles]; // SMALL(0), LARGE(1)
   unsigned char currentSignal; // RED(0), GREEN(1)
 }
