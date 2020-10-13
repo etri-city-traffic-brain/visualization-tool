@@ -1,20 +1,42 @@
-/* eslint-disable global-require */
-/**
- * SALT-VIS Server Main
- * author: beanpole
- * last modified: 2019-6-5
- */
+const debug = require('debug')('server:web');
+const app = require('./app')
+const http = require('http');
 
-const mongoose = require('mongoose');
-const config = require('./config');
-const mongoDB = require('./main/dbms/init-mongoose');
-const lowDB = require('./main/dbms/init-db');
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
 
-mongoDB.init(config, mongoose);
-lowDB.init('./db.json');
+  const bind = typeof port === 'string'
+    ? `Pipe ${port}`
+    : `Port ${port}`;
 
-const app = require('./app');
+  switch (error.code) {
+  case 'EACCES':
+    console.error(`${bind} requires elevated privileges`);
+    break;
+  case 'EADDRINUSE':
+    console.error(`${bind} is already in use`);
+    break;
+  default:
+    throw error;
+  }
+}
+
+const onListening = server => () => {
+  const addr = server.address();
+  const bind = typeof addr === 'string'
+    ? `pipe ${addr}`
+    : `port ${addr.port}`;
+  debug(`Listening on ${bind}`);
+};
 
 module.exports = {
-  app,
-};
+  start({port}) {
+    const server = http.createServer(app);
+
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening(server));
+  }
+}

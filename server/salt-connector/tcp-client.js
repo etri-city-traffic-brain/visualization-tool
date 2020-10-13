@@ -24,9 +24,9 @@ socket.on('connect', () => {
         lenRoadId: 14,
         roadId: '-572700451_1_0', // -572700451_1_0
         speed: 32,
-        numVehicles: 2,
+        numVehicles: 3,
         vehicles: [
-          1, 0,
+          1, 0, 1,
         ],
         currentSignal: 'r',
       },

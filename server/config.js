@@ -65,5 +65,6 @@ module.exports = {
   server: {
     tcpPort: 1337,
     wsPort: 8082,
+    webPort: 3000,
   },
 };

@@ -8,7 +8,7 @@ const msgFactory = require('./msg-factory');
  * @param {*} wss
  */
 function distributeData({ getQueue, getQueueIds }, wss, serialize) {
-  debug('msg-distributor[--> Web Browser] started...');
+  debug('[--> Web Browser] started...');
   const distribute = () => {
     getQueueIds().forEach((simulationId) => {
       const queue = getQueue(simulationId);
@@ -38,7 +38,7 @@ function distributeData({ getQueue, getQueueIds }, wss, serialize) {
  * @param {*} wss
  */
 function distributeDataToSalt({ getQueue, getQueueIds }, tcpServer) {
-  debug('msg-distributor[--> SALT] started...');
+  debug('[--> SALT] started...');
   const distribute = () => {
     getQueueIds().forEach((simulationId) => {
       const queue = getQueue(simulationId);

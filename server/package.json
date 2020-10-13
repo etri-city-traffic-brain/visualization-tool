@@ -43,6 +43,7 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "faucet": "0.0.1",
     "nodemon": "^1.17.4",

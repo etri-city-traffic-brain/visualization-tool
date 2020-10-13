@@ -1,89 +1,21 @@
 #!/usr/bin/env node
 
 /**
- * Module dependencies.
- */
-// process.env.DEBUG = 'server:server';
-const debug = require('debug')('server:server');
-const http = require('http');
-const { app } = require('../server');
-
-/**
- * Normalize a port into a number, string, or false.
+ * Entry point
+ * author: beanpole
+ * last modified: 2020-10-13
  */
 
-function normalizePort(val) {
-  const port = parseInt(val, 10);
+const mongoose = require('mongoose');
 
-  if (Number.isNaN(port)) {
-    return val;
-  }
+const config = require('../config');
+const mongoConnector = require('../main/dbms/init-mongoose');
+const lowdbConnector = require('../main/dbms/init-db');
+const saltConnector = require('../salt-connector')
+const webApiServer = require('../server')
+const { tcpPort, wsPort, webPort } = require('../config').server;
 
-  if (port >= 0) {
-    return port;
-  }
-
-  return false;
-}
-
-/**
- * Get port from environment and store in Express.
- */
-
-const port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
-
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  const bind = typeof port === 'string'
-    ? `Pipe ${port}`
-    : `Port ${port}`;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-  case 'EACCES':
-    console.error(`${bind} requires elevated privileges`);
-    process.exit(1);
-    break;
-  case 'EADDRINUSE':
-    console.error(`${bind} is already in use`);
-    process.exit(1);
-    break;
-  default:
-    throw error;
-  }
-}
-
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-const onListening = server => () => {
-  const addr = server.address();
-  const bind = typeof addr === 'string'
-    ? `pipe ${addr}`
-    : `port ${addr.port}`;
-  debug(`Listening on ${bind}`);
-};
-
-
-/**
- * Create HTTP server.
- */
-
-const server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening(server));
+mongoConnector.start(config, mongoose);
+lowdbConnector.start('../db.json');
+webApiServer.start({ port: webPort })
+saltConnector.start({ tcpPort, wsPort })

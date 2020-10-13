@@ -1,99 +1,96 @@
+
 const debug = require('debug')('salt-connector:tcp-server');
 const net = require('net');
 const chalk = require('chalk');
-const {
-  Header, Init, Data, Status, MsgType,
-} = require('./msg');
+const fs = require('fs');
+const events = require('events');
 
-function Server({ port }, { getQueue }) {
-  const socketToSimulationId = {};
-  const simulationIdToSocket = {};
+const { EventEmitter } = events;
 
-  const send = (simulationId, buffer) => {
-    const socket = simulationIdToSocket[simulationId];
-    if (socket) {
-      socket.write(buffer);
+const { Header } = require('./msg');
+const hex = require('./hex');
+const SaltMsgHandler = require('./salt-msg-handler');
+const BufferManager = require('./socket-buffer-manager');
+
+const HEADER_LENGTH = 16;
+const bufferManager = BufferManager();
+
+const { green } = chalk;
+
+const writeStream = fs.createWriteStream('./output');
+
+/**
+ * TCP Server
+ * @param {number} port
+ * @param {Object} queueManager manage communation message channel
+ * @param {function} queueManager.getQueue
+ */
+function Server(port = 1337, queueManager) {
+  const saltMsgHandler = SaltMsgHandler(queueManager.getQueue);
+
+  // saltMsgHandler.on('salt-status', () => {
+  //   console.log('salt-status event');
+  // });
+  let timer;
+  // const eventEmitter = new EventEmitter();
+  const consumeSaltMsg = (socket) => {
+    const buffer = bufferManager.getBuffer(socket);
+    if (buffer && buffer.length >= HEADER_LENGTH) {
+      const header = Header(buffer);
+      debug(header);
+      const handler = saltMsgHandler.get(header.type);
+      if (handler) {
+        const bodyLength = header.length + HEADER_LENGTH;
+        handler(socket, buffer.slice(HEADER_LENGTH, bodyLength));
+        bufferManager.setBuffer(socket, buffer.slice(bodyLength));
+      } else {
+        debug(chalk.red('cannot find handler'));
+        bufferManager.setBuffer(socket, Buffer.alloc(0));
+      }
     }
-  };
-
-  const processInit = (socket, buffer) => {
-    const initMsg = Init(buffer);
-    const { simulationId } = initMsg;
-    socketToSimulationId[socket] = simulationId;
-    simulationIdToSocket[simulationId] = socket;
-    debug('SALT INIT');
-    const queue = getQueue(simulationId);
-    if (queue) {
-      queue.socket = socket;
-    }
-    debug('myQueue: ', queue);
-  };
-
-  const processData = (socket, buffer) => {
-    const data = Data(buffer);
-    // debug(data);
-    const simulationId = socketToSimulationId[socket];
-    debug('SALT DATA', simulationId);
-
-    const queue = getQueue(simulationId);
-    if (queue) {
-      queue.dataQueue.push(data);
-    }
-  };
-
-  const processStatus = (socket, buffer) => {
-    const status = Status(buffer);
-    debug(chalk.yellow('status'));
-  };
-
-  const handlers = {
-    [MsgType.INIT]: processInit,
-    [MsgType.DATA]: processData,
-    [MsgType.STATUS]: processStatus,
+    timer = setTimeout(() => consumeSaltMsg(socket), 500);
   };
 
   const handleData = socket => (buffer) => {
-    const header = Header(buffer);
-    const handler = handlers[header.type];
-    if (handler) {
-      handler(socket, buffer);
-    } else {
-      debug(chalk.red('cannot find handler'));
-    }
+    // log(hex(buffer));
+    writeStream.write(hex(buffer));
+    bufferManager.addBuffer(socket, buffer);
   };
 
   const handleClose = socket => () => {
-    debug('handleClose');
-    const simulationId = socketToSimulationId[socket];
-    delete simulationIdToSocket[simulationId];
-    delete socketToSimulationId[socket];
+    saltMsgHandler.clearResource(socket);
+    bufferManager.deleteBuffer(socket);
+    clearTimeout(timer);
   };
 
   const handleError = socket => () => {
-    debug(chalk.green(`[socket-error] ${socket.remoteAddress}:${socket.remotePort}`));
+    debug(green(`[socket-error] ${socket.remoteAddress}:${socket}`));
   };
 
   const server = net.createServer((socket) => {
     socket.on('data', handleData(socket));
     socket.on('close', handleClose(socket));
     socket.on('error', handleError(socket));
+    consumeSaltMsg(socket);
   });
 
   server.on('connection', (socket) => {
-    debug(chalk.green(`[connection] ${socket.remoteAddress}:${socket.remotePort}`));
+    debug(green(`[connection] ${socket.remoteAddress}:${socket}`));
   });
 
   server.on('error', (socket) => {
-    debug(chalk.green(`[error] ${socket.remoteAddress}:${socket.remotePort}`));
+    debug(green(`[error] ${socket.remoteAddress}:${socket}`));
   });
 
-  return {
+  const api = {
     start() {
-      server.listen(port, '127.0.0.1');
+      server.listen(port, '0.0.0.0');
       debug(`SALT-Connector start on ${chalk.blue(port)}...`);
     },
-    send,
+    send: saltMsgHandler.send,
   };
+
+  return Object.assign(saltMsgHandler, api);
 }
 
 module.exports = Server;

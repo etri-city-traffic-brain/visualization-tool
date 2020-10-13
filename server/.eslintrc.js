@@ -6,6 +6,7 @@ module.exports = {
   "parserOptions": {
     "ecmaVersion": 2017
   },
+  "parser": "babel-eslint",
   "extends": "airbnb-base",
   "rules": {
     "indent": [

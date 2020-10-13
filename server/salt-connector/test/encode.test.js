@@ -1,9 +1,9 @@
 
 
 const test = require('tape');
-const { Header } = require('./msg');
+const { Header } = require('../msg');
 
-const encode = require('./encode');
+const encode = require('../encode');
 
 test('test encode', (assert) => {
   const buffer = encode(Header, {

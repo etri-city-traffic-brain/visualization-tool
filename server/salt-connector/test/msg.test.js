@@ -1,6 +1,6 @@
 
 const test = require('tape');
-const { Header, Init, Data } = require('./msg');
+const { Header, Init, Data } = require('../msg');
 
 
 test('test Init', (assert) => {

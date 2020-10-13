@@ -1,6 +1,7 @@
 // protocol message between SALT and SALT-VIS
 
 #define SIMULATION_ID_LENGTH 17;
+
 struct MsgHeader {
   unsigned int type; // INIT(0), DATA(1), STATUS(2), SET(10), STOP(11)
   long timestamp; // milliseconds

@@ -1,13 +1,18 @@
+// @ts-check
 const debug = require('debug')('salt-connector:ws-server');
 const WebSocket = require('ws');
 const chalk = require('chalk');
 
-const { MsgType } = require('./msg');
+const { MsgType } = require('./type');
 
 const { log } = console;
-const serialize = obj => JSON.stringify(obj);
 
-function Server({ port }, queueManager) {
+/**
+ *
+ * @param {number} port
+ * @param {{addQueue: function, deleteQueue: function, getQueue: function}} queueManager
+ */
+function Server(port, queueManager) {
   const server = new WebSocket.Server({ port });
 
   function handleConnection(client) {
@@ -16,7 +21,8 @@ function Server({ port }, queueManager) {
         const obj = JSON.parse(message);
         if (obj.type === MsgType.INIT) { // init
           Object.assign(client, { $simulationId: obj.simulationId });
-          log('add queue for', obj.simulationId);
+          // const sId = obj.simulationId.substring(0, 16);
+          debug('add queue for', obj.simulationId);
           queueManager.addQueue(obj.simulationId);
         } else if (obj.type === MsgType.SET) {
           const queue = queueManager.getQueue(obj.simulationId);
@@ -32,18 +38,6 @@ function Server({ port }, queueManager) {
       log('delete queue for', client.$simulationId);
       queueManager.deleteQueue(client.$simulationId);
     });
-
-    // demo
-    const dummy = () => {
-      client.send(serialize({
-        header: {
-          type: 1,
-          timestamp: new Date().getTime(),
-        },
-        roads: [],
-      }));
-    };
-    // setInterval(dummy, 1000);
 
     client.on('error', () => {
     });
