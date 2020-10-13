@@ -1,6 +1,6 @@
 <template>
   <div style="min-width:840px;">
-    <b-container fluid>
+    <b-container fluid class="mt-1">
       <b-alert
         :show="warning"
         dismissible
@@ -9,7 +9,7 @@
         {{ warning }}
       </b-alert>
       <b-row>
-        <b-col md="12" class="my-2">
+        <b-col md="12" class="">
           <b-button size="sm" variant="dark" v-b-modal.create-simulation-modal >
             <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
           </b-button>
@@ -19,6 +19,7 @@
           <b-btn size="sm" class="mr-1" variant="dark" @click.stop="updateTable" >
             <b-icon icon="arrow-clockwise"/> 새로고침
           </b-btn>
+
           <b-btn variant="warning" v-if="selected.length >= 2" size="sm" @click.stop="compare">분석 </b-btn>
           <!-- simulation drop area -->
           <b-collapse id="collapse1" class="mt-1">
@@ -46,18 +47,26 @@
           </b-collapse> <!-- simulation drop area -->
         </b-col>
       </b-row>
+      <b-row>
+        <b-col class="mt-1">
+          <b-form-checkbox v-model="autoRefresh" name="check-button" size="md" switch>
+           자동 새로고침 <b>({{ autoRefresh }})</b>
+          </b-form-checkbox>
+        </b-col>
+      </b-row>
       <!----------------------->
       <!-- Simulation List   -->
       <!----------------------->
+        <!-- :busy.sync="isBusy" -->
       <b-table bordered outlined striped hover small
         ref="simulations-table"
         head-variant="light"
         foot-variant="light"
-        :busy.sync="isBusy"
-        :items="dataProvider"
+        :items="items"
         :fields="fields"
         :current-page="currentPage"
         :per-page="perPage"
+        class="mt-1"
       >
         <template v-slot:cell(num)="row">
           <b-button
@@ -124,7 +133,7 @@
             size="sm"
             variant="secondary"
             :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
-            v-if="row.item.status !== 'error'"
+            v-if="row.item.status === 'finished' || row.item.status === 'running'"
             >
               <b-icon icon="zoom-in"></b-icon> 상세보기
           </b-button>

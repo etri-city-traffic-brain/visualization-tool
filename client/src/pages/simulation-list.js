@@ -57,10 +57,19 @@ export default {
       warning: null,
       userState,
       modalShow: false,
+      autoRefresh: false,
     };
   },
   mounted() {
-    // setInterval(() => this.updateTable(), 1000)
+    this.dataProvider({ currentPage: this.currentPage })
+    this.interval = setInterval(async () => {
+      if(this.autoRefresh) {
+        this.dataProvider({ currentPage: this.currentPage })
+      }
+    }, 3000)
+  },
+  destroyed() {
+    clearInterval(this.interval)
   },
   methods: {
     calcDuration(configuration) {
@@ -161,12 +170,14 @@ export default {
       this.updateTable();
     },
     async dataProvider({ currentPage }) {
+
       this.isBusy = true
       try {
         const { data, total, perPage } = (await simulationService.getSimulations(this.userState.userId, currentPage)).data;
         this.totalRows = total;
         this.isBusy = false
         this.perPage = perPage
+        this.items = data
         return data;
       } catch (err) {
         this.isBusy = false

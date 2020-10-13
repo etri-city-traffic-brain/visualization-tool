@@ -111,7 +111,7 @@
           text-variant="light"
           border-variant="secondary"
           no-body
-          class="p-1 m-0"
+          class="p-1 m-1"
         >
           <h5><b-badge variant="dark">속도분포</b-badge></h5>
           <b-card no-body class="m-0 pt-3">
@@ -125,7 +125,7 @@
           border-variant="secondary"
           sub-title="스텝별 속도 분포"
           no-body
-          class="p-1 m-0"
+          class="p-1 m-1"
         >
           <h5><b-badge variant="dark">스텝별 속도 분포</b-badge></h5>
           <b-card no-body class="m-0 pt-3">
@@ -138,7 +138,7 @@
           border-variant="secondary"
           sub-title="혼잡도 분포"
           no-body
-          class="p-1 m-0"
+          class="p-1 m-1"
         >
           <h5><b-badge variant="dark">혼잡도 분포</b-badge></h5>
           <b-card no-body class="m-0 pt-2">
@@ -151,7 +151,7 @@
           border-variant="secondary"
           sub-title="스텝별 혼잡도 분포"
           no-body
-          class="p-1 m-0"
+          class="p-1 m-1"
         >
           <h5><b-badge variant="dark">스텝별 혼잡도 분포</b-badge></h5>
           <b-card no-body class="m-0 pt-2">

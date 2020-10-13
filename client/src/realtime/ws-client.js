@@ -35,6 +35,7 @@ function Client({simulationId, eventBus}) {
 
     socket.addEventListener('message', (event) => {
       eventBus.$emit('salt:data', deserialize(event.data))
+      log(deserialize(event.data))
     });
     socket.addEventListener('close', () => {
       eventBus.$emit('ws:close', {})

@@ -37,6 +37,7 @@ export default (map, getEdges, eventBus, extent) => {
   if (eventBus) {
     eventBus.$on('salt:data', (data) => {
       currentRoads = data.roads
+      console.log(data.roads)
       layer.redraw()
     });
   }

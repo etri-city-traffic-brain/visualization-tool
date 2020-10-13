@@ -75,6 +75,7 @@ function MapManager({map, simulationId, eventBus}) {
 
   async function updateSimulationResult() {
     currentSpeedsPerLink = await simulationService.getSimulationResult(simulationId, extent(map));
+    console.log(edgeLayer.getGeometries().length)
     edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep);
     gridLayer.updateGrid(simulationId, currentStep);
   }

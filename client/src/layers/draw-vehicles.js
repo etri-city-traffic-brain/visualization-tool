@@ -3,7 +3,9 @@ import VehicleFactory from '../vehicles/model/factory'
 
 function drawVehicles({context, map, edges: cells = [], roads}) {
   const roadMap = roads.reduce((acc, cur) => {
-    acc[cur.roadId] = cur
+    // acc[cur.roadId] = cur
+    acc[cur.roadId.substring(0, 14)] = cur
+    console.log('update', cur.roadId.substring(0, 14))
     return acc
   }, {})
 
