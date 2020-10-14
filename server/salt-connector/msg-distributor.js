@@ -13,7 +13,7 @@ function distributeData({ getQueue, getQueueIds }, wss, serialize) {
     getQueueIds().forEach((simulationId) => {
       const queue = getQueue(simulationId);
       if (queue) {
-        const data = queue.dataQueue.splice(0, 10);
+        const data = queue.dataQueue.splice(0, 1);
         if (data.length > 0) {
           wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
@@ -43,12 +43,12 @@ function distributeDataToSalt({ getQueue, getQueueIds }, tcpServer) {
     getQueueIds().forEach((simulationId) => {
       const queue = getQueue(simulationId);
       if (queue) {
-        const data = queue.commandQueue.splice(0, 10);
+        const data = queue.commandQueue.splice(0, 1);
         if (data.length > 0) {
           debug('distirbutor: set message');
           const setMsg = msgFactory.makeSet({
-            extent: [0, 0, 100, 100],
-            roadType: 0,
+            extent: data[0].extent,
+            roadType: data[0].roadType,
           });
 
           tcpServer.send(simulationId, setMsg);

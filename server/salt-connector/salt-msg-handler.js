@@ -15,7 +15,7 @@ const { MsgType } = require('./type');
  *
  * @param {function} getQueue queue manager's function
  */
-function SaltMsgHandler(getQueue) {
+function SaltMsgHandler({ getQueue }) {
   const socketToSimulationId = {};
   const simulationIdToSocket = {};
   const e = Object.create(EventEmitter.prototype);

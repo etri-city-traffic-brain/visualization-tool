@@ -1,13 +1,14 @@
 const net = require('net');
 const chalk = require('chalk');
 const msgFactory = require('../msg-factory');
-const { Header } = require('../msg');
+const { Header, Set } = require('../msg');
 
 const roads = require('./salt-roads');
 
 const { log } = console;
 
 const socket = net.connect({ port: 1337, host: '1.245.47.108' });
+const HEADER_LENGTH = 16;
 
 // const simulationId = '001'.padStart(24, '0');
 const simulationId = 'SALT_202009_00940';
@@ -44,18 +45,21 @@ socket.on('connect', () => {
   });
 
   send(init);
-  // send(data);
+  send(data);
   send(status);
 });
 
 socket.on('data', (buffer) => {
-  // const header = Header(buffer);
-  // log(chalk.green('*** Command received ***'));
-  // log(header);
+  const header = Header(buffer);
+  log(chalk.green('*** Command received ***'));
+  log(header);
+  const bodyLength = header.length + HEADER_LENGTH;
+  const bodyBuffer = buffer.slice(HEADER_LENGTH, bodyLength);
 
-  // if (header.type === 10) {
-
-  // }
+  if (header.type === 10) {
+    const set = Set(bodyBuffer)
+    log(set)
+  }
 });
 
 socket.on('close', () => {

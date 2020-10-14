@@ -1,10 +1,10 @@
 
-const server = require('./server');
+// const server = require('./server');
 
-module.exports = server;
+// module.exports = server;
 
-module.exports = {
-  start({tcpPort, wsPort}) {
-    server({tcpPort, wsPort})
-  }
-}
+// module.exports = {
+//   start({tcpPort, wsPort}, httpServer) {
+//     server({tcpPort, wsPort}, httpServer)
+//   }
+// }

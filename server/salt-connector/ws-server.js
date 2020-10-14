@@ -9,23 +9,25 @@ const { log } = console;
 
 /**
  *
- * @param {number} port
  * @param {{addQueue: function, deleteQueue: function, getQueue: function}} queueManager
+ * @param {Object} httpServer
  */
-function Server(port, queueManager) {
-  const server = new WebSocket.Server({ port });
+module.exports = (httpServer, queueManager) => {
+  // const server = new WebSocket.Server({ port });
+  const webSocketServer = new WebSocket.Server({server: httpServer});
 
   function handleConnection(client) {
     client.on('message', (message) => {
       try {
         const obj = JSON.parse(message);
-        if (obj.type === MsgType.INIT) { // init
+        if (obj.type === MsgType.INIT) { // init from ws
           Object.assign(client, { $simulationId: obj.simulationId });
           // const sId = obj.simulationId.substring(0, 16);
           debug('add queue for', obj.simulationId);
           queueManager.addQueue(obj.simulationId);
         } else if (obj.type === MsgType.SET) {
           const queue = queueManager.getQueue(obj.simulationId);
+          debug(obj)
           queue.commandQueue.push(obj);
         }
       } catch (err) {
@@ -43,14 +45,9 @@ function Server(port, queueManager) {
     });
   }
 
-  server.on('connection', handleConnection);
+  webSocketServer.on('connection', handleConnection);
 
-  return {
-    start() {
-      debug(`GUI-Connector start on ${chalk.blue(port)}...`);
-    },
-    server,
-  };
-}
 
-module.exports = Server;
+  return webSocketServer
+
+};

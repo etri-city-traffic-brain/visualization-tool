@@ -3,17 +3,11 @@ const debug = require('debug')('salt-connector:tcp-server');
 const net = require('net');
 const chalk = require('chalk');
 const fs = require('fs');
-const events = require('events');
-
-const { EventEmitter } = events;
 
 const { Header } = require('./msg');
 const hex = require('./hex');
-const SaltMsgHandler = require('./salt-msg-handler');
-const BufferManager = require('./socket-buffer-manager');
 
 const HEADER_LENGTH = 16;
-const bufferManager = BufferManager();
 
 const { green } = chalk;
 
@@ -25,14 +19,10 @@ const writeStream = fs.createWriteStream('./output');
  * @param {Object} queueManager manage communation message channel
  * @param {function} queueManager.getQueue
  */
-function Server(port = 1337, queueManager) {
-  const saltMsgHandler = SaltMsgHandler(queueManager.getQueue);
 
-  // saltMsgHandler.on('salt-status', () => {
-  //   console.log('salt-status event');
-  // });
+
+module.exports = (port = 1337, saltMsgHandler, bufferManager ) => {
   let timer;
-  // const eventEmitter = new EventEmitter();
   const consumeSaltMsg = (socket) => {
     const buffer = bufferManager.getBuffer(socket);
     if (buffer && buffer.length >= HEADER_LENGTH) {
@@ -82,15 +72,10 @@ function Server(port = 1337, queueManager) {
     debug(green(`[error] ${socket.remoteAddress}:${socket}`));
   });
 
-  const api = {
-    start() {
-      server.listen(port, '0.0.0.0');
-      debug(`SALT-Connector start on ${chalk.blue(port)}...`);
-    },
+  server.listen(port, '0.0.0.0');
+  debug(`start on ${chalk.blue(port)}...`);
+
+  return Object.assign(saltMsgHandler, {
     send: saltMsgHandler.send,
-  };
-
-  return Object.assign(saltMsgHandler, api);
+  });
 }
-
-module.exports = Server;
