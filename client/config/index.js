@@ -12,24 +12,24 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/data': 'http://127.0.0.1:3000',
+      '/data': 'http://127.0.0.1',
       '/simulation': {
-        target: 'http://127.0.0.1:3000',
+        target: 'http://127.0.0.1',
       },
       '/simulations': {
-        target: 'http://127.0.0.1:3000',
+        target: 'http://127.0.0.1',
       },
       '/predictions': {
-        target: 'http://127.0.0.1:3000',
+        target: 'http://127.0.0.1',
       },
       '/statistics': {
-        target: 'http://127.0.0.1:3000',
+        target: 'http://127.0.0.1',
       },
       '/map': {
-        target: 'http://127.0.0.1:3000',
+        target: 'http://127.0.0.1',
       },
       '/salt': {
-        target: 'http://127.0.0.1:3000',
+        target: 'http://127.0.0.1',
       },
     },
 

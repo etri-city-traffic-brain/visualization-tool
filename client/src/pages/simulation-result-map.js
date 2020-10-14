@@ -137,7 +137,6 @@ export default {
     })
 
     this.$on('salt:data', (d) => {
-      console.log(d)
       this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
         acc += cur
         return acc

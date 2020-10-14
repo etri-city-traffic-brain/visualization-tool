@@ -4,12 +4,13 @@ const serialize = obj => JSON.stringify(obj);
 const deserialize = str => JSON.parse(str);
 
 const { log } = console
+
 function Client({simulationId, eventBus}) {
 
   if (!eventBus) {
     throw new Error('eventBus is null')
   }
-  const url = 'ws://localhost:8082'
+  const url = 'ws://localhost'
   let status = 'ready'
   let socket = null
 
@@ -47,13 +48,13 @@ function Client({simulationId, eventBus}) {
     })
 
     eventBus.$on('salt:set', ({extent, zoom}) => {
-      console.log('fire salt:set')
-      // log('salt:set', JSON.stringify(extent, false, 2))
       const roadType = zoom >= 19 ? 1 : 0 // 1: cell, 0: link
-      this.send({
+      const { min, max } = extent
+      log(this)
+      send({
         simulationId,
-        type: 10,
-        extent,
+        type: 10, // Set
+        extent:[ min.x, min.y, max.x, max.y],
         roadType
       })
     })
