@@ -1,6 +1,6 @@
 const debug = require('debug')('server:web');
-const app = require('./app')
 const http = require('http');
+const config = require('./config');
 
 function onError(error) {
   if (error.syscall !== 'listen') {
@@ -31,12 +31,10 @@ const onListening = server => () => {
   debug(`Listening on ${bind}`);
 };
 
-module.exports = {
-  start({port}) {
-    const server = http.createServer(app);
-
-    server.listen(port);
-    server.on('error', onError);
-    server.on('listening', onListening(server));
-  }
+module.exports = (app, port) => {
+  const server = http.createServer(app);
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening(server));
+  return server
 }

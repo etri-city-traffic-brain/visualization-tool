@@ -25,17 +25,6 @@ module.exports = {
     standalone: 'C:\\home\\ubuntu\\salt\\helpler\\runStandAloneSALT.py',
     distributed: `${base}/helper/runDistributedSALT.py`,
   },
-
-  mongodbUrl: 'mongodb://127.0.0.1:27017/map',
-  mongoOption: {
-    useNewUrlParser: true,
-    autoReconnect: true,
-    reconnectTries: Number.MAX_VALUE,
-    reconnectInterval: 1000,
-    keepAlive: 1,
-    connectTimeoutMS: 30000,
-  },
-
   simulation: {
     // dbFile: './db.json', // database file location
     routes: `${base}/routes`,
@@ -65,6 +54,18 @@ module.exports = {
   server: {
     tcpPort: 1337,
     wsPort: 8082,
-    webPort: 3000,
+    webPort: 80,
   },
+  db: {
+    mongodbUrl: 'mongodb://127.0.0.1:27017/map',
+    mongoOption: {
+      useNewUrlParser: true,
+      autoReconnect: true,
+      reconnectTries: Number.MAX_VALUE,
+      reconnectInterval: 1000,
+      keepAlive: 1,
+      connectTimeoutMS: 30000,
+    },
+    lowDBFile: './db.json',
+  }
 };

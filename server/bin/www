@@ -6,16 +6,14 @@
  * last modified: 2020-10-13
  */
 
-const mongoose = require('mongoose');
+const connectDB = require('../main/dbms')
+const webApp = require('../web-app')
+const startMessenger = require('../salt-connector/server')
+const startHttpServer = require('../http-server')
 
-const config = require('../config');
-const mongoConnector = require('../main/dbms/init-mongoose');
-const lowdbConnector = require('../main/dbms/init-db');
-const saltConnector = require('../salt-connector')
-const webApiServer = require('../server')
-const { tcpPort, wsPort, webPort } = require('../config').server;
+const { server: { webPort, tcpPort }, db } = require('../config');
 
-mongoConnector.start(config, mongoose);
-lowdbConnector.start('../db.json');
-webApiServer.start({ port: webPort })
-saltConnector.start({ tcpPort, wsPort })
+connectDB(db)
+
+const httpServer = startHttpServer(webApp, webPort)
+startMessenger(httpServer, tcpPort)

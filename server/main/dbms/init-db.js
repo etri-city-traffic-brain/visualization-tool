@@ -5,8 +5,8 @@ const TABLE_SIMULATION = 'simulations';
 let database;
 
 module.exports = {
-  start(file = './db.json') {
-    low(new FileAsync(file))
+  start({lowDBFile}) {
+    low(new FileAsync(lowDBFile))
       .then((db) => {
         debug('LowDB connected...');
         database = db;

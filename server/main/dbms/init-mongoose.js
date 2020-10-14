@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 const debug = require('debug')('server:db');
 const chalk = require('chalk');
+const mongoose = require('mongoose');
 
-function start({ mongodbUrl, mongoOption }, mongoose) {
+function start({ mongodbUrl, mongoOption }) {
   const { connection } = mongoose;
   let lastReconnectAttempt; // saves the timestamp of the last reconnect attempt
 
