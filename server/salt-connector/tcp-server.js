@@ -42,7 +42,7 @@ module.exports = (port = 1337, saltMsgHandler, bufferManager ) => {
   };
 
   const handleData = socket => (buffer) => {
-    // log(hex(buffer));
+    // console.log(hex(buffer));
     writeStream.write(hex(buffer));
     bufferManager.addBuffer(socket, buffer);
   };

@@ -17,13 +17,17 @@ log('*** SALT Simulator Dummy ***');
 log('simulationId:', simulationId);
 
 const send = (buffer) => {
-  log('send buffer', buffer.length);
+  log('send buffer', buffer.length - 16);
   socket.write(buffer);
 };
 
+const vehicles = Array(48).fill(0)
+
+const str2CharCodes = str => str.split('').map(d => d.charCodeAt())
+
 socket.on('connect', () => {
   const init = msgFactory.makeInit({
-    simulationId,
+    simulationId: str2CharCodes(simulationId),
   });
 
   const status = msgFactory.makeStatus({
@@ -32,21 +36,35 @@ socket.on('connect', () => {
   });
 
   const data = msgFactory.makeData({
-    numRoads: 1,
+    numRoads: 3,
     roads: [
       {
-        roadId: '-572700451_1_0XX', // -572700451_1_0
-        speed: 32,
-        numVehicles: 2,
-        vehicles: [1, 0],
-        currentSignal: 'r',
+        roadId: str2CharCodes('-572700451_0_0  '), // -572700451_1_0
+        speed: 36,
+        currentSignal: 1,
+        numVehicles: 4,
+        vehicles: vehicles,
+      },
+      {
+        roadId: str2CharCodes('-572700451_0_1  '), // -572700451_1_0
+        speed: 36,
+        currentSignal: 1,
+        numVehicles: 4,
+        vehicles: vehicles,
+      },
+      {
+        roadId: str2CharCodes('-572700451_0_2  '), // -572700451_1_0
+        speed: 36,
+        currentSignal: 1,
+        numVehicles: 4,
+        vehicles: vehicles,
       },
     ],
   });
 
   send(init);
   send(data);
-  send(status);
+  // send(status);
 });
 
 socket.on('data', (buffer) => {

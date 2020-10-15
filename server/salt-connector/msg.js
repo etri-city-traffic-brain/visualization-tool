@@ -11,12 +11,14 @@ const { MsgType } = require('./type');
 
 const MAX_SIMULATION_ID_LENGTH = 17;
 const MAX_ROAD_ID_LENGTH = 16;
-const HEADER_LENGTH = 16;
+const MAX_VEHICLES = 48;
+const EXTENT_LENGTH = 4;
+
 
 const {
-  doublebe,
-  uint32be: uint32,
-  floatbe: float,
+  double,
+  uint32,
+  float,
   int8,
   array,
   string,
@@ -24,24 +26,27 @@ const {
 
 const Header = Struct([
   ['type', uint32],
-  ['timestamp', doublebe],
+  ['timestamp', double],
   ['length', uint32],
 ]);
 
-// DIRECTION: SALT -> SLAT-VIS
+/**
+ * Init Message
+ * direction: SALT > VIS
+ */
 const Init = Struct([
-  // ['header', Header],
-  ['simulationId', string(MAX_SIMULATION_ID_LENGTH)],
+  ['simulationId', array(MAX_SIMULATION_ID_LENGTH, int8)],
 ]);
 Init.type = MsgType.INIT;
 
 const Road = Struct([
   // ['lenRoadId', uint32],
-  ['roadId', string(MAX_ROAD_ID_LENGTH)],
+  ['roadId', array(MAX_ROAD_ID_LENGTH, int8)],
   ['speed', uint32],
-  ['numVehicles', uint32],
-  ['vehicles', array('numVehicles', int8)],
   ['currentSignal', int8],
+  ['numVehicles', uint32],
+  // ['vehicles', array('numVehicles', int8)],
+  ['vehicles', array(MAX_VEHICLES, int8)],
 ]);
 
 // DIRECTION: SALT -> SLAT-VIS
@@ -55,7 +60,7 @@ Data.type = MsgType.DATA;
 // DIRECTION: SALT -> SLAT-VIS
 const Status = Struct([
   // ['header', Header],
-  ['status', uint32],
+  ['status', int8],
   ['progress', uint32],
 
 ]);
@@ -64,8 +69,8 @@ Status.type = MsgType.STATUS;
 // DIRECTION: SALT <- SLAT-VIS
 const Set = Struct([
   // ['header', Header],
-  ['extent', array(4, float)],
-  ['roadType', uint32],
+  ['extent', array(EXTENT_LENGTH, float)],
+  ['roadType', int8],
 ]);
 
 Set.type = MsgType.SET;

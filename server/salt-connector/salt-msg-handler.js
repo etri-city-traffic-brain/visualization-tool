@@ -3,6 +3,8 @@ const chalk = require('chalk');
 
 const events = require('events');
 
+const charCodes2Str = codes => codes.map(d => String.fromCharCode(d)).join('')
+
 const { EventEmitter } = events;
 
 const {
@@ -27,9 +29,11 @@ function SaltMsgHandler({ getQueue }) {
     }
   };
 
+
+
   const handleSaltInit = (socket, buffer) => {
     const initMsg = Init(buffer);
-    const { simulationId } = initMsg;
+    const simulationId = charCodes2Str(initMsg.simulationId);
     socketToSimulationId[socket] = simulationId;
     simulationIdToSocket[simulationId] = socket;
     debug(`[INIT] ${simulationId}, ${buffer.length}`);
@@ -43,6 +47,7 @@ function SaltMsgHandler({ getQueue }) {
     const data = Data(buffer);
     const simulationId = socketToSimulationId[socket];
     debug(`[DATA] ${simulationId}, ${buffer.length}`);
+    debug(data)
     const queue = getQueue(simulationId);
     if (queue) {
       queue.dataQueue.push(data);
