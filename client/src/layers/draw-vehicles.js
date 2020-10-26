@@ -1,45 +1,42 @@
 import makeVehicles from '../vehicles/calc-vehicles';
 import VehicleFactory from '../vehicles/model/factory'
 
-function drawVehicles({context, map, edges: cells = [], roads}) {
-  const roadMap = roads.reduce((acc, cur) => {
-    // acc[cur.roadId] = cur
+import divideChunks from '../vehicles/divide-chunks'
+
+const chunkLength = 0.007
+
+function drawVehicles({context, map, getEdges, getEdgesRealtime}) {
+  const edgesRealtime = getEdgesRealtime().reduce((acc, cur) => {
     acc[cur.roadId.substring(0, 14)] = cur
-    console.log('update', cur.roadId.substring(0, 14))
     return acc
   }, {})
 
-  // const tempCarsByLink = {}
+  const hasRealtimeData = cell => !!edgesRealtime[cell.properties.LINK_ID]
 
-  cells
-    .filter(cell => cell.properties.SPEEDLH >= 30)
-    .forEach(cell => {
-      const p1 = map.coordinateToContainerPoint(cell.getLastCoordinate());
-      const p2 = map.coordinateToContainerPoint(cell.getFirstCoordinate());
+  getEdges()
+    .filter(hasRealtimeData)
+    .map((edge => {
+      const startLocation = map.coordinateToContainerPoint(edge.getFirstCoordinate());
+      const edgeRealtime = edgesRealtime[edge.properties.LINK_ID]
 
-      const roadId = cell.properties.LINK_ID
-      const road = roadMap[roadId]
+      const edgeChunks = divideChunks({
+        chunkLength: chunkLength,
+        coordinateToContainerPoint: map.coordinateToContainerPoint.bind(map),
+        coordinates: edge.getCoordinates()
+      })
 
-      // isAdjecent link의 속성을 보고서 해야 됨
-      // cell builder 에서 넣어주셈
-      // cell 로는 X
-      if(road) {
-        // const linkId = roadId.slice(0, roadId.indexOf('_'))
-        // const saveVehicels = road.vehicles.slice(0,2)
-        const targetVehicles = road.vehicles.slice()
-
-        // const array = new Array(Math.floor(Math.random() * 6)).fill(1)
-        const vehicles = makeVehicles(p1, p2, targetVehicles, VehicleFactory)
-        let drawCars = vehicles.slice()
-        if(road.isAdjecent) {
-          drawCars = vehicles.slice(4)
-        }
-
-        for(let i=0; i<drawCars.length; i++) {
-          const car = drawCars[i]
-          car.draw(context)
-        }
+      const vehicleTypes = edgeRealtime.vehicles.slice(0, edgeRealtime.numVehicles)
+      return makeVehicles({
+        startLocation,
+        vehicles: [vehicleTypes, edgeChunks],
+        VehicleFactory,
       }
+      )
+    }))
+    .forEach(vehicles => {
+      vehicles.forEach(vehicle => {
+        vehicle.draw(context, map.getZoom())
+      })
     })
 }
 

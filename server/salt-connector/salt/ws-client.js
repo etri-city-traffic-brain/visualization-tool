@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 
-const ws = new WebSocket('ws://localhost:8082');
+const ws = new WebSocket('ws://localhost');
 const { log } = console;
 
 const serialize = obj => JSON.stringify(obj);

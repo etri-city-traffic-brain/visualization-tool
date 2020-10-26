@@ -4,10 +4,15 @@ function QueueManager() {
 
   return {
     addQueue(id) {
+      if(queueRegistry[id]) {
+        return queueRegistry[id]
+      }
       queueRegistry[id] = {
+        created: new Date().getTime(),
         dataQueue: [],
         commandQueue: [],
       };
+      return queueRegistry[id]
     },
     deleteQueue(id) {
       delete queueRegistry[id];

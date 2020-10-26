@@ -9,11 +9,10 @@
           <b-button v-b-modal.modal-xl variant="secondary" size="sm">
             <b-icon icon="bar-chart"/>
           </b-button>
-          <b-button @click="center(1)" class="ml-1" size="sm" variant="dark">
-            도안동
-          </b-button>
         </b-button-group>
         <uniq-congestion-color-bar/>
+          <b-button @click="center(1)" class="ml-1" size="sm" variant="dark"> 대전(도안) </b-button>
+          <b-button @click="center(2)" class="ml-1" size="sm" variant="dark"> 세종(시청) </b-button>
 
         <uniq-map-changer :map="map" />
       </div>
@@ -27,6 +26,16 @@
       shadow
     >
       <uniq-simulation-result-ext :simulation="simulation" />
+      <b-card
+        bg-variant="secondary"
+        text-variant="light"
+        class="p-2 ml-1 mr-1 mt-1"
+        no-body
+      >
+        <b-button size="sm">
+          {{ linkHover }}
+        </b-button>
+      </b-card>
     </b-sidebar>
 
     <!-- MAP CONTAINER -->
@@ -113,7 +122,7 @@
           no-body
           class="p-1 m-1"
         >
-          <h5><b-badge variant="dark">속도분포</b-badge></h5>
+          <h5><b-badge variant="grey">속도분포</b-badge></h5>
           <b-card no-body class="m-0 pt-3">
             <histogram-chart :chartData="chart.histogramData" :height="135" class="mt-1"/>
           </b-card>
@@ -127,7 +136,7 @@
           no-body
           class="p-1 m-1"
         >
-          <h5><b-badge variant="dark">스텝별 속도 분포</b-badge></h5>
+          <h5><b-badge variant="grey">스텝별 속도 분포</b-badge></h5>
           <b-card no-body class="m-0 pt-3">
             <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="135"/>
           </b-card>
@@ -140,7 +149,7 @@
           no-body
           class="p-1 m-1"
         >
-          <h5><b-badge variant="dark">혼잡도 분포</b-badge></h5>
+          <h5><b-badge variant="grey">혼잡도 분포</b-badge></h5>
           <b-card no-body class="m-0 pt-2">
             <doughnut :chartData="chart.pieData" :height="130" />
           </b-card>
@@ -153,7 +162,7 @@
           no-body
           class="p-1 m-1"
         >
-          <h5><b-badge variant="dark">스텝별 혼잡도 분포</b-badge></h5>
+          <h5><b-badge variant="grey">스텝별 혼잡도 분포</b-badge></h5>
           <b-card no-body class="m-0 pt-2">
             <doughnut :chartData="chart.pieDataStep" :height="130"/>
           </b-card>
@@ -161,6 +170,9 @@
       </b-card-group>
      </b-card>
 
+    <!--
+      STATUS RUNNING PANEL
+    -->
     <b-card
       text-variant="light"
       bg-variant="dark"
@@ -168,36 +180,41 @@
       v-if="simulation.status === 'running'"
       class="p-0 m-0"
       style="height:400px; border-radius: 0px;"
-      :title="simulationId"
     >
-      <!-- <b-card-text>실시간 시뮬레이션 상태 혹은 통계를 보여줌</b-card-text> -->
-      <!-- {{ currentZoom }} -->
-      <!-- <b-card-text>{{ currentExtent[0] }} {{ currentExtent[1] }} </b-card-text> -->
-      <b-button  size="sm" class="ml-1">
-        start simulation <b-icon icon="caret-right-fill"/>
+      <h3>{{ simulationId }}</h3>
+      <b-card-text>{{ currentExtent[0] }} {{ currentExtent[1] }} </b-card-text>
+      <b-button>
+        <b-icon icon="caret-right-fill"/>
       </b-button>
-      <b-button  size="sm" class="ml-1">
+      <b-button>
         <b-icon icon="stop-fill"/>
       </b-button>
-      <b-button  @click="connectWebSocket" size="sm" class="ml-1">
+      <b-button  @click="connectWebSocket">
         connect ws <b-icon icon="plug"> </b-icon>
       </b-button>
-      <b-button  size="sm" class="ml-1">
-        simulation status:
+      <b-button>
+        시뮬레이션 상태
         <b-icon v-if="simulation.status==='running'" icon="circle-fill" variant="success" animation="throb" font-scale="1"></b-icon>
         <b-icon v-else icon="circle-fill" variant="danger" animation="throb" font-scale="1"></b-icon>
       </b-button>
-      <b-button  size="sm" class="ml-1">
-        ws status:
+      <b-button>
+        서버 연결상태
         <b-icon v-if="wsStatus==='open'" icon="circle-fill" variant="success" animation="throb" font-scale="1"></b-icon>
         <b-icon v-if="wsStatus==='error'" icon="circle-fill" variant="danger" animation="throb" font-scale="1"></b-icon>
-        <b-icon v-if="wsStatus==='close'" icon="slash-circle" variant="danger" font-scale="1"></b-icon>
+        <b-icon v-if="wsStatus==='close'" icon="slash-circle" variant="warning" font-scale="1"></b-icon>
       </b-button>
-      <b-button  size="sm" variant="dark" class="ml-1"
-      :style="{'background-color': congestionColor(avgSpeed), 'border': 0}"
-      >
-        average speed: {{avgSpeed}}km
+      <!-- <b-button> 평균속도</b-button> -->
+      <!-- <b-button :style="{'background-color': congestionColor(avgSpeed)}" > {{ avgSpeed }} km </b-button> -->
+
+      <b-progress  striped :animated="progress !== 100" height="2rem" :value="progress" show-progress class="mb-2 mt-2"></b-progress>
+
+      <h3>진행률: {{ this.progress }} % </h3>
+      <h3 :style="{'color': congestionColor(avgSpeed)}">평균속도: {{ avgSpeed }} km </h3>
+
+      <b-button v-if="progress === 100"  @click="connectWebSocket" size="sm" class="ml-1">
+        분석
       </b-button>
+
     </b-card>
 
     <b-modal id="modal-xl" size="xl" ok-only :title="simulationId">

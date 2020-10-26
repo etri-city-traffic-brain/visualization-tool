@@ -22,3 +22,5 @@ db/db.json
 db/data.zip
 # map/
 map-ui/
+# debug message
+output

@@ -9,28 +9,24 @@ class Vehicle {
     this.length = length
     this.width = width
   }
-  draw(context) {
+  draw(context, zoom) {
     this.drawStart(context)
-    this.drawBasic(context)
+    this.drawBasic(context, zoom)
     if(this.drawMe) {
       this.drawMe(context)
     }
     this.drawEnd(context)
   }
 
-  drawBasic(context) {
-    // context.beginPath()
-    // context.arc(this.start.x, this.start.y, 2, 0, 2 * Math.PI);
-    // context.fillStyle = 'blue';
-    // context.fill();
-
-    context.translate(this.start.x, this.start.y - 0);
+  drawBasic(context, zoom=18) {
+    context.translate(this.start.x, this.start.y);
+    if(zoom === 18) {
+      context.scale(0.6, 0.6);
+    }
     context.rotate(this.angle);
     context.fillStyle = this.color
     context.fillRect(0 + 2, 0 - this.width / 2, this.length, this.width);
     roundRect(context, 0 + 2, 0 - this.width / 2, this.length, this.width,5, true)
-
-    // context.restore()
   }
 
   drawStart(context) {

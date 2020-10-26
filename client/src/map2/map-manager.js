@@ -42,6 +42,14 @@ function MapManager({map, simulationId, eventBus}) {
     target.bringToFront();
     target.setOptions({ arrowStyle: [2, 2] });
     target.updateSymbol({ lineWidth: 4 });
+
+
+    eventBus.$emit('link:hover', {
+      ...target.properties,
+      id: target.getId(),
+      speeds: currentSpeedsPerLink[target.getId()],
+    })
+
   };
 
   const edgeMouseOut = ({ target }) => {
@@ -75,7 +83,6 @@ function MapManager({map, simulationId, eventBus}) {
 
   async function updateSimulationResult() {
     currentSpeedsPerLink = await simulationService.getSimulationResult(simulationId, extent(map));
-    log('edges loaded:', edgeLayer.getGeometries().length)
     edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep);
     gridLayer.updateGrid(simulationId, currentStep);
   }

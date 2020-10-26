@@ -3,7 +3,8 @@ const debug = require('debug')('salt-connector:tcp-server');
 const net = require('net');
 const chalk = require('chalk');
 const fs = require('fs');
-
+const SaltMsgHandler = require('./salt-msg-handler');
+const BufferManager = require('./socket-buffer-manager');
 const { Header } = require('./msg');
 const hex = require('./hex');
 
@@ -21,8 +22,12 @@ const writeStream = fs.createWriteStream('./output');
  */
 
 
-module.exports = (port = 1337, saltMsgHandler, bufferManager ) => {
+module.exports = (port = 1337) => {
   let timer;
+
+  const saltMsgHandler = SaltMsgHandler();
+  const bufferManager = BufferManager();
+
   const consumeSaltMsg = (socket) => {
     const buffer = bufferManager.getBuffer(socket);
     if (buffer && buffer.length >= HEADER_LENGTH) {
@@ -51,10 +56,11 @@ module.exports = (port = 1337, saltMsgHandler, bufferManager ) => {
     saltMsgHandler.clearResource(socket);
     bufferManager.deleteBuffer(socket);
     clearTimeout(timer);
+    debug(chalk.red(`[close]`))
   };
 
   const handleError = socket => () => {
-    debug(green(`[socket-error] ${socket.remoteAddress}:${socket}`));
+    debug(green(`[socket-error] ${socket.remoteAddress}`));
   };
 
   const server = net.createServer((socket) => {
@@ -65,11 +71,11 @@ module.exports = (port = 1337, saltMsgHandler, bufferManager ) => {
   });
 
   server.on('connection', (socket) => {
-    debug(green(`[connection] ${socket.remoteAddress}:${socket}`));
+    debug(green(`[connection] ${socket.remoteAddress}`));
   });
 
   server.on('error', (socket) => {
-    debug(green(`[error] ${socket.remoteAddress}:${socket}`));
+    debug(green(`[error] ${socket.remoteAddress}`));
   });
 
   server.listen(port, '0.0.0.0');

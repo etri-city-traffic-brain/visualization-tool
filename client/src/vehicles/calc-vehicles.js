@@ -1,45 +1,39 @@
 const angleBetween = (p1, p2) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
-const VEHICLE_LENGTH_SMALL = 24;
-const VEHICLE_LENGTH_LARGE = 48;
-const CAR_HEIGHT = 8
+/**
+ *
+ * @param {Object} startLocation
+ * @param {number} startLocation.x - x
+ * @param {number} startLocation.y - y
+ * @param {Array} vehicles
+ * @param {Array} vehicleTypes
+ * @param {*} VehicleFactory
+  */
+function makeVehicles({startLocation, vehicles = [], VehicleFactory}) {
 
-function makeVehicles(p1, p2, vehicles = [], VehicleFactory) {
+  const [vehicleTypes, edgeChunks ] = vehicles
   const result = []
 
-  const angle = angleBetween(p2, p1) + Math.PI
+  let vehicleLocationIndex = 0;
+  for(let i = 0; i < vehicleTypes.length; i += 1) {
+    const carType = vehicleTypes[i]
 
-  let sx = 0;
-  let sy = 0
-  for(let i = 0; i < vehicles.length; i += 1 ) {
-    const carType = vehicles[i]
-    const carLen = carType ? VEHICLE_LENGTH_LARGE : VEHICLE_LENGTH_SMALL
-    const color = carType ? '#1E90FF' : '#FF8C00'
-    const length = carType ? 40 : 20
-    if (i === 0) {
-      sx = p1.x;
-      sy = p1.y;
+    const chunk = edgeChunks[vehicleLocationIndex] ? edgeChunks[vehicleLocationIndex] : edgeChunks[edgeChunks.length - 1]
+
+    const v = VehicleFactory.of(carType, {
+      start: {
+        x: chunk.x,
+        y: chunk.y
+      },
+      angle: angleBetween(edgeChunks[i] || startLocation, edgeChunks[i+1] || startLocation),
+    })
+
+    vehicleLocationIndex++
+    if(carType === 1) {
+      vehicleLocationIndex += 1
     }
-
-    const start  = {
-      x: sx,
-      y: sy
-    }
-
-    sx = sx + carLen * Math.cos(angle)
-    sy = sy + carLen * Math.sin(angle)
-
-    result.push(
-      VehicleFactory.of(carType, {
-        start,
-        color,
-        angle,
-        length,
-        width: CAR_HEIGHT
-      })
-    )
+    result.push(v)
   }
-
   return result
 }
 

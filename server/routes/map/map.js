@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const findFeatures = require('./find-features');
-// const mongoose = require('../../main/dbms/mongo');
-const parseMapReqParam = require('../../utils/parse-req-query');
+const parse = require('../../utils/parse-req-query');
 
 module.exports = async (req, res) => {
-  const { extent, zoom } = parseMapReqParam(req);
+  console.log('******************** map *****')
+  const { extent, zoom } = parse(req);
   // const collectionName = zoom <= 17 ? 'links' : 'cells';
-  const collectionName = zoom <= 17 ? 'links' : 'dlinks';
+  const collectionName = zoom <= 17 ? 'ulinks' : 'ucells';
 
   const collections = mongoose.connection.db.collection(collectionName);
   const links = await findFeatures(collections, {

@@ -4,49 +4,59 @@ import drawVehicles from './draw-vehicles';
 
 const MAX_ZOOM = 19;
 
-export default (map, getEdges, eventBus, extent) => {
-  const layer = new maptalks.CanvasLayer('c', {
+function Container() {
+  let _data = []
+
+  return {
+    set(data) {
+      _data = data
+
+    },
+    get() {
+      return _data
+    }
+  }
+}
+
+function makeCanvasLayer(map, getEdges, realtimeEdgeData) {
+  const canvasLayer = new maptalks.CanvasLayer('c', {
     forceRenderOnMoving: true,
     forceRenderOnZooming: true
   });
 
-  let currentRoads = []
-
-  layer.draw = function draw(context) {
-    if (map.getZoom() < MAX_ZOOM) {
-      return
-    }
-
+  canvasLayer.draw = function draw(context) {
     drawVehicles({
       context,
       map,
-      edges: getEdges(),
-      roads: currentRoads
+      getEdges,
+      getEdgesRealtime: realtimeEdgeData.get
     })
 
-    this.completeRender();
+    canvasLayer.completeRender();
   };
 
-  //draw when map is interacting
-  layer.drawOnInteracting = function drawOnInteracting(context, view) {
-    this.draw(context, view);
-  };
+  canvasLayer.drawOnInteracting = (context, view) => canvasLayer.draw(context, view);
+  return canvasLayer
+}
 
-  layer.show();
+export default (map, getEdges, eventBus, extent) => {
+  let realtimeEdgeData = Container()
+  const canvasLayer = makeCanvasLayer(map, getEdges, realtimeEdgeData)
+
+  canvasLayer.show();
 
   if (eventBus) {
     eventBus.$on('salt:data', (data) => {
-      currentRoads = data.roads
-      console.log(data.roads)
-      layer.redraw()
+      realtimeEdgeData.set(data.roads)
+      canvasLayer.redraw()
     });
   }
 
   map.on('zoomend moveend', () => {
-    if(map.getZoom() >= MAX_ZOOM) {
-      layer.show()
+    if(map.getZoom() >= MAX_ZOOM - 1) {
+      canvasLayer.show()
     } else {
-      layer.hide()
+      canvasLayer.hide()
     }
     if (eventBus) {
       eventBus.$emit('salt:set', {
@@ -56,5 +66,5 @@ export default (map, getEdges, eventBus, extent) => {
     }
   });
 
-  return layer
+  return canvasLayer
 }

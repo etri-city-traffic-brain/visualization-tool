@@ -25,6 +25,7 @@ function updateCongestion(edgeLayer, map, linkSpeeds = {}, step = 0) {
     } else {
       geometry.updateSymbol({
         lineWidth: 1,
+        lineColor: 'orange',
         'markerPlacement' : 'vertex-last', //vertex, point, vertex-first, vertex-last, center
         // lineDasharray : [5, 5]
       });
@@ -48,20 +49,20 @@ function uuu(edgeLayer, map, edgeSpeeds = {}) {
 export default (map, eventBus) => {
 
   const layer = new maptalks.VectorLayer('edgeLayer', [], {
-    enableAltitude: true,
-    drawAltitude: {
-      polygonFill: '#1bbc9b',
-      polygonOpacity: 0.3,
-      lineWidth: 0,
-    },
+    // enableAltitude: true,
+    // drawAltitude: {
+    //   polygonFill: '#1bbc9b',
+    //   polygonOpacity: 0.3,
+    //   lineWidth: 0,
+    // },
   })
 
   map.on('zoomend moveend', (event) => {
     const map = event.target;
     if(map.getZoom() >= 19 || map.getZoom() <= 14) {
-      layer.hide()
+      // layer.hide()
     } else {
-      layer.show()
+      // layer.show()
     }
   });
 

@@ -1,7 +1,5 @@
 import Vehicle from './vehicle'
 
-
-
 class Car extends Vehicle {
   constructor({ start, angle }) {
     super({

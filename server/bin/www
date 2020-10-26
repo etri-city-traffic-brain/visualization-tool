@@ -8,7 +8,7 @@
 
 const connectDB = require('../main/dbms')
 const webApp = require('../web-app')
-const startMessenger = require('../salt-connector/server')
+const startMessenger = require('../salt-connector/connector')
 const startHttpServer = require('../http-server')
 
 const { server: { webPort, tcpPort }, db } = require('../config');

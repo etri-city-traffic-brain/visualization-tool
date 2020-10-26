@@ -53,5 +53,6 @@ if (require.main === module) {
   // }
 
   // importData('dlinks', '../data/daejeon-link.geojson');
-  importData('dlinks', 'c:/Temp/edge-cell/edge-cell.geojson');
+  importData('ulinks', '../../../uniq-cell-builder/outputs/link.geojson');
+  // importData('ucells', '../../../uniq-cell-builder/outputs/cell.geojson');
 }

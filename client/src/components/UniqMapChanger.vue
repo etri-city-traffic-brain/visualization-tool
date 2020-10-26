@@ -5,8 +5,8 @@
     </b-button>
     <!-- <b-button variant="secondary" @click="changeMap(1)">Gray</b-button>
     <b-button variant="dark" @click="changeMap(2)">Midnight</b-button> -->
-    <b-button variant="dark" @click="changeMap(3)" class="ml-1">
-      위성지도
+    <b-button variant="primary" @click="changeMap(3)" class="ml-1" >
+      위성지도 <b-icon icon="bar-chart"/>
     </b-button>
   </b-button-group>
 </template>

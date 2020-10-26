@@ -7,13 +7,12 @@ const QueueManager = require('./queue-manager');
 const { tcpPort, wsPort } = require('../config').server;
 const config = require('../config');
 const serialize = obj => JSON.stringify(obj);
-
+const msgFactory = require('./msg-factory');
 const {
   distributeData,
   distributeDataToSalt,
 } = require('./msg-distributor');
-const SaltMsgHandler = require('./salt-msg-handler');
-const BufferManager = require('./socket-buffer-manager');
+
 /**
  * SALT connector server
  * connect simulator and web browser
@@ -23,19 +22,25 @@ const BufferManager = require('./socket-buffer-manager');
  */
 
 module.exports = (httpServer, tcpPort) => {
-  debug(chalk.yellow('Messenger service start'));
-  const queueManager = QueueManager();
-  const tcpServer = startSlatMessageReceiver(
-    tcpPort,
-    SaltMsgHandler(queueManager),
-    BufferManager()
-  );
-  const webSocketServer = startWebSocketServer(httpServer, queueManager);
+  debug(chalk.yellow('Connector service start'));
+  const tcpServer = startSlatMessageReceiver(tcpPort);
+  const wss = startWebSocketServer(httpServer);
 
-  tcpServer.on('salt-status', (status) => {
-    debug(status);
+  // send to simulator
+  wss.on('salt:set', (data) => {
+    tcpServer.send(data.simulationId, msgFactory.makeSet(data))
+  })
+
+  // send to web
+  tcpServer.on('salt:status', (data) => {
+    debug(data);
+    data.event = 'salt:status'
+    wss.send(data.simulationId, data)
   });
 
-  distributeData(queueManager, webSocketServer, serialize);
-  distributeDataToSalt(queueManager, tcpServer);
+  // send to web
+  tcpServer.on('salt:data', (data) => {
+    data.event = 'salt:data'
+    wss.send(data.simulationId, data)
+  })
 }

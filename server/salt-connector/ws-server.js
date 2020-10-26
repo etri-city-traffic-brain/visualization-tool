@@ -2,33 +2,28 @@
 const debug = require('debug')('salt-connector:ws-server');
 const WebSocket = require('ws');
 const chalk = require('chalk');
-
+const events = require('events');
 const { MsgType } = require('./type');
-
+const msgFactory = require('./msg-factory');
+const e = require('express');
 const { log } = console;
-
+const serialize = obj => JSON.stringify(obj);
 /**
  *
  * @param {{addQueue: function, deleteQueue: function, getQueue: function}} queueManager
  * @param {Object} httpServer
  */
-module.exports = (httpServer, queueManager) => {
-  // const server = new WebSocket.Server({ port });
+module.exports = (httpServer) => {
   const webSocketServer = new WebSocket.Server({server: httpServer});
-
+  const eventBus = Object.create(events.EventEmitter.prototype);
   function handleConnection(client) {
     client.on('message', (message) => {
       try {
         const obj = JSON.parse(message);
         if (obj.type === MsgType.INIT) { // init from ws
           Object.assign(client, { $simulationId: obj.simulationId });
-          // const sId = obj.simulationId.substring(0, 16);
-          debug('add queue for', obj.simulationId);
-          queueManager.addQueue(obj.simulationId);
         } else if (obj.type === MsgType.SET) {
-          const queue = queueManager.getQueue(obj.simulationId);
-          debug(obj)
-          queue.commandQueue.push(obj);
+          eventBus.emit('salt:set', obj)
         }
       } catch (err) {
         debug(err.message);
@@ -38,16 +33,26 @@ module.exports = (httpServer, queueManager) => {
     client.on('close', () => {
       log(chalk.red('disconnected'), client.id, client.$simulationId);
       log('delete queue for', client.$simulationId);
-      queueManager.deleteQueue(client.$simulationId);
     });
 
     client.on('error', () => {
+      log('error')
     });
   }
-
   webSocketServer.on('connection', handleConnection);
 
+  const send = (simulationId, data) => {
+    webSocketServer.clients.forEach((client) => {
+      // @ts-ignore
+      if(client.$simulationId === simulationId) {
+        client.send(serialize(data))
+      }
+    })
+  }
 
-  return webSocketServer
+  return Object.assign(eventBus, {
+    clients: webSocketServer.clients,
+    send
+  })
 
 };

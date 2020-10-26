@@ -27,6 +27,8 @@ import UniqCongestionColorBar from '@/components/CongestionColorBar';
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt';
 import UniqMapChanger from '@/components/UniqMapChanger';
 
+import region from '@/map2/region'
+
 const dataset = (label, color, data) => ({
   label,
   fill: false,
@@ -74,8 +76,8 @@ export default {
       currentStep: 1,
       slideMax: 0,
       showLoading: false,
-      gridData: {},
-      isGridView: false,
+      // gridData: {},
+      // isGridView: false,
       zoomPrevious: 17,
       congestionColor,
       currentEdge: '',
@@ -92,7 +94,9 @@ export default {
       currentZoom: '',
       currentExtent: '',
       wsStatus: 'ready',
-      avgSpeed: '27'
+      avgSpeed: '27',
+      linkHover: '',
+      progress: 0,
     };
   },
   destroyed() {
@@ -136,11 +140,21 @@ export default {
       return;
     })
 
+    this.$on('link:hover', (link) => {
+      this.linkHover = link.LINK_ID
+      return;
+    })
+
+
     this.$on('salt:data', (d) => {
       this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
         acc += cur
         return acc
       }, 0) / d.roads.length
+    })
+
+    this.$on('salt:status', (status) => {
+      this.progress = status.progress
     })
 
     this.$on('map:moved', ({zoom, extent}) => {
@@ -209,10 +223,14 @@ export default {
         this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, step);
       }
     },
-    center(region) {
-      if(region === 1) { // 도안
-        this.map.setCenter( [127.334706, 36.346159] )
-      }
+    center(code) {
+      const center = region[code] || region[1]
+      this.map.animateTo({
+        center,
+      },
+      {
+        duration: 2000
+      })
     },
     makeToast(msg, variant='info') {
       this.$bvToast.toast(msg, {
