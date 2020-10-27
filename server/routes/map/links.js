@@ -4,7 +4,7 @@ const findFeatures = require('./find-features');
 const parseMapReqParam = require('../../utils/parse-req-query');
 
 module.exports = async (req, res) => {
-  console.log('********************** links **********************');
+  // console.log('********************** links **********************');
   const { extent } = parseMapReqParam(req);
   // const collection = mongoose.connection.db.collection('links');
   const collection = mongoose.connection.db.collection('ulinks');

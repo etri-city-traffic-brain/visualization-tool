@@ -114,7 +114,8 @@ export default {
       return value === 'finished';
     },
     async updateTable() {
-      this.$refs['simulations-table'].refresh()
+      // this.$refs['simulations-table'].refresh()
+      this.dataProvider({ currentPage: this.currentPage })
     },
     hideAlert() {
       setTimeout(() => {

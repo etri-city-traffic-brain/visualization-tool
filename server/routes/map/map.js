@@ -3,7 +3,7 @@ const findFeatures = require('./find-features');
 const parse = require('../../utils/parse-req-query');
 
 module.exports = async (req, res) => {
-  console.log('******************** map *****')
+  // console.log('******************** map *****')
   const { extent, zoom } = parse(req);
   // const collectionName = zoom <= 17 ? 'links' : 'cells';
   const collectionName = zoom <= 17 ? 'ulinks' : 'ucells';

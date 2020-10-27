@@ -7,7 +7,8 @@ const chunkLength = 0.007
 
 function drawVehicles({context, map, getEdges, getEdgesRealtime}) {
   const edgesRealtime = getEdgesRealtime().reduce((acc, cur) => {
-    acc[cur.roadId.substring(0, 14)] = cur
+    // acc[cur.roadId.substring(0, 14)] = cur
+    acc[cur.roadId.trim()] = cur
     return acc
   }, {})
 

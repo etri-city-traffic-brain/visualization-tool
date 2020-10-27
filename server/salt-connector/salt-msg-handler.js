@@ -24,9 +24,7 @@ function SaltMsgHandler() {
 
   const send = (simulationId, buffer) => {
     const socket = simulationIdToSocket[simulationId];
-    console.log('find sId', simulationId)
     if (socket) {
-      console.log('find socket')
       socket.write(buffer);
     }
   };
@@ -40,7 +38,8 @@ function SaltMsgHandler() {
 
     const setBuffer = msgFactory.makeSet({
       // extent: [127.12111, 37.544715, 127.122871, 37.533623],
-      extent: [127.10954, 37.57036,127.1576, 37.52477],
+      // extent: [127.10954, 37.57036,127.1576, 37.52477],
+      extent: [127.33342, 36.3517, 127.34806, 36.34478],
       roadType: 1,
     });
 
@@ -62,7 +61,7 @@ function SaltMsgHandler() {
   const handleSaltData = (socket, buffer) => {
     const data = Data(buffer);
     const simulationId = socketToSimulationId[socket];
-    debug(`[DATA] ${simulationId}, ${buffer.length}`);
+    debug(`[DATA] ${simulationId}, ROADS: ${data.roads.length} ${buffer.length}`);
     // debug(data)
     eventBus.emit('salt:data', {
       simulationId,

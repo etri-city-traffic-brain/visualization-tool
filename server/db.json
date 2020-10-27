@@ -379,7 +379,7 @@
       "id": "SALT_202007_00516",
       "user": "salt_test",
       "description": "...",
-      "status": "running",
+      "status": "finished",
       "created": "2020-07-16 16:33:40",
       "configuration": {
         "region": 0,
@@ -396,7 +396,10 @@
           "4gu_thu.xml"
         ]
       },
-      "started": "2020-09-15 10:45:38"
+      "started": "2020-10-26 16:12:08",
+      "text": "",
+      "error": "ns not found",
+      "ended": "2020-10-26 16:57:08"
     },
     {
       "id": "SALT_202007_00631",
@@ -452,7 +455,7 @@
       "id": "SALT_202009_00670",
       "user": "salt_test",
       "description": "...",
-      "status": "finished",
+      "status": "stopped",
       "created": "2020-09-15 10:41:14",
       "configuration": {
         "region": "11250",
@@ -471,7 +474,8 @@
       },
       "error": null,
       "ended": "2020-09-17 18:58:15",
-      "started": "2020-09-17 18:58:11"
+      "started": "2020-09-17 18:58:11",
+      "text": ""
     },
     {
       "id": "SALT_202009_00940",
@@ -494,7 +498,10 @@
       },
       "status": "running",
       "created": "2020-09-24 16:21:12",
-      "started": "2020-09-24 16:33:07"
+      "started": "2020-09-24 16:33:07",
+      "error": "ENOENT: no such file or directory, scandir '/home/ubuntu/salt/output/SALT_202009_00940'",
+      "ended": "2020-10-26 19:18:08",
+      "text": ""
     },
     {
       "id": "SALT_202009_00024",

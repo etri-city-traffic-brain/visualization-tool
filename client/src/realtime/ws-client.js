@@ -47,12 +47,18 @@ function Client({ url = 'ws://localhost', simulationId, eventBus }) {
     })
 
     eventBus.$on('salt:set', ({extent, zoom}) => {
-      const roadType = zoom >= 19 ? 1 : 0 // 1: cell, 0: link
+      const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
       const { min, max } = extent
+
+      min.x -= 0.0012;
+      min.y -= 0.0014;
+      max.x += 0.0012;
+      max.y += 0.0014;
+
       send({
         simulationId,
         type: 10, // Set
-        extent:[ min.x, min.y, max.x, max.y],
+        extent:[min.x, max.y, max.x, min.y],
         roadType
       })
     })

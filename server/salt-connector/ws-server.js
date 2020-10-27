@@ -10,7 +10,7 @@ const { log } = console;
 const serialize = obj => JSON.stringify(obj);
 /**
  *
- * @param {{addQueue: function, deleteQueue: function, getQueue: function}} queueManager
+ * @param {{addQueue: function, deleteQueue: function, getQueue: function}}
  * @param {Object} httpServer
  */
 module.exports = (httpServer) => {
@@ -23,6 +23,7 @@ module.exports = (httpServer) => {
         if (obj.type === MsgType.INIT) { // init from ws
           Object.assign(client, { $simulationId: obj.simulationId });
         } else if (obj.type === MsgType.SET) {
+          console.log(obj)
           eventBus.emit('salt:set', obj)
         }
       } catch (err) {

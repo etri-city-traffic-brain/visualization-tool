@@ -1,13 +1,13 @@
 
 
 const cookSimulationResult = require('../../main/simulation-manager/simulation-result-cooker');
-const dbUtils = require('../../main/dbms/db-utils');
+// const dbUtils = require('../../main/dbms/db-utils');
 
-const { getSimulations } = require('../../globals');
+const { updatetStatus } = require('../../globals');
 
-const { FINISHED } = require('../../main/simulation-manager/simulatoin-status');
+// const { FINISHED } = require('../../main/simulation-manager/simulatoin-status');
 
-const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
+// const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
 
 /**
  * handle simulation status event
@@ -17,9 +17,10 @@ const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
  * @param {*} text
  */
 
-module.exports = async function processSimulationStatus({ simulation, status, text = '' }) {
+module.exports = async ({ simulation, status, text = '' }) => {
+  console.log('status', status)
   const { id, configuration } = simulation;
-  if (status !== FINISHED) {
+  if (status !== 'finished') {
     updatetStatus(id, status, { text });
     return;
   }
@@ -34,6 +35,7 @@ module.exports = async function processSimulationStatus({ simulation, status, te
       updatetStatus(id, status, text);
     });
   } catch (err) {
+    console.log(err.message)
     updatetStatus(id, 'error', { error: err.message });
   }
 };

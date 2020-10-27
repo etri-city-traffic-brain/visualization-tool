@@ -3,15 +3,10 @@ const chalk = require('chalk');
 
 const startWebSocketServer = require('./ws-server');
 const startSlatMessageReceiver = require('./tcp-server');
-const QueueManager = require('./queue-manager');
-const { tcpPort, wsPort } = require('../config').server;
-const config = require('../config');
-const serialize = obj => JSON.stringify(obj);
+
 const msgFactory = require('./msg-factory');
-const {
-  distributeData,
-  distributeDataToSalt,
-} = require('./msg-distributor');
+
+const { notifySimulationFinished } = require('../main/service/simulation-service')
 
 /**
  * SALT connector server
@@ -32,10 +27,20 @@ module.exports = (httpServer, tcpPort) => {
   })
 
   // send to web
-  tcpServer.on('salt:status', (data) => {
+  tcpServer.on('salt:status', async (data) => {
     debug(data);
     data.event = 'salt:status'
     wss.send(data.simulationId, data)
+
+    if(data.status === 1 && data.progress === 100) {
+      debug('*** FINISHED ***')
+      try {
+        await notifySimulationFinished(data.simulationId)
+      } catch (err) {
+        debug(err.message)
+      }
+    }
+
   });
 
   // send to web

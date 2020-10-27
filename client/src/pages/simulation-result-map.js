@@ -23,6 +23,8 @@ import BarChart from '@/components/charts/BarChart';
 import SimulationResult from '@/pages/SimulationResult.vue';
 const mapId = `map-${Math.floor(Math.random() * 100)}`;
 
+
+
 import UniqCongestionColorBar from '@/components/CongestionColorBar';
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt';
 import UniqMapChanger from '@/components/UniqMapChanger';
@@ -94,7 +96,7 @@ export default {
       currentZoom: '',
       currentExtent: '',
       wsStatus: 'ready',
-      avgSpeed: '27',
+      avgSpeed: 0,
       linkHover: '',
       progress: 0,
     };
@@ -153,8 +155,31 @@ export default {
       }, 0) / d.roads.length
     })
 
-    this.$on('salt:status', (status) => {
+    let timer;
+    const checkStatus = async (simulationId) => {
+      const r = await simulationService.getSimulationInfo(simulationId)
+      console.log(r.simulation.status)
+      if(r.simulation.status === 'finished') {
+        clearTimeout(timer)
+        this.$router.go(this.$router.currentRoute)
+      }
+      timer = setTimeout(async () => checkStatus(simulationId), 1000)
+    }
+
+    this.$on('salt:status', async (status) => {
       this.progress = status.progress
+
+      if(status.status ===1 && status.progress === 100) {
+        // finished
+        // 시뮬레이션이 종료 되었으니
+        // 결과파일을 다운로드 하고
+        // 통계정보를 생성한다.
+        // this.$router.go(this.$router.currentRoute)
+        // this.simulation.status = 'finished'
+        await checkStatus(status.simulationId)
+
+
+      }
     })
 
     this.$on('map:moved', ({zoom, extent}) => {
@@ -203,6 +228,10 @@ export default {
     ...stepperMixin,
     toggleState() {
       return this.playBtnToggle ? 'M' : 'A'
+    },
+
+    updateChart() {
+
     },
     edgeSpeed() {
       if(this.currentEdge && this.currentEdge.speeds) {

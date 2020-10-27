@@ -74,7 +74,7 @@ export default (map, eventBus) => {
     eventBus.$on('salt:data', (data) => {
       let roadMap = data.roads.reduce((acc, cur) => {
         // acc[cur.roadId] = cur
-        acc[cur.roadId.substring(0, 14)] = cur
+        acc[cur.roadId.trim()] = cur
         return acc
       }, {})
 

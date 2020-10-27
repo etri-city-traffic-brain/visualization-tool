@@ -33,7 +33,12 @@ const subIds = (cellId) => {
 
 async function insertToMongo(collectionName, cells) {
   const db = mongoose.connection.useDb('simulation_results');
-  await db.collection(collectionName).drop();
+  debug('drop', collectionName)
+  try {
+    await db.collection(collectionName).drop();
+  } catch (err) {
+    debug(err.message)
+  }
 
   const collection = db.collection(collectionName);
   await collection.createIndex({ cellId: 1 });
@@ -58,7 +63,9 @@ module.exports = ({ id, duration, period }, updateStatus) => {
   }
 
   const simulationResultFile = fs.readdirSync(`${output}/${id}`).find(file => file.endsWith('.csv'));
+  console.log('file:', `${output}/${id}/${simulationResultFile}`)
   if (!simulationResultFile) {
+    console.log('file not found')
     return Promise.reject(new Error('simulation result file(csv) not found...'));
   }
 
@@ -89,7 +96,9 @@ module.exports = ({ id, duration, period }, updateStatus) => {
     const handleEnd = async () => {
       stream.close();
       try {
+        debug('insert mongo start')
         await insertToMongo(id, cells);
+        debug('insert mongo end')
         await makeChartData(output, id, {
           meta: {
             duration,

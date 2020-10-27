@@ -209,11 +209,18 @@
       <b-progress  striped :animated="progress !== 100" height="2rem" :value="progress" show-progress class="mb-2 mt-2"></b-progress>
 
       <h3>진행률: {{ this.progress }} % </h3>
-      <h3 :style="{'color': congestionColor(avgSpeed)}">평균속도: {{ avgSpeed }} km </h3>
+      <h3 :style="{'color': congestionColor(avgSpeed)}">평균속도: {{ (avgSpeed).toFixed(2) }} km </h3>
 
       <b-button v-if="progress === 100"  @click="connectWebSocket" size="sm" class="ml-1">
         분석
       </b-button>
+
+      <b-progress height="2rem" v-if="progress === 100">
+        <b-progress-bar value="100" animated striped>
+          <span><strong> processing {{ simulation.status }} </strong></span>
+        </b-progress-bar>
+      </b-progress>
+
 
     </b-card>
 
