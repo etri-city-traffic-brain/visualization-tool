@@ -499,8 +499,8 @@
       "status": "running",
       "created": "2020-09-24 16:21:12",
       "started": "2020-09-24 16:33:07",
-      "error": "ENOENT: no such file or directory, scandir '/home/ubuntu/salt/output/SALT_202009_00940'",
-      "ended": "2020-10-26 19:18:08",
+      "error": "linkId is not defined",
+      "ended": "2020-10-27 16:51:34",
       "text": ""
     },
     {
@@ -591,9 +591,9 @@
           "gd_fri.xml"
         ]
       },
-      "status": "stopped",
+      "status": "running",
       "created": "2020-09-25 13:40:22",
-      "started": "2020-10-12 13:34:00"
+      "started": "2020-10-27 10:50:51"
     }
   ]
 }

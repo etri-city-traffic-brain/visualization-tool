@@ -41,7 +41,7 @@ function MapManager({map, simulationId, eventBus}) {
   const edgeMouseOver = ({ target }) => {
     target.bringToFront();
     target.setOptions({ arrowStyle: [2, 2] });
-    target.updateSymbol({ lineWidth: 4 });
+    // target.updateSymbol({ lineWidth: 4 });
 
 
     eventBus.$emit('link:hover', {
@@ -54,7 +54,7 @@ function MapManager({map, simulationId, eventBus}) {
 
   const edgeMouseOut = ({ target }) => {
     target.setOptions({ arrowStyle: null });
-    target.updateSymbol({ lineWidth: 1 });
+    // target.updateSymbol({ lineWidth: 1 });
   };
 
   const edgeClicked = ({ target }) => {

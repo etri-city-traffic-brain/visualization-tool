@@ -11,15 +11,15 @@ const debug = require('debug')('api:simulation-result');
 
 const fs = require('fs');
 const csv = require('fast-csv');
-const moment = require('moment');
-const mongoose = require('mongoose');
 
-const config = require('../../config');
 const status = require('./simulatoin-status');
 
-const currentTime = () => moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
-const makeChartData = require('../chart-data-maker');
+const { currentTimeFormatted, updateStatus } = require('../../globals');
 
+const makeChartData = require('../chart-data-maker');
+const recordResult = require('./record-to-mongo')
+
+const config = require('../../config');
 const { output } = config.saltPath;
 
 const subIds = (cellId) => {
@@ -31,46 +31,26 @@ const subIds = (cellId) => {
   };
 };
 
-async function insertToMongo(collectionName, cells) {
-  const db = mongoose.connection.useDb('simulation_results');
-  debug('drop', collectionName)
-  try {
-    await db.collection(collectionName).drop();
-  } catch (err) {
-    debug(err.message)
-  }
-
-  const collection = db.collection(collectionName);
-  await collection.createIndex({ cellId: 1 });
-  debug('start bulk insert');
-  let bulkOperation = collection.initializeOrderedBulkOp();
-  const cellIds = Object.keys(cells);
-  for (let i = 0; i < cellIds.length; i += 1) {
-    bulkOperation.insert(cells[cellIds[i]]);
-    if (i % 1000 === 0) {
-      await bulkOperation.execute();
-      bulkOperation = collection.initializeOrderedBulkOp();
-    }
-  }
-  await bulkOperation.execute();
-  debug('finish bulk insert');
+const pickResultFile = id => {
+  const file = fs.readdirSync(`${output}/${id}`).find(file => file.endsWith('.csv'));
+  if(!file) return null
+  return `${output}/${id}/${file}`
 }
 
-module.exports = ({ id, duration, period }, updateStatus) => {
-  debug('Start cooking simulation result', id);
-  if (!id) {
+module.exports = ({ simulationId, duration, period }) => {
+  debug('Start cooking simulation result', simulationId);
+  if (!simulationId) {
     return Promise.reject(new Error('simulation id missed'));
   }
 
-  const simulationResultFile = fs.readdirSync(`${output}/${id}`).find(file => file.endsWith('.csv'));
-  console.log('file:', `${output}/${id}/${simulationResultFile}`)
+  const simulationResultFile = pickResultFile(simulationId)
+  debug('target file:', simulationResultFile)
   if (!simulationResultFile) {
-    console.log('file not found')
     return Promise.reject(new Error('simulation result file(csv) not found...'));
   }
 
   return new Promise((resolve, reject) => {
-    const stream = fs.createReadStream(`${output}/${id}/${simulationResultFile}`);
+    const stream = fs.createReadStream(simulationResultFile);
     const transform = ([start, , id, , speed]) => ({ start, id, speed });
 
     const cells = {};
@@ -84,7 +64,7 @@ module.exports = ({ id, duration, period }, updateStatus) => {
 
       const cell = cells[cellId] || {};
       const speed = Number((+row.speed).toFixed(1));
-      if (speed) {
+      if (speed >= 0) {
         cell.linkId = linkId;
         cell.cellId = cellId;
         cell.values = cell.values || [];
@@ -97,9 +77,9 @@ module.exports = ({ id, duration, period }, updateStatus) => {
       stream.close();
       try {
         debug('insert mongo start')
-        await insertToMongo(id, cells);
+        await recordResult(simulationId, cells);
         debug('insert mongo end')
-        await makeChartData(output, id, {
+        await makeChartData(output, simulationId, {
           meta: {
             duration,
             period,
@@ -110,20 +90,23 @@ module.exports = ({ id, duration, period }, updateStatus) => {
         const memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
         debug(`The worker uses approximately ${Math.round(memoryUsed * 100) / 100} MB`);
         debug(`${(Date.now() - start) / 1000} sec`);
-        updateStatus(status.FINISHED, { ended: currentTime() });
+
+        updateStatus(simulationId, status.FINISHED, { ended: currentTimeFormatted() });
         resolve(true);
       } catch (err) {
-        updateStatus(status.ERROR, { error: err.message, ended: currentTime() });
+        updateStatus(simulationId, status.ERROR, { error: err.message, ended: currentTimeFormatted() });
         debug(err.message);
         reject(err);
       }
     };
+
+    const handleError = err => reject(err)
 
     csv
       .fromStream(stream)
       .transform(transform)
       .on('data', handleData)
       .on('end', handleEnd)
-      .on('error', err => reject(err));
+      .on('error', handleError);
   });
 };

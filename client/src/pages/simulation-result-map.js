@@ -43,6 +43,7 @@ const dataset = (label, color, data) => ({
 })
 
 const makeLinkSpeedChartData = (v1, v2, v3) => {
+  console.log(v2)
   return {
     labels: new Array(v2.length).fill(0).map((v, i) => i),
     datasets: [
@@ -208,7 +209,7 @@ export default {
       this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0);
       this.chart.pieData = await statisticsService.getPieChart(this.simulationId);
       this.speedsPerStep = await statisticsService.getSummaryChart(this.simulationId);
-
+      // console.log(this.speedsPerStep)
       this.chart.linkSpeeds = makeLinkSpeedChartData(
         [],
         this.speedsPerStep.datasets[0].data,

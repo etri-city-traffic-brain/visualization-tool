@@ -31,7 +31,10 @@ const {
  * @param {String} id
  */
 async function removeSimulation(id) {
-  if (mongoose.connection.readyState !== 1) {
+  // if (mongoose.connection.readyState !== 1) {
+  //   throw new Error('Cannot delete simulation, Simulation Database not connected');
+  // }
+  if(!mongooseUtils.isConnected()) {
     throw new Error('Cannot delete simulation, Simulation Database not connected');
   }
   const simulation = getSimulations().find({ id }).value();
@@ -53,7 +56,7 @@ async function removeSimulation(id) {
       await rmdir(targetDirOutput);
     }
 
-    await mongooseUtils.dropCollection(mongoose, 'simulation_results', id);
+    await mongooseUtils.dropCollection('simulation_results', id);
   } catch (err) {
     throw err;
   }

@@ -1,12 +1,25 @@
+const mongoose = require('mongoose');
 
-const dropCollection = async (mongoose, db, collection) => {
-  const targetDb = mongoose.connection.useDb(db);
-  await targetDb.collection(collection).drop();
+const SIMULATION_RESULT_DB = 'simulation_results'
+
+const dropCollection = async (dbName, collectionName) => {
+  const targetDb = mongoose.connection.useDb(dbName);
+  await targetDb.collection(collectionName).drop();
 };
 
-const isConnected = mongoose => mongoose.connection.readyState === 1;
+const dropSimulationCollection = async (collectionName) => {
+  const targetDb = mongoose.connection.useDb(SIMULATION_RESULT_DB);
+  await targetDb.collection(collectionName).drop();
+}
 
+const isConnected = () => mongoose.connection.readyState === 1;
+
+const useDB = name => mongoose.connection.useDb(name);
+const useSimulationDB = () => useDB(SIMULATION_RESULT_DB)
 module.exports = {
   dropCollection,
+  dropSimulationCollection,
   isConnected,
+  useDB,
+  useSimulationDB,
 };

@@ -1,30 +1,36 @@
 // //    Utilities
 
 const moment = require('moment');
-const dbUtils = require('./main/dbms/db-utils');
+
+const simulationStatusUpdater = lowDbTable => (id, status, param = {}) => {
+  lowDbTable().find({ id })
+    .assign({
+      status,
+      ...param,
+    })
+    .write();
+}
 
 const db = require('./main/dbms/init-db');
+const config = require('./config');
 
 const { getSimulations } = db;
 
-const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
+const updateStatus = simulationStatusUpdater(getSimulations);
 
-const currentTime = () => moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
+const currentTimeFormatted = () => moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
 
-const config = require('./config');
+const getConfigFilePath = simulationId => `${config.saltPath.data}/${simulationId}/salt.config.json`;
+const getScenarioFilePath = simulationId => `${config.saltPath.data}/${simulationId}/salt.scenario.json`;
 
-const {
-  saltPath: { data },
-} = config;
-
-const getConfigFilePath = simulationId => `${data}/${simulationId}/salt.config.json`;
-const getScenarioFilePath = simulationId => `${data}/${simulationId}/salt.scenario.json`;
+const getSimulation = id => getSimulations().find({ id }).value()
 
 module.exports = {
   getSimulations,
-  updatetStatus,
-  currentTime,
+  updateStatus,
+  currentTimeFormatted,
   getConfigFilePath,
   getScenarioFilePath,
+  getSimulation,
   config,
 };

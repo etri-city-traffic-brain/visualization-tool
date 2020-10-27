@@ -107,7 +107,7 @@ socket.on('connect', async () => {
   // log('send status')
   send(msgFactory.makeStatus({ status: 0, progress: 50 }))
   await sleep(1000)
-  send(msgFactory.makeStatus({ status: 1, progress: 100 }))
+  send(msgFactory.makeStatus({ status: 0, progress: 99 }))
 
   // send(status);
 
