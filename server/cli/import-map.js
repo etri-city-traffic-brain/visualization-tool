@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const fse = require('fs-extra')
 const { connect } = require('./db');
-
+const chalk = require('chalk')
 const { log } = console;
 
-const data = {
-  links: '../data/map-link.geojson',
-  sections: '../data/map-section.geojson',
-  cells: '../data/map-cell.geojson',
-  signals: '../data/map-traffic-light.geojson',
-};
+// const data = {
+//   links: '../data/map-link.geojson',
+//   sections: '../data/map-section.geojson',
+//   cells: '../data/map-cell.geojson',
+//   signals: '../data/map-traffic-light.geojson',
+// };
 
 async function run(connection, collectionName, geojson) {
   const { db } = connection;
@@ -22,35 +23,50 @@ async function run(connection, collectionName, geojson) {
     // ignore
   }
   const bulk = collection.initializeOrderedBulkOp();
+  log('start bulk insert')
   geojson.features.forEach(bulk.insert.bind(bulk));
   const result = await bulk.execute();
+  log('create index')
   await collection.createIndex({ geometry: '2dsphere' });
+  log('end bulk insert')
   return result;
 }
 
-async function importData(collectionName) {
+async function importData(collectionName, filePath) {
+  log('start processing', filePath)
   const { connection } = await connect('map');
-
+  const exists = await fse.pathExists(filePath)
+  if(!exists) {
+    log(`${filePath} not exists`)
+    return false
+  }
   try {
-    const geojson = JSON.parse(fs.readFileSync(data[collectionName], 'utf8'));
-    const result = await run(connection, collectionName, geojson);
-    log('finished', result);
-    process.exit(1);
+    const geojson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    await run(connection, collectionName, geojson);
+    log(chalk.green(`${filePath} finished`));
   } catch (err) {
     log('fail to load ', collectionName);
   }
 }
 
+
 if (require.main === module) {
+
   if (process.argv.length < 3) {
-    log('usage', 'node import [cells | links | sections | signals]');
-    process.exit(1);
-  }
-  const collectionName = process.argv[2];
-  if (!['links', 'sections', 'cells', 'signals'].includes(collectionName)) {
-    log('enter links or sections or cells');
+    log('usage', 'node import [directory path]');
     process.exit(1);
   }
 
-  importData(collectionName);
+  const dir = process.argv[2]
+
+  fse.pathExists(dir)
+    .then(async (exists) => {
+      if(exists) {
+        await importData('ulinks', `${dir}/link.geojson`)
+        await importData('ucells', `${dir}/cell.geojson`)
+        process.exit(1)
+      } else {
+        log(chalk.red(`[${dir}] not exists`))
+      }
+    })
 }

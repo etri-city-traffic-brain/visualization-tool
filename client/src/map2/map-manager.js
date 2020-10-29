@@ -31,7 +31,7 @@ function MapManager({map, simulationId, eventBus}) {
   const edgeLayer = makeEdgeLayer(map, eventBus);
   const gridLayer = makeGridLayer(map)
   const canvasLayer = makeCanvasLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus, extent)
-  const toolLayer = makeToolLayer(map)
+  const toolLayer = makeToolLayer(map, edgeLayer.getGeometries.bind(edgeLayer))
   map.addLayer(edgeLayer)
   map.addLayer(gridLayer)
   map.addLayer(canvasLayer)

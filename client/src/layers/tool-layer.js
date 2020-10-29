@@ -2,8 +2,9 @@
 import * as maptalks from 'maptalks'
 
 import color from '@/utils/colors';
+import { InputGroupPlugin } from 'bootstrap-vue';
 
-export default (map, eventBus) => {
+export default (map, getGeometries) => {
 
   const layer = new maptalks.VectorLayer('toolLayer', [])
 
@@ -17,6 +18,7 @@ export default (map, eventBus) => {
   });
 
 
+
   var circle = new maptalks.Circle(map.getCenter(), 80,{
     draggable: true,
     symbol: {
@@ -25,6 +27,21 @@ export default (map, eventBus) => {
       polygonFill: '#1bbc9b',
       polygonOpacity: 0.2
     }
+  });
+
+  circle.on('click', () => {
+    getGeometries().forEach(obj => {
+      if(circle.containsPoint(obj.getCenter())) {
+        console.log(obj.getCenter())
+        obj.updateSymbol({
+          // lineWidth,
+          lineColor: 'black',
+          markerPlacement: 'vertex-last', //vertex, point, vertex-first, vertex-last, center
+          lineDasharray: []
+        })
+      }
+
+    })
   });
   layer.addGeometry([circle])
 

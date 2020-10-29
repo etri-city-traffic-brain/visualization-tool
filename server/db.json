@@ -455,7 +455,7 @@
       "id": "SALT_202009_00670",
       "user": "salt_test",
       "description": "...",
-      "status": "stopped",
+      "status": "running",
       "created": "2020-09-15 10:41:14",
       "configuration": {
         "region": "11250",
@@ -474,7 +474,7 @@
       },
       "error": null,
       "ended": "2020-09-17 18:58:15",
-      "started": "2020-09-17 18:58:11",
+      "started": "2020-10-29 12:49:53",
       "text": ""
     },
     {
@@ -496,11 +496,11 @@
           "gd_thu.xml"
         ]
       },
-      "status": "running",
+      "status": "finished",
       "created": "2020-09-24 16:21:12",
       "started": "2020-09-24 16:33:07",
       "error": "linkId is not defined",
-      "ended": "2020-10-28 19:08:46",
+      "ended": "2020-10-29 13:45:12",
       "text": ""
     },
     {
