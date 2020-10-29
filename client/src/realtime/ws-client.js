@@ -18,6 +18,7 @@ function Client({ url = 'ws://localhost', simulationId, eventBus }) {
 
   function init() {
     if(status === 'open') {
+      log('WebSocket is already opened!!')
       return
     }
     socket = new WebSocket(url);

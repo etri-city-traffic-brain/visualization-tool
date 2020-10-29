@@ -496,11 +496,11 @@
           "gd_thu.xml"
         ]
       },
-      "status": "running",
+      "status": "finished",
       "created": "2020-09-24 16:21:12",
       "started": "2020-09-24 16:33:07",
       "error": "linkId is not defined",
-      "ended": "2020-10-28 19:08:46",
+      "ended": "2020-10-27 16:51:34",
       "text": ""
     },
     {

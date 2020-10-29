@@ -38,6 +38,7 @@ const pickResultFile = id => {
 }
 
 module.exports = ({ simulationId, duration, period }) => {
+  updateStatus(simulationId, 'processing');
   debug('Start cooking simulation result', simulationId);
   if (!simulationId) {
     return Promise.reject(new Error('simulation id missed'));

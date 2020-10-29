@@ -20,7 +20,7 @@ function updateCongestion(edgeLayer, map, linkSpeeds = {}, step = 0) {
       });
     } else {
       geometry.updateSymbol({
-        lineWidth: 2,
+        lineWidth: 1,
         lineColor: '#808080',
         markerPlacement: 'vertex-last', //vertex, point, vertex-first, vertex-last, center
         lineDasharray: [5, 5]
@@ -69,6 +69,5 @@ export default (map, eventBus) => {
       updateRealtimeSpeed(edgeLayer, roadMap, map.getZoom())
     });
   }
-
   return edgeLayer
 };

@@ -2,35 +2,40 @@
   <div id="app">
     <b-navbar
       type="dark"
-      sticky
       :variant="variant"
       ref="main-nav"
       id="main-nav"
-      class="pl-3 pt-1 pb-0 m-0"
+      class="pl-3 pt-1 pb-1 m-0"
     >
-      <b-navbar-brand href="#" to="/">SALT</b-navbar-brand>
-      <b-collapse is-nav id="nav_dropdown_collapse" >
-         <b-navbar-nav>
-          <b-nav-item to="/SimulationList" >
-            <strong>트래픽시뮬레이션</strong>
-          </b-nav-item>
-        </b-navbar-nav>
-         <b-navbar-nav class="ml-auto">
-          <b-nav-item size="sm" to="/SignalEditor" >
-            <b-button size="sm">신호편집</b-button>
-          </b-nav-item>
-        </b-navbar-nav>
-      </b-collapse>
+      <b-navbar-brand href="#" to="/">
+        <b-iconstack font-scale="1">
+          <b-icon stacked icon="globe" animation="throb" variant="primary" scale="0.75" ></b-icon>
+          <b-icon stacked icon="globe" animation="spin-reverse" :variant="variantLogo" ></b-icon>
+        </b-iconstack> &nbsp;
+        <span>UNIQ-VIS</span>
+      </b-navbar-brand>
+      <b-navbar-nav>
+        <b-nav-item to="/SimulationList" >
+          <strong>트래픽시뮬레이션</strong>
+        </b-nav-item>
+      </b-navbar-nav>
+        <!-- <b-navbar-nav class="ml-auto"> -->
+      <!-- <b-collapse is-nav id="nav_dropdown_collapse" > -->
+          <!-- <b-nav-item size="sm" to="/SignalEditor" > -->
+            <!-- <b-button size="sm">신호편집</b-button> -->
+          <!-- </b-nav-item> -->
+      <!-- </b-collapse> -->
+        <!-- </b-navbar-nav> -->
     </b-navbar>
     <transition name="fade">
       <router-view/>
     </transition>
-    <!-- <b-container fluid class="mt-2 mb-2 p-2 text-center"> -->
-      <!-- 도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어 -->
-      <!-- <hr class="my-4"> -->
-      <!-- <small class="text-muted">Copyright 2019. ETRI all rights reserved.</small> -->
-      <!-- <small class="text-muted">COPYRIGHT ⓒ 2020. <em>MODUTECH</em> Inc. ALL RIGHT RESERVED.</small> -->
-    <!-- </b-container> -->
+    <b-container fluid class="mt-2 mb-2 p-2 text-center" v-if="$router.currentRoute.name !== 'SimulationResultMap'">
+      도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어
+      <hr class="my-3">
+      <small class="text-muted">Copyright 2020. ETRI All rights reserved.</small>
+      <small class="text-muted">Copyright ⓒ 2020. <em>Modutech</em> Inc. All rights reserved.</small>
+    </b-container>
   </div>
 </template>
 
@@ -51,14 +56,25 @@ export default {
       }
       this.prevScrollpos = currentScrollPos;
     };
+    // const variants = ['success','danger', 'warning', 'primary', 'light']
+    const variants = ['light', 'secondary']
+    let i = 0;
+    setInterval(() => {
+      this.variantLogo = variants[i++ % variants.length]
+      if ( i >= 100) {
+        i = 0
+      }
+    }, 1000)
   },
   data() {
     return {
       prevScrollpos: window.pageYOffset,
       variant: 'dark',
       userState,
+      variantLogo: 'dark'
     };
   },
+
 };
 </script>
 

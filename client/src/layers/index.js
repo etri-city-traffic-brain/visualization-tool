@@ -1,6 +1,7 @@
 import makeEdgeLayer from './edge-layer'
 import makeCanvasLayer from './canvas-layer'
 import makeGridLayer from './grid-layer'
+import toolLayer from './tool-layer'
 
 export default {
   makeEdgeLayer,
@@ -11,5 +12,6 @@ export default {
 export {
   makeEdgeLayer,
   makeCanvasLayer,
-  makeGridLayer
+  makeGridLayer,
+  toolLayer as makeToolLayer
 }

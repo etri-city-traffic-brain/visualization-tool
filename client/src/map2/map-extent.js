@@ -9,12 +9,11 @@ const getExtent = (map) => {
   const max = extent.getMax();
   const zoom = map.getZoom();
 
-  if (zoom >= 19) { // bigger rectangle than current extent
-    min.x -= 0.0012;
-    min.y -= 0.0014;
-    max.x += 0.0012;
-    max.y += 0.0014;
-  }
+  min.x -= min.x * 0.000002;
+  min.y -= min.y * 0.000005;
+  max.x += max.x * 0.000002;
+  max.y += max.y * 0.000005;
+
   return {
     min,
     max,

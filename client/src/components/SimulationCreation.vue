@@ -11,7 +11,7 @@
     body-text-variant="ligth"
     body-border-variant="dark"
     hide-footer
-    header-class="pb-0"
+    header-class="pt-2 pb-0"
   >
     <b-card class="p-0 m-0" >
       <b-form-group label-cols-sm="3" label="User ID" label-class="text-sm-right" label-for="userId">
@@ -82,3 +82,9 @@
 <script src="./simulation-creation">
 
 </script>
+
+<style scoped>
+ .no-border-radius {
+   border-radius: 10px;
+ }
+</style>

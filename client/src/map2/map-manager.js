@@ -17,7 +17,7 @@ import makeGeometry from './make-geometry';
 import simulationService from '../service/simulation-service';
 import mapService from '../service/map-service';
 
-import { makeEdgeLayer, makeCanvasLayer, makeGridLayer } from '../layers'
+import { makeEdgeLayer, makeCanvasLayer, makeGridLayer, makeToolLayer } from '../layers'
 
 const ZOOM_MINIMUM = 14;
 
@@ -31,9 +31,13 @@ function MapManager({map, simulationId, eventBus}) {
   const edgeLayer = makeEdgeLayer(map, eventBus);
   const gridLayer = makeGridLayer(map)
   const canvasLayer = makeCanvasLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus, extent)
+  const toolLayer = makeToolLayer(map)
   map.addLayer(edgeLayer)
   map.addLayer(gridLayer)
   map.addLayer(canvasLayer)
+  map.addLayer(toolLayer)
+
+  toolLayer.startEdit()
 
   const removeFeatures = layer => ids => layer.removeGeometry(ids);
   const removeEdges = removeFeatures(edgeLayer);
@@ -68,11 +72,15 @@ function MapManager({map, simulationId, eventBus}) {
 
     target.setInfoWindow({
       title: target.properties.LINK_ID,
-      content: JSON.stringify(target.properties, false, 2),
+      content: `
+      <div class="content">
+          <div> 속도: ${target.properties.SPEEDLH} </div>
+          <div> 링크 길이: ${target.properties.edgeLen} m</div>
+          <div></div>
+          </div>
+      `
     });
-
     target.openInfoWindow();
-
   }
 
   const addEventHandler = geometry =>
@@ -102,6 +110,7 @@ function MapManager({map, simulationId, eventBus}) {
 
     try {
       const { features } = await mapService.getMap(extent(map));
+      console.log('num of features:', features.length)
       if(event === 'zoomend') {
         removeEdges(edgesExisted);
         addFeatures(features)
