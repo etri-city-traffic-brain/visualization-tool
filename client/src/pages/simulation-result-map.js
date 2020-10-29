@@ -97,6 +97,7 @@ export default {
       avgSpeed: 0,
       linkHover: '',
       progress: 0,
+      focusData: {}
     };
   },
   destroyed() {
@@ -119,13 +120,7 @@ export default {
       mapId: this.mapId
     });
 
-    // const { simulation } = await simulationService.getSimulationInfo(this.simulationId);
-    // if(!simulation) {
-    //   return;
-    // }
     await this.updateSimulation()
-
-    // this.simulation = simulation;
 
     this.mapManager = MapManager({
       map: this.map,
@@ -176,9 +171,14 @@ export default {
     this.$on('salt:status', async (status) => {
       this.progress = status.progress
       if(status.status ===1 && status.progress === 100) {
-        //
+        // FINISHED
       }
     })
+
+    this.$on('map:focus', (data) => {
+      log(data)
+      this.focusData = data
+    } )
 
     this.$on('salt:finished', async () => {
       log('**** FINISHED *****')

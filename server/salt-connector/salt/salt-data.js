@@ -11,7 +11,8 @@ const socket = net.connect({ port: 1337, host: '1.245.47.108' });
 const HEADER_LENGTH = 16;
 
 // const simulationId = '001'.padStart(24, '0');
-const simulationId = 'SALT_202009_00940';
+// const simulationId = 'SALT_202009_00940';
+const simulationId = 'SALT_202009_00670';
 
 log('*** SALT Simulator Dummy ***');
 log('simulationId:', simulationId);
@@ -46,14 +47,14 @@ socket.on('connect', async () => {
     roads: [
       {
         roadId: str2CharCodes('-563104349_8_0  '), // -572700451_1_0
-        speed: 36,
+        speed: 2,
         currentSignal: 1,
         numVehicles: 4,
         vehicles: vehicles,
       },
       {
         roadId: str2CharCodes('563104839_7_0   '), // -572700451_1_0
-        speed: 36,
+        speed: 2,
         currentSignal: 1,
         numVehicles: 3,
         vehicles: vehicles,
@@ -67,7 +68,7 @@ socket.on('connect', async () => {
       },
       {
         roadId: str2CharCodes(roadId('-563104376_0_0')), // -572700451_1_0
-        speed: 70,
+        speed: 2,
         currentSignal: 1,
         numVehicles: 4,
         vehicles: vehicles,
@@ -107,8 +108,8 @@ socket.on('connect', async () => {
   // log('send status')
   send(msgFactory.makeStatus({ status: 0, progress: 50 }))
   await sleep(1000)
-  // send(msgFactory.makeStatus({ status: 0, progress: 99 }))
-  send(msgFactory.makeStatus({ status: 1, progress: 100 }))
+  send(msgFactory.makeStatus({ status: 0, progress: 55 }))
+  // send(msgFactory.makeStatus({ status: 1, progress: 100 }))
 
   // send(status);
 

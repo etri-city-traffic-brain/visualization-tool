@@ -29,19 +29,6 @@ function updateCongestion(edgeLayer, map, linkSpeeds = {}, step = 0) {
   });
 }
 
-function updateRealtimeSpeed(edgeLayer, speedByEdgeId = {}, zoom) {
-  edgeLayer.getGeometries().forEach((geometry) => {
-    const road = speedByEdgeId[geometry.getId()];
-    if(road) {
-      geometry.updateSymbol({
-        lineWidth: calcLineWidth(zoom),
-        lineColor: color(road.speed),
-      });
-    }
-  });
-}
-
-
 export default (map, eventBus) => {
 
   const edgeLayer = new maptalks.VectorLayer('edgeLayer', [])
@@ -55,19 +42,25 @@ export default (map, eventBus) => {
     }
   });
 
+  function updateRealtimeSpeed(speedByEdgeId = {}, zoom) {
+    edgeLayer.getGeometries().forEach((geometry) => {
+      const road = speedByEdgeId[geometry.getId()];
+      if(road) {
+        geometry.updateSymbol({
+          lineWidth: calcLineWidth(zoom),
+          lineColor: color(road.speed),
+        });
+      }
+    });
+  }
+
   edgeLayer.updateCongestion = (currentSpeedsPerLink, currentStep) => {
     updateCongestion(edgeLayer, map, currentSpeedsPerLink, currentStep)
   }
 
-  if (eventBus) {
-    eventBus.$on('salt:data', (data) => {
-      let roadMap = data.roads.reduce((acc, cur) => {
-        acc[cur.roadId.trim()] = cur
-        return acc
-      }, {})
-
-      updateRealtimeSpeed(edgeLayer, roadMap, map.getZoom())
-    });
+  edgeLayer.updateRealtimeData = (data, zoom) => {
+    updateRealtimeSpeed(data, zoom)
   }
+
   return edgeLayer
 };

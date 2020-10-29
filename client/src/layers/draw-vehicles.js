@@ -5,20 +5,28 @@ import divideChunks from '../vehicles/divide-chunks'
 
 const chunkLength = 0.007
 
-function drawVehicles({context, map, getEdges, getEdgesRealtime}) {
-  const edgesRealtime = getEdgesRealtime().reduce((acc, cur) => {
-    // acc[cur.roadId.substring(0, 14)] = cur
-    acc[cur.roadId.trim()] = cur
-    return acc
-  }, {})
+const linkId = cell => cell.properties.LINK_ID
 
-  const hasRealtimeData = cell => !!edgesRealtime[cell.properties.LINK_ID]
+/**
+ *
+ * @param {Object} obj - An object
+ * @param {Object} obj.context - HTML5 canvas graphics context
+ * @param {Object} obj.map - Maptalks map object
+ * @param {Function} obj.getEdges - get edges
+ */
+function drawVehicles({
+  context,
+  map,
+  getEdges,
+  realtimeEdgeData
+}) {
+  const hasRealtimeData = cell => !!realtimeEdgeData[linkId(cell)]
 
   getEdges()
     .filter(hasRealtimeData)
     .map((edge => {
       const startLocation = map.coordinateToContainerPoint(edge.getFirstCoordinate());
-      const edgeRealtime = edgesRealtime[edge.properties.LINK_ID]
+      const edgeRealtime = realtimeEdgeData[edge.properties.LINK_ID]
 
       const edgeChunks = divideChunks({
         chunkLength: chunkLength,

@@ -31,13 +31,30 @@ function MapManager({map, simulationId, eventBus}) {
   const edgeLayer = makeEdgeLayer(map, eventBus);
   const gridLayer = makeGridLayer(map)
   const canvasLayer = makeCanvasLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus, extent)
-  const toolLayer = makeToolLayer(map, edgeLayer.getGeometries.bind(edgeLayer))
+  const toolLayer = makeToolLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
   map.addLayer(edgeLayer)
   map.addLayer(gridLayer)
   map.addLayer(canvasLayer)
   map.addLayer(toolLayer)
 
   toolLayer.startEdit()
+
+  eventBus.$on('salt:data', (data) => {
+    // realtimeEdgeData.set(data.roads)
+    // canvasLayer.setRealtimeEdgeData(data.roads)
+    // canvasLayer.redraw()
+
+
+    let speedsByEdgeId = data.roads.reduce((acc, cur) => {
+      acc[cur.roadId.trim()] = cur
+      return acc
+    }, {})
+
+    canvasLayer.updateRealtimeData(speedsByEdgeId)
+    edgeLayer.updateRealtimeData(speedsByEdgeId, map.getZoom())
+    toolLayer.updateRealtimeData(speedsByEdgeId, data.roads)
+
+  });
 
   const removeFeatures = layer => ids => layer.removeGeometry(ids);
   const removeEdges = removeFeatures(edgeLayer);
@@ -144,10 +161,12 @@ function MapManager({map, simulationId, eventBus}) {
       await loadMapData(event.type);
     }
     if(eventBus) {
-      eventBus.$emit('map:moved', {
+      const data = {
         zoom,
         extent: extent(map)
-      })
+      }
+      eventBus.$emit('map:moved', data)
+      eventBus.$emit('salt:set', data)
     }
   };
 

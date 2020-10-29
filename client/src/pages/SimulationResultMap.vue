@@ -187,6 +187,10 @@
       no-body
     >
       <uniq-simulation-result-ext :simulation="simulation" />
+
+
+       <div class="d-flex bd-highlight" >
+        <div class="flex-fill bd-highlight">
       <b-card
         text-variant="light"
         bg-variant="dark"
@@ -212,6 +216,25 @@
           </b-card-text>
         </b-card-body>
       </b-card>
+        </div>
+
+        <div class="p-2 flex-fill bd-highlight">
+          <b-card
+            text-variant="light"
+            bg-variant="dark"
+            border-variant="secondary"
+            no-body
+            class="mt-1"
+          >
+            <b-card-body>
+              <b-card-text>
+                평균속도: {{ focusData.speed }} km,
+                통행차량: {{ focusData.vehicles }}대
+              </b-card-text>
+            </b-card-body>
+          </b-card>
+        </div>
+       </div>
       <b-card
         text-variant="light"
         bg-variant="dark"
