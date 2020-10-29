@@ -1,7 +1,7 @@
 
 import moment from "moment";
 
-import SimulationCreationDialog from '@/components/SimulationCreation';
+import SimulationCreationPanel from '@/components/SimulationCreation';
 import BarChart from '@/components/charts/BarChart';
 
 import { simulationService, statisticsService } from '@/service'
@@ -27,7 +27,7 @@ export default {
   name: 'SimulationList',
   components: {
     BarChart,
-    SimulationCreationDialog,
+    SimulationCreationPanel,
   },
   mixins: [dragDropMixin, fileMgmtMixin],
   data() {

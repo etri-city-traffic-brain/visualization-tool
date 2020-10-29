@@ -9,24 +9,6 @@ const random = () => `${Math.floor(Math.random() * 1000)}`
 const randomId = () => `SALT_${year}${m}_${random().padStart(5, '0')}`;
 const format = date => moment(date).format('YYYY-MM-DD');
 
-const dayMap = {
-  1: 'mon',
-  2: 'tue',
-  3: 'wed',
-  4: 'thu',
-  5: 'fri',
-  6: 'sat',
-  0: 'sun'
-}
-
-const regionMap = {
-  0: '4gu',
-  11230: 'gn',
-  11250: 'gd',
-  11220: 'sc',
-  11240: 'sp',
-}
-
 const periodOptions = [
   { value: 10, text: '10분', },
   { value: 30, text: '30분', },
@@ -42,10 +24,16 @@ const partitionOptions=  [
   { value: 16, text: '16개' },
 ]
 
+const scripts =  [
+  { value: 'script-01.py', text: 'script-01.py' },
+  { value: 'script-02.py', text: 'script-02.py' },
+  { value: 'script-03.py', text: 'script-03.py' },
+  { value: 'script-04.py', text: 'script-04.py' },
+]
 
 export default {
-  name: 'SimulationCreationDialog',
-  props: ['userId'],
+  name: 'SimulationCreationPanel',
+  props: ['userId', 'modalName'],
   data() {
     return {
       id: randomId(),
@@ -65,11 +53,17 @@ export default {
       msg: 'waiting',
       variant: 'info',
       timeout: null,
-      status: 'ready'
+      status: 'ready',
+      scripts: [ ...scripts ],
+      scriptSelected: scripts[0].value,
     };
   },
   beforeDestroy() {
     clearTimeout(this.timeout)
+    console.log('destroyed')
+  },
+  mounted() {
+    console.log('mounted')
   },
   methods: {
     resetForm() {
@@ -82,15 +76,9 @@ export default {
 
       const from = moment(`${this.fromDate} ${this.fromTime}`);
       const to = moment(`${this.toDate} ${this.toTime}`)
-      const end = to.diff(from) / 1000;
-
+      const end = to.diff(from) / 1000 + 60 - 1;
       const days = to.diff(from, 'days') + 1
       const day = from.day()
-      let routes = [`${regionMap[this.areaSelected]}_${dayMap[from.day()]}.xml`]
-
-      if (days > 1 && days <8) {
-        routes = new Array(days).fill('').map((v, i) => `${regionMap[this.areaSelected]}_${dayMap[(i+day)%7]}.xml`)
-      }
 
       this.msg = '시뮬레이션을 준비하고 있습니다...'
       this.variant = 'info';
@@ -111,7 +99,6 @@ export default {
           description: this.description,
           configuration: {
             region: this.areaSelected,
-            day: from.day(),
             fromDate: this.fromDate,
             toDate: this.toDate,
             fromTime: `${this.fromTime}:00`,
@@ -120,7 +107,8 @@ export default {
             partitions: this.partitionSelected,
             begin: 0,
             end,
-            routes,
+            day,
+            days
           },
         });
         this.status = 'finished'
@@ -141,7 +129,7 @@ export default {
     },
     hide() {
       this.$emit('hide');
-      this.$bvModal.hide('create-simulation-modal')
+      this.$bvModal.hide(this.modalName)
       this.resetForm();
     },
   },

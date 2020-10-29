@@ -1,5 +1,5 @@
 <template>
-  <b-modal
+  <!-- <b-modal
     title="시뮬레이션 등록"
     id="create-simulation-modal"
     ref="create-simulation-modal"
@@ -12,27 +12,26 @@
     body-border-variant="dark"
     hide-footer
     header-class="pt-2 pb-0"
-  >
+  > -->
+  <div>
     <b-card class="p-0 m-0" >
-      <b-form-group label-cols-sm="3" label="User ID" label-class="text-sm-right" label-for="userId">
+      <!-- <b-form-group label-cols-sm="3" label="User ID" label-class="text-sm-right" label-for="userId">
         <b-form-input autofocus id="userId" v-model="userId" disabled></b-form-input>
+      </b-form-group> -->
+      <b-form-group label-cols-sm="3" label="시뮬레이션 ID" label-class="text-sm-right" label-for="id">
+        <b-form-input autofocus id="id" v-model="id" focus select></b-form-input>
       </b-form-group>
-      <b-form-group label-cols-sm="3" label="Simulation ID" label-class="text-sm-right" label-for="id">
-        <b-form-input autofocus id="id" v-model="id"></b-form-input>
-      </b-form-group>
-      <b-form-group label-cols-sm="3" label="Description" label-class="text-sm-right" label-for="description">
+      <b-form-group label-cols-sm="3" label="설명" label-class="text-sm-right" label-for="description">
         <b-form-input id="description" v-model="description"></b-form-input>
       </b-form-group>
-      <b-form-group label-cols-sm="3" label="Region" label-class="text-sm-right">
+      <!-- <b-form-group label-cols-sm="3" label="Region" label-class="text-sm-right">
         <b-input-group>
         <b-form-select v-model="areaSelected" :options="areaOptions" @change="selectArea" />
-      <!-- </b-form-group>
-      <b-form-group label-cols-sm="3" label="파티션" label-class="text-sm-right"> -->
         <b-form-select v-model="partitionSelected" :options="partitionOptions" class="ml-2"></b-form-select>
         </b-input-group>
-      </b-form-group>
+      </b-form-group> -->
       <b-form-group
-        label="From"
+        label="시뮬레이션 시작"
         label-cols-sm="3"
         label-class="text-sm-right"
         label-for="date"
@@ -43,7 +42,7 @@
         </b-input-group>
       </b-form-group>
       <b-form-group
-        label="To"
+        label="시뮬레이션 종료"
         label-cols-sm="3"
         label-class="text-sm-right"
         label-for="begineHour"
@@ -54,11 +53,15 @@
         </b-input-group>
       </b-form-group>
 
-      <b-form-group label-cols-sm="3" label="Period" label-class="text-sm-right" label-for="Period">
+      <b-form-group label-cols-sm="3" label="동적스크립트" label-class="text-sm-right">
+        <b-form-select v-model="scriptSelected" :options="scripts" />
+      </b-form-group>
+
+      <b-form-group label-cols-sm="3" label="주기" label-class="text-sm-right" label-for="Period">
         <b-form-select v-model="periodSelected" :options="periodOptions" class="mb-3" />
       </b-form-group>
 
-      <b-form-group label-cols-sm="6" label-class="text-sm-right" label-for="Period" v-if="status === 'ready'">
+      <b-form-group label-cols-sm="6" label-class="text-sm-right" label-for="Period" >
         <b-button class="mr-1" @click="save" variant="dark" >
           시뮬레이션 등록
         </b-button>
@@ -76,7 +79,8 @@
       <b-spinner small />
       {{ msg.toUpperCase() }}
     </b-alert>
-  </b-modal>
+  </div>
+  <!-- </b-modal> -->
 </template>
 
 <script src="./simulation-creation">

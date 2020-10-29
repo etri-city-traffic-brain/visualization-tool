@@ -191,11 +191,28 @@
         align="center"
         size="sm"
       />
-      <simulation-creation-dialog
-        @hide="hideCreateSimulationDialog"
-        :userId="userState.userId"
-        >
-      </simulation-creation-dialog>
+
+      <b-modal
+        title="시뮬레이션 등록"
+        id="create-simulation-modal"
+        ref="create-simulation-modal"
+        size="lg"
+        header-border-variant="dark"
+        header-bg-variant="dark"
+        header-text-variant="light"
+        body-bg-variant="dark"
+        body-text-variant="ligth"
+        body-border-variant="dark"
+        hide-footer
+        header-class="pt-2 pb-0"
+      >
+        <simulation-creation-panel
+          @hide="hideCreateSimulationDialog"
+          :userId="userState.userId"
+          modalName="create-simulation-modal"
+          >
+        </simulation-creation-panel>
+      </b-modal>
     </b-container>
   </div>
 </template>
