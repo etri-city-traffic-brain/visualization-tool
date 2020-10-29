@@ -1,13 +1,9 @@
 <template>
   <b-button-group size="sm">
-    <b-button variant="dark" @click="changeMap(0)">
-      일반지도
-    </b-button>
-    <!-- <b-button variant="secondary" @click="changeMap(1)">Gray</b-button>
-    <b-button variant="dark" @click="changeMap(2)">Midnight</b-button> -->
-    <b-button variant="primary" @click="changeMap(3)" class="ml-1" >
-      위성지도 <b-icon icon="bar-chart"/>
-    </b-button>
+    <b-button @click="changeMap(0)"> 일반 </b-button>
+    <b-button @click="changeMap(1)"> 그레이</b-button>
+    <b-button @click="changeMap(2)"> 야간</b-button>
+    <b-button @click="changeMap(3)"> 위성 </b-button>
   </b-button-group>
 </template>
 
@@ -23,12 +19,6 @@ export default {
   name: 'uniq-map-changer',
   props: {
     map: Object
-  },
-  data() {
-    return {
-    }
-  },
-  mounted() {
   },
   methods: {
     changeMap(type = 0) {

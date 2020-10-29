@@ -16,9 +16,11 @@ async function getSimulationInfo(simulationId) {
     const timeDiff = moment(`${toDate} ${toTime}`).diff(moment(`${fromDate} ${fromTime}`));
 
     const slideMax = Math.ceil(timeDiff / (period * 1000)) - 1 // unit: miliseconds
+    console.log(slideMax)
     return {
       simulation,
       slideMax,
+      ticks: slideMax + 1
     };
   } catch (err) {
     // eslint-disable-next-line no-console

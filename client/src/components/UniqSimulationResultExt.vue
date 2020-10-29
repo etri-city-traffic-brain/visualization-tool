@@ -1,14 +1,20 @@
 <template>
   <b-card
-    bg-variant="secondary"
     text-variant="light"
-    class="p-2 ml-1 mr-1"
+    bg-variant="dark"
+    border-variant="secondary"
     no-body
   >
-    <h5> <b-badge variant="secondary"> {{ simulation.id }} </b-badge> </h5>
-    <h5> <b-badge variant="secondary"> {{ simulation.configuration.period / 60}}분 주기 </b-badge> </h5>
-    <h5> <b-badge>시작:</b-badge><b-badge>{{ simulation.configuration.fromDate }} {{ simulation.configuration.fromTime }} </b-badge> </h5>
-    <h5> <b-badge>종료:</b-badge><b-badge>{{ simulation.configuration.toDate }} {{ simulation.configuration.toTime }} </b-badge> </h5>
+  <b-card-body class="pb-1">
+    <b-card-title>
+      {{ simulation.id }}
+    </b-card-title>
+    <ul>
+      <li>주기: {{ period / 60}}분</li>
+      <li>시작: {{ configuration.fromDate }} {{ configuration.fromTime }}</li>
+      <li>종료: {{ configuration.toDate }} {{ configuration.toTime }}</li>
+    </ul>
+    </b-card-body>
   </b-card>
 </template>
 
@@ -18,8 +24,12 @@ export default {
   props: {
     simulation: Object,
   },
-  data() {
-    return {
+  computed: {
+    period() {
+      return this.simulation.configuration.period
+    },
+    configuration() {
+      return this.simulation.configuration
     }
   }
 }

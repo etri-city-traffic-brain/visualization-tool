@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 const debug = require('debug')('api:stop');
 const { Client } = require('ssh2');
-const { updatetStatus } = require('../../globals');
+const { updateStatus } = require('../../globals');
 
 async function kill(vmInfo, port) {
   return new Promise((resolve, reject) => {
@@ -50,7 +50,7 @@ async function stop(req, res) {
   //     username: 'ubuntu',
   //   }, simulation.workerPort);
   // }
-  updatetStatus(id, 'stopped');
+  updateStatus(id, 'stopped');
   res.json({
     id,
   });

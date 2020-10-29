@@ -107,7 +107,8 @@ socket.on('connect', async () => {
   // log('send status')
   send(msgFactory.makeStatus({ status: 0, progress: 50 }))
   await sleep(1000)
-  send(msgFactory.makeStatus({ status: 0, progress: 100 }))
+  // send(msgFactory.makeStatus({ status: 0, progress: 99 }))
+  send(msgFactory.makeStatus({ status: 1, progress: 100 }))
 
   // send(status);
 
@@ -120,9 +121,9 @@ socket.on('connect', async () => {
   // },)
   // console.log('road size:', r.length - 16)
 
-  setTimeout(()=>{
-    socket.destroy()
-  }, 2000)
+  // setTimeout(()=>{
+  //   socket.destroy()
+  // }, 2000)
 });
 
 socket.on('data', (buffer) => {

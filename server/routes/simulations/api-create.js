@@ -31,7 +31,7 @@ const prepareScenarioFile = require('./utils/prepare-scenario');
 const createSimulation = require('./utils/create-simulation-row');
 
 const {
-  updatetStatus, currentTime, getSimulations, config,
+  updateStatus, currentTimeFormatted, getSimulations, config,
 } = require('../../globals');
 
 const { base } = config;
@@ -68,13 +68,13 @@ module.exports = async (req, res, next) => {
   const simulationDir = `${base}/data/${simulationId}`;
   try {
     await mkdir(simulationDir);
-    await createSimulation(req.body, getSimulations(), currentTime());
-    updatetStatus(simulationId, 'preparing', {});
+    await createSimulation(req.body, getSimulations(), currentTimeFormatted());
+    updateStatus(simulationId, 'preparing', {});
 
     await prepareScenario(simulationDir, req.body);
     await prepareSaltConfig(simulationDir, simulationId);
 
-    updatetStatus(simulationId, 'downloading scenario...', {});
+    updateStatus(simulationId, 'downloading scenario...', {});
 
     // const scenarioFilePath = await prepareScenarioFile(
     //   simulationDir,
@@ -83,14 +83,14 @@ module.exports = async (req, res, next) => {
     // );
     // await unzip(scenarioFilePath, { dir: simulationDir });
     setTimeout(() => {
-      updatetStatus(simulationId, 'ready', {});
+      updateStatus(simulationId, 'ready', {});
       res.json({ simulationId });
     }, 10000);
   } catch (err) {
     debug(err);
-    updatetStatus(simulationId, 'error', {
+    updateStatus(simulationId, 'error', {
       error: `fail to create simulation ${err.message}`,
-      ended: currentTime(),
+      ended: currentTimeFormatted(),
     });
   }
 };

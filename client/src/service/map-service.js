@@ -7,16 +7,9 @@ const uriBase = 'salt/v1/map';
 
 export default {
   async getMap(extent) {
-    // console.log('getMap')
-    const { min, max } = extent;
-    min.x -= min.x * 0.00001;
-    min.y -= min.y * 0.00003;
-    max.x += max.x * 0.00001;
-    max.y += max.y * 0.00001;
     return (await get(`${uriBase}?${query(extent)}`)).data;
   },
   async getLinks(extent) {
-    // console.log('getLinks')
     const { min, max } = extent;
     min.x -= min.x * 0.00001;
     min.y -= min.y * 0.00001;

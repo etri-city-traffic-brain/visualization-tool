@@ -52,9 +52,9 @@ module.exports = {
     urlBase: predictionApiBase,
   },
   server: {
-    tcpPort: 1337,
+    tcpPort: process.env['tcpPort'] || 1337,
     wsPort: 8082,
-    webPort: 80,
+    webPort: process.env['webPort'] || 80,
   },
   db: {
     mongodbUrl: 'mongodb://127.0.0.1:27017/map',
@@ -66,6 +66,6 @@ module.exports = {
       keepAlive: 1,
       connectTimeoutMS: 30000,
     },
-    lowDBFile: './db.json',
+    lowDBFile: process.env['db'] || './db.json',
   }
 };

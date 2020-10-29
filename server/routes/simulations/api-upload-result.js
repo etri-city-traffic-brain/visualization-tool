@@ -2,18 +2,12 @@ const fs = require('fs');
 const moment = require('moment');
 const multer = require('multer');
 const path = require('path');
-const dbUtils = require('../../main/dbms/db-utils');
-const cookSimulationResult = require('../../main/simulation-manager/simulation-result-cooker');
 
-const { getSimulations } = require('../../globals');
+const cookSimulationResult = require('../../main/simulation-manager/cook');
+
+const { getSimulations, updateStatus, currentTimeFormatted } = require('../../globals');
 
 const { saltPath: { output } } = require('../../config');
-
-const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
-
-function getCurrentTimeFormatted() {
-  return moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
-}
 
 const prepareDir = (targetPath) => {
   if (!fs.existsSync(targetPath)) {
@@ -44,7 +38,7 @@ function uploadResult(req, res) {
       return;
     }
 
-    const started = getCurrentTimeFormatted();
+    const started = currentTimeFormatted();
     getSimulations()
       .find({ id })
       .assign({ status: 'running', started })
@@ -54,17 +48,15 @@ function uploadResult(req, res) {
 
     try {
       await cookSimulationResult({
-        id,
+        simulationId: id,
         duration: simulation.configuration.end,
         period: simulation.configuration.period,
-      }, (status, text) => {
-        updatetStatus(id, status, text);
-      });
+      })
       getSimulations()
         .find({ id })
         .assign({
           status: 'finished',
-          ended: getCurrentTimeFormatted(),
+          ended: currentTimeFormatted(),
           error: null,
         })
         .write();
@@ -75,7 +67,7 @@ function uploadResult(req, res) {
         .find({ id })
         .assign({
           status: 'error',
-          ended: getCurrentTimeFormatted(),
+          ended: currentTimeFormatted(),
           error: `${err.message}, check data file format.`,
         })
         .write();

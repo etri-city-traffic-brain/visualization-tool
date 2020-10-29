@@ -14,7 +14,7 @@ const MAX_ROAD_ID_LENGTH = 16;
 const MAX_VEHICLES = 48;
 const EXTENT_LENGTH = 4;
 
-const charCodes2Str = codes => codes.map(d => String.fromCharCode(d)).join('').trim()
+const charCodes2Str = codes => codes.map(d => String.fromCharCode(d)).join('').replace(/\0/g,'').trim()
 
 const {
   double,

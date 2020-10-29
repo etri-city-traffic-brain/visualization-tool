@@ -2,9 +2,8 @@
 
 const cloudService = require('../../main/service/cloud-service');
 const downloader = require('../../main/simulation-manager/downloader');
-const cookSimulationResult = require('../../main/simulation-manager/simulation-result-cooker');
+const cookSimulationResult = require('../../main/simulation-manager/cook');
 const Status = require('../../main/simulation-manager/simulatoin-status');
-const dbUtils = require('../../main/dbms/db-utils');
 
 const { FINISHED } = Status;
 const {
@@ -14,7 +13,8 @@ const {
   },
 } = global.SALT;
 
-const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
+const { updateStatus } = require('../../globals');
+
 const downloadFiles = require('./download-files');
 
 const makeResultDownloader = ({ pathLocal, pathRemote, vmInfo }) => async (simulationId) => {
@@ -39,7 +39,7 @@ async function handle({ simulation, status, text = '' }) {
   try {
     vmInfo = await cloudService.getVmInfo(simulation.user);
   } catch (err) {
-    updatetStatus(simulation.id, 'error', {
+    updateStatus(simulation.id, 'error', {
       error: `Fail to retrieve VM package info - ${err.message}`,
     });
     return;
@@ -53,21 +53,19 @@ async function handle({ simulation, status, text = '' }) {
 
   if (status === FINISHED) {
     try {
-      updatetStatus(simulation.id, 'downloading');
+      updateStatus(simulation.id, 'downloading');
       await download(simulation.id);
-      updatetStatus(simulation.id, 'analyzing');
+      updateStatus(simulation.id, 'analyzing');
       cookSimulationResult({
-        id: simulation.id,
+        simulationId: simulation.id,
         duration: simulation.configuration.end,
         period: simulation.configuration.period,
-      }, (status, text) => {
-        updatetStatus(simulation.id, status, text);
-      });
+      })
     } catch (err) {
-      updatetStatus(simulation.id, 'error', { error: err.message });
+      updateStatus(simulation.id, 'error', { error: err.message });
     }
   } else {
-    updatetStatus(simulation.id, status, { text });
+    updateStatus(simulation.id, status, { text });
   }
 }
 

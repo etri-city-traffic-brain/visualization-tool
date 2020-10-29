@@ -1,4 +1,5 @@
 const express = require('express');
+const { link } = require('fs-extra');
 
 const mongoose = require('mongoose');
 const findFeatures = require('../../routes/map/find-features');
@@ -42,9 +43,18 @@ router.get('/:id', async (req, res) => {
     return;
   }
 
+  const map = {
+    links: 'ulinks',
+    cells: 'ucells',
+  }
+
+  const collectionName = map[linkOrCell]
+
   const { id: simulationId } = req.params;
-  const collection = useDb(DB_MAP).collection(linkOrCell);
+  console.log(simulationId, linkOrCell)
+  const collection = useDb(DB_MAP).collection(collectionName);
   const features = await findFeatures(collection, { extent, zoom });
+
   const fieldName = (linkOrCell === MAP_LINK) ? 'linkId' : 'cellId';
   const speeds = await useDb(DB_SIMULATION_RESULT)
     .collection(simulationId)

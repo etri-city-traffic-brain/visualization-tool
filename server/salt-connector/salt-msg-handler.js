@@ -24,13 +24,12 @@ function SaltMsgHandler() {
 
   const send = (simulationId, buffer) => {
     const socket = simulationIdToSocket[simulationId];
-    console.log('find sId', simulationId)
     if (socket) {
-      console.log('find socket')
       socket.write(buffer);
     }
   };
 
+  //   INIT
   const handleSaltInit = (socket, buffer) => {
     const initMsg = Init(buffer);
     const simulationId = initMsg.simulationId;
@@ -39,42 +38,36 @@ function SaltMsgHandler() {
     debug(`[INIT] ${simulationId}, ${buffer.length}`);
 
     const setBuffer = msgFactory.makeSet({
-      // extent: [127.12111, 37.544715, 127.122871, 37.533623],
-      extent: [127.10954, 37.57036,127.1576, 37.52477],
+      extent: [127.33342, 36.3517, 127.34806, 36.34478], // max.y 가 min.y 보다 작아야 함
       roadType: 1,
     });
 
     // just for test
      send(simulationId, setBuffer)
      debug('send Set')
-
-    //  setTimeout(() => {
-    //   const setBuffer = msgFactory.makeSet({
-    //     extent: [127.10954, 37.57036,127.1526, 37.52377],
-    //     roadType: 0,
-    //   });
-
-    //    send(simulationId, setBuffer)
-    //    debug('send Set')
-    //  }, 10000)
   };
 
+  //  DATA
   const handleSaltData = (socket, buffer) => {
     const data = Data(buffer);
     const simulationId = socketToSimulationId[socket];
-    debug(`[DATA] ${simulationId}, ${buffer.length}`);
+    debug(`[DATA] ${simulationId}, ROADS: ${data.roads.length} ${buffer.length}`);
     // debug(data)
     eventBus.emit('salt:data', {
+      event: 'salt:data',
       simulationId,
       ...data
     });
   };
 
+
+  //  STATUS
   const handleSaltStatus = (socket, buffer) => {
     const status = Status(buffer);
     const simulationId = socketToSimulationId[socket];
     debug(chalk.yellow(JSON.stringify(status)));
     eventBus.emit('salt:status', {
+      event: 'salt:status',
       simulationId,
       ...status
     });

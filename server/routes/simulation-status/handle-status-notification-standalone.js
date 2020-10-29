@@ -1,13 +1,8 @@
 
 
-const cookSimulationResult = require('../../main/simulation-manager/simulation-result-cooker');
-const dbUtils = require('../../main/dbms/db-utils');
+const cookSimulationResult = require('../../main/simulation-manager/cook');
 
-const { getSimulations } = require('../../globals');
-
-const { FINISHED } = require('../../main/simulation-manager/simulatoin-status');
-
-const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
+const { updateStatus } = require('../../globals');
 
 /**
  * handle simulation status event
@@ -17,23 +12,25 @@ const updatetStatus = dbUtils.simulationStatusUpdater(getSimulations);
  * @param {*} text
  */
 
-module.exports = async function processSimulationStatus({ simulation, status, text = '' }) {
+module.exports = async ({ simulation, status, text = '' }) => {
+  console.log('status', status)
   const { id, configuration } = simulation;
-  if (status !== FINISHED) {
-    updatetStatus(id, status, { text });
+  if (status !== 'finished') {
+    updateStatus(id, status, { text });
     return;
   }
 
+
+
   try {
-    updatetStatus(id, '처리중...');
+    updateStatus(id, '처리중...');
     await cookSimulationResult({
-      id,
+      simulationId: id,
       duration: configuration.end,
       period: configuration.period,
-    }, (status, text) => {
-      updatetStatus(id, status, text);
     });
   } catch (err) {
-    updatetStatus(id, 'error', { error: err.message });
+    console.log(err.message)
+    updateStatus(id, 'error', { error: err.message });
   }
 };

@@ -6,26 +6,27 @@
  * 2: when the simulation is finihsed
  */
 import StepPlayer from '@/stepper/step-runner';
+import stepperMixin from '@/stepper/mixin';
 
 import makeMap from '@/map2/make-map';
 import MapManager from '@/map2/map-manager';
+
 import WebSocketClient from '@/realtime/ws-client';
+
 import simulationService from '@/service/simulation-service';
-import stepperMixin from '@/stepper/mixin';
+
+import SimulationResult from '@/pages/SimulationResult.vue';
+
 import HistogramChart from '@/components/charts/HistogramChart';
 import Doughnut from '@/components/charts/Doughnut';
 import statisticsService from '@/service/statistics-service';
 import congestionColor from '@/utils/colors';
 import LineChart from '@/components/charts/LineChart';
 import BarChart from '@/components/charts/BarChart';
-// import D3SpeedBar from '@/components/d3/D3SpeedBar';
-
-import SimulationResult from '@/pages/SimulationResult.vue';
-const mapId = `map-${Math.floor(Math.random() * 100)}`;
-
 import UniqCongestionColorBar from '@/components/CongestionColorBar';
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt';
 import UniqMapChanger from '@/components/UniqMapChanger';
+
 
 import region from '@/map2/region'
 
@@ -51,6 +52,8 @@ const makeLinkSpeedChartData = (v1, v2, v3) => {
   }
 }
 
+const { log } = console
+
 export default {
   name: 'SimulationResultMap',
   components: {
@@ -65,10 +68,10 @@ export default {
   },
   data() {
     return {
-      simulationId: '', // simulation id
+      simulationId: null,
       simulation: { configuration: {} },
       map: null,
-      mapId,
+      mapId: `map-${Math.floor(Math.random() * 100)}`,
       mapHeight: 800, // map view height
       mapManager: null,
       speedsPerStep: {},
@@ -76,11 +79,8 @@ export default {
       currentStep: 1,
       slideMax: 0,
       showLoading: false,
-      // gridData: {},
-      // isGridView: false,
-      zoomPrevious: 17,
       congestionColor,
-      currentEdge: '',
+      currentEdge: null,
       playBtnToggle: false,
       player: null,
       wsClient: null,
@@ -94,7 +94,7 @@ export default {
       currentZoom: '',
       currentExtent: '',
       wsStatus: 'ready',
-      avgSpeed: '27',
+      avgSpeed: 0,
       linkHover: '',
       progress: 0,
     };
@@ -114,29 +114,50 @@ export default {
   async mounted() {
     this.simulationId = this.$route.params ? this.$route.params.id : '';
     this.showLoading = true
-    this.mapHeight = window.innerHeight - 480;
-    this.map = makeMap({ mapId });
+    this.resize()
+    this.map = makeMap({
+      mapId: this.mapId
+    });
 
-    const { simulation, slideMax } = await simulationService.getSimulationInfo(this.simulationId);
+    // const { simulation } = await simulationService.getSimulationInfo(this.simulationId);
+    // if(!simulation) {
+    //   return;
+    // }
+    await this.updateSimulation()
 
-    this.simulation = simulation;
+    // this.simulation = simulation;
 
     this.mapManager = MapManager({
       map: this.map,
       simulationId: this.simulationId,
-      eventBus:this
+      eventBus: this
     });
+
+    this.mapManager.loadMapData();
+    if (this.simulation.status === 'finished') {
+      await this.updateChart()
+    }
+    this.wsClient = WebSocketClient({
+      simulationId: this.simulationId,
+      eventBus: this
+    })
+    this.wsClient.init()
+
+    this.showLoading = false
 
     this.$on('link:selected', (link) => {
       this.currentEdge = link;
       if(link.speeds) {
-        // this.selectedEdge = link;
+        if(!this.speedsPerStep.datasets) {
+          return;
+        }
         this.chart.linkSpeeds = makeLinkSpeedChartData(
           link.speeds,
           this.speedsPerStep.datasets[0].data,
           new Array(link.speeds.length).fill(this.edgeSpeed())
         )
       }
+
       return;
     })
 
@@ -145,7 +166,6 @@ export default {
       return;
     })
 
-
     this.$on('salt:data', (d) => {
       this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
         acc += cur
@@ -153,8 +173,17 @@ export default {
       }, 0) / d.roads.length
     })
 
-    this.$on('salt:status', (status) => {
+    this.$on('salt:status', async (status) => {
       this.progress = status.progress
+      if(status.status ===1 && status.progress === 100) {
+        //
+      }
+    })
+
+    this.$on('salt:finished', async () => {
+      log('**** FINISHED *****')
+      await this.updateSimulation()
+      await this.updateChart()
     })
 
     this.$on('map:moved', ({zoom, extent}) => {
@@ -165,44 +194,45 @@ export default {
     this.$on('ws:open', () => {
       this.wsStatus = 'open'
     });
+
     this.$on('ws:error', (error) => {
       this.wsStatus = 'error'
       this.makeToast(error.message, 'warning')
     });
+
     this.$on('ws:close', () => {
       this.wsStatus = 'close'
       this.makeToast('ws connection closed', 'warning')
     });
 
-    this.mapManager.loadMapData();
-    if (this.simulation.status === 'finished') {
-      this.slideMax = slideMax;
+    window.addEventListener('resize', this.resize);
+  },
+  methods: {
+    ...stepperMixin,
+    toggleState() {
+      return this.playBtnToggle ? 'M' : 'A'
+    },
+
+    async updateSimulation() {
+      const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId);
+      this.simulation = simulation;
+      this.slideMax = ticks - 1
+    },
+
+    async updateChart() {
+
+
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this));
       this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, 0);
       this.chart.histogramData = await statisticsService.getHistogramChart(this.simulationId);
       this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0);
       this.chart.pieData = await statisticsService.getPieChart(this.simulationId);
       this.speedsPerStep = await statisticsService.getSummaryChart(this.simulationId);
-
       this.chart.linkSpeeds = makeLinkSpeedChartData(
         [],
         this.speedsPerStep.datasets[0].data,
         new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed())
       )
-    } else if(this.simulation.status === 'running') {
-      this.wsClient = WebSocketClient({
-        simulationId: this.simulationId,
-        eventBus: this
-      })
-      this.wsClient.init()
-    }
-    window.addEventListener('resize', this.resize);
-    this.showLoading = false
-  },
-  methods: {
-    ...stepperMixin,
-    toggleState() {
-      return this.playBtnToggle ? 'M' : 'A'
     },
     edgeSpeed() {
       if(this.currentEdge && this.currentEdge.speeds) {
@@ -223,14 +253,9 @@ export default {
         this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, step);
       }
     },
-    center(code) {
-      const center = region[code] || region[1]
-      this.map.animateTo({
-        center,
-      },
-      {
-        duration: 2000
-      })
+    centerTo(locationCode) {
+      const center = region[locationCode] || region[1]
+      this.map.animateTo({ center, }, { duration: 2000 })
     },
     makeToast(msg, variant='info') {
       this.$bvToast.toast(msg, {

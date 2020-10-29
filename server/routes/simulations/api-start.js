@@ -14,10 +14,10 @@
 const debug = require('debug')('api:create');
 
 // const { RUNNING, ERROR } = require('../../main/simulation-manager/simulatoin-status');
-const { updatetStatus, currentTime, getSimulations } = require('../../globals');
+const { updateStatus, currentTimeFormatted, getSimulations } = require('../../globals');
 
 // const runSimulator = require('../../main/simulation-manager/simulation-runner');
-const run = require('../../main/simulation-manager/simulation-runner-standalone');
+const exec = require('../../main/simulation-manager/exec-salt');
 // const makeUpload = require('../../main/uploader-scp');
 /**
  * upload data files to master and workers
@@ -49,12 +49,12 @@ async function start(req, res) {
 
   try {
     res.json({ id, status: 'running', result: '' });
-    updatetStatus(id, 'running', { started: currentTime() });
-    const result = await run({ simulationId: id });
+    updateStatus(id, 'running', { started: currentTimeFormatted() });
+    const result = await exec({ simulationId: id });
   } catch (err) {
-    updatetStatus(id, 'error', {
+    updateStatus(id, 'error', {
       error: `fail to start simulation ${err.message}`,
-      ended: currentTime(),
+      ended: currentTimeFormatted(),
     });
     res.status(500).json({ id, status: 'error', error: err.message });
   }

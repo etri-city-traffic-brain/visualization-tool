@@ -1,17 +1,12 @@
 const debug = require('debug')('salt-connector:connector');
 const chalk = require('chalk');
 
+const cookSimulationResult = require('../main/simulation-manager/cook');
+const { getSimulation, updateStatus } = require('../globals');
+
 const startWebSocketServer = require('./ws-server');
 const startSlatMessageReceiver = require('./tcp-server');
-const QueueManager = require('./queue-manager');
-const { tcpPort, wsPort } = require('../config').server;
-const config = require('../config');
-const serialize = obj => JSON.stringify(obj);
-const msgFactory = require('./msg-factory');
-const {
-  distributeData,
-  distributeDataToSalt,
-} = require('./msg-distributor');
+const saltMsgFactory = require('./msg-factory');
 
 /**
  * SALT connector server
@@ -24,23 +19,50 @@ const {
 module.exports = (httpServer, tcpPort) => {
   debug(chalk.yellow('Connector service start'));
   const tcpServer = startSlatMessageReceiver(tcpPort);
-  const wss = startWebSocketServer(httpServer);
+  const webSocketServer = startWebSocketServer(httpServer);
 
   // send to simulator
-  wss.on('salt:set', (data) => {
-    tcpServer.send(data.simulationId, msgFactory.makeSet(data))
+  webSocketServer.on('salt:set', (data) => {
+    tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
   })
 
   // send to web
-  tcpServer.on('salt:status', (data) => {
+  tcpServer.on('salt:status', async (data) => {
+    let { simulationId } = data
     debug(data);
-    data.event = 'salt:status'
-    wss.send(data.simulationId, data)
+    webSocketServer.send(data.simulationId, { ...data })
+
+    if(data.status === 1 && data.progress === 100) {
+      debug('*** SALT FINISHED ***')
+
+      const simulation = getSimulation(simulationId)
+      if (!simulation) {
+        debug('cannot find simulation', simulation)
+        return;
+      }
+
+      const { configuration } = simulation
+
+      try {
+        await cookSimulationResult({
+          simulationId,
+          duration: configuration.end,
+          period: configuration.period,
+        });
+
+        // just for test
+        updateStatus(simulationId, 'finished')
+        webSocketServer.send(simulationId, {
+          event: 'salt:finished'
+        })
+      } catch (err) {
+        debug(err.message)
+      }
+    }
   });
 
   // send to web
   tcpServer.on('salt:data', (data) => {
-    data.event = 'salt:data'
-    wss.send(data.simulationId, data)
+    webSocketServer.send(data.simulationId, { ...data })
   })
 }

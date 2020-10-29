@@ -75,7 +75,7 @@ module.exports = (port = 1337) => {
   });
 
   server.on('error', (socket) => {
-    debug(green(`[error] ${socket.remoteAddress}`));
+    debug(green(`[server-error] ${socket.remoteAddress}`));
   });
 
   server.listen(port, '0.0.0.0');

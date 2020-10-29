@@ -11,15 +11,14 @@
           </b-button>
         </b-button-group>
         <uniq-congestion-color-bar/>
-          <b-button @click="center(1)" class="ml-1" size="sm" variant="dark"> 대전(도안) </b-button>
-          <b-button @click="center(2)" class="ml-1" size="sm" variant="dark"> 세종(시청) </b-button>
-
+        <b-button @click="centerTo(1)" class="ml-1" size="sm" variant="dark"> 대전(도안) </b-button>
+        <b-button @click="centerTo(2)" class="ml-1" size="sm" variant="dark"> 세종(시청) </b-button>
         <uniq-map-changer :map="map" />
       </div>
     </div>
 
     <b-sidebar
-      title="Properties"
+      title="UNIQ-VIS"
       v-model="sidebar"
       bg-variant="dark"
       text-variant="white"
@@ -35,10 +34,13 @@
         <b-button size="sm">
           {{ linkHover }}
         </b-button>
+        <h3> 시뮬레이션 상태: {{ simulation.status }} </h3>
       </b-card>
     </b-sidebar>
 
-    <!-- MAP CONTAINER -->
+    <!--
+      CONTAINER MAP
+    -->
     <b-card
       bg-variant="dark"
       border-variant="dark"
@@ -82,7 +84,9 @@
     </b-card>
 
 
-    <!-- BOTTOM CONTAINER -->
+    <!--
+      CONTAINER BOTTOM (FINISHED)
+    -->
     <b-card
       class="uniq-box-panel mt-0"
       bg-variant="dark"
@@ -106,7 +110,7 @@
           <b-badge variant="dark"> {{ simulation.configuration.period / 60}}분 주기 </b-badge>
           <b-badge variant="dark"> {{ simulation.configuration.fromDate }} {{ simulation.configuration.fromTime }} </b-badge> ~
           <b-badge variant="dark"> {{ simulation.configuration.toDate }} {{ simulation.configuration.toTime }} </b-badge>
-          <b-badge variant="dark"> {{ currentEdge.id || 'NO LINK' }} </b-badge>
+          <b-badge variant="dark"> {{ currentEdge ? currentEdge.id : 'NO LINK' }} </b-badge>
           <b-badge variant="light" :style="{'background-color': congestionColor(edgeSpeed())}" > {{ edgeSpeed().toFixed(2) }} km </b-badge>
         </h5>
         <b-card>
@@ -171,50 +175,76 @@
      </b-card>
 
     <!--
-      STATUS RUNNING PANEL
+      CONTAINER BOTTOM (RUNNING)
     -->
     <b-card
       text-variant="light"
       bg-variant="dark"
       border-variant="dark"
       v-if="simulation.status === 'running'"
-      class="p-0 m-0"
-      style="height:400px; border-radius: 0px;"
+      class="p-2 mt-0"
+      style="height:400px; border-radius: 0px; overflow:auto;"
+      no-body
     >
-      <h3>{{ simulationId }}</h3>
-      <b-card-text>{{ currentExtent[0] }} {{ currentExtent[1] }} </b-card-text>
-      <b-button>
-        <b-icon icon="caret-right-fill"/>
-      </b-button>
-      <b-button>
-        <b-icon icon="stop-fill"/>
-      </b-button>
-      <b-button  @click="connectWebSocket">
-        connect ws <b-icon icon="plug"> </b-icon>
-      </b-button>
-      <b-button>
-        시뮬레이션 상태
-        <b-icon v-if="simulation.status==='running'" icon="circle-fill" variant="success" animation="throb" font-scale="1"></b-icon>
-        <b-icon v-else icon="circle-fill" variant="danger" animation="throb" font-scale="1"></b-icon>
-      </b-button>
-      <b-button>
-        서버 연결상태
-        <b-icon v-if="wsStatus==='open'" icon="circle-fill" variant="success" animation="throb" font-scale="1"></b-icon>
-        <b-icon v-if="wsStatus==='error'" icon="circle-fill" variant="danger" animation="throb" font-scale="1"></b-icon>
-        <b-icon v-if="wsStatus==='close'" icon="slash-circle" variant="warning" font-scale="1"></b-icon>
-      </b-button>
-      <!-- <b-button> 평균속도</b-button> -->
-      <!-- <b-button :style="{'background-color': congestionColor(avgSpeed)}" > {{ avgSpeed }} km </b-button> -->
-
-      <b-progress  striped :animated="progress !== 100" height="2rem" :value="progress" show-progress class="mb-2 mt-2"></b-progress>
-
-      <h3>진행률: {{ this.progress }} % </h3>
-      <h3 :style="{'color': congestionColor(avgSpeed)}">평균속도: {{ avgSpeed }} km </h3>
-
-      <b-button v-if="progress === 100"  @click="connectWebSocket" size="sm" class="ml-1">
-        분석
-      </b-button>
-
+      <uniq-simulation-result-ext :simulation="simulation" />
+      <b-card
+        text-variant="light"
+        bg-variant="dark"
+        border-variant="secondary"
+        no-body
+        class="mt-1"
+      >
+        <b-card-body>
+          <b-card-text>
+            <div>
+              시뮬레이터 상태: {{ simulation.status.toUpperCase() }}
+            </div>
+            평균속도: <span :style="{'color': congestionColor(avgSpeed)}"> {{ (avgSpeed).toFixed(2) }} km </span>
+            <b-form inline>
+              서버 연결상태: &nbsp;
+              <b-icon v-if="wsStatus==='open'" icon="circle-fill" variant="primary" animation="throb" font-scale="1"></b-icon>
+              <b-icon v-else icon="slash-circle" variant="warning" font-scale="1"></b-icon>
+              &nbsp;
+              <b-button v-if="wsStatus !=='open'" @click="connectWebSocket" size="sm">
+                연결 <b-icon icon="plug"> </b-icon>
+              </b-button>
+            </b-form>
+          </b-card-text>
+        </b-card-body>
+      </b-card>
+      <b-card
+        text-variant="light"
+        bg-variant="dark"
+        border-variant="secondary"
+        no-body
+        class="mt-1"
+        >
+          <b-card-body>
+            진행률:
+            <b-progress
+              striped
+              :animated="progress !== 100"
+              height="1rem"
+              show-progress class="w-100 mb-2 mt-2">
+              <b-progress-bar :value="progress" animated striped>
+                <span><b-icon icon="truck"></b-icon> {{ progress }} %</span>
+              </b-progress-bar>
+            </b-progress>
+            <b-form inline>
+              <b-button v-if="simulation.status!=='running'" size="sm">
+                시뮬레이션 시작 <b-icon icon="caret-right-fill"/>
+              </b-button>
+              <b-button size="sm">
+                시뮬레이션 중지 <b-icon icon="stop-fill"/>
+              </b-button>
+            </b-form>
+          </b-card-body>
+      </b-card>
+      <b-progress height="1rem" v-if="progress === 100">
+        <b-progress-bar value="100" animated striped>
+          <span><strong> processing {{ simulation.status }} </strong></span>
+        </b-progress-bar>
+      </b-progress>
     </b-card>
 
     <b-modal id="modal-xl" size="xl" ok-only :title="simulationId">
@@ -287,4 +317,6 @@
     border: 3px solid #343a40;
   }
 
+  /* @import '@/assets/images/gb1.jpg'; */
+  @import '@/assets/styles/style.css';
 </style>

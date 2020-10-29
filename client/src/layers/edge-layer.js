@@ -1,45 +1,41 @@
-// import * as maptalks from '../map/maptalks';
 
 import * as maptalks from 'maptalks'
 
 import color from '@/utils/colors';
 
+const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1.5
+
 function updateCongestion(edgeLayer, map, linkSpeeds = {}, step = 0) {
-  const geometries = edgeLayer.getGeometries()
-  const zoom = map.getZoom();
-  const alpha = (Math.abs(17 - zoom) + 1.5) * 2
-  geometries.forEach((geometry) => {
+  const lineWidth = calcLineWidth(map.getZoom())
+  edgeLayer.getGeometries().forEach((geometry) => {
     const speeds = linkSpeeds[geometry.getId()] || [];
     const speed = speeds[step];
     if(speed) {
-      let lineColor = color(speeds[step]) || 'gray';
-      if (speed >= 60) {
-        lineColor = 'green'
-      }
+      let lineColor = color(speeds[step]) || '#808080';
       geometry.updateSymbol({
+        lineWidth,
         lineColor,
-        lineWidth: alpha,
-        'markerPlacement' : 'vertex-last', //vertex, point, vertex-first, vertex-last, center
-        lineDasharray : []
+        markerPlacement: 'vertex-last', //vertex, point, vertex-first, vertex-last, center
+        lineDasharray: []
       });
     } else {
       geometry.updateSymbol({
         lineWidth: 1,
-        lineColor: 'orange',
-        'markerPlacement' : 'vertex-last', //vertex, point, vertex-first, vertex-last, center
-        // lineDasharray : [5, 5]
+        lineColor: '#808080',
+        markerPlacement: 'vertex-last', //vertex, point, vertex-first, vertex-last, center
+        lineDasharray: [5, 5]
       });
     }
   });
 }
 
-function uuu(edgeLayer, map, edgeSpeeds = {}) {
-  edgeLayer.getGeometries().forEach((edge) => {
-    const road = edgeSpeeds[edge.getId()];
+function updateRealtimeSpeed(edgeLayer, speedByEdgeId = {}, zoom) {
+  edgeLayer.getGeometries().forEach((geometry) => {
+    const road = speedByEdgeId[geometry.getId()];
     if(road) {
-      edge.updateSymbol({
+      geometry.updateSymbol({
+        lineWidth: calcLineWidth(zoom),
         lineColor: color(road.speed),
-        lineWidth: 4,
       });
     }
   });
@@ -48,14 +44,7 @@ function uuu(edgeLayer, map, edgeSpeeds = {}) {
 
 export default (map, eventBus) => {
 
-  const layer = new maptalks.VectorLayer('edgeLayer', [], {
-    // enableAltitude: true,
-    // drawAltitude: {
-    //   polygonFill: '#1bbc9b',
-    //   polygonOpacity: 0.3,
-    //   lineWidth: 0,
-    // },
-  })
+  const edgeLayer = new maptalks.VectorLayer('edgeLayer', [])
 
   map.on('zoomend moveend', (event) => {
     const map = event.target;
@@ -66,21 +55,19 @@ export default (map, eventBus) => {
     }
   });
 
-  layer.updateCongestion = (currentSpeedsPerLink, currentStep) => {
-    updateCongestion(layer, map, currentSpeedsPerLink, currentStep)
+  edgeLayer.updateCongestion = (currentSpeedsPerLink, currentStep) => {
+    updateCongestion(edgeLayer, map, currentSpeedsPerLink, currentStep)
   }
 
   if (eventBus) {
     eventBus.$on('salt:data', (data) => {
       let roadMap = data.roads.reduce((acc, cur) => {
-        // acc[cur.roadId] = cur
-        acc[cur.roadId.substring(0, 14)] = cur
+        acc[cur.roadId.trim()] = cur
         return acc
       }, {})
 
-      uuu(layer, map, roadMap)
+      updateRealtimeSpeed(edgeLayer, roadMap, map.getZoom())
     });
   }
-
-  return layer
+  return edgeLayer
 };
