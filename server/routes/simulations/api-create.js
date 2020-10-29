@@ -14,83 +14,52 @@
 const debug = require('debug')('api:create');
 const fs = require('fs');
 const util = require('util');
-const unzip = util.promisify(require('extract-zip'));
 const createError = require('http-errors');
 
 const mkdir = util.promisify(fs.mkdir);
 const writeFile = util.promisify(fs.writeFile);
 
 const makeScenario = require('../../main/simulation-manager/make-scenario');
-const makeSaltConfig = require('../../main/simulation-manager/make-salt-config');
-const { downloadScenarioByRegion } = require('../../main/service/scenario-downloader');
-
-// const { ERROR } = require('../../main/simulation-manager/simulatoin-status');
-const cloudService = require('../../main/service/cloud-service');
-const prepareScenarioFile = require('./utils/prepare-scenario');
-
-const createSimulation = require('./utils/create-simulation-row');
+const downloadScenario = require('./utils/prepare-scenario');
+const registorSimulation = require('./utils/create-simulation-row');
 
 const {
   updateStatus, currentTimeFormatted, getSimulations, config,
 } = require('../../globals');
 
-const { base } = config;
-
+const { base, server } = config;
+const host = server.ip
 const existSimulation = id => getSimulations().find({ id }).value();
 const stringify = obj => JSON.stringify(obj, false, 2);
-
-async function prepareScenario(simulationDir, { id: simulationId, configuration }) {
-  const route = configuration.routes.map(route => `../routes/${route}`).join(' ');
-  await writeFile(
-    `${simulationDir}/salt.scenario.json`,
-    stringify(makeScenario(Object.assign({}, configuration, { id: simulationId, route }))),
-  );
-}
-
-async function prepareSaltConfig(simulationDir) {
-  await writeFile(
-    `${simulationDir}/salt.config.json`,
-    stringify(makeSaltConfig(cloudService.getVmInfo())),
-  );
-}
 
 /**
  * prepare simulation data
  */
 module.exports = async (req, res, next) => {
-  debug('create simulation');
-  const { id: simulationId } = req.body;
+  const { body } = req
+  const { id, configuration } = body;
+  debug(`prepare simulation ${id}`);
 
-  if (existSimulation(simulationId)) {
-    next(createError(409, `Simulation [${simulationId}] already exists...`));
+  if (existSimulation(id)) {
+    next(createError(409, `Simulation [${id}] already exists...`));
     return;
   }
-  const simulationDir = `${base}/data/${simulationId}`;
+  const simulationDir = `${base}/data/${id}`;
   try {
     await mkdir(simulationDir);
-    await createSimulation(req.body, getSimulations(), currentTimeFormatted());
-    updateStatus(simulationId, 'preparing', {});
-
-    await prepareScenario(simulationDir, req.body);
-    await prepareSaltConfig(simulationDir, simulationId);
-
-    updateStatus(simulationId, 'downloading scenario...', {});
-
-    // const scenarioFilePath = await prepareScenarioFile(
-    //   simulationDir,
-    //   req.body.configuration,
-    //   downloadScenarioByRegion,
-    // );
-    // await unzip(scenarioFilePath, { dir: simulationDir });
-    setTimeout(() => {
-      updateStatus(simulationId, 'ready', {});
-      res.json({ simulationId });
-    }, 10000);
+    await registorSimulation(body, getSimulations(), currentTimeFormatted());
+    updateStatus(id, 'preparing', {});
+    await writeFile(`${simulationDir}/salt.scenario.json`, stringify(makeScenario({host, ...body})));
+    // await downloadScenario(simulationDir, configuration );
+    updateStatus(id, 'ready', {});
+    debug(`simulation ${id} is ready!`)
+    res.json({ id });
   } catch (err) {
     debug(err);
-    updateStatus(simulationId, 'error', {
+    updateStatus(id, 'error', {
       error: `fail to create simulation ${err.message}`,
       ended: currentTimeFormatted(),
     });
+    next(createError(500, err.message))
   }
 };

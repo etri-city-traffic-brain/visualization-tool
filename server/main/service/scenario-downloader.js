@@ -15,7 +15,6 @@ const {
 } = require('../../config');
 
 async function download(url, targetDir = './') {
-  console.log('download');
   const targetFilePath = path.resolve(targetDir, 'data.zip');
 
   try {

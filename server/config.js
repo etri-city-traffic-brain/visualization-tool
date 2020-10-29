@@ -52,6 +52,7 @@ module.exports = {
     urlBase: predictionApiBase,
   },
   server: {
+    ip: '127.0.0.1',
     tcpPort: process.env['tcpPort'] || 1337,
     wsPort: 8082,
     webPort: process.env['webPort'] || 80,

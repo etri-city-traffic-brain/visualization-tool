@@ -2,77 +2,43 @@
  * make simulation scenario file
  * author: beanpole
  */
-const R = require('ramda');
 
-function buildInput(id, route, partitions) {
-  if (partitions === 0) {
-    // return {
-    //   fileType: 'SALT',
-    //   node: `${id}/node.xml`,
-    //   link: `${id}/edge.xml`,
-    //   connection: `${id}/connection.xml`,
-    //   trafficLightSystem: `${id}/tss.xml`,
-    //   route: `routes/${route}`,
-    // };
-    return {
-      fileType: 'SALT',
-      node: 'node.xml',
-      link: 'edge.xml',
-      connection: 'connection.xml',
-      trafficLightSystem: 'tss.xml',
-      route,
-    };
-  }
 
-  // const results = R.range(0, partitions).map((value, idx) => ({
-  //   'sub-id': (idx + 1).toString(),
-  //   fileType: 'SALT',
-  //   node: `${id}/sub${idx}.node.xml`,
-  //   link: `${id}/sub${idx}.edge.xml`,
-  //   connection: `${id}/sub${idx}.connection.xml`,
-  //   trafficLightSystem: `${id}/sub${idx}.tss.xml`,
-  //   route: `routes/${route}`,
-  // }));
-  const results = R.range(0, partitions).map((value, idx) => ({
-    'sub-id': (idx + 1).toString(),
-    fileType: 'SALT',
-    node: `sub${idx}.node.xml`,
-    link: `sub${idx}.edge.xml`,
-    connection: `sub${idx}.connection.xml`,
-    trafficLightSystem: `sub${idx}.tss.xml`,
-    route,
-  }));
-
-  return {
-    input: results,
-  };
+const DAYS = {
+  1: 'mon',
+  2: 'tue',
+  3: 'wed',
+  4: 'thu',
+  5: 'fri',
+  6: 'sat',
+  0: 'sun'
 }
 
-/**
- *
- * @param {level} string
- */
-function generate({
-  id,
-  begin,
-  end,
-  route,
-  level = 'cell',
-  period,
-  partitions,
-}) {
-  const property = buildInput(id, route, partitions * 1);
-  const propertyName = partitions === 0 ? 'input' : 'inputs';
+module.exports = ({ id, host, configuration: {begin, end, day, days, period,}}) => {
+
+  let routes = [`${DAYS[day]}.xml`]
+
+  if (days > 1) {
+    routes = new Array(days).fill('').map((v, i) => `${DAYS[(i + day) % 7]}.xml`)
+  }
+
   return {
     scenario: {
       id,
+      host,
+      port: 1337,
       time: {
-        // begin: begin * 60 * 60, // to seconds
-        // end: (end + 1) * 60 * 60, // to seconds
         begin,
         end,
       },
-      [propertyName]: property,
+      input:  {
+        fileType: 'SALT',
+        node: 'node.xml',
+        link: 'edge.xml',
+        connection: 'connection.xml',
+        trafficLightSystem: 'tss.xml',
+        route: routes.map(route => `${route}`).join(' '),
+      },
       parameter: {
         minCellLength: 30.0,
         vehLength: 5.0,
@@ -80,11 +46,9 @@ function generate({
       output: {
         fileDir: `output/${id}/`,
         period,
-        level,
+        level: 'cell',
         save: 1,
       },
     },
   };
-}
-
-module.exports = generate;
+};
