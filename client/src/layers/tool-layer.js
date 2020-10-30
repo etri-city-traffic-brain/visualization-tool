@@ -21,25 +21,33 @@ export default (map, getGeometries, eventBus) => {
     }
   });
 
-  let selectedEdges = {}
-  circle.on('mouseup', () => {
+  let selectedEdges = null
+  circle.on('dragend', () => {
     selectedEdges = {}
     getGeometries().forEach(obj => {
       if(circle.containsPoint(obj.getFirstCoordinate()) || circle.containsPoint(obj.getLastCoordinate())) {
-        // obj.updateSymbol({
-        //   lineColor: 'black',
-        //   lineDasharray: []
-        // })
-        // selectedEdges.push(obj)
         selectedEdges[obj.properties.LINK_ID] = obj
       }
     })
   });
 
-  layer.updateRealtimeData = (realtimeEdgeData, realTimeEdges) => {
+  layer.toggleFocusTool = () => {
+    circle.setCoordinates(map.getCenter())
+  }
 
+  layer.updateRealtimeData = (realtimeEdgeData, realTimeEdges) => {
+    if(selectedEdges == null) {
+      selectedEdges = {}
+      getGeometries().forEach(obj => {
+        if(circle.containsPoint(obj.getFirstCoordinate()) || circle.containsPoint(obj.getLastCoordinate())) {
+          selectedEdges[obj.properties.LINK_ID] = obj
+        }
+      })
+    }
+    const xxx = []
     const { speed, vehicles } = realTimeEdges.reduce((acc, cur) => {
       if(selectedEdges[cur.roadId]) {
+        xxx.push(cur)
         acc.speed += cur.speed;
         acc.vehicles += cur.numVehicles;
       }
@@ -51,8 +59,11 @@ export default (map, getGeometries, eventBus) => {
     if(eventBus) {
       eventBus.$emit('map:focus', {
         speed: (avgSpeed).toFixed(2),
-        vehicles
+        vehicles,
+        realTimeEdges: xxx
       })
+
+      console.log(xxx)
     }
   }
 

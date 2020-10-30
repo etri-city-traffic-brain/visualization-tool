@@ -1,4 +1,5 @@
 <template>
+  <div>
   <b-container fluid class="m-0 p-0">
     <div class="uniq-top-menu">
       <div>
@@ -92,7 +93,7 @@
       bg-variant="dark"
       border-variant="dark"
       no-body
-      style="height:400px;overflow:auto"
+      style="height:400px;overflow-y:auto;overflow-x:hidden"
       v-if="simulation.status === 'finished'"
     >
       <!-- <div class="px-1 py-0" > -->
@@ -182,99 +183,127 @@
       bg-variant="dark"
       border-variant="dark"
       v-if="simulation.status === 'running'"
-      class="p-2 mt-0"
-      style="height:400px; border-radius: 0px; overflow:auto;"
+      class="p-1 mt-0"
+      style="height:400px; border-radius: 0px; overflow-y:auto;overflow-x:hidden"
       no-body
     >
-      <uniq-simulation-result-ext :simulation="simulation" />
+      <!-- <uniq-simulation-result-ext :simulation="simulation" /> -->
+
+      <b-card-group deck>
+        <b-card
+          text-variant="light"
+          bg-variant="secondary"
+          border-variant="dark"
+          no-body
+          class="m-0"
+        >
+
+          <b-card-body>
+            <b-card-text>
+              시뮬레이션: <strong>{{ simulationId }} </strong>
+
+            </b-card-text>
+            <b-card-text>
+              서버 연결상태: {{ wsStatus.toUpperCase() }}
+              <div>
+                시뮬레이션 상태: {{ simulation.status.toUpperCase() }}
+              </div>
+              <div>평균속도:</div>
+              <b-form inline>
+              <b-progress  max="70" class="w-50">
+                <b-progress-bar :value="avgSpeed" v-bind:style="{'background-color':congestionColor(avgSpeed)}"></b-progress-bar>
+              </b-progress> &nbsp;
+              <span :style="{'color': congestionColor(avgSpeed)}"> {{ (avgSpeed).toFixed(2) }} km </span>
+              </b-form>
+              <b-form inline>
+                <b-button v-if="wsStatus !=='open'" @click="connectWebSocket" size="sm">
+                  연결 <b-icon icon="plug"> </b-icon>
+                </b-button>
+              </b-form>
 
 
-       <div class="d-flex bd-highlight" >
-        <div class="flex-fill bd-highlight">
-      <b-card
-        text-variant="light"
-        bg-variant="dark"
-        border-variant="secondary"
-        no-body
-        class="mt-1"
-      >
-        <b-card-body>
-          <b-card-text>
-            <div>
-              시뮬레이터 상태: {{ simulation.status.toUpperCase() }}
-            </div>
-            평균속도: <span :style="{'color': congestionColor(avgSpeed)}"> {{ (avgSpeed).toFixed(2) }} km </span>
-            <b-form inline>
-              서버 연결상태: &nbsp;
-              <b-icon v-if="wsStatus==='open'" icon="circle-fill" variant="primary" animation="throb" font-scale="1"></b-icon>
-              <b-icon v-else icon="slash-circle" variant="warning" font-scale="1"></b-icon>
-              &nbsp;
-              <b-button v-if="wsStatus !=='open'" @click="connectWebSocket" size="sm">
-                연결 <b-icon icon="plug"> </b-icon>
-              </b-button>
-            </b-form>
-          </b-card-text>
-        </b-card-body>
-      </b-card>
-        </div>
+            속도분포(뷰포트)
+            <doughnut :chartData="pieData" :height="110" />
 
-        <div class="p-2 flex-fill bd-highlight">
+
+            </b-card-text>
+          </b-card-body>
+        </b-card>
           <b-card
-            text-variant="light"
-            bg-variant="dark"
-            border-variant="secondary"
-            no-body
-            class="mt-1"
-          >
-            <b-card-body>
-              <b-card-text>
-                평균속도: {{ focusData.speed }} km,
-                통행차량: {{ focusData.vehicles }}대
-              </b-card-text>
-            </b-card-body>
-          </b-card>
-        </div>
-       </div>
-      <b-card
-        text-variant="light"
-        bg-variant="dark"
-        border-variant="secondary"
-        no-body
-        class="mt-1"
+          text-variant="light"
+          bg-variant="secondary"
+          border-variant="dark"
+          no-body
+          class="m-0"
         >
           <b-card-body>
-            진행률:
-            <b-progress
-              striped
-              :animated="progress !== 100"
-              height="1rem"
-              show-progress class="w-100 mb-2 mt-2">
-              <b-progress-bar :value="progress" animated striped>
-                <span><b-icon icon="truck"></b-icon> {{ progress }} %</span>
-              </b-progress-bar>
-            </b-progress>
+            <b-card-text>
+              <h5>선택지역 통행차량: {{ focusData.vehicles }} 대, </h5>
+              <h5>선택지역 평균속도: </h5>
+              <b-form inline>
+                <b-progress  max="70" class="w-50">
+                  <b-progress-bar :value="focusData.speed" v-bind:style="{'background-color':congestionColor(focusData.speed)}"></b-progress-bar>
+                </b-progress> &nbsp;
+                <span>{{ focusData.speed }} km </span>
+              </b-form>
+            </b-card-text>
+            <b-card-text>
+            속도분포(선택영역)
+            <doughnut :chartData="pieData2" :height="110"/>
+            </b-card-text>
+          </b-card-body>
+        </b-card>
+        <b-card
+          text-variant="light"
+          bg-variant="secondary"
+          border-variant="dark"
+          no-body
+          class="m-0"
+        >
+          <b-card-body>
+            <b-card-text>
+              <h5>시뮬레이션 진행률:</h5>
+              <b-progress
+                striped
+                :animated="progress !== 100"
+                height="1rem"
+                show-progress class="w-100 mb-2 mt-2">
+                <b-progress-bar :value="progress" animated striped>
+                  <span><b-icon icon="truck"></b-icon> {{ progress }} %</span>
+                </b-progress-bar>
+              </b-progress>
+            </b-card-text>
             <b-form inline>
-              <b-button v-if="simulation.status!=='running'" size="sm">
-                시뮬레이션 시작 <b-icon icon="caret-right-fill"/>
-              </b-button>
-              <b-button size="sm">
-                시뮬레이션 중지 <b-icon icon="stop-fill"/>
-              </b-button>
+              <b-button v-if="simulation.status!=='running'" size="sm"> 시뮬레이션 시작 <b-icon icon="caret-right-fill"/> </b-button>
+              <b-button size="sm" variant="dark"> 시뮬레이션 중지 <b-icon icon="stop-fill"/> </b-button>
+              <b-button class="ml-2" @click="toggleFocusTool" size="sm" variant="dark"> 포커스 도구 </b-button>
             </b-form>
           </b-card-body>
-      </b-card>
-      <b-progress height="1rem" v-if="progress === 100">
-        <b-progress-bar value="100" animated striped>
-          <span><strong> processing {{ simulation.status }} </strong></span>
-        </b-progress-bar>
-      </b-progress>
-    </b-card>
+        </b-card>
+      </b-card-group>
 
-    <b-modal id="modal-xl" size="xl" ok-only :title="simulationId">
+      <b-card bg-variant="dark" border-variant="dark" no-body>
+        <b-progress height="2rem" v-if="progress === 100">
+          <b-progress-bar value="100" animated striped variant="success">
+            <span><strong> 통계정보 생성중... </strong></span>
+          </b-progress-bar>
+        </b-progress>
+      </b-card>
+
+    </b-card>
+    <!--
+    <b-modal
+      id="modal-xl"
+      size="xl"
+      ok-only
+      :title="simulationId"
+      centered
+    >
       <simulation-result :simulationId="simulationId"/>
     </b-modal>
-
+    -->
   </b-container>
+  </div>
 </template>
 
 <script src="./simulation-result-map.js"> </script>

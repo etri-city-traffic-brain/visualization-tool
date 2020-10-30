@@ -18,7 +18,7 @@ import simulationService from '../service/simulation-service';
 import mapService from '../service/map-service';
 
 import { makeEdgeLayer, makeCanvasLayer, makeGridLayer, makeToolLayer } from '../layers'
-
+import * as d3 from 'd3'
 const ZOOM_MINIMUM = 14;
 
 const { log } = console
@@ -37,18 +37,39 @@ function MapManager({map, simulationId, eventBus}) {
   map.addLayer(canvasLayer)
   map.addLayer(toolLayer)
 
-  toolLayer.startEdit()
+
+
+  function toggleFocusTool() {
+    const showHide = toolLayer.isVisible() ? toolLayer.hide.bind(toolLayer) : toolLayer.show.bind(toolLayer)
+    // toolLayer.hide()
+    showHide()
+    toolLayer.toggleFocusTool()
+  }
+
+  toolLayer.hide() // default hide
+
+
+
+  // toolLayer.startEdit()
+
+
 
   eventBus.$on('salt:data', (data) => {
     // realtimeEdgeData.set(data.roads)
     // canvasLayer.setRealtimeEdgeData(data.roads)
     // canvasLayer.redraw()
+    // console.log(data.roads)
 
+    const speeds = []
 
     let speedsByEdgeId = data.roads.reduce((acc, cur) => {
       acc[cur.roadId.trim()] = cur
+      speeds.push(cur.speed)
       return acc
     }, {})
+
+
+
 
     canvasLayer.updateRealtimeData(speedsByEdgeId)
     edgeLayer.updateRealtimeData(speedsByEdgeId, map.getZoom())
@@ -175,6 +196,7 @@ function MapManager({map, simulationId, eventBus}) {
   return {
     loadMapData,
     changeStep,
+    toggleFocusTool
   };
 }
 

@@ -1,26 +1,14 @@
 <template>
   <div style="min-width:840px;">
-    <b-container fluid class="mt-1">
-      <b-alert
-        :show="warning"
-        dismissible
-        variant="warning"
-      >
-        {{ warning }}
-      </b-alert>
-      <b-row>
-        <b-col md="12" class="">
-          <b-button size="sm" variant="dark" v-b-modal.create-simulation-modal >
-            <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
-          </b-button>
-          <b-btn size="sm" variant="dark" v-b-toggle.collapse1 v-b-tooltip.hover >
-            <b-icon icon="files"/> 시뮬레이션 비교
-          </b-btn>
-          <b-btn size="sm" class="mr-1" variant="dark" @click.stop="updateTable" >
-            <b-icon icon="arrow-clockwise"/> 새로고침
-          </b-btn>
-
-          <b-btn variant="warning" v-if="selected.length >= 2" size="sm" @click.stop="compare">분석 </b-btn>
+    <b-navbar type="dark" variant="dark">
+      <b-navbar-nav>
+        <b-nav-item href="#" v-b-modal.create-simulation-modal><b-icon icon="file-earmark-plus"/> 시뮬레이션 등록</b-nav-item>
+        <b-nav-item href="#" v-b-toggle.collapse1 v-b-tooltip.hover><b-icon icon="files"/> 시뮬레이션 비교</b-nav-item>
+        <b-nav-item href="#" v-if="!autoRefresh" @click.stop="updateTable"><b-icon icon="arrow-clockwise"/> 새로고침</b-nav-item>
+      </b-navbar-nav>
+    </b-navbar>
+    <b-card bg-variant="secondary" text-variant="white" style="border-radius:0" no-body>
+     <b-btn variant="warning" v-if="selected.length >= 2" size="sm" @click.stop="compare">분석 </b-btn>
           <!-- simulation drop area -->
           <b-collapse id="collapse1" class="mt-1">
             <b-card-group deck>
@@ -28,10 +16,14 @@
                 class="mb-2"
                 @drop="drop"
                 @dragover="dragover"
+                bg-variant="secondary"
+                border-variant="secondary"
               >
-                <h5 v-if="selected.length === 0" >
+                <span v-if="selected.length === 0" >
                   시뮬레이션 이름을 선택 후 여기로 드래그&드랍 하세요.
-                </h5>
+                </span>
+                <b-icon v-b-toggle.collapse1 v-b-tooltip.hover icon="x"/>
+
                 <b-badge class="mx-2 p-2"
                   @click="deleteSelected(item)"
                   href="#"
@@ -45,13 +37,22 @@
               </b-card>
             </b-card-group>
           </b-collapse> <!-- simulation drop area -->
+    </b-card>
+    <b-container fluid class="mt-1">
+      <b-alert :show="warning" dismissible variant="warning" > {{ warning }} </b-alert>
+      <b-row>
+        <b-col md="12">
+          <!-- <b-button size="sm" variant="dark" v-b-modal.create-simulation-modal > <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록 </b-button> -->
+          <!-- <b-btn size="sm" variant="dark" v-b-toggle.collapse1 v-b-tooltip.hover > <b-icon icon="files"/> 시뮬레이션 비교 </b-btn> -->
+          <!-- <b-btn size="sm" class="mr-1" variant="dark" @click.stop="updateTable" > <b-icon icon="arrow-clockwise"/> 새로고침 </b-btn> -->
         </b-col>
       </b-row>
       <b-row>
         <b-col class="mt-1">
-          <b-form-checkbox v-model="autoRefresh" name="check-button" size="md" switch>
-           자동 새로고침 <b>({{ autoRefresh }})</b>
-          </b-form-checkbox>
+          <b-form inline>
+          <b-form-checkbox v-model="autoRefresh" name="check-button" size="md" switch> 자동 새로고침 </b-form-checkbox>
+          <!-- <b-btn v-if="!autoRefresh" size="sm" variant="link" href="#" @click.stop="updateTable"><b-icon icon="arrow-clockwise"/></b-btn> -->
+           </b-form>
         </b-col>
       </b-row>
       <!----------------------->
@@ -105,7 +106,7 @@
             @click.stop="startSimulation(row.item.id, row.index, $event.target)"
             v-if="row.item.status === 'ready' || row.item.status === 'error' || row.item.status === 'stopped'"
             >
-               <b-icon icon="play-fill"/> 시작
+              <b-icon icon="play-fill"/> 시작
           </b-button>
           <b-button
             size="sm"
@@ -205,6 +206,7 @@
         body-border-variant="dark"
         hide-footer
         header-class="pt-2 pb-0"
+        centered
       >
         <simulation-creation-panel
           @hide="hideCreateSimulationDialog"

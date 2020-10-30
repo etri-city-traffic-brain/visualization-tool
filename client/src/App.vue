@@ -30,12 +30,23 @@
     <transition name="fade">
       <router-view/>
     </transition>
-    <b-container fluid class="mt-2 mb-2 p-2 text-center" v-if="$router.currentRoute.name !== 'SimulationResultMap'">
-      도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어
-      <hr class="my-3">
-      <small class="text-muted">Copyright 2020. ETRI All rights reserved.</small>
-      <small class="text-muted">Copyright ⓒ 2020. <em>Modutech</em> Inc. All rights reserved.</small>
-    </b-container>
+
+    <!--
+      BOTTOM COPYRIGHT
+    -->
+    <b-card
+      bg-variant="dark"
+      text-variant="white"
+      class="no-round-corner"
+      v-if="$router.currentRoute.name !== 'SimulationResultMap'"
+    >
+      <b-container fluid class="mt-2 mb-2 p-2 text-center" >
+        도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어
+        <hr class="my-3">
+        <small class="text-muted">Copyright 2020. ETRI All rights reserved.</small>
+        <small class="text-muted">Copyright ⓒ 2020. <em>Modutech</em> Inc. All rights reserved.</small>
+      </b-container>
+    </b-card>
   </div>
 </template>
 
@@ -46,16 +57,16 @@ export default {
   name: 'App',
   mounted() {
     this.prevScrollpos = window.pageYOffset;
-    const navBar = this.$refs['main-nav'];
-    window.onscroll = () => {
-      const currentScrollPos = window.pageYOffset;
-      if (this.prevScrollpos > currentScrollPos) {
-        navBar.$el.style.top = '0';
-      } else {
-        navBar.$el.style.top = '-50px';
-      }
-      this.prevScrollpos = currentScrollPos;
-    };
+    // const navBar = this.$refs['main-nav'];
+    // window.onscroll = () => {
+    //   const currentScrollPos = window.pageYOffset;
+    //   if (this.prevScrollpos > currentScrollPos) {
+    //     navBar.$el.style.top = '0';
+    //   } else {
+    //     navBar.$el.style.top = '-50px';
+    //   }
+    //   this.prevScrollpos = currentScrollPos;
+    // };
     // const variants = ['success','danger', 'warning', 'primary', 'light']
     const variants = ['light', 'secondary']
     let i = 0;
@@ -122,5 +133,7 @@ html {
 * {
   box-sizing: border-box;
 }
-
+.no-round-corner {
+  border-radius: 0
+}
 </style>

@@ -1,3 +1,8 @@
+
+
+//    SALT SIMULATION EMULATOR
+//    SEND DATA MESSAGE TO VIS-SERVER
+
 const net = require('net');
 const chalk = require('chalk');
 const msgFactory = require('../msg-factory');
@@ -11,8 +16,8 @@ const socket = net.connect({ port: 1337, host: '1.245.47.108' });
 const HEADER_LENGTH = 16;
 
 // const simulationId = '001'.padStart(24, '0');
-// const simulationId = 'SALT_202009_00940';
-const simulationId = 'SALT_202009_00670';
+const simulationId = process.argv[2] || 'SALT_202009_00940';
+// const simulationId = 'SALT_202009_00670';
 
 log('*** SALT Simulator Dummy ***');
 log('simulationId:', simulationId);
@@ -30,6 +35,66 @@ const str2CharCodes = str => {
 
 const sleep = sec => new Promise((resolve) => setTimeout(() => resolve(), sec))
 
+const randomSpeed = () => Math.floor(Math.random() * 70)
+
+const randomCars = () => Math.floor(Math.random() * 4)
+const makeData = () => {
+  const data = msgFactory.makeData({
+    numRoads: 7,
+    roads: [
+      {
+        roadId: str2CharCodes('-563104349_8_0  '), // -572700451_1_0
+        speed: randomSpeed(),
+        currentSignal: 1,
+        numVehicles: randomCars(),
+        vehicles: vehicles,
+      },
+      {
+        roadId: str2CharCodes('563104839_7_0   '), // -572700451_1_0
+        speed: randomSpeed(),
+        currentSignal: 1,
+        numVehicles: randomCars(),
+        vehicles: vehicles,
+      },
+      {
+        roadId: str2CharCodes('563109038_0_0   '), // -572700451_1_0
+        speed: randomSpeed(),
+        currentSignal: 1,
+        numVehicles: randomCars(),
+        vehicles: vehicles,
+      },
+      {
+        roadId: str2CharCodes(roadId('-563104376_0_0')), // -572700451_1_0
+        speed: randomSpeed(),
+        currentSignal: 1,
+        numVehicles: randomCars(),
+        vehicles: vehicles,
+      },
+      {
+        roadId: str2CharCodes(roadId('-563107729_0_0')), // -572700451_1_0
+        speed: randomSpeed(),
+        currentSignal: 1,
+        numVehicles: 4,
+        vehicles: vehicles,
+      },
+      {
+        roadId: str2CharCodes(roadId('-563104341_0_0')), // -572700451_1_0
+        speed: randomSpeed(),
+        currentSignal: 1,
+        numVehicles: 4,
+        vehicles: vehicles,
+      },
+      {
+        roadId: str2CharCodes(roadId('-563104338_0_0')), // -572700451_1_0
+        speed: randomSpeed(),
+        currentSignal: 1,
+        numVehicles: 4,
+        vehicles: vehicles,
+      },
+    ],
+  });
+  return data
+}
 const roadId = str => str.padEnd(MAX_ROAD_ID_LENGTH, ' ')
 const sId = str => str.padEnd(MAX_SIMULATION_ID_LENGTH, ' ')
 socket.on('connect', async () => {
@@ -42,73 +107,26 @@ socket.on('connect', async () => {
     progress: 20,
   });
 
-  const data = msgFactory.makeData({
-    numRoads: 7,
-    roads: [
-      {
-        roadId: str2CharCodes('-563104349_8_0  '), // -572700451_1_0
-        speed: 2,
-        currentSignal: 1,
-        numVehicles: 4,
-        vehicles: vehicles,
-      },
-      {
-        roadId: str2CharCodes('563104839_7_0   '), // -572700451_1_0
-        speed: 2,
-        currentSignal: 1,
-        numVehicles: 3,
-        vehicles: vehicles,
-      },
-      {
-        roadId: str2CharCodes('563109038_0_0   '), // -572700451_1_0
-        speed: 2,
-        currentSignal: 1,
-        numVehicles: 4,
-        vehicles: vehicles,
-      },
-      {
-        roadId: str2CharCodes(roadId('-563104376_0_0')), // -572700451_1_0
-        speed: 2,
-        currentSignal: 1,
-        numVehicles: 4,
-        vehicles: vehicles,
-      },
-      {
-        roadId: str2CharCodes(roadId('-563107729_0_0')), // -572700451_1_0
-        speed: 70,
-        currentSignal: 1,
-        numVehicles: 4,
-        vehicles: vehicles,
-      },
-      {
-        roadId: str2CharCodes(roadId('-563104341_0_0')), // -572700451_1_0
-        speed: 70,
-        currentSignal: 1,
-        numVehicles: 4,
-        vehicles: vehicles,
-      },
-      {
-        roadId: str2CharCodes(roadId('-563104338_0_0')), // -572700451_1_0
-        speed: 70,
-        currentSignal: 1,
-        numVehicles: 4,
-        vehicles: vehicles,
-      },
-    ],
-  });
 
-  console.log(data.length - 16)
+
+
+
+  // console.log(data.length - 16)
   send(init);
-  send(data);
   // send(data);
-  send(msgFactory.makeStatus({ status: 0, progress: 20 }))
+  // send(msgFactory.makeStatus({ status: 0, progress: 20 }))
   // log('send status')
-  await sleep(1000)
+  // await sleep(1000)
+
+  for(let i=0; i<100; i++) {
+    await sleep(1000)
+    send(makeData());
+    send(msgFactory.makeStatus({ status: 0, progress: i * 10 }))
+    console.log('send')
+  }
 
   // log('send status')
-  send(msgFactory.makeStatus({ status: 0, progress: 50 }))
-  await sleep(1000)
-  send(msgFactory.makeStatus({ status: 0, progress: 55 }))
+  // send(msgFactory.makeStatus({ status: 0, progress: 55 }))
   // send(msgFactory.makeStatus({ status: 1, progress: 100 }))
 
   // send(status);

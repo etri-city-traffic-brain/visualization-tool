@@ -7,7 +7,8 @@
  */
 import StepPlayer from '@/stepper/step-runner';
 import stepperMixin from '@/stepper/mixin';
-
+// import * as d3 from 'd3'
+import * as R from 'ramda'
 import makeMap from '@/map2/make-map';
 import MapManager from '@/map2/map-manager';
 
@@ -27,8 +28,10 @@ import UniqCongestionColorBar from '@/components/CongestionColorBar';
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt';
 import UniqMapChanger from '@/components/UniqMapChanger';
 
+import bins from '@/stats/histogram'
 
 import region from '@/map2/region'
+import config from '@/stats/config'
 
 const dataset = (label, color, data) => ({
   label,
@@ -51,7 +54,7 @@ const makeLinkSpeedChartData = (v1, v2, v3) => {
     ],
   }
 }
-
+// import congestionColor from '@/utils/colors';
 const { log } = console
 
 export default {
@@ -94,10 +97,20 @@ export default {
       currentZoom: '',
       currentExtent: '',
       wsStatus: 'ready',
-      avgSpeed: 0,
+      avgSpeed: 0.00,
       linkHover: '',
       progress: 0,
-      focusData: {}
+      focusData: {
+        speed: 0.00
+      },
+      pieData: {
+        // datasets: [{
+        //   data: [10, 10, 10],
+        //   backgroundColor:["red","orange","green"],
+        // }],
+        // labels: [ '막힘', '정체', '원활' ]
+      },
+      pieData2: {}
     };
   },
   destroyed() {
@@ -166,6 +179,15 @@ export default {
         acc += cur
         return acc
       }, 0) / d.roads.length
+
+
+      this.pieData = {
+        datasets: [{
+          data: bins(d.roads).map(R.prop('length')),
+          backgroundColor:config.colorsOfSpeed,
+        }],
+        labels: config.speeds
+      }
     })
 
     this.$on('salt:status', async (status) => {
@@ -176,12 +198,19 @@ export default {
     })
 
     this.$on('map:focus', (data) => {
-      log(data)
       this.focusData = data
-    } )
+      this.pieData2 = {
+        datasets: [{
+          data: bins(data.realTimeEdges).map(R.prop('length')),
+          backgroundColor:config.colorsOfSpeed,
+        }],
+        labels: config.speeds
+      }
+      // console.log(data.realTimeEdges)
+    })
 
     this.$on('salt:finished', async () => {
-      log('**** FINISHED *****')
+      log('**** SIMULATION FINISHED *****')
       await this.updateSimulation()
       await this.updateChart()
     })
@@ -209,6 +238,9 @@ export default {
   },
   methods: {
     ...stepperMixin,
+    toggleFocusTool() {
+      this.mapManager.toggleFocusTool()
+    },
     toggleState() {
       return this.playBtnToggle ? 'M' : 'A'
     },

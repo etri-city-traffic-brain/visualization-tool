@@ -58,6 +58,7 @@ export default {
       userState,
       modalShow: false,
       autoRefresh: false,
+      expanded: false,
     };
   },
   mounted() {

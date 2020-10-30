@@ -1,8 +1,8 @@
 <template>
   <b-card
     text-variant="light"
-    bg-variant="dark"
-    border-variant="secondary"
+    bg-variant="secondary"
+    border-variant="dark"
     no-body
   >
   <b-card-body class="pb-1">
