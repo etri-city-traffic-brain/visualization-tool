@@ -28,10 +28,23 @@ import UniqCongestionColorBar from '@/components/CongestionColorBar';
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt';
 import UniqMapChanger from '@/components/UniqMapChanger';
 
+import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning';
+import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished';
+
 import bins from '@/stats/histogram'
 
 import region from '@/map2/region'
 import config from '@/stats/config'
+
+const pieDefault = () => ({
+
+  datasets: [{
+    data: [0, 0, 0],
+    backgroundColor:["red","orange","green"],
+  }],
+  labels: [ '막힘', '정체', '원활' ],
+
+})
 
 const dataset = (label, color, data) => ({
   label,
@@ -61,6 +74,8 @@ export default {
   name: 'SimulationResultMap',
   components: {
     SimulationResult,
+    SimulationDetailsOnRunning,
+    SimulationDetailsOnFinished,
     LineChart,
     BarChart,
     HistogramChart,
@@ -103,14 +118,9 @@ export default {
       focusData: {
         speed: 0.00
       },
-      pieData: {
-        // datasets: [{
-        //   data: [10, 10, 10],
-        //   backgroundColor:["red","orange","green"],
-        // }],
-        // labels: [ '막힘', '정체', '원활' ]
-      },
-      pieData2: {}
+      avgSpeedView: pieDefault(),
+      avgSpeedFocus: pieDefault(),
+      logs: []
     };
   },
   destroyed() {
@@ -126,13 +136,13 @@ export default {
     window.removeEventListener("resize", this.getWindowHeight);
   },
   async mounted() {
+
     this.simulationId = this.$route.params ? this.$route.params.id : '';
     this.showLoading = true
     this.resize()
     this.map = makeMap({
       mapId: this.mapId
     });
-
     await this.updateSimulation()
 
     this.mapManager = MapManager({
@@ -181,16 +191,17 @@ export default {
       }, 0) / d.roads.length
 
 
-      this.pieData = {
+      this.avgSpeedView = {
         datasets: [{
           data: bins(d.roads).map(R.prop('length')),
-          backgroundColor:config.colorsOfSpeed,
+          backgroundColor:config.colorsOfSpeed2,
         }],
         labels: config.speeds
       }
     })
 
     this.$on('salt:status', async (status) => {
+      this.addLog(`status: ${status.status}, progress: ${status.progress}`)
       this.progress = status.progress
       if(status.status ===1 && status.progress === 100) {
         // FINISHED
@@ -199,13 +210,14 @@ export default {
 
     this.$on('map:focus', (data) => {
       this.focusData = data
-      this.pieData2 = {
+      this.avgSpeedFocus = {
         datasets: [{
           data: bins(data.realTimeEdges).map(R.prop('length')),
-          backgroundColor:config.colorsOfSpeed,
+          backgroundColor:config.colorsOfSpeed2,
         }],
         labels: config.speeds
       }
+      console.log(bins(data.realTimeEdges))
       // console.log(data.realTimeEdges)
     })
 
@@ -238,6 +250,13 @@ export default {
   },
   methods: {
     ...stepperMixin,
+    addLog(text) {
+
+      this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
+      if(this.logs.length > 5) {
+        this.logs.shift()
+      }
+    },
     toggleFocusTool() {
       this.mapManager.toggleFocusTool()
     },
@@ -273,7 +292,8 @@ export default {
       return 0
     },
     resize() {
-      this.mapHeight = window.innerHeight - 480; // update map height to current height
+      // this.mapHeight = window.innerHeight - 480; // update map height to current height
+      this.mapHeight = window.innerHeight - 400; // update map height to current height
     },
     togglePlay() {
       (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()

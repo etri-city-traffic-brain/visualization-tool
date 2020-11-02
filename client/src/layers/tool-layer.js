@@ -62,8 +62,6 @@ export default (map, getGeometries, eventBus) => {
         vehicles,
         realTimeEdges: xxx
       })
-
-      console.log(xxx)
     }
   }
 

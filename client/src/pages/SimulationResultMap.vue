@@ -84,213 +84,71 @@
       </div>
     </b-card>
 
-
-    <!--
-      CONTAINER BOTTOM (FINISHED)
-    -->
-    <b-card
-      class="uniq-box-panel mt-0"
-      bg-variant="dark"
-      border-variant="dark"
-      no-body
-      style="height:400px;overflow-y:auto;overflow-x:hidden"
-      v-if="simulation.status === 'finished'"
-    >
-      <!-- <div class="px-1 py-0" > -->
-      <b-card
-        bg-variant="dark"
-        text-variant="light"
-        border-variant="dark"
-        v-if="simulation.status === 'finished'"
-        :sub-title="simulationId"
-        no-body
-        class="p-1"
-        style="border-radius: 0px;"
-      >
-        <h5>
-          <b-badge variant="dark"> {{ simulation.configuration.period / 60}}분 주기 </b-badge>
-          <b-badge variant="dark"> {{ simulation.configuration.fromDate }} {{ simulation.configuration.fromTime }} </b-badge> ~
-          <b-badge variant="dark"> {{ simulation.configuration.toDate }} {{ simulation.configuration.toTime }} </b-badge>
-          <b-badge variant="dark"> {{ currentEdge ? currentEdge.id : 'NO LINK' }} </b-badge>
-          <b-badge variant="light" :style="{'background-color': congestionColor(edgeSpeed())}" > {{ edgeSpeed().toFixed(2) }} km </b-badge>
-        </h5>
-        <b-card>
-          <line-chart :chartData="chart.linkSpeeds" :height="50"/>
-        </b-card>
-      </b-card>
-
-      <b-card-group deck class="m-0">
-        <b-card
-          bg-variant="secondary"
-          text-variant="light"
-          border-variant="secondary"
-          no-body
-          class="p-1 m-1"
-        >
-          <h5><b-badge variant="grey">속도분포</b-badge></h5>
-          <b-card no-body class="m-0 pt-3">
-            <histogram-chart :chartData="chart.histogramData" :height="135" class="mt-1"/>
-          </b-card>
-        </b-card>
-
-        <b-card
-          bg-variant="secondary"
-          text-variant="light"
-          border-variant="secondary"
-          sub-title="스텝별 속도 분포"
-          no-body
-          class="p-1 m-1"
-        >
-          <h5><b-badge variant="grey">스텝별 속도 분포</b-badge></h5>
-          <b-card no-body class="m-0 pt-3">
-            <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="135"/>
-          </b-card>
-        </b-card>
-        <b-card
-          bg-variant="secondary"
-          text-variant="light"
-          border-variant="secondary"
-          sub-title="혼잡도 분포"
-          no-body
-          class="p-1 m-1"
-        >
-          <h5><b-badge variant="grey">혼잡도 분포</b-badge></h5>
-          <b-card no-body class="m-0 pt-2">
-            <doughnut :chartData="chart.pieData" :height="130" />
-          </b-card>
-        </b-card>
-        <b-card
-          bg-variant="secondary"
-          text-variant="light"
-          border-variant="secondary"
-          sub-title="스텝별 혼잡도 분포"
-          no-body
-          class="p-1 m-1"
-        >
-          <h5><b-badge variant="grey">스텝별 혼잡도 분포</b-badge></h5>
-          <b-card no-body class="m-0 pt-2">
-            <doughnut :chartData="chart.pieDataStep" :height="130"/>
-          </b-card>
-        </b-card>
-      </b-card-group>
-     </b-card>
-
-    <!--
-      CONTAINER BOTTOM (RUNNING)
-    -->
     <b-card
       text-variant="light"
       bg-variant="dark"
       border-variant="dark"
-      v-if="simulation.status === 'running'"
-      class="p-1 mt-0"
-      style="height:400px; border-radius: 0px; overflow-y:auto;overflow-x:hidden"
+      class="p-1 pb-0 mt-0 bottom-panel"
+      style=""
       no-body
     >
-      <!-- <uniq-simulation-result-ext :simulation="simulation" /> -->
 
-      <b-card-group deck>
-        <b-card
-          text-variant="light"
-          bg-variant="secondary"
-          border-variant="dark"
-          no-body
-          class="m-0"
-        >
+    <b-card
+      bg-variant="dark"
+      text-variant="light"
+      border-variant="dark"
+      :sub-title-="simulationId"
+      no-body
+      class="p-1"
+      style="border-radius: 0px;"
 
-          <b-card-body>
-            <b-card-text>
-              시뮬레이션: <strong>{{ simulationId }} </strong>
-
-            </b-card-text>
-            <b-card-text>
-              서버 연결상태: {{ wsStatus.toUpperCase() }}
-              <div>
-                시뮬레이션 상태: {{ simulation.status.toUpperCase() }}
-              </div>
-              <div>평균속도:</div>
-              <b-form inline>
-              <b-progress  max="70" class="w-50">
-                <b-progress-bar :value="avgSpeed" v-bind:style="{'background-color':congestionColor(avgSpeed)}"></b-progress-bar>
-              </b-progress> &nbsp;
-              <span :style="{'color': congestionColor(avgSpeed)}"> {{ (avgSpeed).toFixed(2) }} km </span>
-              </b-form>
-              <b-form inline>
-                <b-button v-if="wsStatus !=='open'" @click="connectWebSocket" size="sm">
-                  연결 <b-icon icon="plug"> </b-icon>
-                </b-button>
-              </b-form>
-
-
-            속도분포(뷰포트)
-            <doughnut :chartData="pieData" :height="110" />
-
-
-            </b-card-text>
-          </b-card-body>
-        </b-card>
-          <b-card
-          text-variant="light"
-          bg-variant="secondary"
-          border-variant="dark"
-          no-body
-          class="m-0"
-        >
-          <b-card-body>
-            <b-card-text>
-              <h5>선택지역 통행차량: {{ focusData.vehicles }} 대, </h5>
-              <h5>선택지역 평균속도: </h5>
-              <b-form inline>
-                <b-progress  max="70" class="w-50">
-                  <b-progress-bar :value="focusData.speed" v-bind:style="{'background-color':congestionColor(focusData.speed)}"></b-progress-bar>
-                </b-progress> &nbsp;
-                <span>{{ focusData.speed }} km </span>
-              </b-form>
-            </b-card-text>
-            <b-card-text>
-            속도분포(선택영역)
-            <doughnut :chartData="pieData2" :height="110"/>
-            </b-card-text>
-          </b-card-body>
-        </b-card>
-        <b-card
-          text-variant="light"
-          bg-variant="secondary"
-          border-variant="dark"
-          no-body
-          class="m-0"
-        >
-          <b-card-body>
-            <b-card-text>
-              <h5>시뮬레이션 진행률:</h5>
-              <b-progress
-                striped
-                :animated="progress !== 100"
-                height="1rem"
-                show-progress class="w-100 mb-2 mt-2">
-                <b-progress-bar :value="progress" animated striped>
-                  <span><b-icon icon="truck"></b-icon> {{ progress }} %</span>
-                </b-progress-bar>
-              </b-progress>
-            </b-card-text>
-            <b-form inline>
-              <b-button v-if="simulation.status!=='running'" size="sm"> 시뮬레이션 시작 <b-icon icon="caret-right-fill"/> </b-button>
-              <b-button size="sm" variant="dark"> 시뮬레이션 중지 <b-icon icon="stop-fill"/> </b-button>
-              <b-button class="ml-2" @click="toggleFocusTool" size="sm" variant="dark"> 포커스 도구 </b-button>
-            </b-form>
-          </b-card-body>
-        </b-card>
-      </b-card-group>
-
-      <b-card bg-variant="dark" border-variant="dark" no-body>
-        <b-progress height="2rem" v-if="progress === 100">
-          <b-progress-bar value="100" animated striped variant="success">
-            <span><strong> 통계정보 생성중... </strong></span>
-          </b-progress-bar>
-        </b-progress>
-      </b-card>
-
+    >
+      <h5>
+        <b-badge variant="dark"> {{ simulationId }} </b-badge>
+        <b-badge variant="dark"> {{ simulation.configuration.period / 60}}분 주기 </b-badge>
+        <b-badge variant="dark"> {{ simulation.configuration.fromDate }} {{ simulation.configuration.fromTime }} </b-badge> ~
+        <b-badge variant="dark"> {{ simulation.configuration.toDate }} {{ simulation.configuration.toTime }} </b-badge>
+        <!-- <b-badge variant="dark"> {{ currentEdge ? currentEdge.id : 'NO LINK' }} </b-badge> -->
+        <!-- <b-badge variant="light" :style="{'background-color': congestionColor(edgeSpeed())}" > {{ edgeSpeed().toFixed(2) }} km </b-badge> -->
+      </h5>
+      <!-- <b-card>
+        <line-chart :chartData="chart.linkSpeeds" :height="50"/>
+      </b-card> -->
     </b-card>
+
+    <!--
+      CONTAINER BOTTOM (FINISHED)
+    -->
+    <SimulationDetailsOnFinished
+      v-if="simulation.status === 'finished'"
+      :simulation="simulation"
+      :simulationId="simulationId"
+      :avgSpeed="avgSpeed"
+      :chart="chart"
+      :currentEdge="currentEdge"
+      :edgeSpeed="edgeSpeed"
+    >
+    </SimulationDetailsOnFinished>
+
+    <!--
+      CONTAINER BOTTOM (RUNNING)
+    -->
+    <SimulationDetailsOnRunning
+      v-if="simulation.status === 'running'"
+      :simulation="simulation"
+      :progress="progress"
+      :wsStatus="wsStatus"
+      :focusData="focusData"
+      :simulationId="simulationId"
+      :avgSpeed="avgSpeed"
+      :avgSpeedView="avgSpeedView"
+      :avgSpeedFocus="avgSpeedFocus"
+      @connect-web-socket="connectWebSocket"
+      @toggle-focus-tool="toggleFocusTool"
+      :logs="logs"
+    >
+    </SimulationDetailsOnRunning>
+     </b-card>
     <!--
     <b-modal
       id="modal-xl"
@@ -317,7 +175,18 @@
   }
 
   .map {
-    max-height: 800px;
+    /* max-height: 1024px; */
+    max-height: 1024px;
+  }
+
+  .bottom-panel {
+    height:400px;
+    border-radius: 0px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
   }
 
   .uniq-step-player {
@@ -325,7 +194,7 @@
     position: absolute;
     width: 300px;
     /* top: 65px; */
-    bottom: 10px;
+    bottom: 100px;
     right: 10px;
   }
 

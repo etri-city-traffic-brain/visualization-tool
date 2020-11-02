@@ -12,6 +12,13 @@ export default {
         maintainAspectRatio: false,
         circumference: Math.PI,
         rotation: -Math.PI,
+        legend: {
+          display: true,
+          labels: {
+            fontColor: "white",
+            fontSize: 12
+          }
+        },
       },
     };
   },

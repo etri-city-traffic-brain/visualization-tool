@@ -204,8 +204,8 @@
         body-bg-variant="dark"
         body-text-variant="ligth"
         body-border-variant="dark"
-        hide-footer
         header-class="pt-2 pb-0"
+        hide-footer
         centered
       >
         <simulation-creation-panel
