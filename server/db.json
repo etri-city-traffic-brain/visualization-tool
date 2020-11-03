@@ -456,8 +456,11 @@
         "day": 4,
         "days": 1
       },
-      "status": "ready",
-      "created": "2020-10-29 19:16:04"
+      "status": "finished",
+      "created": "2020-10-29 19:16:04",
+      "started": "2020-11-02 18:31:10",
+      "ended": "2020-11-02 18:31:13",
+      "error": null
     }
   ]
 }

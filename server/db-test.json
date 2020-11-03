@@ -568,9 +568,12 @@
           "gd_fri.xml"
         ]
       },
-      "status": "stopped",
+      "status": "running",
       "created": "2020-09-25 13:33:16",
-      "started": "2020-10-12 13:31:33"
+      "started": "2020-11-02 18:17:29",
+      "ended": "2020-11-02 18:17:32",
+      "error": null,
+      "text": ""
     },
     {
       "id": "SALT_202009_00617",

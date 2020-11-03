@@ -43,7 +43,7 @@ module.exports = (port = 1337) => {
         bufferManager.setBuffer(socket, Buffer.alloc(0));
       }
     }
-    timer = setTimeout(() => consumeSaltMsg(socket), 500);
+    timer = setTimeout(() => consumeSaltMsg(socket), 10);
   };
 
   const handleData = socket => (buffer) => {

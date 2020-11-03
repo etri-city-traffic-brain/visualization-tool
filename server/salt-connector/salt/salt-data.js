@@ -119,9 +119,10 @@ socket.on('connect', async () => {
   // await sleep(1000)
 
   for(let i=0; i<100; i++) {
-    await sleep(1000)
+    // await sleep(50)
+    await sleep(1500)
     send(makeData());
-    send(msgFactory.makeStatus({ status: 0, progress: i * 10 }))
+    send(msgFactory.makeStatus({ status: 0, progress: i * 1 }))
     console.log('send')
   }
 
