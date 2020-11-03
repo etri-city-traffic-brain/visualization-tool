@@ -39,7 +39,7 @@ import config from '@/stats/config'
 const pieDefault = () => ({
 
   datasets: [{
-    data: [0, 0, 0],
+    data: [1, 1, 1],
     backgroundColor:["red","orange","green"],
   }],
   labels: [ '막힘', '정체', '원활' ],
@@ -90,7 +90,7 @@ export default {
       simulation: { configuration: {} },
       map: null,
       mapId: `map-${Math.floor(Math.random() * 100)}`,
-      mapHeight: 800, // map view height
+      mapHeight: 1024, // map view height
       mapManager: null,
       speedsPerStep: {},
       sidebar: false,
@@ -120,7 +120,23 @@ export default {
       },
       avgSpeedView: pieDefault(),
       avgSpeedFocus: pieDefault(),
-      logs: []
+      logs: [],
+      bottomStyle: {
+        height: '220px',
+        borderRadius: '0px',
+        overflowY:'auto',
+        overflowX:'hidden',
+        position: 'fixed',
+        bottom: 0,
+        width: '100%',
+      },
+      playerStyle: {
+        zIndex: 999,
+        position: 'fixed',
+        width: '300px',
+        bottom: '230px',
+        right: '10px',
+      }
     };
   },
   destroyed() {
@@ -217,7 +233,7 @@ export default {
         }],
         labels: config.speeds
       }
-      console.log(bins(data.realTimeEdges))
+      // console.log(bins(data.realTimeEdges))
       // console.log(data.realTimeEdges)
     })
 
@@ -250,6 +266,15 @@ export default {
   },
   methods: {
     ...stepperMixin,
+    toggleBottom() {
+      if (this.bottomStyle.height === '220px') {
+        this.bottomStyle.height = '390px'
+        this.playerStyle.bottom = '400px'
+      } else if (this.bottomStyle.height === '390px') {
+        this.bottomStyle.height = '220px'
+        this.playerStyle.bottom = '230px'
+      }
+    },
     addLog(text) {
 
       this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
@@ -293,9 +318,12 @@ export default {
     },
     resize() {
       // this.mapHeight = window.innerHeight - 480; // update map height to current height
-      this.mapHeight = window.innerHeight - 400; // update map height to current height
+      this.mapHeight = window.innerHeight - 200; // update map height to current height
+      // this.mapHeight = window.innerHeight
     },
     togglePlay() {
+      this.playBtnToggle = !this.playBtnToggle;
+
       (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()
     },
     async stepChanged(step) {

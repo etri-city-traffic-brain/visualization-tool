@@ -6,13 +6,11 @@ import { reactiveProp } from './mixins';
 export default {
   extends: Bar,
   mixins: [reactiveProp],
-  prop: ['chartData'],
+  prop: ['chartData', 'height'],
   data() {
     return {
       options: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
         scales: {
           xAxes: [{
             display: false,
@@ -20,16 +18,27 @@ export default {
             categoryPercentage: 1,
             ticks: {
               max: 70,
-            },
-          },
-          {
-            gridLines: {
+              fontColor: 'white',
               display: false,
             },
+            gridLines: { display: false, },
+          },
+          {
+            barPercentage: 1,
+            categoryPercentage: 1,
             ticks: {
-              max: 80,
+              display: true,
+              fontColor: 'white',
             },
+            gridLines: { display: false, },
           }],
+          yAxes: [{
+            ticks: {
+              display: true,
+              fontColor: 'white'
+            },
+            gridLines: { display: false, },
+          }]
         },
       },
     };

@@ -148,7 +148,7 @@ function MapManager({map, simulationId, eventBus}) {
 
     try {
       const { features } = await mapService.getMap(extent(map));
-      console.log('num of features:', features.length)
+      // console.log('num of features:', features.length)
       if(event === 'zoomend') {
         removeEdges(edgesExisted);
         addFeatures(features)

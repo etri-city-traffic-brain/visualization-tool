@@ -32,57 +32,81 @@
         <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="50"/>
     </b-card>
 
-    <b-card-group deck class="m-0">
+    <b-card-group class="m-0">
       <b-card
-        bg-variant="secondary"
+        bg-variant="dark"
+        border-variant="dark"
         text-variant="light"
-        border-variant="secondary"
         no-body
         class="p-1 m-1"
+          style="min-width: 15rem;"
       >
-        <h5><b-badge variant="grey">속도분포</b-badge></h5>
-        <b-card no-body class="m-0 pt-3">
-          <histogram-chart :chartData="chart.histogramData" :height="135" class="mt-1"/>
+
+        <b-card no-body
+          class="m-0 pt-0"
+          text-variant="light"
+          bg-variant="dark"
+          border-variant="dark"
+        >
+          <h5 class="text-center"><b-badge variant="grey">속도분포</b-badge></h5>
+          <histogram-chart :chartData="chart.histogramData" :height="150" class="mt-1"/>
         </b-card>
       </b-card>
 
       <b-card
-        bg-variant="secondary"
+        bg-variant="dark"
+        border-variant="dark"
         text-variant="light"
-        border-variant="secondary"
         sub-title="스텝별 속도 분포"
         no-body
         class="p-1 m-1"
+         style="min-width: 15rem;"
       >
-        <h5><b-badge variant="grey">스텝별 속도 분포</b-badge></h5>
-        <b-card no-body class="m-0 pt-3">
-          <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="135"/>
+        <b-card no-body
+          class="m-0 pt-0"
+          text-variant="light"
+          bg-variant="dark"
+          border-variant="dark">
+          <h5 class="text-center"><b-badge variant="grey">스텝별 속도 분포</b-badge></h5>
+          <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="150"/>
         </b-card>
       </b-card>
       <b-card
-        bg-variant="secondary"
+        bg-variant="dark"
         text-variant="light"
-        border-variant="secondary"
+        border-variant="dark"
         sub-title="혼잡도 분포"
         no-body
         class="p-1 m-1"
     >
-        <h5><b-badge variant="grey">혼잡도 분포</b-badge></h5>
-        <b-card no-body class="m-0 pt-2">
-          <doughnut :chartData="chart.pieData" :height="130" />
+        <b-card
+          no-body
+          class="m-0 pt-0"
+          text-variant="light"
+          bg-variant="dark"
+          border-variant="dark"
+        >
+          <doughnut :chartData="chart.pieData" :height="110" />
+          <h5 class="mt-1 text-center"><b-badge variant="grey">혼잡도 분포</b-badge></h5>
         </b-card>
       </b-card>
       <b-card
-        bg-variant="secondary"
+        bg-variant="dark"
         text-variant="light"
-        border-variant="secondary"
+        border-variant="dark"
         sub-title="스텝별 혼잡도 분포"
         no-body
         class="p-1 m-1"
       >
-        <h5><b-badge variant="grey">스텝별 혼잡도 분포</b-badge></h5>
-        <b-card no-body class="m-0 pt-2">
-          <doughnut :chartData="chart.pieDataStep" :height="130"/>
+        <b-card
+          no-body
+          class="m-0 pt-0"
+          text-variant="light"
+          bg-variant="dark"
+          border-variant="dark"
+        >
+          <doughnut :chartData="chart.pieDataStep" :height="110"/>
+          <h5 class="mt-1 text-center"><b-badge variant="grey">스텝별 혼잡도 분포</b-badge></h5>
         </b-card>
       </b-card>
     </b-card-group>

@@ -88,52 +88,52 @@
         </b-col>
       </b-row>
       <b-row>
-        <b-col class="p-0">
+        <b-col
+          class="p-0"
+          cols="6"
+          v-for="item in histograms"
+          :key="item.name"
+        >
           <b-card
-            bg-variant="secondary"
-            border-variant="secondary"
+            bg-variant="dark"
+            border-variant="dark"
             text-variant="light"
             no-body
-            class="p-1"
-            style="max-height: 250px; min-width: 860px; border-radius: 0px;"
+              style="border-radius: 0px;"
+            v-if="item"
           >
-            <b-card-group columns>
-              <b-card
-                bg-variant="secondary"
-                border-variant="secondary"
-                text-variant="light"
-                no-body
-                v-for="item in histograms"
-                :key="item.name"
-                class="m-0"
-              >
-                <b-card-text class="text-center m-0"> 속도별 차량분포 {{ item.name }} </b-card-text>
-                <b-card no-body class="m-0 p-0">
-                  <histogram-chart :chartData="item" :height="135" class="mt-2" v-if="item.isReady"/>
-                </b-card>
-              </b-card>
-            </b-card-group>
+            <b-card-text class="text-center m-0"> 속도별 차량분포 {{ item.name }} </b-card-text>
+            <b-card no-body
+              class="m-0 pt-0"
+              text-variant="light"
+              bg-variant="dark"
+              border-variant="dark"
+            >
+              <histogram-chart :chartData="item" :height="115"/>
+            </b-card>
           </b-card>
         </b-col>
       </b-row>
+      <b-row>
+        <b-col
+          v-for="item in pies"
+          :key="item.name"
+          class="p-0" cols="6"
+        >
+          <b-card
+            text-variant="light"
+            bg-variant="secondary"
+            border-variant=""
+            style="border-radius: 0px;"
+            >
+            <doughnut :chartData="item" v-if="item.isReady" :height="135"/>
+            <b-card-text class="text-center m-0"> 혼잡도 {{ item.name }} </b-card-text>
+          </b-card>
+        </b-col>
+      </b-row>
+
     </b-container>
 
-    <!-- congestion pie -->
-    <!--
-    <b-container fluid class="mt-2" v-if="isReady">
-      <b-card-group columns>
-        <b-card
-          header-text-variant="white"
-          header-bg-variant="dark"
-          v-for="item in pies"
-          :header="'속도별 차량 분포 (' + item.name + ')'"
-          :key="item.name"
-          >
-          <doughnut :chartData="item" v-if="item.isReady"/>
-        </b-card>
-      </b-card-group>
-    </b-container>
-    -->
     <div class="top" v-if="!isReady">
       <div class="center">
         <h1><b-badge class="mb-2" variant="dark"> {{ msg }} </b-badge></h1>

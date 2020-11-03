@@ -8,35 +8,39 @@
       </b-navbar-nav>
     </b-navbar>
     <b-card bg-variant="secondary" text-variant="white" style="border-radius:0" no-body>
-     <b-btn variant="warning" v-if="selected.length >= 2" size="sm" @click.stop="compare">분석 </b-btn>
-          <!-- simulation drop area -->
-          <b-collapse id="collapse1" class="mt-1">
-            <b-card-group deck>
-              <b-card
-                class="mb-2"
-                @drop="drop"
-                @dragover="dragover"
-                bg-variant="secondary"
-                border-variant="secondary"
-              >
-                <span v-if="selected.length === 0" >
-                  시뮬레이션 이름을 선택 후 여기로 드래그&드랍 하세요.
-                </span>
-                <b-icon v-b-toggle.collapse1 v-b-tooltip.hover icon="x"/>
 
-                <b-badge class="mx-2 p-2"
-                  @click="deleteSelected(item)"
-                  href="#"
-                  v-for="item in selected"
-                  :key="item"
-                  v-b-tooltip.hover
-                  title="클릭하면 제거됩니다."
-                >
-                  {{ item }}
-                </b-badge>
-              </b-card>
-            </b-card-group>
-          </b-collapse> <!-- simulation drop area -->
+          <!-- simulation drop area -->
+      <b-collapse id="collapse1" class="mt-1">
+        <b-card-group deck>
+          <b-card
+            class="mb-2"
+            @drop="drop"
+            @dragover="dragover"
+            bg-variant="secondary"
+            border-variant="secondary"
+          >
+            <span v-if="selected.length === 0" >
+              시뮬레이션 이름을 선택 후 여기로 드래그&드랍 하세요.
+            </span>
+
+
+            <b-badge class="mx-2 p-2"
+              href="#"
+              v-for="item in selected"
+              :key="item"
+              v-b-tooltip.hover
+              title="클릭하면 제거됩니다."
+            >
+              {{ item }}
+              <b-icon @click="deleteSelected(item)" icon="x"/>
+            </b-badge>
+          </b-card>
+        </b-card-group>
+      </b-collapse> <!-- simulation drop area -->
+      <b-btn variant="warning" v-if="selected.length >= 2" size="sm" @click.stop="compare"> <b-icon icon="bar-chart-fill"></b-icon> 비교 </b-btn>
+      <b-btn v-if="selected.length>0" href="#" class="m-0" v-b-toggle.collapse1 v-b-tooltip.hover variant="dark" size="sm">
+        <b-icon icon="x"/> 닫기
+      </b-btn>
     </b-card>
     <b-container fluid class="mt-1">
       <b-alert :show="warning" dismissible variant="warning" > {{ warning }} </b-alert>

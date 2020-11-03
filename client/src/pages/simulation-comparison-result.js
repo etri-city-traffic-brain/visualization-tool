@@ -66,12 +66,20 @@ export default {
 
     this.map1 = makeMap({ mapId: mapId1 });
     this.map1.zoomControl.hide();
-    this.linkManager1 = LinkManager(this.map1, this.selected[0]);
+    this.linkManager1 = LinkManager({
+      map: this.map1,
+      simulationId: this.selected[0],
+      eventBus: this,
+    });
     this.linkManager1.loadMapData();
 
     this.map2 = makeMap({ mapId: mapId2 });
     this.map2.zoomControl.hide();
-    this.linkManager2 = LinkManager(this.map2, this.selected[1]);
+    this.linkManager2 = LinkManager({
+      map: this.map2,
+      simulationId: this.selected[1],
+      eventBus: this
+    });
     this.linkManager2.loadMapData();
 
     this.map1.on('moveend', (param) => {
