@@ -9,7 +9,7 @@
   "dependencies": {
     "@turf/turf": "^5.1.6",
     "awestruct": "^1.2.5",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "chalk": "^4.1.0",
     "child-process-promise": "^2.2.1",
     "cookie-parser": "~1.4.3",
