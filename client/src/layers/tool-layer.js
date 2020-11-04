@@ -1,11 +1,13 @@
 
 import * as maptalks from 'maptalks'
 
+import array2Obj from '@/utils/array2obj'
+
 export default (map, getGeometries, eventBus) => {
 
   const layer = new maptalks.VectorLayer('toolLayer', [])
 
-  const circle = new maptalks.Circle(map.getCenter(), 80,{
+  const circle = new maptalks.Circle(map.getCenter(), 80, {
     draggable: true,
     symbol: {
       lineColor: '#34495e',
@@ -23,24 +25,23 @@ export default (map, getGeometries, eventBus) => {
 
   const isInside = isFocused(circle)
 
-  // const convertArrayToObject = (array, key) => {
-  //   const initialValue = {};
-  //   return array.reduce((obj, item) => {
-  //     return {
-  //       ...obj,
-  //       [item[key]]: item,
-  //     };
-  //   }, initialValue);
-  // };
-
   let edgesFocused = null
+
+  const setEdgesFocused = value => {
+    edgesFocused = value
+  }
+
+  const updateEdgeFocused = () => {
+    setEdgesFocused(
+      array2Obj(
+        getGeometries().filter(isInside),
+        ['properties', 'LINK_ID']
+      )
+    )
+  }
+
   circle.on('dragend', () => {
-    edgesFocused = getGeometries()
-      .filter(isInside)
-      .reduce((acc, edge) => {
-        acc[edge.properties.LINK_ID] = edge
-        return acc
-      }, {})
+    updateEdgeFocused()
   });
 
   layer.toggleFocusTool = () => {
@@ -49,12 +50,7 @@ export default (map, getGeometries, eventBus) => {
 
   layer.updateRealtimeData = (realtimeEdgeData) => {
     if(edgesFocused == null) {
-      edgesFocused = {}
-      getGeometries().forEach(obj => {
-        if(circle.containsPoint(obj.getFirstCoordinate()) || circle.containsPoint(obj.getLastCoordinate())) {
-          edgesFocused[obj.properties.LINK_ID] = obj
-        }
-      })
+      updateEdgeFocused()
     }
     const roadsRealtime = Object.values(realtimeEdgeData)
     const { speed, vehicles, roadsFocused } = roadsRealtime.reduce((acc, cur) => {
@@ -80,13 +76,9 @@ export default (map, getGeometries, eventBus) => {
   layer.addGeometry([circle])
 
   layer.startEdit = () => {
-    // circle.startEdit({
-    //   fixAspectRatio: true,
-    // })
-
-    setTimeout(() => {
-      // circle.endEdit()
-    }, 3000)
+    circle.startEdit({
+      fixAspectRatio: true,
+    })
   }
 
   return layer
