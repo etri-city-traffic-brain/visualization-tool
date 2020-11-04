@@ -37,37 +37,36 @@ import region from '@/map2/region'
 import config from '@/stats/config'
 
 const pieDefault = () => ({
-
   datasets: [{
     data: [1, 1, 1],
     backgroundColor:["red","orange","green"],
   }],
   labels: [ '막힘', '정체', '원활' ],
-
 })
 
-const dataset = (label, color, data) => ({
-  label,
-  fill: false,
-  borderColor: color,
-  backgroundColor: color,
-  borderWidth: 2,
-  pointRadius: 1,
-  data,
 
-})
 
-const makeLinkSpeedChartData = (v1, v2, v3) => {
+const makeLinkSpeedChartData = (data1, data2, data3) => {
+  const dataset = (label, color, data) => ({
+    label,
+    fill: false,
+    borderColor: color,
+    backgroundColor: color,
+    borderWidth: 2,
+    pointRadius: 1,
+    data,
+  })
+
   return {
-    labels: new Array(v2.length).fill(0).map((v, i) => i),
+    labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
-      dataset('링크속도', '#7FFFD4', v1),
-      dataset('전체평균속도', '#1E90FF', v2),
-      dataset('제한속도', '#FF0000', v3),
+      dataset('링크속도', '#7FFFD4', data1),
+      dataset('평균속도', '#1E90FF', data2),
+      dataset('제한속도', '#FF0000', data3),
     ],
   }
 }
-// import congestionColor from '@/utils/colors';
+
 const { log } = console
 
 export default {
@@ -152,13 +151,10 @@ export default {
     window.removeEventListener("resize", this.getWindowHeight);
   },
   async mounted() {
-
-    this.simulationId = this.$route.params ? this.$route.params.id : '';
+    this.simulationId = this.$route.params ? this.$route.params.id : null;
     this.showLoading = true
     this.resize()
-    this.map = makeMap({
-      mapId: this.mapId
-    });
+    this.map = makeMap({ mapId: this.mapId });
     await this.updateSimulation()
 
     this.mapManager = MapManager({
@@ -288,16 +284,12 @@ export default {
     toggleState() {
       return this.playBtnToggle ? 'M' : 'A'
     },
-
     async updateSimulation() {
       const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId);
       this.simulation = simulation;
       this.slideMax = ticks - 1
     },
-
     async updateChart() {
-
-
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this));
       this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, 0);
       this.chart.histogramData = await statisticsService.getHistogramChart(this.simulationId);
@@ -317,9 +309,7 @@ export default {
       return 0
     },
     resize() {
-      // this.mapHeight = window.innerHeight - 480; // update map height to current height
-      this.mapHeight = window.innerHeight - 200; // update map height to current height
-      // this.mapHeight = window.innerHeight
+      this.mapHeight = window.innerHeight - 220; // update map height to current height
     },
     togglePlay() {
       this.playBtnToggle = !this.playBtnToggle;

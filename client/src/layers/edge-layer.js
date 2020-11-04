@@ -29,7 +29,7 @@ function updateCongestion(edgeLayer, map, linkSpeeds = {}, step = 0) {
   });
 }
 
-export default (map, eventBus) => {
+export default (map) => {
 
   const edgeLayer = new maptalks.VectorLayer('edgeLayer', [])
 
@@ -42,12 +42,12 @@ export default (map, eventBus) => {
     }
   });
 
-  function updateRealtimeSpeed(speedByEdgeId = {}, zoom) {
+  function updateRealtimeSpeed(speedByEdgeId = {}) {
     edgeLayer.getGeometries().forEach((geometry) => {
       const road = speedByEdgeId[geometry.getId()];
       if(road) {
         geometry.updateSymbol({
-          lineWidth: calcLineWidth(zoom),
+          lineWidth: calcLineWidth(map.getZoom()),
           lineColor: color(road.speed),
         });
       }
@@ -58,8 +58,8 @@ export default (map, eventBus) => {
     updateCongestion(edgeLayer, map, currentSpeedsPerLink, currentStep)
   }
 
-  edgeLayer.updateRealtimeData = (data, zoom) => {
-    updateRealtimeSpeed(data, zoom)
+  edgeLayer.updateRealtimeData = (data) => {
+    updateRealtimeSpeed(data)
   }
 
   return edgeLayer

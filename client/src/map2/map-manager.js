@@ -13,18 +13,23 @@ import * as R from 'ramda';
 import extent from './map-extent';
 import makeId from './make-id';
 import makeGeometry from './make-geometry';
-
 import simulationService from '../service/simulation-service';
 import mapService from '../service/map-service';
 
 import { makeEdgeLayer, makeCanvasLayer, makeGridLayer, makeToolLayer } from '../layers'
-import * as d3 from 'd3'
+
 const ZOOM_MINIMUM = 14;
 
 const { log } = console
 
+/**
+ *
+ * @param {Object} param - Parameter
+ * @param {Object} param.map - Maptalks Map Object
+ * @param {string} param.simulationId - Simulation id
+ * @param {Object} param.eventBus - Vue Object as event bus
+ */
 function MapManager({map, simulationId, eventBus}) {
-  log('map-manager created')
   let currentSpeedsPerLink = {};
   let currentStep = 0;
 
@@ -37,43 +42,25 @@ function MapManager({map, simulationId, eventBus}) {
   map.addLayer(canvasLayer)
   map.addLayer(toolLayer)
 
-
-
   function toggleFocusTool() {
-    const showHide = toolLayer.isVisible() ? toolLayer.hide.bind(toolLayer) : toolLayer.show.bind(toolLayer)
-    // toolLayer.hide()
+    const showHide = toolLayer.isVisible()
+      ? toolLayer.hide.bind(toolLayer)
+      : toolLayer.show.bind(toolLayer)
     showHide()
     toolLayer.toggleFocusTool()
   }
 
   toolLayer.hide() // default hide
 
-
-
-  // toolLayer.startEdit()
-
-
-
-  eventBus.$on('salt:data', (data) => {
-    // realtimeEdgeData.set(data.roads)
-    // canvasLayer.setRealtimeEdgeData(data.roads)
-    // canvasLayer.redraw()
-    // console.log(data.roads)
-
-    const speeds = []
-
-    let speedsByEdgeId = data.roads.reduce((acc, cur) => {
-      acc[cur.roadId.trim()] = cur
-      speeds.push(cur.speed)
+  eventBus.$on('salt:data', ({roads}) => {
+    let speedsByEdgeId = roads.reduce((acc, road) => {
+      acc[road.roadId.trim()] = road
       return acc
     }, {})
 
-
-
-
     canvasLayer.updateRealtimeData(speedsByEdgeId)
-    edgeLayer.updateRealtimeData(speedsByEdgeId, map.getZoom())
-    toolLayer.updateRealtimeData(speedsByEdgeId, data.roads)
+    edgeLayer.updateRealtimeData(speedsByEdgeId)
+    toolLayer.updateRealtimeData(speedsByEdgeId)
 
   });
 
