@@ -41,19 +41,23 @@ export default function SaltTrafficLightsLoader(map, element, events) {
       return {
         LINK_ID: properties.LINK_ID,
         LANE: properties.LANE,
-        geometry: geometry.coordinates[0], // from MultiLineString
+        // geometry: geometry.coordinates[0], // from MultiLineString
+        geometry: geometry.coordinates, // from MultiLineString
         isForward: properties.isForward || false,
       };
     });
   };
 
   const editConnection = async (target) => {
+    console.log('edit')
     const { owner } = target;
     const [x, y] = owner.toGeoJSONGeometry().coordinates;
     const linkIds = await getLinkIds(target.owner);
 
     const junction = { id: owner.properties.NODE_ID, x, y };
 
+    console.log(junction)
+    console.log(linkIds)
     // const connectionManager = makeConnectionManager(junction, linkIds, element);
     // var modal = document.getElementById('myModal');
     // modal.style.visibility = 'visible';

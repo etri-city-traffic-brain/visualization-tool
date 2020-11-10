@@ -26,10 +26,12 @@ module.exports = (httpServer, tcpPort) => {
     tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
   })
 
+  const optMap = {}
+
   // send to web
   tcpServer.on('salt:status', async (data) => {
     let { simulationId } = data
-    debug(data);
+    debug(simulationId);
     webSocketServer.send(data.simulationId, { ...data })
 
     if(data.status === 1 && data.progress === 100) {
@@ -41,24 +43,39 @@ module.exports = (httpServer, tcpPort) => {
         return;
       }
 
-      const { configuration } = simulation
+      const { type, configuration } = simulation
+      if(type ==='optimization') {
+        const xxx = optMap[simulationId] || { count: 0}
+        optMap[simulationId] = xxx
+        xxx.count += 1;
+        updateStatus(simulationId, 'running', {epoch: xxx.count})
+        if(xxx.count >= 3) {
+          debug('*** OPTIMIZATION FINISHED***')
+          updateStatus(simulationId, 'finished')
+          webSocketServer.send(simulationId, {
+            event: 'optimization:finished'
+          })
+        }
+      } else {
+        try {
+          await cookSimulationResult({
+            simulationId,
+            duration: configuration.end,
+            period: configuration.period,
+          });
 
-      try {
-        await cookSimulationResult({
-          simulationId,
-          duration: configuration.end,
-          period: configuration.period,
-        });
-
-        // just for test
-        updateStatus(simulationId, 'finished')
-        webSocketServer.send(simulationId, {
-          event: 'salt:finished'
-        })
-      } catch (err) {
-        debug(err.message)
+          // just for test
+          updateStatus(simulationId, 'finished')
+          webSocketServer.send(simulationId, {
+            event: 'salt:finished'
+          })
+        } catch (err) {
+          debug(err.message)
+        }
       }
-    }
+
+      }
+
   });
 
   // send to web

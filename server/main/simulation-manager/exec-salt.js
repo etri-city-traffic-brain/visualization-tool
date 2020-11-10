@@ -1,37 +1,30 @@
 /*!
  * Simulation Runner
- * run simulater on the remote server
+ * run traffic simulator on the local file system
  *
  */
 const { PythonShell } = require('python-shell');
 
 const config = require('../../config');
+const exec = require('../../sim-runner/salt-runner')
 
 const {
-  saltPath: { data },
-  salt: { standalone },
+  saltPath: {home, scripts},
 } = config;
+const { log } = console
 
-// const { getConfigFilePath, getScenarioFilePath } = require('./utils/globals');
+module.exports = ({ simulationId, script: scriptFile }) => new Promise((resolve, reject) => {
 
-module.exports = ({ simulationId }) => new Promise((resolve, reject) => {
-  const configFile = `${data}/${simulationId}/salt.config.json`;
-  const scenarioFile = `${data}/${simulationId}/salt.scenario.json`;
+  const script = 'default.py'
+  const process = exec({
+    homeDir: home,
+    scriptDir: scripts,
+    script,
+  })
 
-  // const configFile = getConfigFilePath(simulationId);
-  // const scenarioFile = getScenarioFilePath(simulationId);
-
-  const options = {
-    mode: 'text',
-    pythonOptions: ['-u'],
-    args: ['-c', configFile, '-s', scenarioFile],
-  };
-
-  PythonShell.run(standalone, options, (err, results) => {
-    if (err) {
-      reject(err);
-    } else {
-      resolve(results);
-    }
+  process.on("close", code => {
+    log(`child process exited with code ${code}`);
   });
+
+  resolve()
 });

@@ -46,7 +46,6 @@ async function start(req, res) {
     });
     return;
   }
-
   try {
     res.json({ id, status: 'running', result: '' });
     updateStatus(id, 'running', { started: currentTimeFormatted() });

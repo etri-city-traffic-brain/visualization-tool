@@ -4,7 +4,7 @@ const serialize = obj => JSON.stringify(obj);
 
 const { log } = console
 
-function Client({ url = 'ws://localhost', simulationId, eventBus }) {
+function Client({ url = 'ws://localhost:8080', simulationId, eventBus }) {
 
   if (!eventBus) {
     throw new Error('eventBus is null')
@@ -17,6 +17,7 @@ function Client({ url = 'ws://localhost', simulationId, eventBus }) {
   const close = () => socket.close();
 
   function init() {
+    console.log('ws-client init:', simulationId)
     if(status === 'open') {
       log('WebSocket is already opened!!')
       return
@@ -29,6 +30,7 @@ function Client({ url = 'ws://localhost', simulationId, eventBus }) {
     });
 
     socket.addEventListener('message', ({ data }) => {
+
       try {
         const event =  JSON.parse(data)
         eventBus.$emit(event.event, event)

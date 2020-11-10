@@ -2,11 +2,12 @@
 import moment from 'moment';
 import simulationService from '@/service/simulation-service';
 // import areas from '../utils/areas';
+import SignalMap from '@/components/SignalMap';
 
 const year = moment().year();
 const m = moment().format('MM');
 const random = () => `${Math.floor(Math.random() * 1000)}`
-const randomId = () => `SALT_${year}${m}_${random().padStart(5, '0')}`;
+const randomId = () => `OPTI_${year}${m}_${random().padStart(5, '0')}`;
 const format = date => moment(date).format('YYYY-MM-DD');
 
 const periodOptions = [
@@ -37,8 +38,11 @@ const scripts =  [
 ]
 
 export default {
-  name: 'SimulationCreationPanel',
+  name: 'OptimizationCreationPanel',
   props: ['userId', 'modalName'],
+  components: {
+    SignalMap
+  },
   data() {
     return {
       id: randomId(),
@@ -67,8 +71,14 @@ export default {
         { text: '날씨', value: 1 },
         { text: '신호', value: 1 },
         { text: '이벤트', value: 1 },
-      ]
-
+      ],
+      visualizationStepSelected: 10, // Must be an array reference!
+      visualizationStepOptions: [
+        { text: '10 Step', value: 10 },
+        { text: '20 Step', value: 20 },
+        { text: '30 Step', value: 30 },
+      ],
+      junctionId: '563103625' // Yuseong Middle
     };
   },
   beforeDestroy() {
@@ -77,6 +87,9 @@ export default {
   mounted() {
   },
   methods: {
+    openSignalMap() {
+      this.$refs['signal-map'].show()
+    },
     resetForm() {
       this.id = randomId();
       this.description = '...';
@@ -120,8 +133,11 @@ export default {
             end,
             day,
             days,
+            visualizationStepSelected: this.visualizationStepSelected,
+            junctionId: this.junctionId,
             script: this.scriptSelected
           },
+          type: 'optimization'
         });
         this.status = 'finished'
         this.variant = "primary"

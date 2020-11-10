@@ -52,8 +52,11 @@ function MapManager({map, simulationId, eventBus}) {
 
   toolLayer.hide() // default hide
 
-  eventBus.$on('salt:data', ({roads}) => {
-    let speedsByEdgeId = roads.reduce((acc, road) => {
+  eventBus.$on('salt:data', (data) => {
+    if(data.simulationId !== simulationId) {
+      return
+    }
+    let speedsByEdgeId = data.roads.reduce((acc, road) => {
       acc[road.roadId.trim()] = road
       return acc
     }, {})

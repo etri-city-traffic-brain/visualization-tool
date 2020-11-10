@@ -37,7 +37,7 @@ const stringify = obj => JSON.stringify(obj, false, 2);
  */
 module.exports = async (req, res, next) => {
   const { body } = req
-  const { id, configuration } = body;
+  const { id, type, configuration } = body;
   debug(`prepare simulation ${id}`);
 
   if (existSimulation(id)) {
@@ -45,17 +45,42 @@ module.exports = async (req, res, next) => {
     return;
   }
   const simulationDir = `${base}/data/${id}`;
+  const slaveId = 'Slave-' + Math.floor(Math.random() * 100)
   try {
     await mkdir(simulationDir);
-    await registorSimulation(body, getSimulations(), currentTimeFormatted());
+    await registorSimulation({
+      ...body,
+      slaveId,
+      role: 'master',
+    }, getSimulations(), currentTimeFormatted());
     updateStatus(id, 'preparing', {});
     await writeFile(`${simulationDir}/salt.scenario.json`, stringify(makeScenario({host, ...body})));
     // await downloadScenario(simulationDir, configuration );
+
     updateStatus(id, 'ready', {});
+
+    if(type === 'optimization') {
+
+      const simulationSlaveDir = `${base}/data/${slaveId}`;
+
+      try {
+        await mkdir(simulationSlaveDir);
+        await registorSimulation({
+          ...body,
+          id: slaveId,
+          role: 'slave',
+        }, getSimulations(), currentTimeFormatted());
+        updateStatus(slaveId, 'ready', {});
+        await writeFile(`${simulationSlaveDir}/salt.scenario.json`, stringify(makeScenario({host, ...body, id: slaveId})));
+
+      } catch (err) {
+        console.log(err)
+      }
+    }
     debug(`simulation ${id} is ready!`)
     res.json({ id });
   } catch (err) {
-    debug(err);
+    debug(err.message);
     updateStatus(id, 'error', {
       error: `fail to create simulation ${err.message}`,
       ended: currentTimeFormatted(),

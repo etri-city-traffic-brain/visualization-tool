@@ -1,10 +1,8 @@
 <template>
   <div style="min-width:840px;">
-    <b-navbar type="dark" variant="dark">
+    <b-navbar type="dark" variant="secondary">
       <b-navbar-nav>
-        <b-nav-item href="#" v-b-modal.create-simulation-modal><b-icon icon="file-earmark-plus"/> 시뮬레이션 등록</b-nav-item>
-        <b-nav-item href="#" v-b-toggle.collapse1 v-b-tooltip.hover><b-icon icon="files"/> 시뮬레이션 결과 비교</b-nav-item>
-        <!-- <b-nav-item href="#" v-b-toggle.collapse1 v-b-tooltip.hover><b-icon icon="files"/> 최적화 등록</b-nav-item> -->
+        <b-nav-item href="#" v-b-modal.create-simulation-modal><b-icon icon="file-earmark-plus"/> 최적화 등록</b-nav-item>
         <!-- <b-nav-item href="#" v-b-toggle.collapse1 v-b-tooltip.hover><b-icon icon="files"/> 강화학습 모델 비교</b-nav-item> -->
         <b-nav-item href="#" v-if="!autoRefresh" @click.stop="updateTable"><b-icon icon="arrow-clockwise"/> 새로고침</b-nav-item>
       </b-navbar-nav>
@@ -99,6 +97,11 @@
           <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
           <b-icon v-else icon="shield-fill-check" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
         </template>
+
+        <template v-slot:cell(epoch)="row">
+          <span>{{row.item.epoch || 0}}</span>
+        </template>
+
         <template v-slot:cell(statusText)="row">
           <b-alert :variant="statusColor(row.item.status)" class="m-0 p-0" show size="sm">{{ row.item.status.toUpperCase() }}</b-alert>
         </template>
@@ -112,7 +115,7 @@
             @click.stop="startSimulation(row.item.id, row.index, $event.target)"
             v-if="row.item.status === 'ready' || row.item.status === 'error' || row.item.status === 'stopped'"
             >
-              <b-icon icon="play-fill"/> 시작
+              <b-icon icon="play-fill"/> 최적화
           </b-button>
           <b-button
             size="sm"
@@ -123,6 +126,7 @@
             v-if="row.item.status === 'running'">
               <b-icon icon="stop-fill"/> 중지
           </b-button>
+
           <!--
           <b-button
             size="sm"
@@ -139,11 +143,22 @@
           <b-button
             size="sm"
             variant="secondary"
-            :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
+            :to="{ name: 'OptimizationResultMap', params: {id: row.item.id}}"
             v-if="row.item.status === 'finished' || row.item.status === 'running'"
             >
-              <b-icon icon="zoom-in"></b-icon> 상세보기
+              <b-icon icon="zoom-in"></b-icon> 신호최적화결과
           </b-button>
+
+          <b-button
+            size="sm"
+            variant="warning"
+            v-b-tooltip.hover
+            title="신호비교"
+            :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
+          >
+            신호비교
+          </b-button>
+
          </template>
          <template v-slot:cell(del)="row">
           <b-button
@@ -200,7 +215,7 @@
       />
 
       <b-modal
-        title="시뮬레이션 등록"
+        title="최적화 등록"
         id="create-simulation-modal"
         ref="create-simulation-modal"
         size="lg"
@@ -212,7 +227,7 @@
         body-border-variant="dark"
         header-class="pt-2 pb-0"
         hide-footer
-        centered
+        centered_
       >
         <simulation-creation-panel
           @hide="hideCreateSimulationDialog"
@@ -225,7 +240,7 @@
   </div>
 </template>
 
-<script src="./simulation-list.js"> </script>
+<script src="./optimization-list.js"> </script>
 
 <style>
 

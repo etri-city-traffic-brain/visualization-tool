@@ -12,11 +12,14 @@ const roads = require('./salt-roads');
 
 const { log } = console;
 
+const roadId = str => str.padEnd(MAX_ROAD_ID_LENGTH, ' ')
+const sId = str => str.padEnd(MAX_SIMULATION_ID_LENGTH, ' ')
+
 const socket = net.connect({ port: 1337, host: '1.245.47.108' });
 const HEADER_LENGTH = 16;
 
 // const simulationId = '001'.padStart(24, '0');
-const simulationId = process.argv[2] || 'SALT_202009_00940';
+const simulationId = sId(process.argv[2] || 'SALT_202009_00940');
 // const simulationId = 'SALT_202009_00670';
 
 log('*** SALT Simulator Dummy ***');
@@ -95,8 +98,7 @@ const makeData = () => {
   });
   return data
 }
-const roadId = str => str.padEnd(MAX_ROAD_ID_LENGTH, ' ')
-const sId = str => str.padEnd(MAX_SIMULATION_ID_LENGTH, ' ')
+
 socket.on('connect', async () => {
   const init = msgFactory.makeInit({
     simulationId: str2CharCodes(simulationId),
@@ -118,12 +120,13 @@ socket.on('connect', async () => {
   // log('send status')
   // await sleep(1000)
 
-  for(let i=0; i<100; i++) {
-    // await sleep(50)
-    await sleep(1500)
-    send(makeData());
-    send(msgFactory.makeStatus({ status: 0, progress: i * 1 }))
-    console.log('send')
+  for(let j=0; j<3; j++) {
+    for(let i=1; i<11; i++) {
+      await sleep(1000)
+      send(makeData());
+      send(msgFactory.makeStatus({ status: 1, progress: i * 10 }))
+    }
+    await sleep(3000)
   }
 
   // log('send status')

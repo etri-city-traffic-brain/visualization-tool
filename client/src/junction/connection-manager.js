@@ -72,13 +72,16 @@ const edgeTmpl = () => ({
  * @param {*} element
  */
 function ConnectionManager({junction, connectedLinks, element}) {
+  console.log('generate lanes', connectedLinks)
   const lanes = generateLanes(connectedLinks);
+  console.log('lanes:', lanes)
   const nodes = new vis.DataSet(lanes);
   const connections = new vis.DataSet([]);
   const data = { nodes, edges: connections };
   const eventBus = eventBusFactory();
   const network = new vis.Network(element, data);
 
+  console.log('Connection Manager')
 
   const notify = (event, param) => {
     eventBus.notify(event, param);
@@ -191,14 +194,18 @@ function ConnectionManager({junction, connectedLinks, element}) {
    * and visualize it
    */
   function loadConnection(rawConnections = []) {
+    console.log('loadConnection')
     rawConnections.forEach((conn) => {
       const from = `${conn.from}${conn.fromLane}`;
       const to = `${conn.to}${conn.toLane}`;
+
       const fromNode = nodes.get(from);
       const toNode = nodes.get(to);
+      // console.log('from', fromNode, toNode)
 
       if (fromNode && toNode) {
         let dirAngle = degree(toNode.angle - fromNode.angle);
+        // console.log('dirAngle', dirAngle)
         dirAngle = dirAngle < 0 ? 360 + dirAngle : dirAngle;
         const { type, direction } = curveType(dirAngle);
         const edge = Object.assign(edgeTmpl(), {
@@ -210,6 +217,7 @@ function ConnectionManager({junction, connectedLinks, element}) {
           to,
           direction,
         });
+        // console.log('add', edge)
         connections.add(edge);
       }
     });

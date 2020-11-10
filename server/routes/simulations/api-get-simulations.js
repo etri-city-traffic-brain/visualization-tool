@@ -11,12 +11,23 @@ module.exports = (req, res) => {
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     user = '',
+    type
   } = req.query;
 
-  const array = getSimulations()
-    .filter({ user })
-    .sortBy('created', 'asc')
-    .value()
-    .reverse();
+  let array;
+  if (type === 'optimization') {
+    array = getSimulations()
+      .filter({ user, type, role: 'master' })
+      .sortBy('created', 'asc')
+      .value()
+      .reverse();
+  } else {
+    array = getSimulations()
+      // .filter({ user })
+      .sortBy('created', 'asc')
+      .value()
+      .reverse();
+    console.log(array.length)
+  }
   res.json(paginate(array, page, perPage));
 };

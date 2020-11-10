@@ -144,7 +144,7 @@ export default {
       this.connectionManager = connectionManager;
 
       const find = findScenario(this.junction.signalScenario);
-
+      console.log('find scenario')
       // update tod duration from scenario
       junction.todPlan.forEach((tod) => {
         tod.tods.forEach((t) => {
@@ -178,7 +178,7 @@ export default {
         });
         this.todPlan = todPlan;
       }
-
+      console.log('xxx')
       // for reactivity
       this.signalPhases = signalPhase.map(phase => ({
         index: phase.index,
@@ -187,6 +187,8 @@ export default {
 
       this.ready = true;
       this.$scrollTo('#nav-bar');
+
+      console.log('ready')
     },
     async handleJunctionDelete({ id }) {
       const { data: arr } = await junctionService.getSignalInfo(id);
@@ -263,6 +265,7 @@ export default {
         }
         this.text = '신호 상세정보 로드중...';
         const { data } = await junctionService.getSignal(junction.id, version);
+        console.log(data)
         this.text = '신호 상세정보 로드완료';
         this.junction = data;
       } catch (err) {

@@ -12,7 +12,7 @@ const HEADER_LENGTH = 16;
 
 const { green } = chalk;
 
-const writeStream = fs.createWriteStream('./output');
+const writeStream = fs.createWriteStream('./debug_output');
 
 /**
  * TCP Server
@@ -28,11 +28,12 @@ module.exports = (port = 1337) => {
   const saltMsgHandler = SaltMsgHandler();
   const bufferManager = BufferManager();
 
-  const consumeSaltMsg = (socket) => {
+  const consumeSaltMsg = (socket, bufferManager) => {
+    // console.log('consume', socket.remotePort)
     const buffer = bufferManager.getBuffer(socket);
     if (buffer && buffer.length >= HEADER_LENGTH) {
       const header = Header(buffer);
-      debug(header);
+      // debug(header);
       const handler = saltMsgHandler.get(header.type);
       if (handler) {
         const bodyLength = header.length + HEADER_LENGTH;
@@ -43,18 +44,26 @@ module.exports = (port = 1337) => {
         bufferManager.setBuffer(socket, Buffer.alloc(0));
       }
     }
-    timer = setTimeout(() => consumeSaltMsg(socket), 10);
+    timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 10);
   };
+
+  const bufferManagerRegistry = {}
 
   const handleData = socket => (buffer) => {
     // console.log(hex(buffer));
-    writeStream.write(hex(buffer));
+    // writeStream.write(hex(buffer));
+    // bufferManager.addBuffer(socket, buffer);
+    const bufferManager = bufferManagerRegistry[socket.remotePort]
     bufferManager.addBuffer(socket, buffer);
   };
 
   const handleClose = socket => () => {
     saltMsgHandler.clearResource(socket);
-    bufferManager.deleteBuffer(socket);
+    const bufferManager = bufferManagerRegistry[socket.remotePort]
+    if(bufferManager) {
+      bufferManager.deleteBuffer(socket);
+    }
+    delete bufferManagerRegistry[socket.remotePort]
     clearTimeout(timer);
     debug(chalk.red(`[close]`))
   };
@@ -64,10 +73,16 @@ module.exports = (port = 1337) => {
   };
 
   const server = net.createServer((socket) => {
+    console.log('created', socket.remotePort)
     socket.on('data', handleData(socket));
     socket.on('close', handleClose(socket));
     socket.on('error', handleError(socket));
-    consumeSaltMsg(socket);
+
+    // const saltMsgHandler = SaltMsgHandler();
+    const bufferManager = BufferManager();
+    bufferManagerRegistry[socket.remotePort] = bufferManager
+    consumeSaltMsg(socket, bufferManager);
+
   });
 
   server.on('connection', (socket) => {

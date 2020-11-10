@@ -43,6 +43,10 @@ async function getSimulations(userId, currentPage) {
   return HTTP.get(`/salt/v1/simulations/?page=${currentPage}&user=${userId}`);
 }
 
+async function getOptimizations(userId, currentPage) {
+  return HTTP.get(`/salt/v1/simulations/?page=${currentPage}&user=${userId}&type=optimization`);
+}
+
 async function uploadResult(item, formData) {
   return HTTP.post(`/salt/v1/simulations/upload/result?id=${item.id}&map=${item.configuration.map}`, formData, {
     headers: {
@@ -73,5 +77,6 @@ export default {
   startSimulation,
   stopSimulation,
   getSimulations,
+  getOptimizations,
   uploadResult,
 };

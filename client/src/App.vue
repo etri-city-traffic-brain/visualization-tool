@@ -16,16 +16,21 @@
       </b-navbar-brand>
       <b-navbar-nav>
         <b-nav-item to="/SimulationList" >
-          <strong>트래픽시뮬레이션</strong>
+          <span v-if="currentRoute.startsWith('Simulation')" style="color:skyblue"> <strong>트래픽시뮬레이션 </strong> </span>
+          <span v-else> 트래픽시뮬레이션  </span>
+        </b-nav-item>
+        <b-nav-item to="/OptimizationList" >
+          <span v-if="currentRoute.startsWith('Optimization')" style="color:skyblue"> <strong>신호최적화 </strong> </span>
+          <span v-else> 신호최적화  </span>
         </b-nav-item>
       </b-navbar-nav>
-        <!-- <b-navbar-nav class="ml-auto"> -->
+        <b-navbar-nav class="ml-auto">
       <!-- <b-collapse is-nav id="nav_dropdown_collapse" > -->
-          <!-- <b-nav-item size="sm" to="/SignalEditor" > -->
-            <!-- <b-button size="sm">신호편집</b-button> -->
-          <!-- </b-nav-item> -->
+          <b-nav-item size="sm" to="/SignalEditor" >
+            신호편집
+          </b-nav-item>
       <!-- </b-collapse> -->
-        <!-- </b-navbar-nav> -->
+        </b-navbar-nav>
     </b-navbar>
     <transition name="fade">
       <router-view/>
@@ -34,11 +39,11 @@
     <!--
       BOTTOM COPYRIGHT
     -->
-    <b-card
+    <!-- <b-card
       bg-variant="dark"
       text-variant="white"
       class="no-round-corner"
-      v-if="$router.currentRoute.name !== 'SimulationResultMap'"
+      v-if="currentRoute !== 'SimulationResultMap'"
     >
       <b-container fluid class="mt-2 mb-2 p-2 text-center" >
         도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어
@@ -46,7 +51,7 @@
         <small class="text-muted">Copyright 2020. ETRI All rights reserved.</small>
         <small class="text-muted">Copyright ⓒ 2020. <em>Modutech</em> Inc. All rights reserved.</small>
       </b-container>
-    </b-card>
+    </b-card> -->
   </div>
 </template>
 
@@ -76,13 +81,22 @@ export default {
         i = 0
       }
     }, 1000)
+
+    // $router.currentRoute.name
+  },
+
+  watch:{
+    $route (to, from){
+      this.currentRoute = to.name
+    }
   },
   data() {
     return {
       prevScrollpos: window.pageYOffset,
       variant: 'dark',
       userState,
-      variantLogo: 'dark'
+      variantLogo: 'dark',
+      currentRoute: '',
     };
   },
 

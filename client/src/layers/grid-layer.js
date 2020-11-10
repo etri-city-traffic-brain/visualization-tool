@@ -62,7 +62,7 @@ function makeGridLayer(map) {
     }
   });
   layer.updateGrid = (sId, currentStep) => {
-    updateGrid(sId, currentStep, layer)
+    // updateGrid(sId, currentStep, layer)
   }
   return layer;
 }

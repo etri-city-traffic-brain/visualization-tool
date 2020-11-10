@@ -11,6 +11,10 @@ import SimulationList from '@/pages/SimulationList';
 import SimulationResultMap from '@/pages/SimulationResultMap';
 import SimulationResult from '@/pages/SimulationResult';
 
+import OptimizationList from '@/pages/OptimizationList';
+import OptimizationResultMap from '@/pages/OptimizationResultMap';
+import OptimizationResultComparisonMap from '@/pages/OptimizationResultComparisonMap';
+
 Vue.use(Router);
 
 const route = (path, component) => ({
@@ -25,6 +29,9 @@ export default new Router({
     route('/SimulationResult/:id', SimulationResult),
     route('/SimulationResultMap/:id', SimulationResultMap),
     route('/SimulationList', SimulationList),
+    route('/OptimizationList', OptimizationList),
+    route('/OptimizationResultMap/:id', OptimizationResultMap),
+    route('/OptimizationResultComparisonMap/:id', OptimizationResultComparisonMap),
     route('/SimulationComparisonResult', SimulationComparisonResult),
     route('/SignalEditor', SignalEditor),
   ],

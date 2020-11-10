@@ -22,6 +22,7 @@ module.exports = (httpServer) => {
         const obj = JSON.parse(message);
         if (obj.type === MsgType.INIT) { // init from ws
           Object.assign(client, { $simulationId: obj.simulationId });
+          console.log('init', obj.simulationId)
         } else if (obj.type === MsgType.SET) {
           console.log(obj)
           eventBus.emit('salt:set', obj)
@@ -47,6 +48,8 @@ module.exports = (httpServer) => {
       // @ts-ignore
       if(client.$simulationId === simulationId) {
         client.send(serialize(data))
+
+        console.log(`send [${client.$simulationId}], [${simulationId}]`)
       }
     })
   }

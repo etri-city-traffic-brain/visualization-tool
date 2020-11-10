@@ -21,6 +21,16 @@
       <b-form-group label-cols-sm="3" label="시뮬레이션 ID" label-class="text-sm-right" label-for="id">
         <b-form-input autofocus id="id" v-model="id" focus select></b-form-input>
       </b-form-group>
+      <b-form-group label-cols-sm="3" label="교차로 ID" label-class="text-sm-right" label-for="id">
+        <!-- <b-form inline> -->
+        <b-input-group>
+          <b-form-input id="junctionId" v-model="junctionId"></b-form-input>
+          <b-input-group-append>
+          <b-btn class="ml-1" @click="openSignalMap">선택</b-btn>
+          </b-input-group-append>
+        </b-input-group>
+        <!-- </b-form> -->
+      </b-form-group>
       <b-form-group label-cols-sm="3" label="설명" label-class="text-sm-right" label-for="description">
         <b-form-input id="description" v-model="description"></b-form-input>
       </b-form-group>
@@ -68,12 +78,16 @@
       </b-form-group>
 
       <b-form-group label-cols-sm="3" label="통계 주기" label-class="text-sm-right" label-for="Period">
-        <b-form-select v-model="periodSelected" :options="periodOptions" class="mb-3" />
+        <b-form-select v-model="periodSelected" :options="periodOptions" class="" />
+      </b-form-group>
+
+      <b-form-group label-cols-sm="3" label="가시화 주기" label-class="text-sm-right">
+        <b-form-select v-model="visualizationStepSelected" :options="visualizationStepOptions" class="" />
       </b-form-group>
 
       <b-form-group label-cols-sm="6" label-class="text-sm-right" label-for="Period" >
-        <b-button class="mr-1" @click="save" variant="dark" >
-          시뮬레이션 등록
+        <b-button class="mr-1" @click="save" variant="primary" >
+          신호최적화 등록
         </b-button>
         <b-button class="mr-1" @click="hide" variant="dark" >
           닫기
@@ -89,11 +103,33 @@
       <b-spinner small />
       {{ msg.toUpperCase() }}
     </b-alert>
+
+
+
+    <b-modal
+        title="최적화 등록"
+        id="create-simulation-modal"
+        ref="signal-map"
+        size="lg"
+        header-border-variant="dark"
+        header-bg-variant="dark"
+        header-text-variant="light"
+        body-bg-variant="dark"
+        body-text-variant="ligth"
+        body-border-variant="dark"
+        header-class="pt-2 pb-0"
+        hide-footer
+      >
+        <signal-map
+          >
+        </signal-map>
+    </b-modal>
+
   </div>
   <!-- </b-modal> -->
 </template>
 
-<script src="./simulation-creation">
+<script src="./optimization-creation">
 
 </script>
 

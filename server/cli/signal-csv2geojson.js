@@ -1,3 +1,5 @@
+
+
 const fs = require('fs');
 
 function make(NODE_ID, coordinates) {
@@ -33,4 +35,7 @@ const obj = {
   features,
 };
 
-fs.writeFileSync('signals.geojson', JSON.stringify(obj, false, 2));
+//  CSV 형태의 노드 목록을 GEO JSON 객체로 변환한다.
+if (require.main === module) {
+  fs.writeFileSync('signals.geojson', JSON.stringify(obj, false, 2));
+}

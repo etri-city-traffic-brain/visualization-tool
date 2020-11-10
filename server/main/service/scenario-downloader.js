@@ -16,11 +16,11 @@ const {
 
 async function download(url, targetDir = './') {
   const targetFilePath = path.resolve(targetDir, 'data.zip');
-
+  console.log(url)
   try {
     const { data } = await axios({
-      method: 'GET',
       url,
+      method: 'GET',
       responseType: 'stream',
     });
 
@@ -37,8 +37,22 @@ async function download(url, targetDir = './') {
       });
       data.on('error', error => reject(error));
     });
-  } catch (err) {
-    return Promise.reject(err);
+  } catch (error) {
+
+    if (error.response) {
+      // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
+      // console.log(error.response.data);
+      console.log(error.response.status);
+      // console.log(error.response.headers);
+    }
+    else if (error.request) {
+      // 요청이 이루어 졌으나 응답을 받지 못했습니다.
+      // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
+      // Node.js의 http.ClientRequest 인스턴스입니다.
+      console.log(error.request);
+    }
+
+    return Promise.reject(error);
   }
 }
 
@@ -50,7 +64,7 @@ function makeUrlForScenarioByRegion({
   toTime,
   region,
   subregion,
-  partitions,
+  partitions = 1,
   signal = 0,
   route = 0,
   event = 0,

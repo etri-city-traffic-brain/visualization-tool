@@ -33,9 +33,9 @@ function SaltMsgHandler() {
   const handleSaltInit = (socket, buffer) => {
     const initMsg = Init(buffer);
     const simulationId = initMsg.simulationId;
-    socketToSimulationId[socket] = simulationId;
+    socketToSimulationId[socket.remotePort] = simulationId;
     simulationIdToSocket[simulationId] = socket;
-    debug(`[INIT] ${simulationId}, ${buffer.length}`);
+    debug(`[INIT] ${simulationId}, ${socket.remotePort}`);
 
     const setBuffer = msgFactory.makeSet({
       extent: [127.33342, 36.3517, 127.34806, 36.34478], // max.y 가 min.y 보다 작아야 함
@@ -44,14 +44,15 @@ function SaltMsgHandler() {
 
     // just for test
      send(simulationId, setBuffer)
-     debug('send Set')
+    //  debug('send Set')
   };
 
   //  DATA
   const handleSaltData = (socket, buffer) => {
     const data = Data(buffer);
-    const simulationId = socketToSimulationId[socket];
-    debug(`[DATA] ${simulationId}, ROADS: ${data.roads.length} ${buffer.length}`);
+    const simulationId = socketToSimulationId[socket.remotePort];
+    // debug(`[DATA] ${simulationId}, ROADS: ${data.roads.length} ${buffer.length}`);
+    // debug(`[DATA] ${simulationId}`);
     // debug(data)
     eventBus.emit('salt:data', {
       event: 'salt:data',
@@ -64,8 +65,8 @@ function SaltMsgHandler() {
   //  STATUS
   const handleSaltStatus = (socket, buffer) => {
     const status = Status(buffer);
-    const simulationId = socketToSimulationId[socket];
-    debug(chalk.yellow(JSON.stringify(status)));
+    const simulationId = socketToSimulationId[socket.remotePort];
+    // debug(chalk.yellow(JSON.stringify(status)));
     eventBus.emit('salt:status', {
       event: 'salt:status',
       simulationId,
@@ -80,8 +81,8 @@ function SaltMsgHandler() {
   };
 
   const clearResource = (socket) => {
-    delete simulationIdToSocket[socketToSimulationId[socket]];
-    delete socketToSimulationId[socket];
+    delete simulationIdToSocket[socketToSimulationId[socket.remotePort]];
+    delete socketToSimulationId[socket.remotePort];
   };
 
   return Object.assign(eventBus, {

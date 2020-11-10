@@ -1,7 +1,8 @@
 
 import moment from "moment";
 
-import SimulationCreationPanel from '@/components/SimulationCreation';
+// import SimulationCreationPanel from '@/components/SimulationCreation';
+import OptimizationCreationPanel from '@/components/OptimizationCreation';
 import BarChart from '@/components/charts/BarChart';
 
 import { simulationService, statisticsService } from '@/service'
@@ -24,10 +25,10 @@ const variant = {
 const { log } = console;
 
 export default {
-  name: 'SimulationList',
+  name: 'OptimizationList',
   components: {
     BarChart,
-    SimulationCreationPanel,
+    SimulationCreationPanel: OptimizationCreationPanel,
   },
   mixins: [dragDropMixin, fileMgmtMixin],
   data() {
@@ -37,6 +38,7 @@ export default {
         { class: "text-center", key: "id", label: "시뮬레이션 아이디", },
         { class: "text-center", key: "status", label: "상태" },
         { class: "text-center", key: "statusText", label: "상태" },
+        { class: "text-center", key: "epoch", label: "Epoch" },
         { class: "text-center", key: "configuration.period", label: "주기" },
         { class: "text-center", key: "started", label: "시작" },
         { class: "text-center", key: "ended", label: "종료" },
@@ -62,7 +64,7 @@ export default {
     };
   },
   mounted() {
-    log('트래픽시뮬레이션 목록')
+    log('신호최적화 목록')
     this.dataProvider({ currentPage: this.currentPage })
     this.interval = setInterval(async () => {
       if(this.autoRefresh) {
@@ -131,9 +133,9 @@ export default {
     },
     async startSimulation(id) {
       const { value: yes } = await this.$swal({
-        title: '시뮬레이션을 시작합니다.',
+        title: '신호 최적화 시작',
         text: id,
-        type: 'warning',
+        type: 'info',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
@@ -168,6 +170,10 @@ export default {
         clearInterval(interval);
       }
     },
+
+    async applyOptimization(id) {
+      console.log('apply optimization')
+    },
     async stopSimulation(id) {
       await simulationService.stopSimulation(id);
       this.updateTable();
@@ -176,7 +182,7 @@ export default {
 
       this.isBusy = true
       try {
-        const { data, total, perPage } = (await simulationService.getSimulations(this.userState.userId, currentPage)).data;
+        const { data, total, perPage } = (await simulationService.getOptimizations(this.userState.userId, currentPage)).data;
         this.totalRows = total;
         this.isBusy = false
         this.perPage = perPage
