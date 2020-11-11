@@ -79,6 +79,18 @@ export default function SaltTrafficLightsLoader(map, element, events) {
       y
     })
   };
+  const  selectConnection = (target) => {
+    const { owner } = target;
+    const [x, y] = owner.toGeoJSONGeometry().coordinates;
+
+    const junction = { id: owner.properties.NODE_ID, x, y };
+
+    events.$emit('junction:selecte', {
+      id: owner.properties.NODE_ID,
+      x,
+      y
+    })
+  };
 
 
   const clicked = (param) => {
@@ -96,12 +108,19 @@ export default function SaltTrafficLightsLoader(map, element, events) {
       const options = {
         items: [
           {
-            item: `편집 - ${feature.properties.CROSS_NM}`,
+            // item: `편집`,
+            item: `편집 - ${feature.properties.NODE_ID.substring(0,10)}`,
             click: editConnection,
           },
           {
-            item: `삭제 - ${feature.properties.CROSS_NM}`,
+            item: `삭제`,
+            // item: `삭제 - ${feature.properties.CROSS_NM}`,
             click: deleteConnection,
+          },
+          {
+            item: `선택`,
+            // item: `삭제 - ${feature.properties.CROSS_NM}`,
+            click: selectConnection,
           },
         ],
       };

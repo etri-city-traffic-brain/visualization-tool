@@ -17,13 +17,13 @@ module.exports = (req, res) => {
   let array;
   if (type === 'optimization') {
     array = getSimulations()
-      .filter({ user, type, role: 'master' })
+      .filter({ type, role: 'master' })
       .sortBy('created', 'asc')
       .value()
       .reverse();
   } else {
     array = getSimulations()
-      // .filter({ user })
+      .filter({ type: 'simulation' })
       .sortBy('created', 'asc')
       .value()
       .reverse();

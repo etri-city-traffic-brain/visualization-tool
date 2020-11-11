@@ -17,6 +17,7 @@ module.exports = (httpServer) => {
   const webSocketServer = new WebSocket.Server({server: httpServer});
   const eventBus = Object.create(events.EventEmitter.prototype);
   function handleConnection(client) {
+    console.log('connected ws-client')
     client.on('message', (message) => {
       try {
         const obj = JSON.parse(message);

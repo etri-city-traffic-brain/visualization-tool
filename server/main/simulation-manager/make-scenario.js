@@ -27,6 +27,7 @@ module.exports = ({ id, host, configuration: {begin, end, day, days, period,}}) 
       id,
       host,
       port: 1337,
+      interval: 100,
       time: {
         begin,
         end,
@@ -37,14 +38,15 @@ module.exports = ({ id, host, configuration: {begin, end, day, days, period,}}) 
         link: 'edge.xml',
         connection: 'connection.xml',
         trafficLightSystem: 'tss.xml',
-        route: routes.map(route => `${route}`).join(' '),
+        // route: routes.map(route => `${route}`).join(' '),
+        route: 'dj_sample_mon.rou.xml',
       },
       parameter: {
         minCellLength: 30.0,
         vehLength: 5.0,
       },
       output: {
-        fileDir: `output/${id}/`,
+        fileDir: `/home/ubuntu/uniq-sim/output/${id}/`,
         period,
         level: 'cell',
         save: 1,

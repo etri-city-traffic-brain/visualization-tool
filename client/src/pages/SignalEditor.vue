@@ -15,7 +15,7 @@
       </b-navbar-brand>
       <b-navbar-nav>
         <b-nav-item v-if="junction.id">
-        {{junction.crossName}} ({{junction.id}}) {{junction.policeStation}}
+        {{junction.crossName}} ({{junction.id.substring(0, 20)}}) {{junction.policeStation}}
         </b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">

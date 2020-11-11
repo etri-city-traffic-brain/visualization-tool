@@ -3,8 +3,17 @@
 const serialize = obj => JSON.stringify(obj);
 
 const { log } = console
+console.log(process.env)
 
-function Client({ url = 'ws://localhost:8080', simulationId, eventBus }) {
+let wsUrl = 'ws://127.0.0.1:8080'
+if(process.env.NODE_ENV === 'development') {
+
+} else {
+  wsUrl = 'ws://101.79.1.114:8080/'
+}
+
+console.log('wsUrl:', wsUrl);
+function Client({ url = wsUrl, simulationId, eventBus }) {
 
   if (!eventBus) {
     throw new Error('eventBus is null')

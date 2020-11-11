@@ -79,16 +79,21 @@ export default {
   },
   created() {
     eventBus.$on('junction:selected', this.handleJunctionSelect);
+    eventBus.$on('junction:selecte', (v) => {
+      this.$emit('junction:select', v)
+    });
     eventBus.$on('junction:delete', this.handleJunctionDelete);
     eventBus.$on('states:changed', this.handleStateChanged);
     eventBus.$on('edge:removed', this.handleEdgeRemoved);
     eventBus.$on('edge:added', this.handleEdgeAdded);
   },
   mounted() {
-    this.map = makeMap({ mapId, zoom:15 });
-    this.map.config('scrollWheelZoom', false);
-    this.tl = TrafficLightManager(this.map, this.$refs.connectionEditor, eventBus);
-    this.tl.load();
+    setTimeout(() => {
+      this.map = makeMap({ mapId, zoom:15 });
+      this.map.config('scrollWheelZoom', false);
+      this.tl = TrafficLightManager(this.map, this.$refs.connectionEditor, eventBus);
+      this.tl.load();
+    }, 200)
   },
   destroyed() {
     if (this.map) {
@@ -186,7 +191,7 @@ export default {
       }));
 
       this.ready = true;
-      this.$scrollTo('#nav-bar');
+      // this.$scrollTo('#nav-bar');
 
       console.log('ready')
     },

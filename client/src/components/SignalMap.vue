@@ -1,7 +1,5 @@
 <template>
   <div>
-    신호선택
-
     <div
       :ref="mapId"
       :id="mapId"
@@ -28,10 +26,22 @@ export default {
 
   created() {
   },
+  destroyed() {
+    if (this.map) {
+      this.map.remove();
+    }
+  },
   mounted() {
     setTimeout(() => {
-      this.map = makeMap({ mapId, zoom:15 });
-    }, 2000)
+      try {
+        this.map = makeMap({ mapId, zoom:15 });
+        this.tl = TrafficLightManager(this.map, this.$refs.connectionEditor, this);
+        this.tl.load();
+
+      } catch (err) {
+        // console.log(err)
+      }
+    }, 200)
 
   }
 }

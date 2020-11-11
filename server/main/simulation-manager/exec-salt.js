@@ -13,13 +13,17 @@ const {
 } = config;
 const { log } = console
 
-module.exports = ({ simulationId, script: scriptFile }) => new Promise((resolve, reject) => {
+const scenarioFile = 'salt.scenario.json'
 
-  const script = 'default.py'
+module.exports = ({ simulationId, script: scriptFile = 'default.py' }) => new Promise((resolve, reject) => {
+
+  const scenarioFilePath = `${home}/data/${simulationId}/${scenarioFile}`
+
   const process = exec({
     homeDir: home,
     scriptDir: scripts,
-    script,
+    script: scriptFile,
+    params: ['-s', scenarioFilePath]
   })
 
   process.on("close", code => {

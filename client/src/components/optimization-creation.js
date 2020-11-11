@@ -1,8 +1,9 @@
 
 import moment from 'moment';
+
 import simulationService from '@/service/simulation-service';
-// import areas from '../utils/areas';
 import SignalMap from '@/components/SignalMap';
+import SignalEditor from '@/pages/SignalEditor';
 
 const year = moment().year();
 const m = moment().format('MM');
@@ -18,12 +19,6 @@ const periodOptions = [
   { value: 240, text: '4시간', },
   { value: 360, text: '6시간', },
 ]
-// const partitionOptions=  [
-//   { value: 0, text: 'None' },
-//   { value: 4, text: '4개' },
-//   { value: 8, text: '8개' },
-//   { value: 16, text: '16개' },
-// ]
 
 const areas = [
   { value: "250", text: "대전" },
@@ -33,7 +28,6 @@ const areas = [
 ]
 
 const scripts =  [
-  { value: 'test_network.py', text: 'script-01.py' },
   { value: 'RL_2phase_pressure.py', text: 'RL_2phase_pressure.py' },
 ]
 
@@ -41,7 +35,8 @@ export default {
   name: 'OptimizationCreationPanel',
   props: ['userId', 'modalName'],
   components: {
-    SignalMap
+    SignalMap,
+    SignalEditor
   },
   data() {
     return {
@@ -53,8 +48,6 @@ export default {
       toTime: '23:59',
       periodSelected: 30,
       periodOptions: [...periodOptions],
-      // partitionSelected: 0,
-      // partitionOptions: [...partitionOptions],
       areaSelected: 250,
       areaOptions: [ ...areas ],
       beginSelected: 0,
@@ -65,7 +58,6 @@ export default {
       status: 'ready',
       scripts: [ ...scripts ],
       scriptSelected: scripts[0].value,
-
       selected: [], // Must be an array reference!
       options: [
         { text: '날씨', value: 1 },
@@ -81,11 +73,6 @@ export default {
       junctionId: '563103625' // Yuseong Middle
     };
   },
-  beforeDestroy() {
-    clearTimeout(this.timeout)
-  },
-  mounted() {
-  },
   methods: {
     openSignalMap() {
       this.$refs['signal-map'].show()
@@ -93,8 +80,6 @@ export default {
     resetForm() {
       this.id = randomId();
       this.description = '...';
-    },
-    selectArea() {
     },
     async save() {
 
@@ -108,15 +93,6 @@ export default {
       this.variant = 'info';
       try {
         this.status = 'running'
-        this.timeout = setInterval(async () => {
-          const { simulation } = await simulationService.getSimulationInfo(this.id)
-          if(!simulation) return
-          if(simulation.status === 'finished' || simulation.status === 'error') {
-            clearInterval(this.timeout)
-            this.running = false
-          }
-          this.msg = simulation.status
-        }, 2000)
         await simulationService.create(this.userId, {
           id: this.id,
           user: this.userId,
@@ -128,7 +104,6 @@ export default {
             fromTime: `${this.fromTime}:00`,
             toTime: `${this.toTime}:00`,
             period: this.periodSelected * 60,
-            // partitions: this.partitionSelected,
             begin: 0,
             end,
             day,
@@ -143,11 +118,8 @@ export default {
         this.variant = "primary"
         this.msg = "시뮬레이션이 준비되었습니다."
         setTimeout(() => {
-          this.status = 'ready'
           this.hide()
-          clearInterval(this.timeout)
         }, 1000)
-
       } catch (err) {
         this.msg = err.message;
         this.variant = 'danger'
@@ -160,5 +132,9 @@ export default {
       this.$bvModal.hide(this.modalName)
       this.resetForm();
     },
+    selectJunction(junction) {
+      this.$refs['signal-map'].hide()
+      this.junctionId = junction.id
+    }
   },
 };

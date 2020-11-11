@@ -110,7 +110,7 @@
         title="최적화 등록"
         id="create-simulation-modal"
         ref="signal-map"
-        size="lg"
+        size="xl"
         header-border-variant="dark"
         header-bg-variant="dark"
         header-text-variant="light"
@@ -120,9 +120,8 @@
         header-class="pt-2 pb-0"
         hide-footer
       >
-        <signal-map
-          >
-        </signal-map>
+        <!-- <signal-map > </signal-map> -->
+        <SignalEditor v-on:junction:select="selectJunction"/>
     </b-modal>
 
   </div>

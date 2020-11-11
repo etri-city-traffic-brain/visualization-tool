@@ -1,6 +1,6 @@
 
 const state = {
-  userId: 'salt_test',
+  userId: 'user1',
   autoRefresh: false,
 };
 

@@ -20,7 +20,8 @@ const mkdir = util.promisify(fs.mkdir);
 const writeFile = util.promisify(fs.writeFile);
 
 const makeScenario = require('../../main/simulation-manager/make-scenario');
-const downloadScenario = require('./utils/prepare-scenario');
+// const downloadScenario = require('./utils/prepare-scenario');
+const downloadScenario = require('./utils/prepare-scenario-test');
 const registorSimulation = require('./utils/create-simulation-row');
 
 const {
@@ -45,21 +46,23 @@ module.exports = async (req, res, next) => {
     return;
   }
   const simulationDir = `${base}/data/${id}`;
-  const slaveId = 'Slave-' + Math.floor(Math.random() * 100)
+  const slaveId = ('S' + ((Math.random() * 10000000) + '').replace('.','')).substring(0, 17)
   try {
-    await mkdir(simulationDir);
-    await registorSimulation({
-      ...body,
-      slaveId,
-      role: 'master',
-    }, getSimulations(), currentTimeFormatted());
-    updateStatus(id, 'preparing', {});
-    await writeFile(`${simulationDir}/salt.scenario.json`, stringify(makeScenario({host, ...body})));
-    // await downloadScenario(simulationDir, configuration );
 
-    updateStatus(id, 'ready', {});
 
     if(type === 'optimization') {
+
+      await mkdir(simulationDir);
+      await registorSimulation({
+        ...body,
+        slaveId,
+        role: 'master',
+      }, getSimulations(), currentTimeFormatted());
+      updateStatus(id, 'preparing', {});
+      await writeFile(`${simulationDir}/salt.scenario.json`, stringify(makeScenario({host, ...body})));
+      await downloadScenario(simulationDir, configuration );
+
+      updateStatus(id, 'ready', {});
 
       const simulationSlaveDir = `${base}/data/${slaveId}`;
 
@@ -72,10 +75,23 @@ module.exports = async (req, res, next) => {
         }, getSimulations(), currentTimeFormatted());
         updateStatus(slaveId, 'ready', {});
         await writeFile(`${simulationSlaveDir}/salt.scenario.json`, stringify(makeScenario({host, ...body, id: slaveId})));
+        await downloadScenario(simulationSlaveDir, configuration );
 
       } catch (err) {
         console.log(err)
       }
+    } else {
+      await mkdir(simulationDir);
+      await registorSimulation({
+        ...body,
+        role: 'master',
+        type: 'simulation'
+      }, getSimulations(), currentTimeFormatted());
+      updateStatus(id, 'preparing', {});
+      await writeFile(`${simulationDir}/salt.scenario.json`, stringify(makeScenario({host, ...body})));
+      await downloadScenario(simulationDir, configuration );
+
+      updateStatus(id, 'ready', {});
     }
     debug(`simulation ${id} is ready!`)
     res.json({ id });

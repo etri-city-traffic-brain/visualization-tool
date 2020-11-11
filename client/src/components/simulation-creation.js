@@ -17,12 +17,6 @@ const periodOptions = [
   { value: 240, text: '4시간', },
   { value: 360, text: '6시간', },
 ]
-// const partitionOptions=  [
-//   { value: 0, text: 'None' },
-//   { value: 4, text: '4개' },
-//   { value: 8, text: '8개' },
-//   { value: 16, text: '16개' },
-// ]
 
 const areas = [
   { value: "250", text: "대전" },
@@ -32,8 +26,7 @@ const areas = [
 ]
 
 const scripts =  [
-  { value: 'test_network.py', text: 'script-01.py' },
-  { value: 'RL_2phase_pressure.py', text: 'RL_2phase_pressure.py' },
+  { value: 'default.py', text: 'default.py' },
 ]
 
 export default {
@@ -108,6 +101,7 @@ export default {
           id: this.id,
           user: this.userId,
           description: this.description,
+          type: 'simulation',
           configuration: {
             region: this.areaSelected,
             fromDate: this.fromDate,
@@ -120,7 +114,8 @@ export default {
             end,
             day,
             days,
-            script: this.scriptSelected
+            script: this.scriptSelected,
+
           },
         });
         this.status = 'finished'
