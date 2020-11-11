@@ -12,7 +12,7 @@ module.exports = {
     home: base,
     data: `${base}/data`,
     output: `${base}/output`,
-    script: `${base}/script`,
+    scripts: `${base}/scripts`,
   },
   salt: {
     config: `${base}/conf/salt.conf.json`,

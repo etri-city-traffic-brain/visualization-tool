@@ -1,10 +1,14 @@
 <template>
   <div style="min-width:840px;">
-    <b-navbar type="dark" variant="secondary">
+    <b-navbar  type="light" variant="secondary" class="p-0">
       <b-navbar-nav>
-        <b-nav-item href="#" v-b-modal.create-simulation-modal><b-icon icon="file-earmark-plus"/> 최적화 등록</b-nav-item>
+        <b-nav-item href="#" v-b-modal.create-simulation-modal>
+          <b-btn size="sm"><b-icon icon="file-earmark-plus"/> <strong>최적화 등록</strong></b-btn>
+        </b-nav-item>
         <!-- <b-nav-item href="#" v-b-toggle.collapse1 v-b-tooltip.hover><b-icon icon="files"/> 강화학습 모델 비교</b-nav-item> -->
-        <b-nav-item href="#" v-if="!autoRefresh" @click.stop="updateTable"><b-icon icon="arrow-clockwise"/> 새로고침</b-nav-item>
+        <b-nav-item href="#" v-if="!autoRefresh" @click.stop="updateTable">
+          <b-btn size="sm"><b-icon icon="arrow-clockwise"/> 새로고침</b-btn>
+        </b-nav-item>
       </b-navbar-nav>
     </b-navbar>
     <b-card bg-variant="secondary" text-variant="white" style="border-radius:0" no-body>

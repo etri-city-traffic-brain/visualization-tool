@@ -56,49 +56,52 @@ async function removeSimulation(id) {
       await rmdir(targetDirOutput);
     }
 
-    await mongooseUtils.dropCollection('simulation_results', id);
+    try {
+      await mongooseUtils.dropCollection('simulation_results', id);
+    } catch (err) {
+      // ignore
+    }
   } catch (err) {
     throw err;
   }
 
-  const vmInfo = await cloudService.getVmInfo(simulation.user);
-  if (!vmInfo) {
+  // const vmInfo = await cloudService.getVmInfo(simulation.user);
+  // if (!vmInfo) {
     // throw new Error('vm not exists');
-    debug('vm not exists');
-    return;
-  }
+    // debug('vm not exists');
+    // return;
+  // }
 
-  const {
-    host, username, privateKey, port, workers,
-  } = vmInfo;
+  // const {
+  //   host, username, privateKey, port, workers,
+  // } = vmInfo;
 
-  try {
-    debug(`remove dir ${host} ${targetDirOutput}`);
-    const masterInfo = {
-      host,
-      username,
-      privateKey,
-      port,
-    };
-    await rmDirRemote(masterInfo, targetDirOutput);
-    await rmDirRemote(masterInfo, targetDirData);
+  // try {
+  //   debug(`remove dir ${host} ${targetDirOutput}`);
+  //   const masterInfo = {
+  //     host,
+  //     username,
+  //     privateKey,
+  //     port,
+  //   };
+    // await rmDirRemote(masterInfo, targetDirOutput);
+    // await rmDirRemote(masterInfo, targetDirData);
 
     /* eslint no-restricted-syntax:0 */
     /* eslint no-await-in-loop:0 */
-    for (const ip of workers) {
-      debug(`remove dir ${ip} ${targetDirOutput}`);
-      const conInfo = {
-        host: ip,
-        username,
-        privateKey,
-      };
-      await rmDirRemote(conInfo, targetDirOutput);
-      await rmDirRemote(conInfo, targetDirData);
-    }
-  } catch (err) {
-    debug(err.message);
-    // throw err;
-  }
+    // for (const ip of workers) {
+    //   debug(`remove dir ${ip} ${targetDirOutput}`);
+    //   const conInfo = {
+    //     host: ip,
+    //     username,
+    //     privateKey,
+    //   };
+    //   await rmDirRemote(conInfo, targetDirOutput);
+    //   await rmDirRemote(conInfo, targetDirData);
+    // }
+  // } catch (err) {
+  //   debug(err.message);
+  // }
 }
 
 module.exports = removeSimulation;

@@ -13,11 +13,13 @@ async function remove(req, res) {
 
     const sim = await getSimulation(id)
 
-    if(sim && sim.slaveId) {
+    if(sim) {
       try {
-        await removeSimulation(sim.slaveId);
+        for(slave of sim.slaves) {
+          await removeSimulation(slave);
+        }
       } catch (err) {
-
+        debug(err)
       }
     }
 

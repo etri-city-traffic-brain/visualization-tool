@@ -33,6 +33,9 @@ const host = server.ip
 const existSimulation = id => getSimulations().find({ id }).value();
 const stringify = obj => JSON.stringify(obj, false, 2);
 
+
+
+
 /**
  * prepare simulation data
  */
@@ -45,42 +48,50 @@ module.exports = async (req, res, next) => {
     next(createError(409, `Simulation [${id}] already exists...`));
     return;
   }
-  const simulationDir = `${base}/data/${id}`;
-  const slaveId = ('S' + ((Math.random() * 10000000) + '').replace('.','')).substring(0, 17)
   try {
 
+    const randomId = (num) => ('S-' + ((Math.random() * 10000000) + '').replace('.','')).substring(0, 14) + '-' + num
+
+    async function makeSimDir(id, body, role, slaves = []) {
+      const simTrainDir = `${base}/data/${id}`;
+      await mkdir(simTrainDir);
+      await registorSimulation({ ...body, id, slaves , role }, getSimulations(), currentTimeFormatted());
+      updateStatus(id, 'ready', {});
+      await writeFile(`${simTrainDir}/salt.scenario.json`, stringify(makeScenario({ host, ...body, id })));
+      await downloadScenario(simTrainDir, configuration );
+
+    }
 
     if(type === 'optimization') {
+      const simTrainDir = `${base}/data/${id}`;
+      const simFixedId = randomId(0)
+      const simTestId = randomId(1)
+      const simFixedDir = `${base}/data/${simFixedId}`;
+      const simTestDir = `${base}/data/${simTestId}`;
 
-      await mkdir(simulationDir);
-      await registorSimulation({
-        ...body,
-        slaveId,
-        role: 'master',
-      }, getSimulations(), currentTimeFormatted());
-      updateStatus(id, 'preparing', {});
-      await writeFile(`${simulationDir}/salt.scenario.json`, stringify(makeScenario({host, ...body})));
-      await downloadScenario(simulationDir, configuration );
+      await makeSimDir(id, body, 'training', [simFixedId, simTestId])
+      await makeSimDir(simFixedId, body, 'fixed', [])
+      await makeSimDir(simTestId, body, 'test', [])
+      // await mkdir(simTrainDir);
+      // await registorSimulation({ ...body, slaveId: simFixedId, role: 'master' }, getSimulations(), currentTimeFormatted());
+      // updateStatus(id, 'ready', {});
+      // await writeFile(`${simTrainDir}/salt.scenario.json`, stringify(makeScenario({host, ...body})));
+      // await downloadScenario(simTrainDir, configuration );
 
-      updateStatus(id, 'ready', {});
+      // await mkdir(simFixedDir);
+      // await registorSimulation({ ...body, id: simFixedId, role: 'slave' }, getSimulations(), currentTimeFormatted());
+      // updateStatus(simFixedId, 'ready', {});
+      // await writeFile(`${simFixedDir}/salt.scenario.json`, stringify(makeScenario({host, ...body, id: simFixedId})));
+      // await downloadScenario(simFixedDir, configuration );
 
-      const simulationSlaveDir = `${base}/data/${slaveId}`;
+      // await mkdir(simTestDir);
+      // await registorSimulation({ ...body, id: simTestId, role: 'slave' }, getSimulations(), currentTimeFormatted());
+      // updateStatus(simTestId, 'ready', {});
+      // await writeFile(`${simTestDir}/salt.scenario.json`, stringify(makeScenario({host, ...body, id: simTestId})));
+      // await downloadScenario(simTestDir, configuration );
 
-      try {
-        await mkdir(simulationSlaveDir);
-        await registorSimulation({
-          ...body,
-          id: slaveId,
-          role: 'slave',
-        }, getSimulations(), currentTimeFormatted());
-        updateStatus(slaveId, 'ready', {});
-        await writeFile(`${simulationSlaveDir}/salt.scenario.json`, stringify(makeScenario({host, ...body, id: slaveId})));
-        await downloadScenario(simulationSlaveDir, configuration );
-
-      } catch (err) {
-        console.log(err)
-      }
     } else {
+      const simulationDir = `${base}/data/${id}`;
       await mkdir(simulationDir);
       await registorSimulation({
         ...body,

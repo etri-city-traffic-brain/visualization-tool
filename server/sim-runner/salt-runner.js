@@ -13,6 +13,7 @@ function exec({
   script,
   params = [],
 }) {
+  let cnt = 0;
   const process = spawn(PYTHON, [`${scriptDir}/${script}`, ...params], {
     env: {
       PYTHONPATH: `${homeDir}/tools/libsalt/`
@@ -20,7 +21,10 @@ function exec({
   });
 
   process.stdout.on("data", data => {
-    // log(`stdout: ${data}`);
+    cnt += 1
+    if(cnt < 5) {
+      log(`stdout: ${data}`);
+    }
   });
 
   process.stderr.on("data", data => {

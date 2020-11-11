@@ -17,7 +17,7 @@ module.exports = (req, res) => {
   let array;
   if (type === 'optimization') {
     array = getSimulations()
-      .filter({ type, role: 'master' })
+      .filter({ type, role: 'training' })
       .sortBy('created', 'asc')
       .value()
       .reverse();

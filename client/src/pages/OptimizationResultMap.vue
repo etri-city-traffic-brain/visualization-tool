@@ -29,7 +29,7 @@
             style="border-radius:0"
             no-body
           >
-            <b-card-body class="p-0">
+            <b-card-body>
               <strong>{{ simulationId }} </strong>
               <b-card
                 text-variant="light"
@@ -39,7 +39,7 @@
               <line-chart :chartData="rewards" :options="defaultOption()" :height="250"/>
               </b-card>
               <b-card-text>
-              학습진행률:
+              학습 진행률:
               </b-card-text>
               <b-card-text>
                 <b-progress height="2rem" v-if="progress === 100">
