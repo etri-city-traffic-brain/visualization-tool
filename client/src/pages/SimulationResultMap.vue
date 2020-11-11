@@ -15,6 +15,8 @@
         <b-button @click="centerTo(1)" class="ml-1" size="sm" variant="dark"> 실증지역 </b-button>
         <!-- <b-button @click="centerTo(2)" class="ml-1" size="sm" variant="dark"> 세종(시청) </b-button> -->
         <uniq-map-changer :map="map" />
+
+        <b-button @click="stop" class="ml-1" size="sm" variant="dark"> 중지 </b-button>
       </div>
 
       <b-card bg-variant="secondary" class="mt-1" v-bind:style="playerStyle" text-variant="light" no-body v-if="simulation.status === 'finished'" >

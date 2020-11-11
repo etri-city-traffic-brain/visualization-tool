@@ -262,6 +262,10 @@ export default {
   },
   methods: {
     ...stepperMixin,
+
+    stop() {
+      this.$emit('salt:stop', this.simulationId)
+    },
     toggleBottom() {
       if (this.bottomStyle.height === '220px') {
         this.bottomStyle.height = '390px'

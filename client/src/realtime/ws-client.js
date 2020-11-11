@@ -3,16 +3,14 @@
 const serialize = obj => JSON.stringify(obj);
 
 const { log } = console
-console.log(process.env)
 
-let wsUrl = 'ws://127.0.0.1:8080'
-if(process.env.NODE_ENV === 'development') {
+// eslint-disable-next-line no-undef
+const env = process && process.env
 
-} else {
-  wsUrl = 'ws://101.79.1.114:8080/'
-}
+let wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.114:8080/'
 
-console.log('wsUrl:', wsUrl);
+log('execution mode:', env.NODE_ENV)
+
 function Client({ url = wsUrl, simulationId, eventBus }) {
 
   if (!eventBus) {
@@ -26,7 +24,7 @@ function Client({ url = wsUrl, simulationId, eventBus }) {
   const close = () => socket.close();
 
   function init() {
-    console.log('ws-client init:', simulationId)
+    log('web-socket init:', simulationId, wsUrl)
     if(status === 'open') {
       log('WebSocket is already opened!!')
       return
@@ -73,6 +71,20 @@ function Client({ url = wsUrl, simulationId, eventBus }) {
         extent:[min.x, max.y, max.x, min.y],
         roadType
       })
+    })
+
+    eventBus.$on('salt:stop', (sId) => {
+
+      if(simulationId === sId) {
+        console.log('finishh')
+
+        send({
+          simulationId,
+          type: 11, // Set
+        })
+      } else {
+        console.log('igno')
+      }
     })
   }
 

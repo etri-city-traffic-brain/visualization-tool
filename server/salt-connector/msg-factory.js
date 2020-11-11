@@ -1,6 +1,6 @@
 
 const {
-  Init, Data, Set, Status, Road,
+  Init, Data, Set, Status, Road, Stop
 } = require('./msg');
 
 const encode = require('./encode-msg');
@@ -20,5 +20,8 @@ module.exports = {
   },
   makeRoad(obj) {
     return encode(Road, obj);
+  },
+  makeStop() {
+    return encode(Stop, {})
   }
 };

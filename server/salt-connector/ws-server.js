@@ -25,8 +25,9 @@ module.exports = (httpServer) => {
           Object.assign(client, { $simulationId: obj.simulationId });
           console.log('init', obj.simulationId)
         } else if (obj.type === MsgType.SET) {
-          console.log(obj)
           eventBus.emit('salt:set', obj)
+        } else if (obj.type === MsgType.STOP) {
+          eventBus.emit('salt:stop', obj)
         }
       } catch (err) {
         debug(err.message);

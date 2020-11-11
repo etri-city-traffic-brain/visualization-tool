@@ -26,8 +26,15 @@ module.exports = (httpServer, tcpPort) => {
     tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
   })
 
-  const optMap = {}
+  webSocketServer.on('salt:stop', (data) => {
+    try {
+      tcpServer.send(data.simulationId, saltMsgFactory.makeStop(data))
+    } catch(err) {
+      console.log(err)
+    }
+  })
 
+  const optMap = {}
   // send to web
   tcpServer.on('salt:status', async (data) => {
     let { simulationId } = data
@@ -45,7 +52,7 @@ module.exports = (httpServer, tcpPort) => {
 
       const { type, configuration } = simulation
       if(type ==='optimization') {
-        const xxx = optMap[simulationId] || { count: 0}
+        const xxx = optMap[simulationId] || { count: 0 }
         optMap[simulationId] = xxx
         xxx.count += 1;
         updateStatus(simulationId, 'running', {epoch: xxx.count})
@@ -63,7 +70,6 @@ module.exports = (httpServer, tcpPort) => {
             duration: configuration.end,
             period: configuration.period,
           });
-
           // just for test
           updateStatus(simulationId, 'finished')
           webSocketServer.send(simulationId, {
@@ -73,9 +79,7 @@ module.exports = (httpServer, tcpPort) => {
           debug(err.message)
         }
       }
-
-      }
-
+    }
   });
 
   // send to web

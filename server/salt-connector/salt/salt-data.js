@@ -159,6 +159,8 @@ socket.on('data', (buffer) => {
   if (header.type === 10) {
     const set = Set(bodyBuffer)
     log(set)
+  } else if(header.type === 11) {
+    log('*** STOP REQUEST ***')
   }
 });
 
