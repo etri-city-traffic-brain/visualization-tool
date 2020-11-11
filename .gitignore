@@ -24,4 +24,4 @@ db/data.zip
 map-ui/
 # debug message
 output/
-server/db.json
+db.json
