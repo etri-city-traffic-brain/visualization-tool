@@ -15,18 +15,17 @@ export default {
         },
         scales: {
           xAxes: [{
-            // display: false,
-            barPercentage: 1,
-            // categoryPercentage: 1,
+            stacked: true,
             ticks: {
-              // max: 10,
+              // fontColor: 'white',
             },
-            gridLines: {
-              display: false,
-            }
-          },
-
-          ],
+          }],
+          yAxes: [{
+            stacked: true,
+            ticks: {
+              // fontColor: 'white',
+            },
+          }]
         },
       },
     }

@@ -5,7 +5,7 @@ import moment from "moment";
 import OptimizationCreationPanel from '@/components/OptimizationCreation';
 import BarChart from '@/components/charts/BarChart';
 
-import { simulationService, statisticsService } from '@/service'
+import { simulationService, statisticsService, optimizationService } from '@/service'
 
 import userState from '@/user-state';
 import calcInterval from '@/utils/calc-time-interval';
@@ -151,7 +151,9 @@ export default {
         this.msg = `시뮬레이션을 시작하고 있습니다... ${seconds++}초`;
       }, 1000);
       try {
-        await simulationService.startSimulation(id, this.userState.userId);
+        // await simulationService.startSimulation(id, this.userState.userId);
+
+        await optimizationService.runTrain(id)
         this.msg = 'Started successfully...';
         this.hideAlert();
         this.updateTable();

@@ -31,6 +31,8 @@ app.use('/salt/v1/status', require('./routes/simulation-status'));
 app.use('/salt/v1/simulation', require('./routes/simulation-result'));
 app.use('/salt/v1/simulations', require('./routes/simulations'));
 
+app.use('/salt/v1/optimization', require('./routes/optimization'));
+
 app.use(require('./middleware/not-found'));
 app.use(require('./middleware/server-error'));
 

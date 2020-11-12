@@ -5,6 +5,7 @@ import scenarioService from './scenario-service'
 import signalService from './signal-service'
 import statisticsService from './statistics-service'
 import simulationService from './simulation-service'
+import optimizationService from './optimization-service'
 
 export {
   junctionServer,
@@ -13,4 +14,5 @@ export {
   signalService,
   statisticsService,
   simulationService,
+  optimizationService,
 }

@@ -121,10 +121,10 @@ socket.on('connect', async () => {
   // await sleep(1000)
 
   for(let j=0; j<3; j++) {
-    for(let i=1; i<11; i++) {
+    for(let i=1; i<6; i++) {
       await sleep(1000)
       send(makeData());
-      send(msgFactory.makeStatus({ status: 1, progress: i * 10 }))
+      send(msgFactory.makeStatus({ status: 1, progress: i * 20 }))
     }
     await sleep(3000)
   }

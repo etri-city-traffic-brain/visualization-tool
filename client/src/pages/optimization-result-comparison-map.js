@@ -20,6 +20,7 @@ import SimulationResult from '@/pages/SimulationResult.vue';
 
 import HistogramChart from '@/components/charts/HistogramChart';
 import Doughnut from '@/components/charts/Doughnut';
+
 import statisticsService from '@/service/statistics-service';
 import congestionColor from '@/utils/colors';
 import LineChart from '@/components/charts/LineChart';
@@ -36,6 +37,8 @@ import bins from '@/stats/histogram'
 import region from '@/map2/region'
 import config from '@/stats/config'
 
+import { optimizationService } from '@/service'
+
 const pieDefault = () => ({
   datasets: [{
     data: [1, 1, 1],
@@ -43,8 +46,6 @@ const pieDefault = () => ({
   }],
   labels: [ '막힘', '정체', '원활' ],
 })
-
-
 
 const makeLinkSpeedChartData = (data1, data2, data3) => {
   const dataset = (label, color, data) => ({
@@ -90,11 +91,11 @@ const defaultOption  = () => ({
         autoSkipPadding: 50,
         maxRotation:0,
         display: true,
-        fontColor: 'white',
+        // fontColor: 'white',
       },
       gridLines: {
         display: true,
-        color: 'grey',
+        // color: 'grey',
       },
     }],
     yAxes: [{
@@ -103,11 +104,11 @@ const defaultOption  = () => ({
         autoSkipPadding: 10,
         maxRotation:0,
         display: true,
-        fontColor: 'white',
+        // fontColor: 'white',
       },
       gridLines: {
         display: true,
-        color: 'grey',
+        // color: 'grey',
       },
     }]
   },
@@ -119,6 +120,66 @@ const defaultOption  = () => ({
     }
   },
 })
+
+const barChartOption = () => ({
+  title: {
+    display: false,
+    text: 'Chart.js Bar Chart - Stacked'
+  },
+  tooltips: {
+    mode: 'index',
+    intersect: false
+  },
+  responsive: true,
+  scales: {
+    xAxes: [{
+      stacked: true,
+    }],
+    yAxes: [{
+      stacked: true
+    }]
+  }
+})
+
+const makePhaseChart = (data, type) => {
+  const colors = ['skyblue', 'orange', 'green']
+  const sl = type === 'fixed' ? 1 : 2
+  const datasets = data.slice(sl).map((d,i) => {
+    return {
+      label: 'Dataset 1',
+      backgroundColor: colors[i],
+      data: d
+
+    }
+  })
+
+  return {
+    labels: data[0],
+    datasets,
+    // datasets: [{
+    //   label: 'Dataset 1',
+    //   backgroundColor: 'skyblue',
+    //   data: data[1]
+    // }, {
+    //   label: 'Dataset 2',
+    //   backgroundColor: 'orange',
+    //   data: data[2]
+    // }]
+  }
+}
+
+const makeRewardChart = (data) => {
+  return {
+    labels: data[0],
+    datasets: [{
+      label: '최적화 Reward',
+      backgroundColor: 'red',
+      borderColor: 'red',
+      data: data[1],
+      fill: false,
+    }]
+  }
+}
 
 export default {
   name: 'OptimizationResultComparisonMap',
@@ -195,18 +256,10 @@ export default {
         right: '10px',
       },
       defaultOption,
-      rewards: {
-        labels: [1,2,3,4,5,6],
-        datasets: [{
-          label: '최적화 Reward',
-          backgroundColor: 'red',
-          borderColor: 'red',
-          data: [
-            10, 20, 30, 100, 30, 20, 10
-          ],
-          fill: false,
-        }]
-      },
+      barChartOption,
+      rewards: { },
+      phaseFixed: {},
+      phaseTest: {},
       selectedModel: 1
     };
   },
@@ -380,13 +433,14 @@ export default {
     },
     async updateSimulation() {
       const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId);
-
-      console.log('update simulation', this.simulationId)
+      log(simulation)
+      // console.log('update simulation', this.simulationId)
 
       this.simulation = simulation;
-      if(simulation.slaveId) {
-        console.log('SLAVE_ID', simulation.slaveId)
-        this.simulationId2 = simulation.slaveId
+      const slave = simulation.slaves[0]
+      if(slave) {
+        console.log('SLAVE_ID', slave)
+        this.simulationId2 = slave
         // const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId2);
         // this.simulation2 = simulation
       }
@@ -414,7 +468,8 @@ export default {
       return 0
     },
     resize() {
-      this.mapHeight = window.innerHeight - 220; // update map height to current height
+      // this.mapHeight = window.innerHeight - 220; // update map height to current height
+      this.mapHeight = window.innerHeight - 80; // update map height to current height
     },
     togglePlay() {
       this.playBtnToggle = !this.playBtnToggle;
@@ -444,5 +499,21 @@ export default {
     async connectWebSocket() {
       this.wsClient.init()
     },
+    async runTest() {
+      log(`compare ${this.simulationId} and ${this.simulationId2}`)
+      optimizationService.runFixed(this.simulationId).then(v => {})
+      optimizationService.runTest(this.simulationId2, 10).then(v => {})
+    },
+    async updatePhaseChart() {
+      const phaseFixed = (await optimizationService.getPhase(this.simulationId, 'fixed')).data
+      const phaseTest = (await optimizationService.getPhase(this.simulationId2)).data
+      console.log(phaseFixed)
+      this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
+      this.phaseTest = makePhaseChart(phaseTest)
+      // this.phaseFixed = makePhaseChart(await optimizationService.getPhase(this.simulationId, 'fixed'))
+      // this.phaseTest = makePhaseChart(await optimizationService.getPhase(this.simulationId2))
+      const c = (await optimizationService.getReward(this.simulationId)).data
+      this.rewards = makeRewardChart(c)
+    }
   },
 };

@@ -8,6 +8,9 @@ const startWebSocketServer = require('./ws-server');
 const startSlatMessageReceiver = require('./tcp-server');
 const saltMsgFactory = require('./msg-factory');
 
+const read = require('../main/signal-optimization/read-reward')
+
+const { saltPath: { output }} = require('../config')
 /**
  * SALT connector server
  * connect simulator and web browser
@@ -63,6 +66,13 @@ module.exports = (httpServer, tcpPort) => {
             event: 'optimization:finished'
           })
         }
+
+
+        const data = await read(`${output}/${simulationId}/reward.csv`)
+        webSocketServer.send(simulationId, {
+          event: 'optimization:epoch',
+          data
+        })
       } else {
         try {
           await cookSimulationResult({

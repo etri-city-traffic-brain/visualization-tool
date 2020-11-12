@@ -144,13 +144,13 @@
         </template>
 
          <template v-slot:cell(details)="row">
+            <!-- v-if="row.item.status === 'finished' || row.item.status === 'running'" -->
           <b-button
             size="sm"
             variant="secondary"
             :to="{ name: 'OptimizationResultMap', params: {id: row.item.id}}"
-            v-if="row.item.status === 'finished' || row.item.status === 'running'"
             >
-              <b-icon icon="zoom-in"></b-icon> 신호최적화결과
+              <b-icon icon="zoom-in"></b-icon> 신호최적화
           </b-button>
 
           <b-button

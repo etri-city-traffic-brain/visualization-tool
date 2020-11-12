@@ -63,53 +63,37 @@
 
     <!-- <b-card-group deck> -->
 
-    <b-row>
+    <b-row class="p-0 m-0">
       <b-col cols="4" class="p-0">
-    <b-card
-      bg-variant="dark"
-      border-variant="dark"
-      class="m-0 p-0 uniq-box-panel map"
-      no-body
-      text-variant="white"
-      >
-        <span class="card-top">{{ simulationId2 }}</span>
-        <!-- <h5><b-badge class="card-top"> 기존신호 </b-badge></h5> -->
-
-      <div
-        :ref="mapId2"
-        :id="mapId2"
-        :style="{height: mapHeight + 'px'}"
-      />
-      <div class="loading-container" v-if="showLoading">
-        <div class="loading-vertical-center">
-          <b-icon icon="three-dots" animation="cylon" font-scale="4"></b-icon>
-        </div>
-      </div>
-    </b-card>
+        <b-card
+          bg-variant="dark"
+          border-variant="dark"
+          class="no-border-radius"
+          no-body
+          text-variant="white"
+          >
+            <span class="card-top"> <strong>기존신호</strong> {{ simulationId }}</span>
+            <div
+              :ref="mapId"
+              :id="mapId"
+              :style="{height: mapHeight + 'px'}"
+            />
+        </b-card>
       </b-col>
       <b-col cols="4" class="p-0">
-    <b-card
-      bg-variant="secondary"
-      border-variant="dark"
-
-      class="m-0 p-0 uniq-box-panel map"
-      no-body
-
-      >
-      <span class="card-top">{{ simulationId }}</span>
-      <!-- <h5><b-badge variant="secondary" class="card-top"> {{ simulationId }} </b-badge></h5> -->
-      <div
-        :ref="mapId"
-        :id="mapId"
-        :style="{height: mapHeight + 'px'}"
-      />
-
-      <!-- <div class="loading-container" v-if="showLoading">
-        <div class="loading-vertical-center">
-          <b-icon icon="three-dots" animation="cylon" font-scale="4"></b-icon>
-        </div>
-      </div> -->
-    </b-card>
+        <b-card
+          bg-variant="secondary"
+          border-variant="dark"
+          class="no-border-radius"
+          no-body
+          >
+          <span class="card-top">{{ simulationId2 }}</span>
+          <div
+            :ref="mapId2"
+            :id="mapId2"
+            :style="{height: mapHeight + 'px'}"
+          />
+        </b-card>
       </b-col>
       <b-col cols="4" class="p-0">
         <b-card
@@ -117,19 +101,32 @@
           border-variant="dark"
           text-variant="dark"
           style="border-radius:0"
+          no-body
         >
-          <b-card
-            text-variant="light"
-            bg-variant="dark"
-            border-variant="dark"
-            no-body
-          >
-            <line-chart :chartData="rewards" :options="defaultOption()" :height="200"/>
+        <b-card-body class="p-1">
+          <b-card class="">
+            <b-card-text class="text-center"> Reward </b-card-text>
+            <line-chart class="" :chartData="rewards" :options="defaultOption()" :height="200"/>
           </b-card>
+          <b-card class="mt-1">
+            <b-card-text class="text-center"> 기존 신호 </b-card-text>
+            <bar-chart class="" :chartData="phaseFixed" :options="barChartOption()" :height="200"></bar-chart>
+          </b-card>
+          <b-card class="mt-1">
+            <b-card-text class="text-center"> 최적화 신호 </b-card-text>
+            <bar-chart class="" :chartData="phaseTest" :options="barChartOption()" :height="200"></bar-chart>
+          </b-card>
+          <b-card-text class="mt-1">
+            <b-btn variant="primary" @click="updatePhaseChart">Update Phase Chart</b-btn>
+          </b-card-text>
+          <b-card-text>
+          <b-btn variant="primary" @click.prevent="runTest">신호최적화 비교</b-btn>
+        </b-card-text>
+        </b-card-body>
         </b-card>
       </b-col>
     </b-row>
-    <b-card
+    <!-- <b-card
       text-variant="light"
       bg-variant="dark"
       border-variant="dark"
@@ -145,47 +142,8 @@
           </b-btn>
         </b-card-text>
 
-
-
-        <!-- <SimulationDetailsOnFinished
-          v-if="simulation.status === 'finished'"
-          :simulation="simulation"
-          :simulationId="simulationId"
-          :avgSpeed="avgSpeed"
-          :chart="chart"
-          :currentEdge="currentEdge"
-          :edgeSpeed="edgeSpeed"
-        >
-        </SimulationDetailsOnFinished> -->
-
-        <!-- <SimulationDetailsOnRunning
-          v-if="simulation.status === 'running'"
-          :simulation="simulation"
-          :progress="progress"
-          :wsStatus="wsStatus"
-          :focusData="focusData"
-          :simulationId="simulationId"
-          :avgSpeed="avgSpeed"
-          :avgSpeedView="avgSpeedView"
-          :avgSpeedFocus="avgSpeedFocus"
-          @connect-web-socket="connectWebSocket"
-          @toggle-focus-tool="toggleFocusTool"
-          :logs="logs"
-        >
-        </SimulationDetailsOnRunning> -->
       </b-card-body>
-    </b-card>
-    <!--
-    <b-modal
-      id="modal-xl"
-      size="xl"
-      ok-only
-      :title="simulationId"
-      centered
-    >
-      <simulation-result :simulationId="simulationId"/>
-    </b-modal>
-    -->
+    </b-card> -->
   </b-container>
   </div>
 </template>
@@ -193,19 +151,10 @@
 <script src="./optimization-result-comparison-map.js"> </script>
 
 <style>
-  .uniq-box-panel {
-    /* min-height:220px;
-    max-height: 500px; */
-    /* min-width: 860px; */
-    /* max-width: 600px; */
-    border-radius: 0px;
-  }
 
-  .map {
-    /* max-height: 1024px; */
-    /* max-height: calc(100%); */
+  .no-border-radius {
+    border-radius: 0;
   }
-
   .card-top {
     position: absolute;
     top: 55px;

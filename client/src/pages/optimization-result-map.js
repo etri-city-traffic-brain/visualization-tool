@@ -36,6 +36,9 @@ import bins from '@/stats/histogram'
 import region from '@/map2/region'
 import config from '@/stats/config'
 
+import { optimizationService } from '@/service'
+
+
 const pieDefault = () => ({
   datasets: [{
     data: [1, 1, 1],
@@ -91,11 +94,11 @@ const defaultOption  = () => ({
         autoSkipPadding: 50,
         maxRotation:0,
         display: true,
-        fontColor: 'white',
+        // fontColor: 'white',
       },
       gridLines: {
         display: true,
-        color: 'grey',
+        // color: 'grey',
       },
     }],
     yAxes: [{
@@ -104,22 +107,37 @@ const defaultOption  = () => ({
         autoSkipPadding: 10,
         maxRotation:0,
         display: true,
-        fontColor: 'white',
+        // fontColor: 'white',
       },
       gridLines: {
         display: true,
-        color: 'grey',
+        // color: 'grey',
       },
     }]
   },
   legend: {
     display: true,
     labels: {
-      fontColor: "white",
+      fontColor: "black",
       fontSize: 12
     }
   },
 })
+
+const range = (n) => new Array(n).fill(0).map((_, i) => i)
+
+function makeRewardChartData(data) {
+  return {
+    labels: range(data.length),
+    datasets: [{
+      label: 'Reward',
+      backgroundColor: 'skyblue',
+      borderColor: 'skyblue',
+      data,
+      fill: false,
+    }]
+  }
+}
 
 export default {
   name: 'OptimizationResultMap',
@@ -304,6 +322,13 @@ export default {
       await this.updateChart()
     })
 
+    this.$on('optimization:epoch', (e) => {
+      log('*** OPTIMIZATION EPOCH ***')
+      log(e)
+
+      this.rewards = makeRewardChartData(e.data)
+    })
+
     this.$on('map:moved', ({zoom, extent}) => {
       this.currentZoom = zoom
       this.currentExtent = [extent.min, extent.max]
@@ -327,7 +352,7 @@ export default {
       this.rewards = {
         labels: [1,2,3,4,5,6, 7],
         datasets: [{
-          label: '최적화 Reward',
+          label: 'Reward',
           backgroundColor: 'red',
           borderColor: 'red',
           data: [
@@ -389,7 +414,7 @@ export default {
       return 0
     },
     resize() {
-      this.mapHeight = window.innerHeight - 90; // update map height to current height
+      this.mapHeight = window.innerHeight - 60; // update map height to current height
     },
 
     makeToast(msg, variant='info') {
@@ -404,5 +429,12 @@ export default {
     async connectWebSocket() {
       this.wsClient.init()
     },
+    async runTrain() {
+      try {
+        await optimizationService.runTrain(this.simulationId)
+      } catch (err) {
+        log(err.message)
+      }
+    }
   },
 };

@@ -64,13 +64,13 @@ module.exports = async (req, res, next) => {
 
     if(type === 'optimization') {
       const simTrainDir = `${base}/data/${id}`;
-      const simFixedId = randomId(0)
+      // const simFixedId = randomId(0)
       const simTestId = randomId(1)
-      const simFixedDir = `${base}/data/${simFixedId}`;
-      const simTestDir = `${base}/data/${simTestId}`;
+      // const simFixedDir = `${base}/data/${simFixedId}`;
+      // const simTestDir = `${base}/data/${simTestId}`;
 
-      await makeSimDir(id, body, 'training', [simFixedId, simTestId])
-      await makeSimDir(simFixedId, body, 'fixed', [])
+      await makeSimDir(id, body, 'training', [simTestId])
+      // await makeSimDir(simFixedId, body, 'fixed', [])
       await makeSimDir(simTestId, body, 'test', [])
       // await mkdir(simTrainDir);
       // await registorSimulation({ ...body, slaveId: simFixedId, role: 'master' }, getSimulations(), currentTimeFormatted());
