@@ -3,7 +3,7 @@
     <b-button
       v-for="(value, id) in congestionColor.domain()"
       v-bind:key="id"
-      :style="{'background-color': congestionColor(value), 'border': 0}"
+      :style="{'background-color': congestionColor(value),}"
       size="sm"
     >
       {{ value }}

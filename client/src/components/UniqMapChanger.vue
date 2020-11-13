@@ -1,7 +1,7 @@
 <template>
   <b-button-group size="sm">
     <b-button @click="changeMap(0)"> 일반 </b-button>
-    <b-button @click="changeMap(1)"> 그레이</b-button>
+    <!-- <b-button @click="changeMap(1)"> 그레이</b-button> -->
     <b-button @click="changeMap(2)"> 야간</b-button>
     <b-button @click="changeMap(3)"> 위성 </b-button>
   </b-button-group>

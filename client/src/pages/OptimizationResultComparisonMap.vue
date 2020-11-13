@@ -3,7 +3,7 @@
   <b-container fluid class="m-0 p-0">
     <div class="uniq-top-menu">
       <div>
-        <b-button @click="sidebar = !sidebar" size="sm" variant="dark">
+        <b-button @click="sidebar = !sidebar" size="sm" variant="primary">
           <b-icon icon="align-end"/>
         </b-button>
         <b-button-group v-if="simulation.status === 'finished'">
@@ -12,7 +12,7 @@
           </b-button>
         </b-button-group>
         <uniq-congestion-color-bar/>
-        <b-button @click="centerTo(1)" class="ml-1" size="sm" variant="dark"> 실증지역 </b-button>
+        <!-- <b-button @click="centerTo(1)" class="ml-1" size="sm" variant="dark"> 실증지역 </b-button> -->
         <!-- <b-button @click="centerTo(2)" class="ml-1" size="sm" variant="dark"> 세종(시청) </b-button> -->
         <uniq-map-changer :map="map" />
       </div>
@@ -68,9 +68,10 @@
         <b-card
           bg-variant="dark"
           border-variant="dark"
-          class="no-border-radius"
+          class="no-border-radius p-1"
           no-body
           text-variant="white"
+
           >
             <span class="card-top"> <strong>기존신호</strong> {{ simulationId }}</span>
             <div
@@ -82,9 +83,9 @@
       </b-col>
       <b-col cols="4" class="p-0">
         <b-card
-          bg-variant="secondary"
+          bg-variant="dark"
           border-variant="dark"
-          class="no-border-radius"
+          class="no-border-radius p-1"
           no-body
           >
           <span class="card-top">{{ simulationId2 }}</span>
@@ -95,33 +96,34 @@
           />
         </b-card>
       </b-col>
-      <b-col cols="4" class="p-0">
+      <b-col cols="4" class="p-0" >
         <b-card
           bg-variant="dark"
           border-variant="dark"
           text-variant="dark"
-          style="border-radius:0"
           no-body
+          style="border-radius:0"
         >
         <b-card-body class="p-1">
+          <uniq-card-title title="Reward"/>
           <b-card class="">
-            <b-card-text class="text-center"> Reward </b-card-text>
-            <line-chart class="" :chartData="rewards" :options="defaultOption()" :height="200"/>
+            <!-- <b-card-text class="text-center"> Reward </b-card-text> -->
+            <line-chart class="" :chartData="rewards" :options="defaultOption()" :height="180"/>
           </b-card>
+          <uniq-card-title title="기존 신호"/>
           <b-card class="mt-1">
-            <b-card-text class="text-center"> 기존 신호 </b-card-text>
-            <bar-chart class="" :chartData="phaseFixed" :options="barChartOption()" :height="200"></bar-chart>
+            <!-- <b-card-text class="text-center"> 기존 신호 </b-card-text> -->
+            <bar-chart class="" :chartData="phaseFixed" :options="barChartOption()" :height="180"></bar-chart>
           </b-card>
+          <uniq-card-title title="최전화 신호"/>
           <b-card class="mt-1">
-            <b-card-text class="text-center"> 최적화 신호 </b-card-text>
-            <bar-chart class="" :chartData="phaseTest" :options="barChartOption()" :height="200"></bar-chart>
+            <!-- <b-card-text class="text-center"> 최적화 신호 </b-card-text> -->
+            <bar-chart class="" :chartData="phaseTest" :options="barChartOption()" :height="180"></bar-chart>
           </b-card>
-          <b-card-text class="mt-1">
-            <b-btn variant="primary" @click="updatePhaseChart">Update Phase Chart</b-btn>
-          </b-card-text>
-          <b-card-text>
-          <b-btn variant="primary" @click.prevent="runTest">신호최적화 비교</b-btn>
-        </b-card-text>
+          <b-card class="mt-1" bg-variant="dark">
+            <b-btn variant="primary" size="sm" @click="updatePhaseChart">Update Phase Chart</b-btn>
+            <b-btn variant="secondary" size="sm" @click.prevent="runTest">신호최적화 비교</b-btn>
+          </b-card>
         </b-card-body>
         </b-card>
       </b-col>

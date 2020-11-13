@@ -210,7 +210,7 @@
         body-bg-variant="dark"
         body-text-variant="ligth"
         body-border-variant="dark"
-        header-class="pt-2 pb-0"
+        header-class="pt-2 pb-0 no-border-round"
         hide-footer
         centered
       >

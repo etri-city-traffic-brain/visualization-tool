@@ -229,7 +229,8 @@
         body-bg-variant="dark"
         body-text-variant="ligth"
         body-border-variant="dark"
-        header-class="pt-2 pb-0"
+        header-class="pt-1 pb-0 no-border-round"
+        body-class="p-2"
         hide-footer
         centered_
       >
@@ -252,4 +253,7 @@ table tbody td {
   vertical-align:middle !important;
 }
 
+.no-border-round {
+  border-radius: 0;
+}
 </style>

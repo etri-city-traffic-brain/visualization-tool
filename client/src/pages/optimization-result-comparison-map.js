@@ -33,7 +33,7 @@ import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished';
 import Vue from 'vue';
 import bins from '@/stats/histogram'
-
+import UniqCardTitle from '@/components/func/UniqCardTitle';
 import region from '@/map2/region'
 import config from '@/stats/config'
 
@@ -193,7 +193,8 @@ export default {
     Doughnut,
     UniqCongestionColorBar,
     UniqSimulationResultExt,
-    UniqMapChanger
+    UniqMapChanger,
+    UniqCardTitle
   },
   data() {
     return {
@@ -469,7 +470,7 @@ export default {
     },
     resize() {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
-      this.mapHeight = window.innerHeight - 80; // update map height to current height
+      this.mapHeight = window.innerHeight - 60; // update map height to current height
     },
     togglePlay() {
       this.playBtnToggle = !this.playBtnToggle;
