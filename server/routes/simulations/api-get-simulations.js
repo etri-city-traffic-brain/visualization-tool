@@ -23,7 +23,7 @@ module.exports = (req, res) => {
       .reverse();
   } else {
     array = getSimulations()
-      .filter({ type: 'simulation' })
+      .filter({ role: 'simulation' })
       .sortBy('created', 'asc')
       .value()
       .reverse();

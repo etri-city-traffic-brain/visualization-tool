@@ -51,7 +51,7 @@ async function start(req, res) {
     res.json({ id, status: 'running', result: '' });
     updateStatus(id, 'running', { started: currentTimeFormatted() });
     // const result = await exec(id);
-    exec(id)
+    exec(simulation)
     .then(() => {})
     .catch(err=>{
       debug(err)

@@ -85,6 +85,10 @@
         <b-form-select v-model="interval" :options="intervalOptions" class="" />
       </b-form-group>
 
+      <b-form-group label-cols-sm="3" label="Epoch" label-class="text-sm-right" label-for="id">
+        <b-form-input v-model="epoch"></b-form-input>
+      </b-form-group>
+
       <b-form-group label-cols-sm="6" label-class="text-sm-right" label-for="Period" >
         <b-button class="mr-1" @click="save" variant="primary" >
           신호최적화 등록

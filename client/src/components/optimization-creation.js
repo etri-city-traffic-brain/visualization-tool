@@ -77,7 +77,8 @@ export default {
         { text: '90 Step', value: 90 },
         { text: '100 Step', value: 100 },
       ],
-      junctionId: '563103625' // Yuseong Middle
+      junctionId: '563103625', // Yuseong Middle
+      epoch: 10,
     };
   },
   methods: {
@@ -92,7 +93,9 @@ export default {
 
       const from = moment(`${this.fromDate} ${this.fromTime}`);
       const to = moment(`${this.toDate} ${this.toTime}`)
-      const end = to.diff(from) / 1000 + 60 - 1;
+      const begin =  moment.duration(this.fromTime).asSeconds()
+      // const end = to.diff(from) / 1000 + 60 - 1;
+      const end = (to.diff(from) / 1000 - 1) + begin;
       const days = to.diff(from, 'days') + 1
       const day = from.day()
 
@@ -117,7 +120,8 @@ export default {
             days,
             interval: this.interval,
             junctionId: this.junctionId,
-            script: this.scriptSelected
+            script: this.scriptSelected,
+            epoch: this.epoch,
           },
           type: 'optimization'
         });

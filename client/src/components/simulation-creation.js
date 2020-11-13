@@ -87,13 +87,13 @@ export default {
       this.id = randomId();
       this.description = '...';
     },
-    selectArea() {
-    },
     async save() {
 
       const from = moment(`${this.fromDate} ${this.fromTime}`);
       const to = moment(`${this.toDate} ${this.toTime}`)
-      const end = to.diff(from) / 1000 + 60 - 1;
+      const begin =  moment.duration(this.fromTime).asSeconds()
+      // const end = to.diff(from) / 1000 + 60 - 1;
+      const end = (to.diff(from) / 1000 - 1) + begin;
       const days = to.diff(from, 'days') + 1
       const day = from.day()
 
@@ -101,20 +101,11 @@ export default {
       this.variant = 'info';
       try {
         this.status = 'running'
-        this.timeout = setInterval(async () => {
-          const { simulation } = await simulationService.getSimulationInfo(this.id)
-          if(!simulation) return
-          if(simulation.status === 'finished' || simulation.status === 'error') {
-            clearInterval(this.timeout)
-            this.running = false
-          }
-          this.msg = simulation.status
-        }, 2000)
         await simulationService.create(this.userId, {
           id: this.id,
           user: this.userId,
           description: this.description,
-          type: 'simulation',
+          role: 'simulation',
           configuration: {
             region: this.areaSelected,
             fromDate: this.fromDate,
@@ -122,14 +113,12 @@ export default {
             fromTime: `${this.fromTime}:00`,
             toTime: `${this.toTime}:00`,
             period: this.periodSelected * 60,
-            // partitions: this.partitionSelected,
-            begin: 0,
+            begin,
             end,
             day,
             days,
             interval: this.interval,
             script: this.scriptSelected,
-
           },
         });
         this.status = 'finished'
@@ -138,8 +127,7 @@ export default {
         setTimeout(() => {
           this.status = 'ready'
           this.hide()
-          clearInterval(this.timeout)
-        }, 1000)
+        }, 200)
 
       } catch (err) {
         this.msg = err.message;
