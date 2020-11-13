@@ -60,7 +60,20 @@ export default {
         { text: '날씨', value: 1 },
         { text: '신호', value: 1 },
         { text: '이벤트', value: 1 },
-      ]
+      ],
+      interval: 10, // Must be an array reference!
+      intervalOptions: [
+        { text: '10 Step', value: 10 },
+        { text: '20 Step', value: 20 },
+        { text: '30 Step', value: 30 },
+        { text: '40 Step', value: 40 },
+        { text: '50 Step', value: 50 },
+        { text: '60 Step', value: 60 },
+        { text: '70 Step', value: 70 },
+        { text: '80 Step', value: 80 },
+        { text: '90 Step', value: 90 },
+        { text: '100 Step', value: 100 },
+      ],
 
     };
   },
@@ -114,6 +127,7 @@ export default {
             end,
             day,
             days,
+            interval: this.interval,
             script: this.scriptSelected,
 
           },

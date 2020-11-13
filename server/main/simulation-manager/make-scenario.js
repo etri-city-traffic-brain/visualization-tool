@@ -14,7 +14,7 @@ const DAYS = {
   0: 'sun'
 }
 
-module.exports = ({ id, host, configuration: {begin, end, day, days, period,}}) => {
+module.exports = ({ id, host, configuration: {begin, end, day, days, period, interval = 10}}) => {
 
   let routes = [`${DAYS[day]}.xml`]
 
@@ -27,7 +27,7 @@ module.exports = ({ id, host, configuration: {begin, end, day, days, period,}}) 
       id,
       host,
       port: 1337,
-      interval: 100,
+      interval,
       time: {
         begin,
         end,

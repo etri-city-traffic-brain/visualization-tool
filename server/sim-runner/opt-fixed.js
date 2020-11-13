@@ -5,7 +5,7 @@ const {
 } = require('../config');
 
 const script = 'RL_2phase_pressure.py'
-const homeDir = '/home/ubuntu/uniq-vis'
+const homeDir = '/home/ubuntu/uniq-sim'
 // const scriptDir = `${homeDir}`
 const scenarioFile = 'salt.scenario.json'
 async function run(simulationId) {

@@ -3,5 +3,30 @@
 
 ## 실시간 교통상황분석 및 시각화 도구
 **실시간 교통상황분석 및 시각화 도구**는 엣지-클라우드 협업기반 교통 모니터링, 교통 영향 인자별 최적 신호와의 연관 관계, 신호 최적화의 도시 전체 파급효과, 도시 간 유사 패턴의 시각적 분석을 위한 대시보드 개발을 목표로 한다.
-# visualization-tool
-## Real-time traffic analysis and visualization
+
+# 개발하기
+## 사전조건
+- 분석서버는 지도정보 및 시뮬레이션 결과를 저장히기 위해서 Mongo-DB 를 사용한다.
+
+## client
+- 클라이언트는 Vue.js를 사용하여 개발한다. 개발 과정에서는 
+- 개발모드로 클라이언트 실행하기
+```
+npm install
+npm run dev
+```
+
+### 빌드
+- 빌드 명령을 수행하면 클라이언트 코드가 서버의 public 디렉토리에 생성된다.
+```
+npm run build
+```
+
+## server
+```
+npm install
+npm run dev
+```
+
+## UI
+- http://localhost:8081 접속

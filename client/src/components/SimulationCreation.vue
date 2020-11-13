@@ -68,7 +68,11 @@
       </b-form-group>
 
       <b-form-group label-cols-sm="3" label="통계 주기" label-class="text-sm-right" label-for="Period">
-        <b-form-select v-model="periodSelected" :options="periodOptions" class="mb-3" />
+        <b-form-select v-model="periodSelected" :options="periodOptions" class="" />
+      </b-form-group>
+
+      <b-form-group label-cols-sm="3" label="가시화 주기" label-class="text-sm-right">
+        <b-form-select v-model="interval" :options="intervalOptions" class="" />
       </b-form-group>
 
       <b-form-group label-cols-sm="6" label-class="text-sm-right" label-for="Period" >

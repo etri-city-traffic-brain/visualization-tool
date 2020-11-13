@@ -54,7 +54,9 @@ module.exports = async (req, res, next) => {
 
     async function makeSimDir(id, body, role, slaves = []) {
       const simTrainDir = `${base}/data/${id}`;
+      const simulationOutDir = `${base}/output/${id}`;
       await mkdir(simTrainDir);
+      await mkdir(simTrainOutDir);
       await registorSimulation({ ...body, id, slaves , role }, getSimulations(), currentTimeFormatted());
       updateStatus(id, 'ready', {});
       await writeFile(`${simTrainDir}/salt.scenario.json`, stringify(makeScenario({ host, ...body, id })));
@@ -92,7 +94,9 @@ module.exports = async (req, res, next) => {
 
     } else {
       const simulationDir = `${base}/data/${id}`;
+      const simulationOutDir = `${base}/output/${id}`;
       await mkdir(simulationDir);
+      await mkdir(simulationOutDir);
       await registorSimulation({
         ...body,
         role: 'master',
