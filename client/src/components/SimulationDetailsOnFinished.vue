@@ -19,65 +19,68 @@
       <b-card>
       </b-card>
     </b-card> -->
-
+    <uniq-card-title title="시뮬레이션 평균속도"/>
     <b-card
       bg-variant="dark"
       text-variant="light"
       border-variant="dark"
       :sub-title="simulationId"
       no-body
-      class="p-1"
+      class="p-1 mt-1"
       style="border-radius: 0px;"
     >
-        <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="50"/>
+        <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="150"/>
     </b-card>
 
-    <b-card-group class="m-0">
+      <uniq-card-title title="속도분포"/>
+
       <b-card
         bg-variant="dark"
         border-variant="dark"
         text-variant="light"
         no-body
-        class="p-1 m-1"
+        class="p-1 mt-1"
           style="min-width: 15rem;"
       >
 
         <b-card no-body
-          class="m-0 pt-0"
+          class="m-0 pt-0 mt-1"
           text-variant="light"
           bg-variant="dark"
           border-variant="dark"
         >
-          <h5 class="text-center"><b-badge variant="grey">속도분포</b-badge></h5>
+          <!-- <h5 class="text-center"><b-badge variant="grey">속도분포</b-badge></h5> -->
           <histogram-chart :chartData="chart.histogramData" :height="150" class="mt-1"/>
         </b-card>
       </b-card>
+
+      <uniq-card-title title="스텝별 속도분포"/>
 
       <b-card
         bg-variant="dark"
         border-variant="dark"
         text-variant="light"
-        sub-title="스텝별 속도 분포"
         no-body
-        class="p-1 m-1"
-         style="min-width: 15rem;"
+        class="p-1 mt-1"
+        style="min-width: 15rem;"
       >
         <b-card no-body
           class="m-0 pt-0"
           text-variant="light"
           bg-variant="dark"
           border-variant="dark">
-          <h5 class="text-center"><b-badge variant="grey">스텝별 속도 분포</b-badge></h5>
+          <!-- <h5 class="text-center"><b-badge variant="grey">스텝별 속도 분포</b-badge></h5> -->
           <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="150"/>
         </b-card>
       </b-card>
+      <uniq-card-title title="혼잡도 분포"/>
       <b-card
         bg-variant="dark"
         text-variant="light"
         border-variant="dark"
         sub-title="혼잡도 분포"
         no-body
-        class="p-1 m-1"
+        class="p-1 mt-1"
     >
         <b-card
           no-body
@@ -87,16 +90,18 @@
           border-variant="dark"
         >
           <doughnut :chartData="chart.pieData" :height="110" />
-          <h5 class="mt-1 text-center"><b-badge variant="grey">혼잡도 분포</b-badge></h5>
+          <!-- <h5 class="mt-1 text-center"><b-badge variant="grey">혼잡도 분포</b-badge></h5> -->
         </b-card>
       </b-card>
+
+      <uniq-card-title title="스텝별 혼잡도 분포"/>
+
       <b-card
         bg-variant="dark"
         text-variant="light"
         border-variant="dark"
-        sub-title="스텝별 혼잡도 분포"
         no-body
-        class="p-1 m-1"
+        class="p-1 mt-1"
       >
         <b-card
           no-body
@@ -106,10 +111,9 @@
           border-variant="dark"
         >
           <doughnut :chartData="chart.pieDataStep" :height="110"/>
-          <h5 class="mt-1 text-center"><b-badge variant="grey">스텝별 혼잡도 분포</b-badge></h5>
+          <!-- <h5 class="mt-1 text-center"><b-badge variant="grey">스텝별 혼잡도 분포</b-badge></h5> -->
         </b-card>
       </b-card>
-    </b-card-group>
   </div>
 </template>
 
@@ -119,6 +123,9 @@ import Doughnut from '@/components/charts/Doughnut';
 import congestionColor from '@/utils/colors';
 import LineChart from '@/components/charts/LineChart';
 import HistogramChart from '@/components/charts/HistogramChart';
+
+import UniqCardTitle from '@/components/func/UniqCardTitle';
+
 
 const defaultOption  = () => ({
   responsive: true,
@@ -168,7 +175,8 @@ export default {
   components: {
     Doughnut,
     LineChart,
-    HistogramChart
+    HistogramChart,
+    UniqCardTitle
   },
   props: {
     simulation: Object,

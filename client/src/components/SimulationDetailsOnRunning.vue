@@ -1,21 +1,24 @@
 <template>
   <div>
 
-    <b-card-group>
+    <!-- <b-card-group> -->
+
+      <uniq-card-title title="혼잡도 분포"/>
       <b-card
         text-variant="light"
         bg-variant="dark"
         border-variant="dark"
         no-body
+        class="mt-1"
       >
         <b-card-body class="p-2">
-          <b-form inline>
+          <!-- <b-form inline> -->
             <b-progress height="2rem" max="70" class="w-100">
               <b-progress-bar animated striped :value="avgSpeed" v-bind:style="{'background-color':congestionColor(avgSpeed)}">
                 <span> {{ (avgSpeed).toFixed(2) }} km </span>
               </b-progress-bar>
               </b-progress>
-            </b-form>
+            <!-- </b-form> -->
             <b-form inline v-if="wsStatus !=='open'">
               <b-button @click="$emit('connect-web-socket')" size="sm">
                 연결 <b-icon icon="plug"> </b-icon>
@@ -24,29 +27,35 @@
           <doughnut :chartData="avgSpeedView" :height="110" />
         </b-card-body>
       </b-card>
-      <b-card
-        text-variant="light"
-        bg-variant="dark"
-        border-variant="dark"
-        no-body
-      >
-        <b-card-body class="p-2">
-          <b-form inline>
-            <b-progress   height="2rem" max="70" class="w-100">
-              <b-progress-bar animated striped :value="focusData.speed" v-bind:style="{'background-color':congestionColor(focusData.speed)}">
-                <span>{{ focusData.speed }} km </span>
-              </b-progress-bar>
-            </b-progress>
-          </b-form>
-          <doughnut :chartData="avgSpeedFocus" :height="110"/>
-        </b-card-body>
-      </b-card>
+
+      <uniq-card-title title="혼잡도 분포(포커스)"/>
 
       <b-card
         text-variant="light"
         bg-variant="dark"
         border-variant="dark"
         no-body
+        class="mt-1"
+      >
+        <b-card-body class="p-2">
+          <!-- <b-form inline> -->
+            <b-progress height="2rem" max="70" class="w-100">
+              <b-progress-bar animated striped :value="focusData.speed" v-bind:style="{'background-color':congestionColor(focusData.speed)}">
+                <span>{{ focusData.speed }} km </span>
+              </b-progress-bar>
+            </b-progress>
+          <!-- </b-form> -->
+          <doughnut :chartData="avgSpeedFocus" :height="110"/>
+        </b-card-body>
+      </b-card>
+
+      <uniq-card-title title="시뮬레이션 진행상태"/>
+      <b-card
+        text-variant="light"
+        bg-variant="dark"
+        border-variant="dark"
+        no-body
+        class="mt-1"
       >
         <b-card-body class="p-2">
           <b-card-text>
@@ -54,7 +63,9 @@
               striped
               :animated="progress !== 100"
               height="2rem"
-              show-progress class="w-100">
+              show-progress class="w-100"
+              v-if="progress > 0"
+            >
               <b-progress-bar :value="progress" animated striped>
                 <span> {{ progress }} %</span>
               </b-progress-bar>
@@ -69,19 +80,24 @@
           </b-form>
         </b-card-body>
       </b-card>
-    </b-card-group>
+    <!-- </b-card-group> -->
+
     <b-card bg-variant="dark" border-variant="dark" no-body class="mt-1">
-      <b-progress height="1rem" v-if="progress === 100">
+       <b-progress height="2rem" v-if="progress === 100">
         <b-progress-bar value="100" animated striped variant="success">
           <span><strong> 통계정보 생성중... </strong></span>
         </b-progress-bar>
       </b-progress>
+    </b-card>
+
+    <b-card bg-variant="dark" border-variant="dark" no-body class="mt-1">
+
        <b-form-textarea
         class="textarea-black"
         id="textarea-small"
         size="sm"
         debounce="500"
-        rows="4"
+        rows="12"
         :value="logs.join('\n')"
         placeholder="SALT logs..."
       ></b-form-textarea>
@@ -92,11 +108,12 @@
 <script>
 import Doughnut from '@/components/charts/Doughnut';
 import congestionColor from '@/utils/colors';
-
+import UniqCardTitle from '@/components/func/UniqCardTitle';
 export default {
   name: 'SimulationDetailsOnRunning',
   components: {
     Doughnut,
+    UniqCardTitle
   },
   props: {
     simulation: Object,

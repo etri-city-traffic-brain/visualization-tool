@@ -133,8 +133,8 @@ export default {
         zIndex: 999,
         position: 'fixed',
         width: '300px',
-        bottom: '230px',
-        right: '10px',
+        bottom: '50px',
+        left: '10px',
       }
     };
   },
@@ -266,15 +266,15 @@ export default {
     stop() {
       this.$emit('salt:stop', this.simulationId)
     },
-    toggleBottom() {
-      if (this.bottomStyle.height === '220px') {
-        this.bottomStyle.height = '390px'
-        this.playerStyle.bottom = '400px'
-      } else if (this.bottomStyle.height === '390px') {
-        this.bottomStyle.height = '220px'
-        this.playerStyle.bottom = '230px'
-      }
-    },
+    // toggleBottom() {
+    //   if (this.bottomStyle.height === '220px') {
+    //     this.bottomStyle.height = '390px'
+    //     this.playerStyle.bottom = '400px'
+    //   } else if (this.bottomStyle.height === '390px') {
+    //     this.bottomStyle.height = '220px'
+    //     this.playerStyle.bottom = '230px'
+    //   }
+    // },
     addLog(text) {
 
       this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
@@ -313,7 +313,8 @@ export default {
       return 0
     },
     resize() {
-      this.mapHeight = window.innerHeight - 220; // update map height to current height
+      // this.mapHeight = window.innerHeight - 220; // update map height to current height
+      this.mapHeight = window.innerHeight - 60; // update map height to current height
     },
     togglePlay() {
       this.playBtnToggle = !this.playBtnToggle;

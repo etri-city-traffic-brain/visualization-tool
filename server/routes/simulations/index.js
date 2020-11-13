@@ -24,6 +24,7 @@ router.get('/download/scenarioByRegion', require('./api-download-scenario').hand
 router.get('/download/result', require('./api-download-result'));
 
 router.post('/create', require('./api-create'));
+router.post('/update', require('./api-update-sim'));
 router.post('/start', require('./api-start'));
 router.post('/stop/:id', require('./api-stop'));
 
