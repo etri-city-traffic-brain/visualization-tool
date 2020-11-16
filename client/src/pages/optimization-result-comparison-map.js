@@ -407,6 +407,10 @@ export default {
     });
 
     window.addEventListener('resize', this.resize);
+
+    const c = (await optimizationService.getReward(this.simulationId)).data
+    this.rewards = makeRewardChart(c)
+
   },
   methods: {
     ...stepperMixin,
@@ -503,7 +507,7 @@ export default {
     async runTest() {
       log(`compare ${this.simulationId} and ${this.simulationId2}`)
       optimizationService.runFixed(this.simulationId).then(v => {})
-      optimizationService.runTest(this.simulationId2, 10).then(v => {})
+      optimizationService.runTest(this.simulationId2, 9).then(v => {})
     },
     async updatePhaseChart() {
       const phaseFixed = (await optimizationService.getPhase(this.simulationId, 'fixed')).data
@@ -513,8 +517,7 @@ export default {
       this.phaseTest = makePhaseChart(phaseTest)
       // this.phaseFixed = makePhaseChart(await optimizationService.getPhase(this.simulationId, 'fixed'))
       // this.phaseTest = makePhaseChart(await optimizationService.getPhase(this.simulationId2))
-      const c = (await optimizationService.getReward(this.simulationId)).data
-      this.rewards = makeRewardChart(c)
+
     }
   },
 };

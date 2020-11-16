@@ -51,7 +51,7 @@ module.exports = (httpServer) => {
       if(client.$simulationId === simulationId) {
         client.send(serialize(data))
 
-        console.log(`send [${client.$simulationId}], [${simulationId}]`)
+        // console.log(`send [${client.$simulationId}], [${simulationId}]`)
       }
     })
   }

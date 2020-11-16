@@ -128,12 +128,12 @@ const range = (n) => new Array(n).fill(0).map((_, i) => i)
 
 function makeRewardChartData(data) {
   return {
-    labels: range(data.length),
+    labels: data[0],
     datasets: [{
       label: 'Reward',
       backgroundColor: 'skyblue',
       borderColor: 'skyblue',
-      data,
+      data: data[1],
       fill: false,
     }]
   }

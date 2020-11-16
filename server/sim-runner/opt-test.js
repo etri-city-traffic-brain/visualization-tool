@@ -20,10 +20,10 @@ async function run(simulation) {
       '-m', 'test',
       '-n', 2,
       '-t', 563103625,
-      '-o', simulation.id,
+      '-o', simulation.masterId, // 주의필요 (모델은 신호최적화 아이디를 사용한다.)
       '-b', simulation.configuration.begin, // 시작
       '-e', simulation.configuration.end, // 종료
-      '-ep', simulation.configuration.epoch || 10, // epoch 회수
+      '-ep', simulation.configuration.epoch || 9, // epoch 회수
     ]
   })
 }

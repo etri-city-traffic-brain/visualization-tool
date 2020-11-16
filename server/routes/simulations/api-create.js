@@ -72,6 +72,7 @@ module.exports = async (req, res, next) => {
     if(type === 'optimization') {
       const idSlave = randomId(1)
       await makeSimDir(id, body, ROLE.TRAINING, [idSlave])
+      body.masterId = id
       await makeSimDir(idSlave, body, ROLE.TEST, [])
     } else {
       await makeSimDir(id, body, ROLE.SIMULATION)

@@ -73,7 +73,7 @@ module.exports = (port = 1337) => {
   };
 
   const server = net.createServer((socket) => {
-    console.log('created', socket.remotePort)
+    // console.log('created', socket.remotePort)
     socket.on('data', handleData(socket));
     socket.on('close', handleClose(socket));
     socket.on('error', handleError(socket));

@@ -44,7 +44,7 @@ module.exports = (httpServer, tcpPort) => {
     debug(simulationId);
     webSocketServer.send(data.simulationId, { ...data })
 
-    if(data.status === 1 && data.progress === 100) {
+    if(data.status === 1 && data.progress >= 100) {
       debug('*** SALT FINISHED ***')
 
       const simulation = getSimulation(simulationId)
@@ -68,7 +68,7 @@ module.exports = (httpServer, tcpPort) => {
         }
 
 
-        const data = await read(`${output}/${simulationId}/reward.csv`)
+        const data = await read(simulationId)
         webSocketServer.send(simulationId, {
           event: 'optimization:epoch',
           data
