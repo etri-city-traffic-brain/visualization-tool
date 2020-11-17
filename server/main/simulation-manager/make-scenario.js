@@ -39,7 +39,7 @@ module.exports = ({ id, host, configuration: {begin, end, day, days, period, int
         connection: 'connection.xml',
         trafficLightSystem: 'tss.xml',
         // route: routes.map(route => `${route}`).join(' '),
-        route: 'dj_sample_mon.rou.xml',
+        route: '/home/ubuntu/uniq-sim/routes/dj_sample_mon.rou.xml',
       },
       parameter: {
         minCellLength: 30.0,

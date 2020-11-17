@@ -27,10 +27,16 @@ const VehicleType = {
   LARGE: 1,
 };
 
+const SimulationType = {
+  OPTIMIZATION: 'optimization',
+  SIMULATION: 'simulation',
+}
+
 module.exports = {
   MsgType,
   StatusType,
   RoadType,
   SignalType,
   VehicleType,
+  SimulationType
 };

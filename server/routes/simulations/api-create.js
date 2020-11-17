@@ -70,9 +70,12 @@ module.exports = async (req, res, next) => {
 
   try {
     if(type === 'optimization') {
-      const idSlave = randomId(1)
-      await makeSimDir(id, body, ROLE.TRAINING, [idSlave])
-      await makeSimDir(idSlave, body, ROLE.TEST, [])
+      const idSlave0 = randomId(0) // for test
+      const idSlave1 = randomId(1) // for fixed
+      await makeSimDir(id, body, ROLE.TRAINING, [idSlave0, idSlave1])
+      body.masterId = id
+      await makeSimDir(idSlave0, body, ROLE.TEST, [])
+      await makeSimDir(idSlave1, body, ROLE.FIXED, [])
     } else {
       await makeSimDir(id, body, ROLE.SIMULATION)
     }

@@ -8,7 +8,9 @@ const startWebSocketServer = require('./ws-server');
 const startSlatMessageReceiver = require('./tcp-server');
 const saltMsgFactory = require('./msg-factory');
 
-const read = require('../main/signal-optimization/read-reward')
+const readReward = require('../main/signal-optimization/read-reward')
+
+const { StatusType } = require('./type')
 
 const { saltPath: { output }} = require('../config')
 /**
@@ -37,42 +39,47 @@ module.exports = (httpServer, tcpPort) => {
     }
   })
 
-  const optMap = {}
+  const isFinished = ({ status, progress }) =>
+    status === StatusType.FINISHED &&
+    progress >= 100
+
+  const epochCounterTable = {}
   // send to web
   tcpServer.on('salt:status', async (data) => {
     let { simulationId } = data
-    debug(simulationId);
-    webSocketServer.send(data.simulationId, { ...data })
+    debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`);
+    webSocketServer.send(data.simulationId, { ...data, simulationId })
 
-    if(data.status === 1 && data.progress === 100) {
-      debug('*** SALT FINISHED ***')
+    if(isFinished(data)) {
+      debug('*** SIMULATION FINISHED ***')
 
       const simulation = getSimulation(simulationId)
       if (!simulation) {
-        debug('cannot find simulation', simulation)
+        debug('cannot find simulation', simulationId)
         return;
       }
 
       const { type, configuration } = simulation
       if(type ==='optimization') {
-        const xxx = optMap[simulationId] || { count: 0 }
-        optMap[simulationId] = xxx
-        xxx.count += 1;
-        updateStatus(simulationId, 'running', {epoch: xxx.count})
-        if(xxx.count >= 3) {
-          debug('*** OPTIMIZATION FINISHED***')
-          updateStatus(simulationId, 'finished')
+        const epochCounter = epochCounterTable[simulationId] || { count: 0 }
+        epochCounterTable[simulationId] = epochCounter
+        epochCounter.count += 1;
+        updateStatus(simulationId, 'running', {epoch: epochCounter.count})
+
+        if(epochCounter.count >= +simulation.configuration.epoch) {
+          debug('*** OPTIMIZATION FINISHED ***')
+          updateStatus(simulationId, 'finished', {epoch: 0})
           webSocketServer.send(simulationId, {
             event: 'optimization:finished'
           })
         }
-
-
-        const data = await read(`${output}/${simulationId}/reward.csv`)
-        webSocketServer.send(simulationId, {
-          event: 'optimization:epoch',
-          data
-        })
+        setTimeout(async () => {
+          const data = await readReward(simulationId)
+          webSocketServer.send(simulationId, {
+            event: 'optimization:epoch',
+            data
+          })
+        }, 4000)
       } else {
         try {
           await cookSimulationResult({

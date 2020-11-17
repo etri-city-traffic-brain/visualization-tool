@@ -104,7 +104,7 @@ export default {
     async toggleDetails(id, status, hide) {
       if (!hide) {
         if (status === 'finished') {
-          this.barChartDataTable[id] = await statisticsService.getSummaryChart(id);
+          // this.barChartDataTable[id] = await statisticsService.getSummaryChart(id);
           this.$forceUpdate();
         }
       } else {

@@ -6,18 +6,20 @@ const {
 
 const script = 'RL_2phase_pressure.py'
 const homeDir = '/home/ubuntu/uniq-sim'
-// const scriptDir = `${homeDir}`
 const scenarioFile = 'salt.scenario.json'
-async function run(simulation) {
-  const scenarioFilePath = `${home}/data/${simulation.id}/${scenarioFile}`
 
+async function run(simulation, mode) {
+  const scenarioFilePath = `${home}/data/${simulation.id}/${scenarioFile}`
+  console.log(simulation.id, mode)
   exec({
     homeDir,
     scriptDir: scripts,
     script,
     params: [
       '-s', scenarioFilePath,
-      '-m', 'fixed',
+      // '-m', 'fixed',
+      '-n', 9, // model num
+      '-m', mode,
       '-t', 563103625,
       '-o', simulation.id,
       '-b', simulation.configuration.begin, // 시작

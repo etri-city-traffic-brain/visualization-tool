@@ -25,7 +25,10 @@ module.exports = (httpServer) => {
           Object.assign(client, { $simulationId: obj.simulationId });
           console.log('init', obj.simulationId)
         } else if (obj.type === MsgType.SET) {
+          obj.extent[3] = obj.extent[3] + 0.001;
           eventBus.emit('salt:set', obj)
+          console.log('--- set ---')
+          console.log(obj.extent)
         } else if (obj.type === MsgType.STOP) {
           eventBus.emit('salt:stop', obj)
         }
@@ -51,7 +54,7 @@ module.exports = (httpServer) => {
       if(client.$simulationId === simulationId) {
         client.send(serialize(data))
 
-        console.log(`send [${client.$simulationId}], [${simulationId}]`)
+        // console.log(`send [${client.$simulationId}], [${simulationId}]`)
       }
     })
   }
