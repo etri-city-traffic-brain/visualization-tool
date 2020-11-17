@@ -36,8 +36,11 @@ import bins from '@/stats/histogram'
 import UniqCardTitle from '@/components/func/UniqCardTitle';
 import region from '@/map2/region'
 import config from '@/stats/config'
-
+import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart';
 import { optimizationService } from '@/service'
+
+import toastMixin from '@/components/mixins/toast-mixin';
+
 
 const pieDefault = () => ({
   datasets: [{
@@ -171,21 +174,9 @@ const makePhaseChart = (data, type) => {
   }
 }
 
-const makeRewardChart = (data) => {
-  return {
-    labels: data[0],
-    datasets: [{
-      label: '최적화 Reward',
-      backgroundColor: 'red',
-      borderColor: 'red',
-      data: data[1],
-      fill: false,
-    }]
-  }
-}
-
 export default {
   name: 'OptimizationResultComparisonMap',
+  mixins: [toastMixin],
   components: {
     SimulationResult,
     SimulationDetailsOnRunning,
@@ -231,6 +222,13 @@ export default {
         pieData: null,
         linkSpeeds: [],
       },
+      chart2: {
+        histogramDataStep: null,
+        histogramData: null,
+        pieDataStep: null,
+        pieData: null,
+        linkSpeeds: [],
+      },
       currentZoom: '',
       currentExtent: '',
       wsStatus: 'ready',
@@ -256,8 +254,8 @@ export default {
         zIndex: 999,
         position: 'fixed',
         width: '300px',
-        bottom: '230px',
-        right: '10px',
+        bottom: '10px',
+        left: '10px',
       },
       chartContainerStyle: {
         borderRadius: 0,
@@ -271,7 +269,7 @@ export default {
       phaseTest: {},
       selectedModel: 1,
       testSlave: null,
-      fiexedSlave: null,
+      fixedSlave: null,
       selectedEpoch: 0,
     };
   },
@@ -292,7 +290,6 @@ export default {
   async mounted() {
     log(`mounted ${this.$options.name}`)
     this.simulationId = this.$route.params ? this.$route.params.id : null;
-    // this.simulationId2 = 'SALT_202011_00214';
 
     this.showLoading = true
     this.resize()
@@ -300,33 +297,36 @@ export default {
     this.map = makeMap({ mapId: this.mapId });
     this.map2 = makeMap({ mapId: this.mapId2 });
 
-    await this.updateSimulation()
+    const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId);
+    this.simulation = simulation;
+    this.testSlave = simulation.slaves[0]
+    this.fixedSlave = simulation.slaves[1]
+
+    this.slideMax = ticks - 1
 
     const bus = new Vue({})
     this.mapManager = MapManager({
       map: this.map,
-      simulationId: this.simulationId,
+      simulationId: this.fixedSlave,
       eventBus: this
     });
     this.mapManager2 = MapManager({
       map: this.map2,
-      simulationId: this.simulationId2,
+      simulationId: this.testSlave,
       eventBus: bus
     });
 
     this.mapManager.loadMapData();
     this.mapManager2.loadMapData();
-    // if (this.simulation.status === 'finished') {
-    //   await this.updateChart()
-    // }
+
     this.wsClient = WebSocketClient({
-      simulationId: this.simulationId,
+      simulationId: this.fixedSlave,
       eventBus: this
     })
     this.wsClient.init()
 
     this.wsClient2 = WebSocketClient({
-      simulationId: this.simulationId2,
+      simulationId: this.testSlave,
       eventBus: bus
     })
 
@@ -394,8 +394,6 @@ export default {
 
     this.$on('salt:finished', async () => {
       log('**** SIMULATION FINISHED *****')
-      // await this.updateSimulation()
-      // await this.updateChart()
     })
 
     this.$on('map:moved', ({zoom, extent}) => {
@@ -418,9 +416,13 @@ export default {
     });
 
     window.addEventListener('resize', this.resize);
-
-    const c = (await optimizationService.getReward(this.simulationId)).data
-    this.rewards = makeRewardChart(c)
+    try {
+      const c = (await optimizationService.getReward(this.fixedSlave)).data
+      this.rewards = makeRewardChartData(c)
+    } catch (err) {
+      log(err.message)
+      this.makeToast(err.message, 'warning')
+    }
   },
   methods: {
     ...stepperMixin,
@@ -436,38 +438,19 @@ export default {
     toggleState() {
       return this.playBtnToggle ? 'M' : 'A'
     },
-    async updateSimulation() {
-      const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId);
-
-      this.simulation = simulation;
-      const slave = simulation.slaves[0]
-
-      this.testSlave = simulation.slaves[0]
-      this.fixedSlave = simulation.slaves[1]
-
-      this.simulationId = this.fixedSlave
-      if(slave) {
-        console.log('SLAVE_ID', slave)
-        this.simulationId2 = slave
-        // const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId2);
-        // this.simulation2 = simulation
-      }
-      // this.simulationId2 =
-      // console.log(simulation)
-      this.slideMax = ticks - 1
-    },
     async updateChart() {
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this));
-      this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, 0);
-      this.chart.histogramData = await statisticsService.getHistogramChart(this.simulationId);
-      this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0);
-      this.chart.pieData = await statisticsService.getPieChart(this.simulationId);
+      this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, 0);
+      this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.testSlave, 0);
+      this.chart.histogramData = await statisticsService.getHistogramChart(this.fixedSlave);
+      this.chart2.histogramData = await statisticsService.getHistogramChart(this.testSlave);
+      // this.chart.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, 0);
+      this.chart.pieData = await statisticsService.getPieChart(this.fixedSlave);
       this.speedsPerStep = await statisticsService.getSummaryChart(this.testSlave);
       this.speedsPerStep2 = await statisticsService.getSummaryChart(this.fixedSlave);
       this.chart.linkSpeeds = makeLinkSpeedChartData(
         this.speedsPerStep.datasets[0].data, //text
         this.speedsPerStep2.datasets[0].data, // fixed
-        // new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed())
       )
     },
     edgeSpeed() {
@@ -488,42 +471,31 @@ export default {
     async stepChanged(step) {
       if(this.simulation.status === 'finished') {
         this.mapManager.changeStep(step);
-        this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, step);
-        this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, step);
+        this.mapManager2.changeStep(step);
+        this.chart.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step);
+        this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step);
+        this.chart2.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step);
+        this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step);
       }
     },
     centerTo(locationCode) {
       const center = region[locationCode] || region[1]
       this.map.animateTo({ center, }, { duration: 2000 })
     },
-    makeToast(msg, variant='info') {
-      this.$bvToast.toast(msg, {
-        title: 'Notification',
-        autoHideDelay: 5000,
-        appendToast: false,
-        variant,
-        toaster: 'b-toaster-bottom-right'
-      })
-    },
     async connectWebSocket() {
       this.wsClient.init()
     },
     async runTest() {
-      log(`compare ${this.simulationId} and ${this.simulationId2}`)
-      // optimizationService.runFixed(this.simulationId).then(v => {})
-      // optimizationService.runTest(this.simulationId2, 9).then(v => {})
       optimizationService.runFixed(this.fixedSlave).then(v => {})
       optimizationService.runTest(this.testSlave, 9).then(v => {})
     },
     async updatePhaseChart() {
-      const phaseFixed = (await optimizationService.getPhase(this.simulationId, 'fixed')).data
-      const phaseTest = (await optimizationService.getPhase(this.simulationId)).data
+      console.log('update phase chart')
+      const phaseFixed = (await optimizationService.getPhase(this.fixedSlave, 'fixed')).data
+      const phaseTest = (await optimizationService.getPhase(this.testSlave)).data
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
-      // this.phaseFixed = makePhaseChart(await optimizationService.getPhase(this.simulationId, 'fixed'))
-      // this.phaseTest = makePhaseChart(await optimizationService.getPhase(this.simulationId2))
-
-
+      console.log(this.phaseFixed)
       this.updateChart()
     }
   },

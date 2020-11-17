@@ -1,4 +1,4 @@
-
+const createError = require('http-errors')
 const read = require('../../main/signal-optimization/read-reward')
 const { getSimulation } = require('../../globals');
 module.exports = async (req, res, next) => {
@@ -9,6 +9,6 @@ module.exports = async (req, res, next) => {
   try {
     res.send(await read(simulationId))
   } catch (err) {
-    next(err)
+    next(createError(500, `cannot find reward file for ${simulaitionId}`))
   }
 }

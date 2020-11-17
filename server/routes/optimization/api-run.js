@@ -13,7 +13,7 @@ module.exports = exec => async (req, res, next) => {
     return;
   }
 
-    updateStatus(id, 'running', { started: currentTimeFormatted() });
+    updateStatus(id, 'running', { started: currentTimeFormatted(), epoch: 0 });
     exec(simulation, mode, modelNum)
     .then(() => {
       res.send({ id, status: 'running', result: '' });

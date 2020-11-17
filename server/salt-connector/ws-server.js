@@ -27,6 +27,8 @@ module.exports = (httpServer) => {
         } else if (obj.type === MsgType.SET) {
           obj.extent[3] = obj.extent[3] + 0.001;
           eventBus.emit('salt:set', obj)
+          console.log('--- set ---')
+          console.log(obj.extent)
         } else if (obj.type === MsgType.STOP) {
           eventBus.emit('salt:stop', obj)
         }

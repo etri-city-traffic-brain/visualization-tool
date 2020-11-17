@@ -48,7 +48,7 @@ module.exports = (httpServer, tcpPort) => {
   tcpServer.on('salt:status', async (data) => {
     let { simulationId } = data
     debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`);
-    webSocketServer.send(data.simulationId, { ...data })
+    webSocketServer.send(data.simulationId, { ...data, simulationId })
 
     if(isFinished(data)) {
       debug('*** SIMULATION FINISHED ***')
