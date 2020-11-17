@@ -4,15 +4,15 @@ import { HTTP } from '@/http-common';
 const base = '/salt/v1/optimization'
 
 async function runTrain(optId) {
-  return HTTP.post(`${base}/train?id=${optId}`);
+  return HTTP.post(`${base}/train?id=${optId}&mode=train`);
 }
 
 async function runFixed(optId) {
-  return HTTP.post(`${base}/fixed?id=${optId}`);
+  return HTTP.post(`${base}/fixed?id=${optId}&mode=fixed`);
 }
 
 async function runTest(optId, modelNum) {
-  return HTTP.post(`${base}/test?id=${optId}&modelNum=${modelNum}`);
+  return HTTP.post(`${base}/test?id=${optId}&modelNum=${modelNum}&mode=test`);
 }
 
 async function getPhase(optId, type) {

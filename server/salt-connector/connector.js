@@ -8,7 +8,9 @@ const startWebSocketServer = require('./ws-server');
 const startSlatMessageReceiver = require('./tcp-server');
 const saltMsgFactory = require('./msg-factory');
 
-const read = require('../main/signal-optimization/read-reward')
+const readReward = require('../main/signal-optimization/read-reward')
+
+const { StatusType } = require('./type')
 
 const { saltPath: { output }} = require('../config')
 /**
@@ -37,38 +39,41 @@ module.exports = (httpServer, tcpPort) => {
     }
   })
 
-  const optMap = {}
+  const isFinished = ({ status, progress }) =>
+    status === StatusType.FINISHED &&
+    progress >= 100
+
+  const epochCounterTable = {}
   // send to web
   tcpServer.on('salt:status', async (data) => {
     let { simulationId } = data
-    debug(simulationId);
+    debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`);
     webSocketServer.send(data.simulationId, { ...data })
 
-    if(data.status === 1 && data.progress >= 100) {
-      debug('*** SALT FINISHED ***')
+    if(isFinished(data)) {
+      debug('*** SIMULATION FINISHED ***')
 
       const simulation = getSimulation(simulationId)
       if (!simulation) {
-        debug('cannot find simulation', simulation)
+        debug('cannot find simulation', simulationId)
         return;
       }
 
       const { type, configuration } = simulation
       if(type ==='optimization') {
-        const xxx = optMap[simulationId] || { count: 0 }
-        optMap[simulationId] = xxx
-        xxx.count += 1;
-        updateStatus(simulationId, 'running', {epoch: xxx.count})
-        if(xxx.count >= 3) {
-          debug('*** OPTIMIZATION FINISHED***')
+        const epochCounter = epochCounterTable[simulationId] || { count: 0 }
+        epochCounterTable[simulationId] = epochCounter
+        epochCounter.count += 1;
+        updateStatus(simulationId, 'running', {epoch: epochCounter.count})
+        if(epochCounter.count >= simulation.epoch) {
+          debug('*** OPTIMIZATION FINISHED ***')
           updateStatus(simulationId, 'finished')
           webSocketServer.send(simulationId, {
             event: 'optimization:finished'
           })
         }
 
-
-        const data = await read(simulationId)
+        const data = await readReward(simulationId)
         webSocketServer.send(simulationId, {
           event: 'optimization:epoch',
           data

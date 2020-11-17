@@ -13,7 +13,12 @@ module.exports = async (req, res, next) => {
     return
   }
 
-  const simulationId = type === 'fixed' ? id : sim.masterId
+  // const simulationId = type === 'fixed' ? id : sim.masterId
+  // const simulationId = id
+  const simulationId = sim.masterId
+
+
+  // phase 는 master directory 에 생성된다.
 
   console.log('read phase:', id, type)
   try {

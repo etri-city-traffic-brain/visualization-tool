@@ -49,12 +49,14 @@
     >
       <uniq-simulation-result-ext :simulation="simulation" />
       <b-card
-        bg-variant="secondary"
-        text-variant="light"
         class="p-2 ml-1 mr-1 mt-1"
         no-body
       >
+
+
+
       </b-card>
+
     </b-sidebar>
 
     <!--
@@ -102,7 +104,12 @@
           border-variant="dark"
           text-variant="dark"
           no-body
-          style="border-radius:0"
+          v-bind:style="{
+            height: mapHeight + 'px',
+            borderRadius: 0,
+            overflow: 'auto'
+          }"
+
         >
         <b-card-body class="p-1">
           <uniq-card-title title="Reward"/>
@@ -115,19 +122,41 @@
             <!-- <b-card-text class="text-center"> 기존 신호 </b-card-text> -->
             <bar-chart class="" :chartData="phaseFixed" :options="barChartOption()" :height="180"></bar-chart>
           </b-card>
-          <uniq-card-title title="최전화 신호"/>
+          <uniq-card-title title="최적화 신호"/>
           <b-card class="mt-1">
             <!-- <b-card-text class="text-center"> 최적화 신호 </b-card-text> -->
             <bar-chart class="" :chartData="phaseTest" :options="barChartOption()" :height="180"></bar-chart>
           </b-card>
-          <b-card class="mt-1" bg-variant="dark">
-            <b-btn variant="primary" size="sm" @click="updatePhaseChart">Update Phase Chart</b-btn>
-            <b-btn variant="secondary" size="sm" @click.prevent="runTest">신호최적화 비교</b-btn>
+          <uniq-card-title title="평균속도 비교"/>
+           <b-card class="mt-1" >
+              <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="150"/>
+              <!-- <bar-chart :chartData="chart.linkSpeeds" :options="barChartOption()" :height="150"/> -->
+            </b-card>
+
+          <b-card class="mt-1" bg-variant="dark" text-variant="light">
+            <b-btn v-for="reward of rewards.labels" :key="reward" class="ml-1"
+            @click="selectedEpoch = reward"
+              >
+              {{ reward }}
+            </b-btn>
+
+            <b-btn variant="primary" @click.prevent="runTest">신호최적화 비교 {{ selectedEpoch }}</b-btn>
+          </b-card>
+          <b-card class="mt-1" bg-variant="dark" text-variant="light">
+
+
+            <b-btn variant="primary" @click="updatePhaseChart">Update Phase Chart</b-btn>
           </b-card>
         </b-card-body>
         </b-card>
       </b-col>
     </b-row>
+    <!-- <b-row class="p-0 m-0">
+      <b-col class="p-0">
+
+
+      </b-col>
+    </b-row> -->
     <!-- <b-card
       text-variant="light"
       bg-variant="dark"

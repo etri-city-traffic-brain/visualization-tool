@@ -61,9 +61,9 @@ const makeLinkSpeedChartData = (data1, data2, data3) => {
   return {
     labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
-      dataset('링크속도', '#7FFFD4', data1),
-      dataset('평균속도', '#1E90FF', data2),
-      dataset('제한속도', '#FF0000', data3),
+      dataset('Fixed', '#7FFFD4', data1),
+      dataset('Test', '#1E90FF', data2),
+      // dataset('제한속도', '#FF0000', data3),
     ],
   }
 }
@@ -125,6 +125,9 @@ const barChartOption = () => ({
   title: {
     display: false,
     text: 'Chart.js Bar Chart - Stacked'
+  },
+  legend: {
+    display: false,
   },
   tooltips: {
     mode: 'index',
@@ -256,12 +259,20 @@ export default {
         bottom: '230px',
         right: '10px',
       },
+      chartContainerStyle: {
+        borderRadius: 0,
+        height: this.mapHeight + 'px',
+        overflow: 'auto'
+      },
       defaultOption,
       barChartOption,
-      rewards: { },
+      rewards: {},
       phaseFixed: {},
       phaseTest: {},
-      selectedModel: 1
+      selectedModel: 1,
+      testSlave: null,
+      fiexedSlave: null,
+      selectedEpoch: 0,
     };
   },
   destroyed() {
@@ -410,21 +421,10 @@ export default {
 
     const c = (await optimizationService.getReward(this.simulationId)).data
     this.rewards = makeRewardChart(c)
-
   },
   methods: {
     ...stepperMixin,
-    toggleBottom() {
-      if (this.bottomStyle.height === '220px') {
-        this.bottomStyle.height = '390px'
-        this.playerStyle.bottom = '400px'
-      } else if (this.bottomStyle.height === '390px') {
-        this.bottomStyle.height = '220px'
-        this.playerStyle.bottom = '230px'
-      }
-    },
     addLog(text) {
-
       this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
       if(this.logs.length > 5) {
         this.logs.shift()
@@ -438,11 +438,14 @@ export default {
     },
     async updateSimulation() {
       const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId);
-      log(simulation)
-      // console.log('update simulation', this.simulationId)
 
       this.simulation = simulation;
       const slave = simulation.slaves[0]
+
+      this.testSlave = simulation.slaves[0]
+      this.fixedSlave = simulation.slaves[1]
+
+      this.simulationId = this.fixedSlave
       if(slave) {
         console.log('SLAVE_ID', slave)
         this.simulationId2 = slave
@@ -459,11 +462,12 @@ export default {
       this.chart.histogramData = await statisticsService.getHistogramChart(this.simulationId);
       this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0);
       this.chart.pieData = await statisticsService.getPieChart(this.simulationId);
-      this.speedsPerStep = await statisticsService.getSummaryChart(this.simulationId);
+      this.speedsPerStep = await statisticsService.getSummaryChart(this.testSlave);
+      this.speedsPerStep2 = await statisticsService.getSummaryChart(this.fixedSlave);
       this.chart.linkSpeeds = makeLinkSpeedChartData(
-        [],
-        this.speedsPerStep.datasets[0].data,
-        new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed())
+        this.speedsPerStep.datasets[0].data, //text
+        this.speedsPerStep2.datasets[0].data, // fixed
+        // new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed())
       )
     },
     edgeSpeed() {
@@ -506,18 +510,21 @@ export default {
     },
     async runTest() {
       log(`compare ${this.simulationId} and ${this.simulationId2}`)
-      optimizationService.runFixed(this.simulationId).then(v => {})
-      optimizationService.runTest(this.simulationId2, 9).then(v => {})
+      // optimizationService.runFixed(this.simulationId).then(v => {})
+      // optimizationService.runTest(this.simulationId2, 9).then(v => {})
+      optimizationService.runFixed(this.fixedSlave).then(v => {})
+      optimizationService.runTest(this.testSlave, 9).then(v => {})
     },
     async updatePhaseChart() {
       const phaseFixed = (await optimizationService.getPhase(this.simulationId, 'fixed')).data
-      const phaseTest = (await optimizationService.getPhase(this.simulationId2)).data
-      console.log(phaseFixed)
+      const phaseTest = (await optimizationService.getPhase(this.simulationId)).data
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
       // this.phaseFixed = makePhaseChart(await optimizationService.getPhase(this.simulationId, 'fixed'))
       // this.phaseTest = makePhaseChart(await optimizationService.getPhase(this.simulationId2))
 
+
+      this.updateChart()
     }
   },
 };
