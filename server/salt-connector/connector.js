@@ -65,19 +65,21 @@ module.exports = (httpServer, tcpPort) => {
         epochCounterTable[simulationId] = epochCounter
         epochCounter.count += 1;
         updateStatus(simulationId, 'running', {epoch: epochCounter.count})
-        if(epochCounter.count >= simulation.epoch) {
+
+        if(epochCounter.count >= +simulation.configuration.epoch) {
           debug('*** OPTIMIZATION FINISHED ***')
-          updateStatus(simulationId, 'finished')
+          updateStatus(simulationId, 'finished', {epoch: 0})
           webSocketServer.send(simulationId, {
             event: 'optimization:finished'
           })
         }
-
-        const data = await readReward(simulationId)
-        webSocketServer.send(simulationId, {
-          event: 'optimization:epoch',
-          data
-        })
+        setTimeout(async () => {
+          const data = await readReward(simulationId)
+          webSocketServer.send(simulationId, {
+            event: 'optimization:epoch',
+            data
+          })
+        }, 4000)
       } else {
         try {
           await cookSimulationResult({
