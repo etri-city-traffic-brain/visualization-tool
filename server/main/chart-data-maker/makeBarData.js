@@ -40,7 +40,6 @@ function makeBar(strData) {
     const avgSpeed = getAvgSpeed(linkIds, index);
     dataset.backgroundColor.push(getColor(avgSpeed));
     dataset.data.push(Number(avgSpeed.toFixed(2)));
-    console.log('push', avgSpeed)
   }
   const datasets = [
     dataset,
