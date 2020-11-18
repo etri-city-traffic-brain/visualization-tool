@@ -105,8 +105,6 @@
         </b-card>
       </b-col>
       <b-col cols="4" class="p-0">
-
-
         <b-card
           bg-variant="info"
           border-variant="info"

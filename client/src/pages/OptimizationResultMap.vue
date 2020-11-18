@@ -39,7 +39,11 @@
               style="border-radius:0px"
               class="m-0 p-0"
               no-body
-              :style="{height: mapHeight + 'px'}"
+
+              :style="{
+                height: mapHeight + 'px',
+                overflow: 'auto'
+              }"
             >
 
               <b-card-body class="p-0">
