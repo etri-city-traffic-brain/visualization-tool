@@ -21,7 +21,7 @@ npm run dev
 ```
 npm run build
 ```
-
+- 먼저 config.js 를 수정한다.
 ## server
 ```
 npm install
