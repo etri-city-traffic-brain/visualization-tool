@@ -211,17 +211,25 @@
         body-bg-variant="dark"
         body-text-variant="ligth"
         body-border-variant="dark"
-        header-class="pt-1 pb-0 no-border-round"
+        header-class="pt-2 pb-0 no-border-round"
         body-class="p-2"
         hide-footer
-        centered_
       >
-        <simulation-creation-panel
+        <!-- <simulation-creation-panel
           @hide="hideCreateSimulationDialog"
           :userId="userState.userId"
           modalName="create-simulation-modal"
           >
-        </simulation-creation-panel>
+        </simulation-creation-panel> -->
+        <uniq-register
+          @hide="hideCreateSimulationDialog"
+          :userId="userState.userId"
+          modalName="create-simulation-modal"
+          role="optimization"
+          :intersectionField="true"
+          :epochField="true"
+          >
+        </uniq-register>
       </b-modal>
     </b-container>
   </div>

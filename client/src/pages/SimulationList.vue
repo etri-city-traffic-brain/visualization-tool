@@ -211,15 +211,24 @@
         body-text-variant="ligth"
         body-border-variant="dark"
         header-class="pt-2 pb-0 no-border-round"
+        body-class="p-2"
         hide-footer
-        centered
       >
-        <simulation-creation-panel
+        <uniq-register
+          @hide="hideCreateSimulationDialog"
+          :userId="userState.userId"
+          modalName="create-simulation-modal"
+          :intersectionField="false"
+          :epochField="false"
+          role="simulation"
+          >
+        </uniq-register>
+        <!-- <simulation-creation-panel
           @hide="hideCreateSimulationDialog"
           :userId="userState.userId"
           modalName="create-simulation-modal"
           >
-        </simulation-creation-panel>
+        </simulation-creation-panel> -->
       </b-modal>
     </b-container>
   </div>

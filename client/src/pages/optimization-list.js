@@ -3,6 +3,7 @@ import moment from "moment";
 
 // import SimulationCreationPanel from '@/components/SimulationCreation';
 import OptimizationCreationPanel from '@/components/OptimizationCreation';
+import UniqRegister from '@/components/UniqRegister';
 import BarChart from '@/components/charts/BarChart';
 
 import { simulationService, statisticsService, optimizationService } from '@/service'
@@ -29,6 +30,7 @@ export default {
   components: {
     BarChart,
     SimulationCreationPanel: OptimizationCreationPanel,
+    UniqRegister
   },
   mixins: [dragDropMixin, fileMgmtMixin],
   data() {
