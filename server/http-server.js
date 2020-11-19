@@ -1,6 +1,5 @@
 const debug = require('debug')('server:web');
 const http = require('http');
-const config = require('./config');
 
 module.exports = (app, port) => {
 

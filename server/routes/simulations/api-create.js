@@ -22,7 +22,7 @@ const writeFile = util.promisify(fs.writeFile);
 const makeScenario = require('../../main/simulation-manager/make-scenario');
 // const downloadScenario = require('./utils/prepare-scenario');
 const downloadScenario = require('./utils/prepare-scenario-test');
-const registorSimulation = require('./utils/create-simulation-row');
+const registorSimulation = require('../../main/simulation-manager/crud/create');
 
 const {
   updateStatus, currentTimeFormatted, getSimulations, config,
@@ -41,7 +41,11 @@ async function makeSimDir(id, body, role, slaves = []) {
   const simOutputDir = `${base}/output/${id}`;
   await mkdir(simDataDir);
   await mkdir(simOutputDir);
-  await registorSimulation({ ...body, id, slaves, role }, getSimulations(), currentTimeFormatted());
+  await registorSimulation(
+    getSimulations,
+    { ...body, id, slaves, role },
+    currentTimeFormatted()
+  );
   await writeFile(`${simDataDir}/salt.scenario.json`, stringify(makeScenario({ host, ...body, id })));
   await downloadScenario(simDataDir, body.configuration );
 

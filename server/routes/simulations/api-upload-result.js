@@ -1,13 +1,12 @@
 const fs = require('fs');
-const moment = require('moment');
 const multer = require('multer');
 const path = require('path');
 
 const cookSimulationResult = require('../../main/simulation-manager/cook');
 
-const { getSimulations, updateStatus, currentTimeFormatted } = require('../../globals');
+const { getSimulations, currentTimeFormatted, config } = require('../../globals');
 
-const { saltPath: { output } } = require('../../config');
+const { saltPath: { output } } = config
 
 const prepareDir = (targetPath) => {
   if (!fs.existsSync(targetPath)) {
