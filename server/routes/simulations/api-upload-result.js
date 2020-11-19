@@ -1,10 +1,17 @@
 const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
+const createError = require('http-errors');
 
 const cookSimulationResult = require('../../main/simulation-manager/cook');
 
-const { getSimulations, currentTimeFormatted, config } = require('../../globals');
+const {
+  getSimulation,
+  getSimulations,
+  currentTimeFormatted,
+  config,
+  updateStatus
+} = require('../../globals');
 
 const { saltPath: { output } } = config
 
@@ -14,22 +21,26 @@ const prepareDir = (targetPath) => {
   }
 };
 
-/**
- * upload simulation result(csv) by user for convinent
- */
-function uploadResult(req, res) {
+module.exports = function upload(req, res, next) {
   const { id } = req.query;
   const targetPath = path.join(output, id);
 
   prepareDir(targetPath);
 
   const storage = multer.diskStorage({
-    destination: (request, file, callback) => callback(null, targetPath),
-    // filename: (request, file, callback) => callback(null, file.originalname),
-    filename: (request, file, callback) => callback(null, 'result.csv'),
+    destination: (req, file, cb) => cb(null, targetPath),
+    filename: (req, file, cb) => cb(null, file.originalname),
   });
 
-  const upload = multer({ storage }).single('file');
+  const fileFilter = (req, file, cb) => {
+    if (file.originalname.endsWith('.csv')) {
+      cb(null, true)
+    } else {
+      cb(null, false)
+    }
+  }
+
+  const upload = multer({ storage, fileFilter }).single('file');
   upload(req, res, async (err) => {
     if (err) {
       res.statusMessage = 'Error uploading file';
@@ -37,13 +48,9 @@ function uploadResult(req, res) {
       return;
     }
 
-    const started = currentTimeFormatted();
-    getSimulations()
-      .find({ id })
-      .assign({ status: 'running', started })
-      .write();
+    updateStatus(id, 'running', { started: currentTimeFormatted() })
 
-    const simulation = getSimulations().find({ id }).value();
+    const simulation = getSimulation(id);
 
     try {
       await cookSimulationResult({
@@ -51,30 +58,16 @@ function uploadResult(req, res) {
         duration: simulation.configuration.end,
         period: simulation.configuration.period,
       })
-      getSimulations()
-        .find({ id })
-        .assign({
-          status: 'finished',
-          ended: currentTimeFormatted(),
-          error: null,
-        })
-        .write();
+
+      updateStatus(id, 'finished', { ended: currentTimeFormatted() })
 
       res.end('File is uploaded');
     } catch (err) {
-      getSimulations()
-        .find({ id })
-        .assign({
-          status: 'error',
-          ended: currentTimeFormatted(),
-          error: `${err.message}, check data file format.`,
-        })
-        .write();
-
-      res.statusMessage = `${err.message}; invalid data format`;
-      res.status(500).end();
+      updateStatus(id, 'error', {
+        ended: currentTimeFormatted(),
+        error: err.message,
+      })
+      next(createError(500, `${err.message} invalid data format`))
     }
   });
 }
-
-module.exports = uploadResult;
