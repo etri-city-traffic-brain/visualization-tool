@@ -7,30 +7,38 @@
     style="min-width:840px; border-radius:0"
   >
     <b-container fluid class="mt-1 p-1">
-      <!-- <b-card bg-variant="secondary"> -->
-      <b-alert :show="warning" dismissible variant="warning" > {{ warning }} </b-alert>
-      <b-row>
-      </b-row>
+      <b-alert
+        :show="warning"
+        dismissible variant="warning"
+      >
+        {{ warning }}
+      </b-alert>
       <b-row class="m-0 p-0">
         <b-col class="p-0">
           <b-form inline>
-            <b-btn variant="dark" size="sm" v-b-modal.create-simulation-modal><b-icon icon="file-earmark-plus"/> <strong>최적화 등록</strong></b-btn>
-            <b-btn variant="dark" size="sm" @click.stop="updateTable" class="ml-1"><b-icon icon="arrow-clockwise"/> 새로고침</b-btn>
-            <b-form-checkbox class="ml-1" v-model="autoRefresh" name="check-button" size="md" switch> 자동 새로고침 </b-form-checkbox>
+            <b-btn variant="dark" size="sm" v-b-modal.create-simulation-modal>
+              <b-icon icon="file-earmark-plus"/>
+              <strong>최적화 등록</strong>
+            </b-btn>
+            <b-btn variant="dark" size="sm" @click.stop="updateTable" class="ml-1">
+              <b-icon icon="arrow-clockwise"/> 새로고침
+            </b-btn>
+            <b-form-checkbox
+              class="ml-1"
+              v-model="autoRefresh"
+              name="check-button"
+              size="md"
+              switch
+            >
+              자동 새로고침
+            </b-form-checkbox>
           </b-form>
         </b-col>
       </b-row>
-      <!----------------------->
-      <!-- Simulation List   -->
-      <!----------------------->
-        <!-- :busy.sync="isBusy" -->
       <b-table
-        bordered_
-        outlined_
-        striped
-        borderless_
         hover
         small
+        striped
         ref="simulations-table"
         table-variant="dark"
         head-variant="dark"
