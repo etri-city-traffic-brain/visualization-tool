@@ -17,7 +17,7 @@ const debug = require('debug')('api:create');
 const { updateStatus, currentTimeFormatted, getSimulations } = require('../../globals');
 
 // const runSimulator = require('../../main/simulation-manager/simulation-runner');
-const exec = require('../../main/simulation-manager/exec-salt');
+const exec = require('../../sim-runner/exec-simulation');
 // const makeUpload = require('../../main/uploader-scp');
 /**
  * upload data files to master and workers
@@ -49,7 +49,8 @@ async function start(req, res) {
   try {
     res.json({ id, status: 'running', result: '' });
     updateStatus(id, 'running', { started: currentTimeFormatted() });
-    const result = await exec({ simulationId: id });
+    exec(simulation);
+
   } catch (err) {
     updateStatus(id, 'error', {
       error: `fail to start simulation ${err.message}`,

@@ -1,33 +1,27 @@
 /**
  * Simulator Runner
  */
-const { spawn } = require("child_process");
-
-const PYTHON = 'python'
+const { spawn } = require('child_process');
 
 const { log } = console
 
-function exec({
-  homeDir,
-  scriptDir,
-  script,
-  params = [],
-}) {
+function exec({ script, pythonPath, params = [] }) {
+
   let cnt = 0;
-  const process = spawn(PYTHON, [`${scriptDir}/${script}`, ...params], {
+  const process = spawn('python', [script, ...params], {
     env: {
-      PYTHONPATH: `${homeDir}/tools/libsalt/`
+      PYTHONPATH: pythonPath,
     }
   });
 
-  process.stdout.on("data", data => {
+  process.stdout.on('data', data => {
     cnt += 1
     if(cnt < 5) {
       log(`stdout: ${data}`);
     }
   });
 
-  process.stderr.on("data", data => {
+  process.stderr.on('data', data => {
     log(`stderr: ${data}`);
   });
 
@@ -35,9 +29,10 @@ function exec({
     log(`error: ${error.message}`);
   });
 
-  process.on("close", code => {
+  process.on('close', code => {
     log(`child process exited with code ${code}`);
   });
+
   return process
 }
 
