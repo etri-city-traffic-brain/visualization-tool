@@ -1,9 +1,13 @@
 
-module.exports = async function createSimulation(lowDbTable, param, created) {
-  await lowDbTable().push({
+const {
+  getSimulations, currentTimeFormatted
+} = require('../../../globals');
+
+module.exports = async function createSimulation(param) {
+  await getSimulations().push({
       ...param,
       status: 'preparing',
-      created,
+      created: currentTimeFormatted(),
       epoch:0,
     })
     .write();

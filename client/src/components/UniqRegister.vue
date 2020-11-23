@@ -79,7 +79,7 @@
     <b-card bg-variant="dark" text-variant="light" border-variant="dark" class="mt-1">
       <b-card-text class="text-right" >
         <b-button class="mr-1" @click="register" variant="secondary" >
-          등록
+          등록  <b-spinner small label="Spinning" v-if="loading"></b-spinner>
         </b-button>
         <b-button class="mr-1" @click="hide" variant="secondary" >
           닫기
@@ -130,10 +130,12 @@ const periodOptions = [
 ]
 
 const areaOptions = [
-  { value: "250", text: "대전" },
-  { value: "11230", text: "대전(실증지역)" },
-  { value: "25040", text: "세종" },
-  { value: "11240", text: "세종(실증지역)" },
+  { value: 10, text: "테스트지역" },
+  { value: 250, text: "대전광역시" },
+  { value: 25030, text: "서구" },
+  { value: 25040, text: "유성구" },
+  { value: 290, text: "세종시" },
+  { value: 29010, text: "세종특별자치시" },
 ]
 
 const scriptOptions =  [
@@ -181,6 +183,7 @@ export default {
       intervalOptions: [ ...intervalOptions ],
       junctionId: '563103625', // Yuseong Middle School
       epoch: 10,
+      loading: false,
     };
   },
   methods: {
@@ -192,7 +195,8 @@ export default {
       this.description = '...';
     },
     async register() {
-      log('등록')
+
+      this.loading = true;
       const from = moment(`${this.fromDate} ${this.fromTime}`);
       const to = moment(`${this.toDate} ${this.toTime}`)
       const begin =  moment.duration(this.fromTime).asSeconds()
@@ -226,6 +230,7 @@ export default {
       } catch (err) {
         log(err)
       }
+      this.loading = false;
       this.resetForm();
       this.hide();
     },

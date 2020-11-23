@@ -27,7 +27,6 @@ module.exports = (req, res) => {
       .sortBy('created', 'asc')
       .value()
       .reverse();
-    console.log(array.length)
   }
   res.json(paginate(array, page, perPage));
 };

@@ -19,8 +19,8 @@ const periodOptions = [
 ]
 
 const areas = [
-  { value: "250", text: "대전" },
-  { value: "11230", text: "대전(실증지역)" },
+  { value: "250", text: "대전(전체)" },
+  { value: "25040", text: "유성" },
   { value: "25040", text: "세종" },
   { value: "11240", text: "세종(실증지역)" },
 ]
