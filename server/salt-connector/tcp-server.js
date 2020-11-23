@@ -12,8 +12,6 @@ const HEADER_LENGTH = 16;
 
 const { green } = chalk;
 
-const writeStream = fs.createWriteStream('./debug_output');
-
 /**
  * TCP Server
  * @param {number} port

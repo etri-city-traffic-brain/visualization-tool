@@ -17,7 +17,7 @@ const status = require('./simulatoin-status');
 const { currentTimeFormatted, updateStatus } = require('../../globals');
 
 const makeChartData = require('../chart-data-maker');
-const recordResult = require('./record-to-mongo')
+const recordResult = require('./insert-to-mongo')
 
 const config = require('../../config');
 const { output } = config.saltPath;

@@ -2,7 +2,10 @@
 
 const { updateStatus, currentTimeFormatted, getSimulation } = require('../../globals');
 
-const exec = require('../../sim-runner/exec-optimization')
+// const exec = require('../../sim-runner/exec-optimization')
+// const executeOptimization = require('../../sim-runner/exec-optimization')
+const { executeOptimization } = require('../../sim-runner')
+
 
 
 module.exports = async (req, res, next) => {
@@ -21,7 +24,7 @@ module.exports = async (req, res, next) => {
     { started: currentTimeFormatted(), epoch: 0 }
   );
 
-  exec(simulation, mode, modelNum)
+  executeOptimization(simulation, mode, modelNum)
     .then(() => res.send({}))
     .catch(err => {
       debug(err)

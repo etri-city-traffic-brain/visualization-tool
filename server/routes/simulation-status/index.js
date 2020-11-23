@@ -1,42 +1,29 @@
 //
-//    simulation status listener
-//    2019
-//    simulator must send 'finished' event
-//    if not server cannot notice that simulation is finished
+//    simulation status updater
+//    2020
 //
 const router = require('express').Router();
+const createError = require('http-errors')
 
-// const handleSimulationResult = require('./handle-status-notification');
-const handleSimulationStatus = require('./handle-status-notification-standalone');
 const Status = require('../../main/simulation-manager/simulatoin-status');
-const { getSimulations } = require('../../globals');
+const { updateStatus } = require('../../globals');
 
 const statusList = Object.values(Status);
 
-// SALT simulator send its status using this interface
-
-async function updateStatus(req, res, next) {
-  const { id, status, text } = req.query;
+async function updateStatuss(req, res, next) {
+  const { id, status } = req.query;
 
   if (!statusList.includes(status)) {
-    next(new Error(`${status} status is not allowed`));
+    next(createError(400, `${status} status is not allowed`));
     return;
   }
 
-  const simulation = getSimulations().find({ id }).value();
-  if (!simulation) {
-    next();
-    return;
-  }
+  updateStatus(id, status);
 
-  handleSimulationStatus({ simulation, status, text });
-
-  res.json({
-    id,
-  });
+  res.send({ id });
 }
 
-router.post('/', updateStatus);
-router.post('/:id', updateStatus);
+router.post('/', updateStatuss);
+router.post('/:id', updateStatuss);
 
 module.exports = router;
