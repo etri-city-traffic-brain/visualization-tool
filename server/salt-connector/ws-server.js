@@ -1,67 +1,62 @@
 // @ts-check
 const debug = require('debug')('salt-connector:ws-server');
+
 const WebSocket = require('ws');
-const chalk = require('chalk');
 const events = require('events');
-const { MsgType } = require('./type');
-const msgFactory = require('./msg-factory');
-const e = require('express');
-const { log } = console;
-const serialize = obj => JSON.stringify(obj);
-/**
- *
- * @param {{addQueue: function, deleteQueue: function, getQueue: function}}
- * @param {Object} httpServer
- */
+
+const { INIT, SET, STOP } = require('./salt-msg-type').MsgType;
+const { EVENT_SET, EVENT_STOP } = require('./event-types');
+
+const MsgHandler = (wsClient, eventBus) => ({
+  [INIT](msg) {
+    Object.assign(wsClient, {
+      $simulationId: msg.simulationId
+    });
+  },
+  [SET](msg) {
+    eventBus.emit(EVENT_SET, msg)
+  },
+  [STOP](msg) {
+    eventBus.emit(EVENT_STOP, msg)
+  },
+})
+
 module.exports = (httpServer) => {
-  const webSocketServer = new WebSocket.Server({server: httpServer});
+  const wss = new WebSocket.Server({server: httpServer});
   const eventBus = Object.create(events.EventEmitter.prototype);
+
   function handleConnection(client) {
-    console.log('connected ws-client')
-    client.on('message', (message) => {
+
+    const msgHandler = MsgHandler(client, eventBus)
+
+    client.on('message', (data) => {
       try {
-        const obj = JSON.parse(message);
-        if (obj.type === MsgType.INIT) { // init from ws
-          Object.assign(client, { $simulationId: obj.simulationId });
-          console.log('init', obj.simulationId)
-        } else if (obj.type === MsgType.SET) {
-          obj.extent[3] = obj.extent[3] + 0.001;
-          eventBus.emit('salt:set', obj)
-          console.log('--- set ---')
-          console.log(obj.extent)
-        } else if (obj.type === MsgType.STOP) {
-          eventBus.emit('salt:stop', obj)
-        }
+        const msg = JSON.parse(data);
+        const handler = msgHandler[msg.type] || (() => {})
+        handler(msg)
       } catch (err) {
         debug(err.message);
       }
     });
 
     client.on('close', () => {
-      log(chalk.red('disconnected'), client.id, client.$simulationId);
-      log('delete queue for', client.$simulationId);
+
     });
 
     client.on('error', () => {
-      log('error')
+
     });
   }
-  webSocketServer.on('connection', handleConnection);
+
+  wss.on('connection', handleConnection);
 
   const send = (simulationId, data) => {
-    webSocketServer.clients.forEach((client) => {
+    wss.clients.forEach((client) => {
       // @ts-ignore
       if(client.$simulationId === simulationId) {
-        client.send(serialize(data))
-
-        // console.log(`send [${client.$simulationId}], [${simulationId}]`)
+        client.send(JSON.stringify(data))
       }
     })
   }
-
-  return Object.assign(eventBus, {
-    clients: webSocketServer.clients,
-    send
-  })
-
+  return Object.assign(eventBus, { send })
 };

@@ -5,8 +5,8 @@
 
 const net = require('net');
 const chalk = require('chalk');
-const msgFactory = require('../msg-factory');
-const { Header, Set, MAX_ROAD_ID_LENGTH, MAX_SIMULATION_ID_LENGTH} = require('../msg');
+const msgFactory = require('../salt-msg-factory');
+const { Header, Set, MAX_ROAD_ID_LENGTH, MAX_SIMULATION_ID_LENGTH} = require('../salt-msg');
 
 const roads = require('./salt-roads');
 
@@ -124,7 +124,8 @@ socket.on('connect', async () => {
     for(let i=1; i<6; i++) {
       await sleep(1000)
       send(makeData());
-      send(msgFactory.makeStatus({ status: 1, progress: i * 20 }))
+      // send(msgFactory.makeStatus({ status: 1, progress: i * 20 }))
+      send(msgFactory.makeStatus({ status: 1, progress: i }))
     }
     await sleep(3000)
   }

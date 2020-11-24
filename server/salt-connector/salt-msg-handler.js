@@ -1,17 +1,11 @@
 const debug = require('debug')('salt-connector:msg-handler');
-const chalk = require('chalk');
 
-const events = require('events');
+const msgFactory = require('./salt-msg-factory');
+const { EventEmitter } = require('events');
 
-// const charCodes2Str = codes => codes.map(d => String.fromCharCode(d)).join('')
-const msgFactory = require('./msg-factory');
-const { EventEmitter } = events;
-
-const {
-  Init, Data, Status
-} = require('./msg');
-
-const { MsgType } = require('./type');
+const { Init, Data, Status } = require('./salt-msg');
+const { INIT, DATA, STATUS } = require('./salt-msg-type').MsgType;
+const { EVENT_DATA, EVENT_STATUS } = require('./event-types');
 
 /**
  *
@@ -42,20 +36,15 @@ function SaltMsgHandler() {
       roadType: 1,
     });
 
-    // just for test
-     send(simulationId, setBuffer)
-    //  debug('send Set')
+    send(simulationId, setBuffer)
   };
 
   //  DATA
   const handleSaltData = (socket, buffer) => {
     const data = Data(buffer);
     const simulationId = socketToSimulationId[socket.remotePort];
-    // debug(`[DATA] ${simulationId}, ROADS: ${data.roads.length} ${buffer.length}`);
-    // debug(`[DATA] ${simulationId}`);
-    // debug(data)
-    eventBus.emit('salt:data', {
-      event: 'salt:data',
+    eventBus.emit(EVENT_DATA, {
+      event: EVENT_DATA,
       simulationId,
       ...data
     });
@@ -66,18 +55,17 @@ function SaltMsgHandler() {
   const handleSaltStatus = (socket, buffer) => {
     const status = Status(buffer);
     const simulationId = socketToSimulationId[socket.remotePort];
-    // debug(chalk.yellow(JSON.stringify(status)));
-    eventBus.emit('salt:status', {
-      event: 'salt:status',
+    eventBus.emit(EVENT_STATUS, {
+      event: EVENT_STATUS,
       simulationId,
       ...status
     });
   };
 
   const handlers = {
-    [MsgType.INIT]: handleSaltInit,
-    [MsgType.DATA]: handleSaltData,
-    [MsgType.STATUS]: handleSaltStatus,
+    [INIT]: handleSaltInit,
+    [DATA]: handleSaltData,
+    [STATUS]: handleSaltStatus,
   };
 
   const clearResource = (socket) => {

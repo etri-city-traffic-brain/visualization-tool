@@ -7,14 +7,14 @@
  */
 
 const Struct = require('awestruct');
-const { MsgType } = require('./type');
+const { MsgType } = require('./salt-msg-type');
 
 const MAX_SIMULATION_ID_LENGTH = 17;
 const MAX_ROAD_ID_LENGTH = 16;
 const MAX_VEHICLES = 48;
 const EXTENT_LENGTH = 4;
 
-const charCodes2Str = codes => codes.map(d => String.fromCharCode(d)).join('').replace(/\0/g,'').trim()
+const { charCodes2Str } = require('./utils')
 
 const {
   double,
@@ -22,7 +22,6 @@ const {
   float,
   int8,
   array,
-  string,
 } = Struct.types;
 
 const Header = Struct([
@@ -41,32 +40,38 @@ const Init = Struct([
 Init.type = MsgType.INIT;
 
 const Road = Struct([
-  // ['lenRoadId', uint32],
   ['roadId', array(MAX_ROAD_ID_LENGTH, int8).transform(charCodes2Str)],
-  // ['roadId', string(MAX_ROAD_ID_LENGTH)],
   ['speed', uint32],
   ['currentSignal', int8],
   ['numVehicles', uint32],
-  // ['vehicles', array('numVehicles', int8)],
   ['vehicles', array(MAX_VEHICLES, int8)],
 ]);
 
-// DIRECTION: SALT -> SLAT-VIS
+/**
+ * Data Message
+ * DIRECTION: SALT -> SLAT-VIS
+ */
 const Data = Struct([
   ['numRoads', uint32],
   ['roads', array('numRoads', Road)],
 ]);
 Data.type = MsgType.DATA;
 
-// DIRECTION: SALT -> SLAT-VIS
+/**
+ * Status Message
+ * DIRECTION: SALT -> SLAT-VIS
+ */
 const Status = Struct([
   ['status', int8],
   ['progress', uint32],
-
 ]);
 Status.type = MsgType.STATUS;
 
-// DIRECTION: SALT <- SLAT-VIS
+
+/**
+ * Set Message
+ * DIRECTION: SALT <- SLAT-VIS
+ */
 const Set = Struct([
   ['extent', array(EXTENT_LENGTH, float)],
   ['roadType', int8],
@@ -74,8 +79,10 @@ const Set = Struct([
 
 Set.type = MsgType.SET;
 
-
-// DIRECTION: SALT <- SLAT-VIS
+/**
+ * Stop Message
+ * DIRECTION: SALT <- SLAT-VIS
+ */
 const Stop = Struct([
   ['header', Header],
 ]);
