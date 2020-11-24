@@ -7,6 +7,7 @@
 # 개발하기
 ## 사전조건
 - 분석서버는 지도정보 및 시뮬레이션 결과를 저장히기 위해서 Mongo-DB 를 사용한다.
+- Node.js 런타임을 설치한다.
 
 ## client
 - 클라이언트는 Vue.js를 사용하여 개발한다. 개발 과정에서는 
@@ -21,7 +22,7 @@ npm run dev
 ```
 npm run build
 ```
-
+- 먼저 config.js 를 수정한다.
 ## server
 ```
 npm install
