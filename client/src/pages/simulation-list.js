@@ -2,6 +2,8 @@
 import moment from "moment";
 
 import SimulationCreationPanel from '@/components/SimulationCreation';
+import UniqRegister from '@/components/UniqRegister';
+
 import BarChart from '@/components/charts/BarChart';
 
 import { simulationService, statisticsService } from '@/service'
@@ -28,6 +30,7 @@ export default {
   components: {
     BarChart,
     SimulationCreationPanel,
+    UniqRegister
   },
   mixins: [dragDropMixin, fileMgmtMixin],
   data() {

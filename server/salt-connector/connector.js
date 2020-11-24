@@ -6,13 +6,18 @@ const { getSimulation, updateStatus } = require('../globals');
 
 const startWebSocketServer = require('./ws-server');
 const startSlatMessageReceiver = require('./tcp-server');
-const saltMsgFactory = require('./msg-factory');
+const saltMsgFactory = require('./salt-msg-factory');
 
 const readReward = require('../main/signal-optimization/read-reward')
 
-const { StatusType } = require('./type')
+const { StatusType } = require('./salt-msg-type')
 
-const { saltPath: { output }} = require('../config')
+const { EVENT_SET, EVENT_STOP, EVENT_STATUS, EVENT_DATA, EVENT_FINISHED } = require('./event-types');
+
+const OPTIMIZATION = {
+  TRAINING: 'training',
+}
+
 /**
  * SALT connector server
  * connect simulator and web browser
@@ -27,11 +32,11 @@ module.exports = (httpServer, tcpPort) => {
   const webSocketServer = startWebSocketServer(httpServer);
 
   // send to simulator
-  webSocketServer.on('salt:set', (data) => {
+  webSocketServer.on(EVENT_SET, (data) => {
     tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
   })
 
-  webSocketServer.on('salt:stop', (data) => {
+  webSocketServer.on(EVENT_STOP, (data) => {
     try {
       tcpServer.send(data.simulationId, saltMsgFactory.makeStop(data))
     } catch(err) {
@@ -44,11 +49,11 @@ module.exports = (httpServer, tcpPort) => {
     progress >= 100
 
   const epochCounterTable = {}
-  // send to web
-  tcpServer.on('salt:status', async (data) => {
+
+  tcpServer.on(EVENT_STATUS, async (data) => {
     let { simulationId } = data
     debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`);
-    webSocketServer.send(data.simulationId, { ...data, simulationId })
+    webSocketServer.send(data.simulationId, { ...data })
 
     if(isFinished(data)) {
       debug('*** SIMULATION FINISHED ***')
@@ -59,16 +64,16 @@ module.exports = (httpServer, tcpPort) => {
         return;
       }
 
-      const { type, configuration } = simulation
-      if(type ==='optimization') {
+      const { configuration, role } = simulation
+      if(role === OPTIMIZATION.TRAINING) {
         const epochCounter = epochCounterTable[simulationId] || { count: 0 }
         epochCounterTable[simulationId] = epochCounter
         epochCounter.count += 1;
-        updateStatus(simulationId, 'running', {epoch: epochCounter.count})
-
+        updateStatus(simulationId, 'running', { epoch: epochCounter.count })
         if(epochCounter.count >= +simulation.configuration.epoch) {
+          debug(epochCounter.count, simulation.epoch)
           debug('*** OPTIMIZATION FINISHED ***')
-          updateStatus(simulationId, 'finished', {epoch: 0})
+          updateStatus(simulationId, 'finished')
           webSocketServer.send(simulationId, {
             event: 'optimization:finished'
           })
@@ -79,9 +84,11 @@ module.exports = (httpServer, tcpPort) => {
             event: 'optimization:epoch',
             data
           })
-        }, 4000)
+        }, 5000)
+
       } else {
         try {
+          debug('**** start cook ***', simulationId)
           await cookSimulationResult({
             simulationId,
             duration: configuration.end,
@@ -90,7 +97,7 @@ module.exports = (httpServer, tcpPort) => {
           // just for test
           updateStatus(simulationId, 'finished')
           webSocketServer.send(simulationId, {
-            event: 'salt:finished'
+            event: EVENT_FINISHED
           })
         } catch (err) {
           debug(err.message)
@@ -100,7 +107,7 @@ module.exports = (httpServer, tcpPort) => {
   });
 
   // send to web
-  tcpServer.on('salt:data', (data) => {
+  tcpServer.on(EVENT_DATA, (data) => {
     webSocketServer.send(data.simulationId, { ...data })
   })
 }

@@ -1,7 +1,7 @@
 
 const {
   Init, Data, Set, Status, Road, Stop
-} = require('./msg');
+} = require('./salt-msg');
 
 const encode = require('./encode-msg');
 

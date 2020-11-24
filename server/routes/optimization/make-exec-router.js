@@ -1,14 +1,9 @@
-
+const debug = require('debug')('api:optimization-train');
+const createError = require('http-errors')
 
 const { updateStatus, currentTimeFormatted, getSimulation } = require('../../globals');
 
-// const exec = require('../../sim-runner/exec-optimization')
-// const executeOptimization = require('../../sim-runner/exec-optimization')
-const { executeOptimization } = require('../../sim-runner')
-
-
-
-module.exports = async (req, res, next) => {
+module.exports = exec => async (req, res, next) => {
 
   const { id, mode, modelNum } = req.query;
   const simulation = getSimulation(id);
@@ -24,7 +19,7 @@ module.exports = async (req, res, next) => {
     { started: currentTimeFormatted(), epoch: 0 }
   );
 
-  executeOptimization(simulation, mode, modelNum)
+  exec(simulation, mode, modelNum)
     .then(() => res.send({}))
     .catch(err => {
       debug(err)

@@ -4,6 +4,8 @@ const FileAsync = require('lowdb/adapters/FileAsync');
 const TABLE_SIMULATION = 'simulations';
 let database;
 
+let tableSimulation;
+
 module.exports = {
   start({lowDBFile}) {
     low(new FileAsync(lowDBFile))
@@ -13,10 +15,12 @@ module.exports = {
         if (!database.has(TABLE_SIMULATION).value()) {
           database.defaults({ simulations: [] }).write();
         }
+
+        tableSimulation = database.get(TABLE_SIMULATION)
       })
       .catch(err => debug('LowDB connection failed...', err.message));
   },
   getSimulations() {
-    return database.get(TABLE_SIMULATION);
+    return tableSimulation;
   },
 };

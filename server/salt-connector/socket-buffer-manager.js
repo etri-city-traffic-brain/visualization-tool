@@ -1,4 +1,5 @@
-const BufferManager = function BufferManager() {
+
+module.exports = () => {
   const bufferBySocket = {};
 
   return {
@@ -22,5 +23,3 @@ const BufferManager = function BufferManager() {
     },
   };
 };
-
-module.exports = BufferManager;

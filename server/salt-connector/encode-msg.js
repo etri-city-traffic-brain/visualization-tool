@@ -1,7 +1,7 @@
 
 
-const encode = require('./encode');
-const { Header } = require('./msg');
+const encode = require('./encode-struct');
+const { Header } = require('./salt-msg');
 
 function encodeMsg(Struct, bodyObj) {
   const bodyBuffer = encode(Struct, bodyObj);

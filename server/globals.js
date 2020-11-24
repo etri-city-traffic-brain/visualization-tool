@@ -2,14 +2,7 @@
 
 const moment = require('moment');
 
-const simulationStatusUpdater = lowDbTable => (id, status, param = {}) => {
-  lowDbTable().find({ id })
-    .assign({
-      status,
-      ...param,
-    })
-    .write();
-}
+const simulationStatusUpdater = require('./main/simulation-manager/update-status')
 
 const db = require('./main/dbms/init-db');
 const config = require('./config');
@@ -24,6 +17,7 @@ const getConfigFilePath = simulationId => `${config.saltPath.data}/${simulationI
 const getScenarioFilePath = simulationId => `${config.saltPath.data}/${simulationId}/salt.scenario.json`;
 
 const getSimulation = id => getSimulations().find({ id }).value()
+const mongooseUtils = require('./main/dbms/mongo-utils');
 
 module.exports = {
   getSimulations,
@@ -33,4 +27,5 @@ module.exports = {
   getScenarioFilePath,
   getSimulation,
   config,
+  mongooseUtils
 };

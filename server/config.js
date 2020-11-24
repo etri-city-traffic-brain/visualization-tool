@@ -21,16 +21,16 @@ module.exports = {
     python: 'python3',
   },
   simulation: {
-    // dbFile: './db.json', // database file location
     routes: `${base}/routes`,
     routePerDay: [
-      'gd_trips_2017_sun_refinement.rou.xml',
-      'gd_trips_2017_mon_refinement.rou.xml',
-      'gd_trips_2017_tue_refinement.rou.xml',
-      'gd_trips_2017_wed_refinement.rou.xml',
-      'gd_trips_2017_thu_refinement.rou.xml',
-      'gd_trips_2017_fri_refinement.rou.xml',
-      'gd_trips_2017_sat_refinement.rou.xml',
+      'dj_sample_sun.rou.xml',
+      'dj_sample_mon.rou.xml',
+      'dj_sample_tue.rou.xml',
+      'dj_sample_wed.rou.xml',
+      'dj_sample_thu.rou.xml',
+      'dj_sample_fri.rou.xml',
+      'dj_sample_sat.rou.xml',
+      'dj_sample_test.rou.xml'
     ],
   },
   scenarioService: {
@@ -43,9 +43,6 @@ module.exports = {
   cloudService: {
     urlBase: cloudApiBase,
   },
-  // predictionService: {
-  //   urlBase: predictionApiBase,
-  // },
   server: {
     ip: '127.0.0.1',
     tcpPort: process.env['tcpPort'] || 1337,

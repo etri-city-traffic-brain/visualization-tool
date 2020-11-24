@@ -1,74 +1,102 @@
 <template>
-  <div style="min-width:840px;">
-    <b-navbar type="dark" variant="dark">
-      <b-navbar-nav>
-        <b-nav-item href="#" v-b-modal.create-simulation-modal><b-icon icon="file-earmark-plus"/> 시뮬레이션 등록</b-nav-item>
-        <b-nav-item href="#" v-b-toggle.collapse1 v-b-tooltip.hover><b-icon icon="files"/> 시뮬레이션 결과 비교</b-nav-item>
-        <!-- <b-nav-item href="#" v-b-toggle.collapse1 v-b-tooltip.hover><b-icon icon="files"/> 최적화 등록</b-nav-item> -->
-        <!-- <b-nav-item href="#" v-b-toggle.collapse1 v-b-tooltip.hover><b-icon icon="files"/> 강화학습 모델 비교</b-nav-item> -->
-        <b-nav-item href="#" v-if="!autoRefresh" @click.stop="updateTable"><b-icon icon="arrow-clockwise"/> 새로고침</b-nav-item>
-      </b-navbar-nav>
-    </b-navbar>
-    <b-card bg-variant="secondary" text-variant="white" style="border-radius:0" no-body>
+<div>
+ <b-card
+    no-body
+    bg-variant="secondary"
+    text-variant="light"
+    style="min-width:840px; border-radius:0"
+  >
+    <b-container fluid class="mt-1 p-1">
+      <b-alert
+        :show="warning"
+        dismissible variant="warning"
+      >
+        {{ warning }}
+      </b-alert>
+      <b-row class="m-0 p-0">
+        <b-col md="12" class="p-0">
+          <b-form inline>
+            <b-btn
+              size="sm"
+              variant="dark"
+              v-b-modal.create-simulation-modal
+            >
+              <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
+            </b-btn>
+            <b-btn
+              size="sm"
+              variant="dark"
+              v-b-toggle.collapse1 v-b-tooltip.hover
+              class="ml-1"
+            >
+              <b-icon icon="files"/> 시뮬레이션 비교
+            </b-btn>
+            <b-btn
+              size="sm"
+              class="ml-1 mr-1"
+              variant="dark"
+              @click.stop="updateTable">
+                <b-icon icon="arrow-clockwise"/> 새로고침
+              </b-btn>
+            <b-form-checkbox
+              v-model="autoRefresh"
+              name="check-button"
+              size="md"
+              switch
+            >
+              자동 새로고침
+            </b-form-checkbox>
+          </b-form>
+        </b-col>
+      </b-row>
+      <b-row class="m-0 p-0">
+        <b-col md="12" class="m-0 p-0">
+          <b-card
+            class="m-0 p-0"
+            text-variant="white" style="border-radius:0" no-body
+            border-variant="secondary"
+            >
 
           <!-- simulation drop area -->
-      <b-collapse id="collapse1" class="mt-1">
-        <b-card-group deck>
-          <b-card
-            class="mb-2"
-            @drop="drop"
-            @dragover="dragover"
-            bg-variant="secondary"
-            border-variant="secondary"
-          >
-            <span v-if="selected.length === 0" >
-              시뮬레이션 이름을 선택 후 여기로 드래그&드랍 하세요.
-            </span>
+            <b-collapse id="collapse1" class="mt-0">
+              <b-card-group deck>
+                <b-card
+                  class="m-0"
+                  @drop="drop"
+                  @dragover="dragover"
+                  bg-variant="secondary"
+                  border-variant="secondary"
+                >
+                  <span v-if="selected.length === 0" >
+                    시뮬레이션 이름을 선택 후 여기로 드래그&드랍 하세요.
+                  </span>
 
 
-            <b-badge class="mx-2 p-2"
-              href="#"
-              v-for="item in selected"
-              :key="item"
-              v-b-tooltip.hover
-              title="클릭하면 제거됩니다."
-            >
-              {{ item }}
-              <b-icon @click="deleteSelected(item)" icon="x"/>
-            </b-badge>
+                  <b-badge class="mx-2 p-2"
+                    href="#"
+                    v-for="item in selected"
+                    :key="item"
+                    v-b-tooltip.hover
+                    title="클릭하면 제거됩니다."
+                  >
+                    {{ item }}
+                    <b-icon @click="deleteSelected(item)" icon="x"/>
+                  </b-badge>
+                </b-card>
+              </b-card-group>
+            </b-collapse> <!-- simulation drop area -->
+            <b-btn variant="warning" v-if="selected.length >= 2" size="sm" @click.stop="compare"> <b-icon icon="bar-chart-fill"></b-icon> 비교 </b-btn>
           </b-card>
-        </b-card-group>
-      </b-collapse> <!-- simulation drop area -->
-      <b-btn variant="warning" v-if="selected.length >= 2" size="sm" @click.stop="compare"> <b-icon icon="bar-chart-fill"></b-icon> 비교 </b-btn>
-      <b-btn v-if="selected.length>0" href="#" class="m-0" v-b-toggle.collapse1 v-b-tooltip.hover variant="dark" size="sm">
-        <b-icon icon="x"/> 닫기
-      </b-btn>
-    </b-card>
-    <b-container fluid class="mt-1">
-      <b-alert :show="warning" dismissible variant="warning" > {{ warning }} </b-alert>
-      <b-row>
-        <b-col md="12">
-          <!-- <b-button size="sm" variant="dark" v-b-modal.create-simulation-modal > <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록 </b-button> -->
-          <!-- <b-btn size="sm" variant="dark" v-b-toggle.collapse1 v-b-tooltip.hover > <b-icon icon="files"/> 시뮬레이션 비교 </b-btn> -->
-          <!-- <b-btn size="sm" class="mr-1" variant="dark" @click.stop="updateTable" > <b-icon icon="arrow-clockwise"/> 새로고침 </b-btn> -->
         </b-col>
       </b-row>
-      <b-row>
-        <b-col class="mt-1">
-          <b-form inline>
-          <b-form-checkbox v-model="autoRefresh" name="check-button" size="md" switch> 자동 새로고침 </b-form-checkbox>
-          <!-- <b-btn v-if="!autoRefresh" size="sm" variant="link" href="#" @click.stop="updateTable"><b-icon icon="arrow-clockwise"/></b-btn> -->
-           </b-form>
-        </b-col>
-      </b-row>
-      <!----------------------->
-      <!-- Simulation List   -->
-      <!----------------------->
-        <!-- :busy.sync="isBusy" -->
-      <b-table bordered outlined striped hover small
+      <b-table
+        hover
+        small
+        striped
         ref="simulations-table"
-        head-variant="light"
-        foot-variant="light"
+        table-variant="dark"
+        head-variant="dark"
+        foot-variant="dark"
         :items="items"
         :fields="fields"
         :current-page="currentPage"
@@ -88,9 +116,7 @@
 
         <template v-slot:cell(id)="row" >
           <div draggable="true" @dragstart="drag" :data-id="row.item.id">
-            <!-- <b class="text-success">{{ row.item.id.toUpperCase() }}</b> -->
             <b>{{ row.item.id.toUpperCase() }}</b>
-             <!-- <h5 class="m-0"><b-badge class="p-2" :variant="statusColor(row.item.status)">{{ row.item.id.toUpperCase() }}</b-badge></h5> -->
           </div>
         </template>
 
@@ -123,19 +149,9 @@
             v-if="row.item.status === 'running'">
               <b-icon icon="stop-fill"/> 중지
           </b-button>
-          <!--
-          <b-button
-            size="sm"
-            variant="dark"
-            :to="{ name: 'SimulationResult', params: {id: row.item.id}}"
-            v-if="row.item.status === 'finished'"
-            >
-              통계
-          </b-button>
-          -->
         </template>
 
-         <template v-slot:cell(details)="row">
+        <template v-slot:cell(details)="row">
           <b-button
             size="sm"
             variant="secondary"
@@ -153,48 +169,48 @@
             @click.stop="removeSimulation(row.item)">
               <b-icon icon="trash-fill" aria-hidden="true"/>
           </b-button>
-         </template>
+        </template>
         <template v-slot:row-details="row">
-          <b-alert
-            v-if="row.item.error && row.item.status === 'error'"
-            class="mb-1 p-2"
-            variant="danger"
-            show
-          >
-            {{row.item.error }}
-          </b-alert>
-          <b-input-group>
-            <b-form-file
-              accept=".csv"
-              v-model="resultFile"
-              placeholder="CSV 파일을 선택하거나 드래그해서 놓으세요...">
-            </b-form-file>
-            <b-input-group-append>
-              <b-button
-                variant="secondary"
-                @click.prevent="uploadSimulatoinResultFile(row.item)">
-                  Upload
-              </b-button>
-            </b-input-group-append>
-          </b-input-group>
-          <!-- <b-button size="sm" class="mt-1" @click="row.toggleDetails">닫기</b-button> -->
+          <b-card bg-variant="secondary" text-variant="light" style="max-width: 600px">
+            <b-alert
+              v-if="row.item.error && row.item.status === 'error'"
+              class="mb-1 p-2"
+              variant="danger"
+              show
+            >
+              {{row.item.error }}
+            </b-alert>
+            <b-input-group>
+              <b-form-file
+                accept=".csv"
+                v-model="resultFile"
+                placeholder="시뮬레이션 결과파일(.CSV)을 선택하세요.">
+              </b-form-file>
+              <b-input-group-append>
+                <b-button
+                  variant="dark"
+                  @click.prevent="uploadSimulatoinResultFile(row.item)">
+                    <b-icon icon="upload"/>
+                </b-button>
+              </b-input-group-append>
+            </b-input-group>
+          </b-card>
         </template>
       </b-table>
-       <b-alert
+      <b-alert
         :show="msg.length > 0"
         :variant="variant"
       >
         <b-spinner small type="grow"/> {{ msg }} <b-spinner small type="grow"/>
       </b-alert>
-      <!-- PAGINATION //-->
       <b-pagination
         :total-rows="totalRows"
         :per-page="perPage"
         v-model="currentPage"
-        first-text="First"
-        prev-text="Prev"
-        next-text="Next"
-        last-text="Last"
+        first-text="|◀"
+        prev-text="◀"
+        next-text="▶"
+        last-text="▶|"
         align="center"
         size="sm"
       />
@@ -211,18 +227,22 @@
         body-text-variant="ligth"
         body-border-variant="dark"
         header-class="pt-2 pb-0 no-border-round"
+        body-class="p-2"
         hide-footer
-        centered
       >
-        <simulation-creation-panel
+        <uniq-register
           @hide="hideCreateSimulationDialog"
           :userId="userState.userId"
           modalName="create-simulation-modal"
+          :intersectionField="false"
+          :epochField="false"
+          role="simulation"
           >
-        </simulation-creation-panel>
+        </uniq-register>
       </b-modal>
     </b-container>
-  </div>
+ </b-card>
+</div>
 </template>
 
 <script src="./simulation-list.js"> </script>
@@ -233,4 +253,7 @@ table tbody td {
   vertical-align:middle !important;
 }
 
+.no-border-round {
+  border-radius: 0;
+}
 </style>

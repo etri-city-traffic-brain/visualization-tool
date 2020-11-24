@@ -3,30 +3,24 @@
  * author: beanpole
  */
 
+const { config } = require('../../globals')
 
-const DAYS = {
-  1: 'mon',
-  2: 'tue',
-  3: 'wed',
-  4: 'thu',
-  5: 'fri',
-  6: 'sat',
-  0: 'sun'
+const { output } = config.saltPath;
+
+const { routes, routePerDay } = config.simulation
+const { tcpPort } = config.server
+
+const getRouteFor = (day) => {
+  const route =  routePerDay[day] || routePerDay[routePerDay.length - 1]
+  return `${routes}/${route}`
 }
 
-module.exports = ({ id, host, configuration: {begin, end, day, days, period, interval = 10}}) => {
-
-  let routes = [`${DAYS[day]}.xml`]
-
-  if (days > 1) {
-    routes = new Array(days).fill('').map((v, i) => `${DAYS[(i + day) % 7]}.xml`)
-  }
-
+module.exports = ({ id, host, configuration: {begin, end, day, period, interval = 10}}) => {
   return {
     scenario: {
       id,
       host,
-      port: 1337,
+      port: tcpPort,
       interval,
       time: {
         begin,
@@ -38,15 +32,14 @@ module.exports = ({ id, host, configuration: {begin, end, day, days, period, int
         link: 'edge.xml',
         connection: 'connection.xml',
         trafficLightSystem: 'tss.xml',
-        // route: routes.map(route => `${route}`).join(' '),
-        route: '/home/ubuntu/uniq-sim/routes/dj_sample_mon.rou.xml',
+        route: getRouteFor(day)
       },
       parameter: {
         minCellLength: 30.0,
         vehLength: 5.0,
       },
       output: {
-        fileDir: `/home/ubuntu/uniq-sim/output/${id}/`,
+        fileDir: `${output}/${id}/`,
         period,
         level: 'cell',
         save: 1,

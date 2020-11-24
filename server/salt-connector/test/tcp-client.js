@@ -1,7 +1,7 @@
 const net = require('net');
 const chalk = require('chalk');
-const msgFactory = require('./msg-factory');
-const { Header } = require('./msg');
+const msgFactory = require('../msg-factory');
+const { Header } = require('../msg');
 
 const { log } = console;
 const socket = net.connect({

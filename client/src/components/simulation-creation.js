@@ -19,8 +19,8 @@ const periodOptions = [
 ]
 
 const areas = [
-  { value: "250", text: "대전" },
-  { value: "11230", text: "대전(실증지역)" },
+  { value: "250", text: "대전(전체)" },
+  { value: "25040", text: "유성" },
   { value: "25040", text: "세종" },
   { value: "11240", text: "세종(실증지역)" },
 ]
@@ -38,12 +38,10 @@ export default {
       description: '...',
       fromDate: format(new Date()),
       toDate: format(new Date()),
-      fromTime: '00:00',
-      toTime: '23:59',
+      fromTime: '07:00',
+      toTime: '09:59',
       periodSelected: 30,
       periodOptions: [...periodOptions],
-      // partitionSelected: 0,
-      // partitionOptions: [...partitionOptions],
       areaSelected: 250,
       areaOptions: [ ...areas ],
       beginSelected: 0,

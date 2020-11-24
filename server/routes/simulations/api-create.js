@@ -20,9 +20,9 @@ const mkdir = util.promisify(fs.mkdir);
 const writeFile = util.promisify(fs.writeFile);
 
 const makeScenario = require('../../main/simulation-manager/make-scenario');
-// const downloadScenario = require('./utils/prepare-scenario');
-const downloadScenario = require('./utils/prepare-scenario-test');
-const registorSimulation = require('./utils/create-simulation-row');
+const downloadScenario = require('./utils/prepare-scenario');
+const downloadScenarioTest = require('./utils/prepare-scenario-test');
+const addSimulation = require('../../main/simulation-manager/crud/create');
 
 const {
   updateStatus, currentTimeFormatted, getSimulations, config,
@@ -36,14 +36,26 @@ const stringify = obj => JSON.stringify(obj, false, 2);
 
 const randomId = (num) => ('S-' + ((Math.random() * 10000000) + '').replace('.','')).substring(0, 14) + '-' + num
 
-async function makeSimDir(id, body, role, slaves = []) {
-  const simDataDir = `${base}/data/${id}`;
+async function createScenarioFile (targetDir, { host, body, id}) {
+  await writeFile(
+    `${targetDir}/salt.scenario.json`,
+    stringify(makeScenario({ host, ...body, id }))
+  );
+}
+
+async function prepareSimulation(id, body, role, slaves = []) {
+  const simInputDir = `${base}/data/${id}`;
   const simOutputDir = `${base}/output/${id}`;
-  await mkdir(simDataDir);
+  await mkdir(simInputDir);
   await mkdir(simOutputDir);
-  await registorSimulation({ ...body, id, slaves, role }, getSimulations(), currentTimeFormatted());
-  await writeFile(`${simDataDir}/salt.scenario.json`, stringify(makeScenario({ host, ...body, id })));
-  await downloadScenario(simDataDir, body.configuration );
+  await addSimulation({ ...body, id, slaves, role });
+  await createScenarioFile(simInputDir, { host, body, id })
+
+  if(body.configuration.region < 100) {
+    await downloadScenarioTest(simInputDir, body.configuration );
+  } else {
+    await downloadScenario(simInputDir, body.configuration );
+  }
 
   updateStatus(id, 'ready', {});
 }
@@ -70,21 +82,21 @@ module.exports = async (req, res, next) => {
 
   try {
     if(type === 'optimization') {
-      const idSlave0 = randomId(0) // for test
-      const idSlave1 = randomId(1) // for fixed
-      await makeSimDir(id, body, ROLE.TRAINING, [idSlave0, idSlave1])
+      const idTest = randomId(0) // for test
+      const idFixed = randomId(1) // for fixed
+      await prepareSimulation(id, body, ROLE.TRAINING, [idTest, idFixed])
       body.masterId = id
-      await makeSimDir(idSlave0, body, ROLE.TEST, [])
-      await makeSimDir(idSlave1, body, ROLE.FIXED, [])
+      await prepareSimulation(idTest, body, ROLE.TEST, [])
+      await prepareSimulation(idFixed, body, ROLE.FIXED, [])
     } else {
-      await makeSimDir(id, body, ROLE.SIMULATION)
+      await prepareSimulation(id, body, ROLE.SIMULATION)
     }
     debug(`simulation ${id} is ready!`)
     res.json({ id });
   } catch (err) {
     debug(err.message);
     updateStatus(id, 'error', {
-      error: `fail to create simulation ${err.message}`,
+      error: `fail to create simulation - ${err.message}`,
       ended: currentTimeFormatted(),
     });
     next(createError(500, err.message))
