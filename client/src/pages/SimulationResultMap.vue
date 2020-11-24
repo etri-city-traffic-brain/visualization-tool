@@ -52,7 +52,7 @@
       </b-sidebar>
 
       <b-row class="p-0 m-0">
-        <b-col cols="6" class="p-0">
+        <b-col cols="6" sm="6" md="6"  lg="6" class="p-0">
           <b-card
             bg-variant="dark"
             border-variant="dark"
@@ -71,7 +71,7 @@
             </div>
           </b-card>
         </b-col>
-        <b-col cols="3" class="p-0">
+        <b-col cols="3" sm="6" md="6"  lg="3" class="p-0">
           <b-card
             text-variant="light"
             bg-variant="dark"
@@ -113,7 +113,7 @@
             </b-card-body>
           </b-card>
         </b-col>
-        <b-col cols="3" class="p-0">
+        <b-col cols="3" sm="0" md="0"  lg="3" class="p-0">
           <b-card
             no-body
             bg-variant="dark"
