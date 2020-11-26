@@ -134,6 +134,7 @@ function MapManager({map, simulationId, eventBus}) {
   }
 
   async function loadMapData(event) {
+    log('load map data')
     const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId());
 
     try {
@@ -183,10 +184,13 @@ function MapManager({map, simulationId, eventBus}) {
 
   map.on('zoomend moveend', handleZoomEvent);
 
+  loadMapData()
+
   return {
     loadMapData,
     changeStep,
-    toggleFocusTool
+    toggleFocusTool,
+    map
   };
 }
 

@@ -14,8 +14,8 @@ async function getSummaryChart(simulationId, step) {
     const res = await HTTP.get(query('summary', simulationId, step))
     return res.data
   } catch (err) {
-    log(" e r r o r ", err.message);
-    return null;
+    log(err.message);
+    return {};
   }
 }
 

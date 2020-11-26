@@ -1,6 +1,9 @@
 <template>
   <div>
-  <b-container fluid class="m-0 p-0">
+  <b-container v-if="!simulation">
+    <h1>We're sorry!!</h1>
+  </b-container>
+  <b-container fluid class="m-0 p-0" v-if="simulation">
     <div class="uniq-top-menu">
       <div>
         <b-button @click="sidebar = !sidebar" size="sm" variant="primary">
@@ -14,7 +17,7 @@
         <uniq-congestion-color-bar/>
         <!-- <b-button @click="centerTo(1)" class="ml-1" size="sm" variant="dark"> 실증지역 </b-button> -->
         <!-- <b-button @click="centerTo(2)" class="ml-1" size="sm" variant="dark"> 세종(시청) </b-button> -->
-        <uniq-map-changer :map="map" />
+        <!-- <uniq-map-changer :map="map" /> -->
       </div>
     </div>
     <div class="uniq-top-menu-right">
@@ -40,8 +43,8 @@
         bg-variant="dark"
         no-body
       >
-        <histogram-chart :chartData="chart.histogramData" :height="150" class="mt-1"/>
-        <histogram-chart :chartData="chart.histogramDataStep" :height="150" class="mt-1"/>
+        <histogram-chart :chartData="chart1.histogramData" :height="150" class="mt-1"/>
+        <histogram-chart :chartData="chart1.histogramDataStep" :height="150" class="mt-1"/>
       </b-card>
       <uniq-card-title title="속도분포(최적화 신호)"/>
       <b-card
@@ -53,7 +56,11 @@
         <histogram-chart :chartData="chart2.histogramDataStep" :height="150" class="mt-1"/>
       </b-card>
 
-      <b-card bg-variant="secondary" class="mt-1" v-bind:style="playerStyle" text-variant="light" no-body
+      <b-card
+        bg-variant="secondary"
+        class="mt-1"
+        v-bind:style="playerStyle"
+        text-variant="light" no-body
       >
         <b-input-group size="sm">
           <b-button-group>
@@ -92,14 +99,20 @@
           class="no-border-radius p-1 m-0"
           no-body
           text-variant="white"
+
           >
-            <span class="card-bottom">
-              <h3><b-badge>기존신호</b-badge></h3> {{ fixedSlave }}
-            </span>
+            <div class="card-bottom text-center">
+              <h3><b-badge>기존신호 - {{ fixedSlave }}</b-badge></h3>
+              <b-progress height="2rem" v-if="progress1 > 0">
+                <b-progress-bar :value="progress1" animated striped variant="primary">
+                  <span> {{ progress1 }} %</span>
+                </b-progress-bar>
+              </b-progress>
+            </div>
             <div
             class="m-0 p-0"
-              :ref="mapId"
-              :id="mapId"
+              :ref="mapId1"
+              :id="mapId1"
               :style="{height: mapHeight + 'px'}"
             />
         </b-card>
@@ -111,10 +124,14 @@
           class="no-border-radius p-1 m-0"
           no-body
           >
-          <span class="card-bottom">
-            <h3><b-badge variant="primary">최적화 신호</b-badge></h3>
-            {{ testSlave }}
-          </span>
+          <div class="card-bottom text-center">
+            <h3><b-badge variant="primary">최적화 신호 - {{ testSlave }}</b-badge></h3>
+            <b-progress height="2rem" class="mt-1"  v-if="progress1 > 0">
+                <b-progress-bar :value="progress2" animated striped variant="primary">
+                  <span> {{ progress2 }} %</span>
+                </b-progress-bar>
+              </b-progress>
+          </div>
           <div
           class="m-0 p-0"
             :ref="mapId2"
@@ -134,7 +151,7 @@
           no-body
           >
           <b-card-text class="text-center p-2 m-0">
-          신호 비교 ({{ simulationId }})
+          신호 비교 ({{ simulation.id }})
           </b-card-text>
         <b-card
           bg-variant="dark"
@@ -176,12 +193,12 @@
 
           <uniq-card-title title="평균속도 비교"/>
            <b-card class="mt-1" >
-              <line-chart :chartData="chart.linkSpeeds" :options="lineChartOption()" :height="150"/>
+              <line-chart :chartData="chart1.linkSpeeds" :options="lineChartOption()" :height="150"/>
               <!-- <bar-chart :chartData="chart.linkSpeeds" :options="barChartOption()" :height="150"/> -->
             </b-card>
 
 
-             <b-card
+             <!-- <b-card
               text-variant="light"
               bg-variant="dark"
               border-variant="dark"
@@ -191,12 +208,7 @@
               <b-card-text class="text-center p-2 m-0">
                 시뮬레이션 진행률
               </b-card-text>
-              <b-progress height="3rem">
-                <b-progress-bar :value="progress" animated striped variant="primary">
-                  <span> {{ progress }} %</span>
-                </b-progress-bar>
-              </b-progress>
-            </b-card>
+            </b-card> -->
 
             <b-card text-variant="light" bg-variant="secondary" class="mt-1" no-body>
             <b-card-text class="m-0 p-2 text-center">
@@ -276,11 +288,12 @@
   }
   .card-bottom {
     position: absolute;
-    bottom: 55px;
-    left: 20px;
+    bottom: 25px;
+    left: 10px;
     font-weight: bold;
-    z-index:100;
+    z-index: 100;
     color: black;
+    width: 95%;
   }
 
   .uniq-top-menu {
