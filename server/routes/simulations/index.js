@@ -23,6 +23,8 @@ router.get('/download/scenarioByCoordinate', require('./api-download-scenario').
 router.get('/download/scenarioByRegion', require('./api-download-scenario').handleDownloadScenarioByRegion);
 router.get('/download/result', require('./api-download-result'));
 
+router.get('/scripts', require('./api-scripts'));
+
 router.post('/create', require('./api-create'));
 router.post('/update', require('./api-update-sim'));
 router.post('/start', require('./api-start'));

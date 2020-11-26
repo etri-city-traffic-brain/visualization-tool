@@ -69,6 +69,10 @@ async function getSimulationResult(simulationId, extent) {
   return (await HTTP.get(`/salt/v1/simulation/${simulationId}?${query(extent)}`)).data;
 }
 
+async function getScripts() {
+  return (await HTTP.get('/salt/v1/simulations/scripts')).data;
+}
+
 export default {
   create,
   remove,
@@ -79,4 +83,5 @@ export default {
   getSimulations,
   getOptimizations,
   uploadResult,
+  getScripts,
 };

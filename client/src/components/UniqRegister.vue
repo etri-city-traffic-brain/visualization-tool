@@ -120,6 +120,8 @@ const generateRandomId = (prefix = 'DEFU') => `${prefix.substring(0,4).toUpperCa
 const format = date => moment(date).format('YYYY-MM-DD');
 const getToday = () => format(new Date())
 
+
+
 const periodOptions = [
   { value: 10, text: '10분', },
   { value: 30, text: '30분', },
@@ -185,6 +187,13 @@ export default {
       epoch: 10,
       loading: false,
     };
+  },
+  async mounted() {
+    try {
+      this.scriptOptions = await simulationService.getScripts()
+    } catch(err) {
+      this.scriptOptions = [...scriptOptions]
+    }
   },
   methods: {
     openSignalMap() {

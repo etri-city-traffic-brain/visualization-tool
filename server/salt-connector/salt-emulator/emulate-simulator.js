@@ -35,7 +35,7 @@ socket.on('connect', async () => {
   }));
 
   // SEND DATA
-  for(let i = 1; i < 11; i++) {
+  for(let i = 1; i < 10; i++) {
     send(makeLoadData());
     send(msgFactory.makeStatus({ status: 1, progress: i * 10 }))
     await sleep(500)

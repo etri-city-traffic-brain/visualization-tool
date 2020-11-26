@@ -106,13 +106,13 @@
       </b-col>
       <b-col cols="4" class="p-0">
         <b-card
-          bg-variant="info"
-          border-variant="info"
+          bg-variant="primary"
+          border-variant="primary"
           class="no-border-radius p-1 m-0"
           no-body
           >
           <span class="card-bottom">
-            <h3><b-badge>최적화 신호</b-badge></h3>
+            <h3><b-badge variant="primary">최적화 신호</b-badge></h3>
             {{ testSlave }}
           </span>
           <div
@@ -142,7 +142,7 @@
           text-variant="dark"
           no-body
             v-bind:style="{
-            height: mapHeight - 40 + 'px',
+            height: mapHeight - 32 + 'px',
             borderRadius: 0,
             overflow: 'auto'
           }"
@@ -151,7 +151,7 @@
           <uniq-card-title title="Reward"/>
           <b-card class="">
             <!-- <b-card-text class="text-center"> Reward </b-card-text> -->
-            <line-chart class="" :chartData="rewards" :options="defaultOption()" :height="180"/>
+            <line-chart class="" :chartData="rewards" :options="lineChartOption()" :height="180"/>
           </b-card>
           <!-- <uniq-card-title title="기존 신호"/> -->
           <b-card text-variant="light" bg-variant="secondary" class="mt-1" no-body>
@@ -164,7 +164,7 @@
             </b-card>
           </b-card>
           <!-- <uniq-card-title title="최적화 신호"/> -->
-          <b-card text-variant="light" bg-variant="info" class="mt-1" no-body>
+          <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body>
             <b-card-text class="m-0 p-2 text-center">
               최적화 신호
             </b-card-text>
@@ -176,9 +176,10 @@
 
           <uniq-card-title title="평균속도 비교"/>
            <b-card class="mt-1" >
-              <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="150"/>
+              <line-chart :chartData="chart.linkSpeeds" :options="lineChartOption()" :height="150"/>
               <!-- <bar-chart :chartData="chart.linkSpeeds" :options="barChartOption()" :height="150"/> -->
             </b-card>
+
 
              <b-card
               text-variant="light"
@@ -203,9 +204,10 @@
             </b-card-text>
               <b-card class="m-1" bg-variant="dark" text-variant="light">
                 <b-btn
+                  size="sm"
                   v-for="reward of rewards.labels"
                   :key="reward"
-                  class="ml-1"
+                  class="ml-1 mt-1"
                   @click="selectedEpoch = reward"
                 >
                   {{ reward }}
@@ -227,12 +229,14 @@
         </b-card>
       </b-col>
     </b-row>
-    <!-- <b-row class="p-0 m-0">
+    <b-row class="p-0 m-0">
       <b-col class="p-0">
-
-
+        <b-card style="height:180px; border-radius:0" bg-variant="light" border-variant="light">
+          <b-card-title>평균속도 비교</b-card-title>
+          <line-chart :chartData="chart.currentSpeedChart" :options="lineChartOption()" :height="30"/>
+        </b-card>
       </b-col>
-    </b-row> -->
+    </b-row>
     <!-- <b-card
       text-variant="light"
       bg-variant="dark"

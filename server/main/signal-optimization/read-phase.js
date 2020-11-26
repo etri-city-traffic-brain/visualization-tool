@@ -14,8 +14,11 @@ async function read(simulationId, type) {
     acc[1].push(cur[1])
     acc[2].push(cur[2])
     acc[3].push(cur[3])
+    acc[4].push(cur[4])
+    acc[5].push(cur[5])
+
     return acc
-  }, [[],[],[],[]])
+  }, [[],[],[],[],[],[]])
 }
 
 module.exports = read

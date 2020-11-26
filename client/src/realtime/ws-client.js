@@ -37,9 +37,9 @@ function Client({ url = wsUrl, simulationId, eventBus }) {
     });
 
     socket.addEventListener('message', ({ data }) => {
-
       try {
         const event =  JSON.parse(data)
+        console.log(event.event)
         eventBus.$emit(event.event, event)
       } catch (err) {
         log.error(err)

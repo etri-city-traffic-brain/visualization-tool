@@ -5,6 +5,9 @@
  * 1: when the simulation is running
  * 2: when the simulation is finihsed
  */
+
+import Vue from 'vue';
+
 import StepPlayer from '@/stepper/step-runner';
 import stepperMixin from '@/stepper/mixin';
 // import * as d3 from 'd3'
@@ -31,7 +34,7 @@ import UniqMapChanger from '@/components/UniqMapChanger';
 
 import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning';
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished';
-import Vue from 'vue';
+
 import bins from '@/stats/histogram'
 import UniqCardTitle from '@/components/func/UniqCardTitle';
 import region from '@/map2/region'
@@ -64,16 +67,35 @@ const makeLinkSpeedChartData = (data1, data2, data3) => {
   return {
     labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
-      dataset('Fixed', '#7FFFD4', data1),
-      dataset('Test', '#1E90FF', data2),
+      dataset('기존신호', 'grey', data1),
+      dataset('최적화신호', 'blue', data2),
       // dataset('제한속도', '#FF0000', data3),
     ],
   }
 }
 
-const { log } = console
+const dataset = (label, color, data) => ({
+  label,
+  fill: false,
+  borderColor: color,
+  backgroundColor: color,
+  borderWidth: 2,
+  pointRadius: 1,
+  data,
+})
 
-const defaultOption  = () => ({
+const makeLineData = (data1, data2) => {
+
+  return {
+    labels: new Array(data1.length).fill(0).map((_, i) => i),
+    datasets: [
+      dataset('기존신호', 'grey', data1),
+      dataset('최적화신호', 'blue', data2),
+    ],
+  }
+}
+
+const lineChartOption  = () => ({
   responsive: true,
   title: {
     display: false,
@@ -148,11 +170,11 @@ const barChartOption = () => ({
 })
 
 const makePhaseChart = (data, type) => {
-  const colors = ['skyblue', 'orange', 'green']
+  const colors = ['skyblue', 'orange', 'green', 'blue', 'red']
   const sl = type === 'fixed' ? 1 : 2
   const datasets = data.slice(sl).map((d,i) => {
     return {
-      label: 'Dataset 1',
+      label: `phase ${i}`,
       backgroundColor: colors[i],
       data: d
 
@@ -173,6 +195,8 @@ const makePhaseChart = (data, type) => {
     // }]
   }
 }
+
+const { log } = console
 
 export default {
   name: 'OptimizationResultComparisonMap',
@@ -221,6 +245,8 @@ export default {
         pieDataStep: null,
         pieData: null,
         linkSpeeds: [],
+        currentSpeeds: [],
+        currentSpeedChart: {}
       },
       chart2: {
         histogramDataStep: null,
@@ -228,6 +254,8 @@ export default {
         pieDataStep: null,
         pieData: null,
         linkSpeeds: [],
+        currentSpeeds: [],
+        currentSpeedChart: {}
       },
       currentZoom: '',
       currentExtent: '',
@@ -262,7 +290,7 @@ export default {
         height: this.mapHeight + 'px',
         overflow: 'auto'
       },
-      defaultOption,
+      lineChartOption,
       barChartOption,
       rewards: {},
       phaseFixed: {},
@@ -355,12 +383,34 @@ export default {
       return;
     })
 
-    this.$on('salt:data', (d) => {
-      this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
-        acc += cur
-        return acc
-      }, 0) / d.roads.length
 
+    const updateChart = () => {
+      setTimeout(() => {
+        this.chart.currentSpeedChart = makeLineData(
+          this.chart.currentSpeeds,
+          this.chart2.currentSpeeds,
+        )
+        updateChart()
+      }, 1000)
+    }
+
+    const calcAvgSpeed = roads => roads.map(road => road.speed).reduce((acc, cur) => {
+      acc += cur
+      return acc
+    }, 0) / roads.length
+
+    this.$on('salt:data', (d) => {
+
+      // const avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
+      //   acc += cur
+      //   return acc
+      // }, 0) / d.roads.length
+
+      const avgSpeed = calcAvgSpeed(d.roads)
+      console.log('--->', avgSpeed)
+      this.chart.currentSpeeds.push((avgSpeed).toFixed(2) * 1)
+      // this.chart2.currentSpeeds.push(avgSpeed + Math.random() * 10)
+      // this.chart.currentSpeedChart = makeLineData(this.chart.currentSpeeds)
 
       this.avgSpeedView = {
         datasets: [{
@@ -370,6 +420,18 @@ export default {
         labels: config.speeds
       }
     })
+
+    bus.$on('salt:data', d => {
+      const avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
+        acc += cur
+        return acc
+      }, 0) / d.roads.length
+
+      this.chart2.currentSpeeds.push((avgSpeed).toFixed(2) * 1)
+    })
+
+
+    updateChart()
 
     this.$on('salt:status', async (status) => {
       this.addLog(`status: ${status.status}, progress: ${status.progress}`)
@@ -461,7 +523,7 @@ export default {
     },
     resize() {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
-      this.mapHeight = window.innerHeight - 60; // update map height to current height
+      this.mapHeight = window.innerHeight - 180 - 60; // update map height to current height
     },
     togglePlay() {
       this.playBtnToggle = !this.playBtnToggle;
@@ -486,16 +548,18 @@ export default {
       this.wsClient.init()
     },
     async runTest() {
+
+      this.chart.currentSpeeds = []
+      this.chart2.currentSpeeds = []
+
       optimizationService.runFixed(this.fixedSlave).then(v => {})
       optimizationService.runTest(this.testSlave, 9).then(v => {})
     },
     async updatePhaseChart() {
-      console.log('update phase chart')
       const phaseFixed = (await optimizationService.getPhase(this.fixedSlave, 'fixed')).data
       const phaseTest = (await optimizationService.getPhase(this.testSlave)).data
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
-      console.log(this.phaseFixed)
       this.updateChart()
     }
   },

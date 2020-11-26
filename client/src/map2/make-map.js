@@ -5,7 +5,8 @@ import * as maptalks from 'maptalks';
 const { Map, TileLayer } = maptalks;
 
 // const LOC_SEOUL = [127.141195, 37.540903]
-const DEFAULT_CENTER = [127.34054, 36.34834]; // 도안
+// const DEFAULT_CENTER = [127.34054, 36.34834]; // 도안
+const DEFAULT_CENTER = [127.34029, 36.34586]; // 도안
 const DEFAULT_ZOOM = 18
 
 const { log } = console
