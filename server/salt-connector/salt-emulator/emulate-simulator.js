@@ -16,7 +16,8 @@ const sId = str => str.padEnd(MAX_SIMULATION_ID_LENGTH, ' ')
 const simulationId = sId(process.argv[2] || 'SALT_202009_00940');
 const HEADER_LENGTH = 16;
 
-const socket = net.connect({ port: 1337, host: '1.245.47.108' });
+// const socket = net.connect({ port: 1337, host: '1.245.47.108' });
+const socket = net.connect({ port: 1337, host: 'localhost' });
 
 const send = (buffer) => {
   socket.write(buffer);
@@ -35,7 +36,7 @@ socket.on('connect', async () => {
   }));
 
   // SEND DATA
-  for(let i = 1; i < 10; i++) {
+  for(let i = 1; i < 11; i++) {
     send(makeLoadData());
     send(msgFactory.makeStatus({ status: 1, progress: i * 10 }))
     await sleep(500)

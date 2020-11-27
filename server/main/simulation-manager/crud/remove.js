@@ -10,9 +10,9 @@ const { getSimulations, mongooseUtils, config } = require('../../../globals');
 const { saltPath: { output, data } } = config
 
 module.exports = async (simulationId) => {
-  if(!mongooseUtils.isConnected()) {
-    throw new Error('Cannot delete simulation, Simulation Database not connected');
-  }
+  // if(!mongooseUtils.isConnected()) {
+  //   throw new Error('Cannot delete simulation, Simulation Database not connected');
+  // }
   const simulation = getSimulations().find({ id: simulationId }).value();
 
   if (!simulation) {

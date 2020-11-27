@@ -33,7 +33,7 @@ function SaltMsgHandler() {
 
     const setBuffer = msgFactory.makeSet({
       // extent: [127.33342, 36.3517, 127.34806, 36.34478], // max.y 가 min.y 보다 작아야 함
-      extent: [127.3373, 36.34837, 127.34303, 36.34303 - 0.0005], // max.y 가 min.y 보다 작아야 함
+      extent: [127.3373, 36.34837, 127.34303, 36.34303 - 0.0005], // max.y 가 min.y 보다 작아야 함], // max.y 가 min.y 보다 작아야 함
       roadType: 1,
     });
 
@@ -43,6 +43,7 @@ function SaltMsgHandler() {
   //  DATA
   const handleSaltData = (socket, buffer) => {
     const data = Data(buffer);
+
     const simulationId = socketToSimulationId[socket.remotePort];
     eventBus.emit(EVENT_DATA, {
       event: EVENT_DATA,

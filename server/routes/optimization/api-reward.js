@@ -9,7 +9,6 @@ module.exports = async (req, res, next) => {
   try {
     res.send(await read(simulationId))
   } catch (err) {
-    console.log(err.message)
-    next(createError(500, `cannot find reward file for ${simulationId}`))
+    next(createError(500, `cannot find reward file for ${simulaitionId}`))
   }
 }

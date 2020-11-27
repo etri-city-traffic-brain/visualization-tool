@@ -108,6 +108,7 @@ module.exports = (httpServer, tcpPort) => {
 
   // send to web
   tcpServer.on(EVENT_DATA, (data) => {
+    // console.log('send client', data)
     webSocketServer.send(data.simulationId, { ...data })
   })
 }
