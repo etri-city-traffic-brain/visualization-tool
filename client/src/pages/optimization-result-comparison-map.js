@@ -55,8 +55,10 @@ const makeLinkSpeedChartData = (data1, data2) => {
     data,
   })
 
+  const idx = data1.findIndex(d => d == null) || data1.length
+
   return {
-    labels: new Array(data2.length).fill(0).map((_, i) => i),
+    labels: new Array(idx).fill(0).map((_, i) => i),
     datasets: [
       dataset('기존신호', 'grey', data1),
       dataset('최적화신호', 'blue', data2),
@@ -161,8 +163,8 @@ const barChartOption = () => ({
 
 const makePhaseChart = (data, type) => {
   const colors = ['skyblue', 'orange', 'green', 'blue', 'red']
-  const sl = type === 'fixed' ? 1 : 2
-  const datasets = data.slice(sl).map((d,i) => {
+  // const sl = type === 'fixed' ? 1 : 2
+  const datasets = data.slice(1).map((d,i) => {
     return {
       label: `phase ${i}`,
       backgroundColor: colors[i],
@@ -170,6 +172,7 @@ const makePhaseChart = (data, type) => {
 
     }
   })
+  // console.log(datasets.length)
 
   return {
     labels: data[0],
@@ -441,7 +444,7 @@ export default {
       this.chart2.currentSpeeds = []
 
       optimizationService.runFixed(this.fixedSlave).then(v => {})
-      optimizationService.runTest(this.testSlave, 9).then(v => {})
+      optimizationService.runTest(this.testSlave, this.selectedEpoch).then(v => {})
       this.progress1 = 0
       this.progress2 = 0
       this.updateChartRealtime()
@@ -451,7 +454,7 @@ export default {
       const phaseTest = (await optimizationService.getPhase(this.testSlave)).data
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
-
+console.log(this.phaseTest.datasets)
       this.updateChart()
     }
   },
