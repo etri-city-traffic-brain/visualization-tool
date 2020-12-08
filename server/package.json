@@ -21,7 +21,7 @@
     "express": "~4.16.0",
     "express-favicon": "^2.0.1",
     "extract-zip": "^1.6.7",
-    "fast-csv": "^2.4.1",
+    "fast-csv": "^4.3.6",
     "form-data": "^2.5.0",
     "fs-extra": "^7.0.0",
     "http-errors": "~1.6.2",
