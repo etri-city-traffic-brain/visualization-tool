@@ -62,7 +62,7 @@ const makeLinkSpeedChartData = (data1, data2, data3) => {
     datasets: [
       dataset('링크속도', '#7FFFD4', data1),
       dataset('평균속도', '#1E90FF', data2),
-      dataset('제한속도', '#FF0000', data3),
+      // dataset('제한속도', '#FF0000', data3),
     ],
   }
 }
@@ -171,7 +171,7 @@ export default {
       simulationId: this.simulationId,
       eventBus: this
     })
-    this.wsClient.init()
+    // this.wsClient()
 
     this.showLoading = false
 

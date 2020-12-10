@@ -70,9 +70,10 @@
                   <b-card-text class="text-center p-2 m-0">
                     학습 진행률
                   </b-card-text>
-                  <b-progress height="3rem" class="m-1">
-                    <b-progress-bar :value="rewards.labels.length * 10" animated striped variant="success" >
-                      <span><strong> Epoch {{ rewards.labels.length }} </strong></span>
+                  <b-progress height="3rem" class="m-1" :max="100">
+                    <!-- <b-progress-bar :value="rewards.labels.length * 10" animated striped variant="success" > -->
+                    <b-progress-bar :value="progressOfEpoch" animated striped variant="success" >
+                      <span><strong> Epoch {{ rewards.labels.length }} / {{ simulation.configuration.epoch }} </strong></span>
                     </b-progress-bar>
                   </b-progress>
                 </b-card>

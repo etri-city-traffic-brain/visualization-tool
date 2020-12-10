@@ -63,7 +63,7 @@
         </b-input-group>
       </b-form-group>
 
-      <b-form-group label-cols-sm="3" label="최적화 스크립트" label-class="text-sm-right">
+      <b-form-group label-cols-sm="3" label="살행 스크립트" label-class="text-sm-right">
         <b-form-select v-model="scriptSelected" :options="scripts" />
       </b-form-group>
 

@@ -8,7 +8,7 @@ import WebSocketClient from '@/realtime/ws-client';
 import SimulationResult from '@/pages/SimulationResult.vue';
 import bins from '@/stats/histogram'
 import config from '@/stats/config'
-import { optimizationService } from '@/service'
+import { optimizationService, simulationService } from '@/service'
 
 import HistogramChart from '@/components/charts/HistogramChart';
 import Doughnut from '@/components/charts/Doughnut';
@@ -51,6 +51,12 @@ export default {
     UniqMapChanger,
     UniqCardTitle
   },
+  computed: {
+    progressOfEpoch() {
+      if(this.rewards.labels.length === 0) return 0
+      return ( (this.rewards.labels.length) / +this.simulation.configuration.epoch) * 100
+    }
+  },
   data() {
     return {
       simulationId: null,
@@ -84,6 +90,9 @@ export default {
   },
   async mounted() {
     this.simulationId = this.$route.params ? this.$route.params.id : null;
+
+    const { simulation } = await simulationService.getSimulationInfo(this.simulationId);
+    this.simulation = simulation
     this.showLoading = true
     this.resize()
     this.map = makeMap({ mapId: this.mapId });
@@ -135,7 +144,7 @@ export default {
 
     this.$on('optimization:finished', (e) => {
       log('*** OPTIMIZATION FINISHED ***')
-      setTimeout(() => this.$swal('신호 최적화 완료'), 2000)
+      // setTimeout(() => this.$swal('신호 최적화 완료'), 2000)
     })
 
     this.$on('map:moved', ({zoom, extent}) => {

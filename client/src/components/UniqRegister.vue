@@ -27,7 +27,7 @@
         </b-input-group>
       </b-form-group>
     </b-card>
-     <b-card bg-variant="light" border-variant="light" text-variant="dark" no-body class="pr-2 pt-3 mt-1">
+     <b-card bg-variant="dark" border-variant="dark" text-variant="light" no-body class="pr-2 pt-3 mt-1">
       <b-form-group
         label="시뮬레이션 시작"
         label-cols-sm="3"
@@ -54,7 +54,7 @@
     </b-card>
 
     <b-card bg-variant="secondary" text-variant="light" no-body class="pr-2 pt-2 mt-1">
-      <b-form-group label-cols-sm="3" label="최적화 스크립트" label-class="text-sm-right">
+      <b-form-group label-cols-sm="3" label="스크립트" label-class="text-sm-right">
         <b-form-select v-model="scriptSelected" :options="scriptOptions" />
       </b-form-group>
        <b-form-group label-cols-sm="3" label="통계 주기" label-class="text-sm-right" label-for="Period">

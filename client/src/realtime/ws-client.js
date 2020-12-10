@@ -20,7 +20,13 @@ function Client({ url = wsUrl, simulationId, eventBus }) {
   let status = 'ready'
   let socket = null
 
-  const send = (obj) => socket.send(serialize(obj))
+  const send = (obj) => {
+    try {
+      socket.send(serialize(obj))
+    } catch (err) {
+      console.log(err.message)
+    }
+  }
   const close = () => socket.close();
 
   function init() {
@@ -58,7 +64,7 @@ function Client({ url = wsUrl, simulationId, eventBus }) {
     eventBus.$on('salt:set', ({extent, zoom}) => {
       const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
       const { min, max } = extent
-
+console.log('send salt:set')
       min.x -= 0.0012;
       min.y -= 0.0014;
       max.x += 0.0012;
@@ -75,8 +81,6 @@ function Client({ url = wsUrl, simulationId, eventBus }) {
     eventBus.$on('salt:stop', (sId) => {
 
       if(simulationId === sId) {
-        console.log('finishh')
-
         send({
           simulationId,
           type: 11, // Set
