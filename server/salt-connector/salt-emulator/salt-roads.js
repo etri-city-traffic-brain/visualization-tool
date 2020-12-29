@@ -60,4 +60,13 @@ module.exports = [
     vehicles: [1, 1, 1, 0, 0],
     isAdjecent: false,
   },
+  {
+    lenRoadId: 14,
+    roadId: '563104785_7_0',
+    speed: 50,
+    vehicles: [1, 1, 1, 1],
+    isAdjecent: false,
+  },
+
+  563104785_7_0
 ];
