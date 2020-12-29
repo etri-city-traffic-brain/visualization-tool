@@ -171,7 +171,7 @@ export default {
       simulationId: this.simulationId,
       eventBus: this
     })
-    this.wsClient.init()
+    // this.wsClient.init()
 
     this.showLoading = false
 
