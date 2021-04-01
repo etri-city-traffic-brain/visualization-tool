@@ -13,6 +13,7 @@ function drawLane (ctx, lanes = []) {
     ctx.moveTo(lane.ex, lane.ey)
     ctx.lineTo(lane.x, lane.y)
     ctx.lineWidth = 40
+    ctx.strokeStyle = 'grey'
     ctx.stroke()
     ctx.restore()
 
@@ -20,7 +21,7 @@ function drawLane (ctx, lanes = []) {
 
     ctx.save()
     ctx.font = '20px Arial'
-    ctx.fillStyle = 'orange'
+    ctx.fillStyle = 'skyblue'
 
     ctx.translate(lane.x + offsetLabel.x, lane.y + offsetLabel.y)
     ctx.rotate(lane.angleLane)

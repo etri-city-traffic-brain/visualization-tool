@@ -74,9 +74,9 @@ function generateLanes (links = []) {
         LINK_ID: link.LINK_ID,
         lane: lane.lanes - i - 1,
         label: ' ' + (lane.lanes - i - 1) + ' ',
-        font: { size: 35, color: 'white' },
-        shape: 'circle',
-        color: 'black'
+        font: { size: 40, color: 'white' },
+        shape: 'box',
+        color: 'grey'
       })
     }
   })

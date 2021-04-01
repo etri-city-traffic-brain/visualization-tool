@@ -1,12 +1,26 @@
 <template>
   <div>
-    <!-- MAP: SIGNAL -->
-    <div
-      :ref="mapId"
-      :id="mapId"
-      :style="{height: '500px'}"
-      class="map"
-    />
+    <b-container fluid class="mt-0 p-0">
+      <b-row class="m-0">
+        <b-col cols="6" class="p-0">
+          <div
+            :ref="mapId"
+            :id="mapId"
+            :style="{height: '500px'}"
+            class="map"
+          />
+        </b-col>
+        <b-col cols="6" class="p-0">
+          <div ref="connectionEditor" class="junction" />
+          <div style="background-color:black;">
+            <b-btn size="sm" class="m-2" @click="downloadConnectionInfo" > 다운로드 </b-btn>
+            <b-btn size="sm" @click="editMode" > 편집모드 </b-btn>
+            <b-btn size="sm" @click="moveMode" > 이동모드 </b-btn>
+          </div>
+        </b-col>
+      </b-row>
+    </b-container>
+
     <!-- MAP //-->
     <!-- NAVIGATION MENU -->
     <b-navbar type="dark" variant="secondary" class="pt-0 pb-0" id="nav-bar">
@@ -26,25 +40,6 @@
         </span>
       </b-navbar-nav>
     </b-navbar>
-    <!-- NAVIGATION MENU END -->
-
-    <!-- <b-container fluid class="mt-2 ml-2">
-
-    </b-container> -->
-
-    <!-- <b-container fluid class="mt-2 pl-3" v-if="!junction.id">
-      <b-btn size="sm" variant="warning">
-        신호가 선택되지 않았습니다
-        <icon name="exclamation"/>
-        <b-btn
-          size="sm"
-          id="show-btn"
-          @click="showModal('modal-signal-map')"
-        >
-          신호선택
-        </b-btn>
-      </b-btn>
-    </b-container> -->
     <b-container
       fluid
       class="p-0"
@@ -63,84 +58,8 @@
       <b-row class="m-0">
         <!-- CONNECTION -->
         <b-col cols="6" class="p-1">
-          <b-card no-body>
-            <b-card-body>
-              <div
-                ref="connectionEditor"
-                class="junction"
-              />
-              <b-btn
-                size="sm"
-                class="m-2"
-                @click="downloadConnectionInfo"
-              >
-                다운로드
-              </b-btn>
-              <b-btn
-                size="sm"
-                @click="editMode"
-              >
-                편집모드
-              </b-btn>
-              <b-btn
-                size="sm"
-                @click="moveMode"
-              >
-                이동모드
-              </b-btn>
-            </b-card-body>
-          </b-card>
-        </b-col>
-        <!-- PHASE -->
-        <b-col cols="6">
-          <b-row>
-            <b-col cols="12" class="p-1">
-              <b-card
-                header-text-variant="white"
-                header-bg-variant="dark"
-                header="현시"
-                no-body
-              >
-                <b-card
-                  v-for="(item, idx) in signalPhases"
-                  :key="item.index"
-                  class="mt-1"
-                  no-body
-                  :bg-variant="(selectedPhase === idx) && 'secondary' || 'white'"
-                >
-                <b-card-body class="p-2">
-                  <div disabled class="ml-2">
-                    <b-badge
-                      href="#"
-                      :variant="(selectedPhase === idx) && 'warning' || 'secondary'"
-                      @click="changePhase(idx)"
-                      class="p-2 mt-1"
-                      v-bind:style="{fontWeight: 'bold', fontSize: '18px'}"
-                    >
-                      PHASE {{ item.index }}
-                    </b-badge>
 
-                    <transition-group name="list">
-                      <b-badge
-                        v-for="(item) in item.state"
-                        :key="item.id"
-                        variant="light"
-                        v-bind:style="{color: colored(item.value), fontWeight: 'bold', fontSize: '18px'}"
-                        class="list-item p-2"
-
-                      >
-                        {{ item.value.toUpperCase() }}
-                      </b-badge>
-                    </transition-group>
-                  </div>
-                  </b-card-body>
-                </b-card>
-              </b-card>
-            </b-col>
-          </b-row>
-          <b-row v-if="signalPhaseDefault.length > 0">
-            <b-col cols="12" class="p-1">
-              <b-card
+          <b-card
                 header-text-variant="white"
                 header-bg-variant="dark"
                 header="부가정보"
@@ -161,6 +80,50 @@
                   </div>
                 </b-card-body>
               </b-card>
+        </b-col>
+        <!-- PHASE -->
+        <b-col cols="6">
+          <b-row v-if="signalPhaseDefault.length > 0">
+            <b-col cols="12" class="p-1">
+              <b-card
+                header-text-variant="white"
+                header-bg-variant="dark"
+                header="현시"
+                no-body
+              >
+                <b-card
+                  v-for="(item, idx) in signalPhases"
+                  :key="item.index"
+                  class="mt-1"
+                  no-body
+                  :bg-variant="(selectedPhase === idx) && 'secondary' || 'white'"
+                >
+                <b-card-body class="p-2">
+                  <div disabled class="ml-2">
+                    <b-badge
+                      href="#"
+                      :variant="(selectedPhase === idx) && 'warning' || 'secondary'"
+                      @click="changePhase(idx)"
+                    >
+                      PHASE {{ item.index }}
+                    </b-badge>
+
+                    <transition-group name="list">
+                      <b-badge
+                        v-for="(item) in item.state"
+                        :key="item.id"
+                        variant="light"
+                        v-bind:style="{color: colored(item.value), fontWeight: 'bold', fontSize: '14px'}"
+                        class="list-item p-2"
+
+                      >
+                        {{ item.value.toUpperCase() }}
+                      </b-badge>
+                    </transition-group>
+                  </div>
+                  </b-card-body>
+                </b-card>
+          </b-card>
             </b-col>
           </b-row>
         </b-col>
@@ -420,7 +383,8 @@
   }
 
   .junction {
-    height:400px;
+    height:453px;
+    background-color: black;
   }
   .salt-tm {
     width: 2.8ch;

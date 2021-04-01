@@ -118,13 +118,14 @@ function ConnectionManager ({ junction, connectedLinks, element }) {
   network.fit()
 
   function beforeDrawing (ctx) {
-    drawJunction(ctx, junction)
+    // drawJunction(ctx, junction)
     drawLane(ctx, lanes)
     // drawLane(ctx, generateLanes(connectedLinks));
   }
 
   function afterDrawing (ctx) {
     // drawDirectionArrow(ctx, connections, network, nodes)
+    // drawLane(ctx, lanes)
   }
 
   const click = (params) => {
