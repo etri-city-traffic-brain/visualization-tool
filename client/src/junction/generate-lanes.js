@@ -5,70 +5,82 @@
  * Copyright(c) 2019-2019 ETRI
  *
  */
-import nodeOption from './lane-node-option';
 
-import utils from './utils';
+import nodeOption from './lane-node-option'
+import utils from './utils'
 
-const { angleBetween } = utils;
-const { floor } = Math;
+const { angleBetween } = utils
 
-const OFFSET_FIRST = 350;
-const OFFSET_SECOND = 570;
-const OFFSET_CENTER = 5;
-const LANE_WIDTH = 8;
+const OFFSET_START = 250
+const OFFSET_END = 460
 
-function makeLane(edge) {
-  const { geometry, isForward } = edge;
+const LINE_OFFSET = 40
 
-  const p1 = { x: geometry[0][0], y: geometry[0][1] * -1 };
-  const p2 = { x: geometry[1][0], y: geometry[1][1] * -1 };
-  const angle = angleBetween(p2, p1);
-  const cosValue = Math.cos(angle);
-  const sinValue = Math.sin(angle);
+/**
+ *
+ */
+function makeLane (edge, idx) {
+  const { geometry, isForward } = edge
+
+  const P1 = geometry[0]
+  const P2 = geometry[1]
+  let p1, p2
+  if (isForward) {
+    p1 = { x: P2[0], y: P2[1] }
+    p2 = { x: P1[0], y: P1[1] }
+  } else {
+    p1 = { x: P1[0], y: P1[1] }
+    p2 = { x: P2[0], y: P2[1] }
+  }
+
+  const lineOffset = LINE_OFFSET * idx
+  const META = isForward ? -1 : 1
+
+  const angle = angleBetween(p2, p1)
+
+  const sx = Math.cos(angle) * OFFSET_START
+  const ex = Math.cos(angle) * OFFSET_END
+
+  const sdx = sx - lineOffset * Math.sin(angle) * META
+  const sdy = (sdx * Math.tan(angle) + lineOffset / Math.cos(angle) * META) * -1
+
+  const edx = ex - lineOffset * Math.sin(angle) * META
+  const edy = (edx * Math.tan(angle) + lineOffset / Math.cos(angle) * META) * -1
+
   return {
     id: edge.id,
-    x: floor(OFFSET_FIRST * cosValue),
-    y: floor(OFFSET_FIRST * sinValue),
-    ex: floor(OFFSET_SECOND * cosValue),
-    ey: floor(OFFSET_SECOND * sinValue),
-    angle: angleBetween(p2, p1),
+    x: sdx,
+    y: sdy,
+    ex: edx,
+    ey: edy,
+    angle,
+    angleLane: angleBetween({ x: sdx, y: sdy }, { x: edx, y: edy }),
     isForward,
     lanes: edge.LANE,
-    LINK_ID: edge.LINK_ID,
-  };
+    LINK_ID: edge.LINK_ID
+  }
 }
 
-function generateLanes(links = []) {
-  const lanes = [];
+function generateLanes (links = []) {
+  const lanes = []
   links.forEach((link) => {
-    const lane = makeLane(link);
-    for (let i = 0; i < lane.lanes; i += 1) {
-      lane.id = `${lane.LINK_ID}${lane.lanes - i - 1}`;
+    for (let i = 0; i < link.LANE; i += 1) {
+      const lane = makeLane(link, i + 1)
+      lane.id = `${lane.LINK_ID}${lane.lanes - i - 1}`
 
-      const angle = (lane.angle + Math.PI / 2); // adjust angle
-
-      const direction = lane.isForward ? -1 : 1;
-
-      const offsetX = OFFSET_CENTER * Math.cos(angle) * direction * LANE_WIDTH;
-      const offsetY = OFFSET_CENTER * Math.sin(angle) * direction * LANE_WIDTH;
-
-      lane.x += offsetX;
-      lane.y += offsetY;
-      lane.ex += offsetX;
-      lane.ey += offsetY;
       lanes.push({
         ...lane,
         ...nodeOption,
         LINK_ID: link.LINK_ID,
-        lane: lane.lanes -i - 1,
-        label: ' ' + (lane.lanes - i -1) + ' ',
-        font:{ size: 35, color: 'white' },
+        lane: lane.lanes - i - 1,
+        label: ' ' + (lane.lanes - i - 1) + ' ',
+        font: { size: 35, color: 'white' },
         shape: 'circle',
-        color: 'black',
-      });
+        color: 'black'
+      })
     }
-  });
-  return lanes;
+  })
+  return lanes
 }
 
-export default generateLanes;
+export default generateLanes

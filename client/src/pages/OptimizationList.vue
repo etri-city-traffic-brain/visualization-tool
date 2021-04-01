@@ -89,7 +89,7 @@
             v-b-tooltip.hover
             title="시뮬레이션을 시작합니다."
             @click.stop="startSimulation(row.item.id, row.index, $event.target)"
-            v-if="row.item.status === 'ready' || row.item.status === 'error' || row.item.status === 'stopped'"
+            v-if="row.item.status !== 'ready' || row.item.status === 'error' || row.item.status === 'stopped'"
             >
               <b-icon icon="play-fill"/> 최적화 시작
           </b-button>

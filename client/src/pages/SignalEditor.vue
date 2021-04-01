@@ -62,7 +62,7 @@
     <b-container fluid class="mt-1 p-0">
       <b-row class="m-0">
         <!-- CONNECTION -->
-        <b-col cols="4" class="p-1">
+        <b-col cols="6" class="p-1">
           <b-card no-body>
             <b-card-body>
               <div
@@ -92,7 +92,7 @@
           </b-card>
         </b-col>
         <!-- PHASE -->
-        <b-col cols="8">
+        <b-col cols="6">
           <b-row>
             <b-col cols="12" class="p-1">
               <b-card
