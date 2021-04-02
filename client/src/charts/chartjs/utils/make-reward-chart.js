@@ -1,13 +1,13 @@
 
-export default ([labels = [], data = []]= []) => {
+export default ([labels = [], data = []] = []) => {
   return {
     labels,
     datasets: [{
-      label: 'Reward',
+      label: '보상',
       backgroundColor: 'skyblue',
       borderColor: 'skyblue',
       data,
-      fill: false,
+      fill: false
     }]
   }
 }

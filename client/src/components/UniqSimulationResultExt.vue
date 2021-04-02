@@ -6,7 +6,7 @@
     no-body
   >
     <b-card-body>
-      <b-card-title>{{ simulation.id }}</b-card-title>
+      <!-- <b-card-title>{{ simulation.id }}</b-card-title> -->
       <b-card-sub-title class="mb-2"> &nbsp;</b-card-sub-title>
       <b-card-text>
         시뮬레이션 기간: {{ configuration.fromTime }} ~ {{ configuration.toTime }}

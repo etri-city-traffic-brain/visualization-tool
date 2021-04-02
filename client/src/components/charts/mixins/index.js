@@ -1,13 +1,13 @@
 function dataHandler (newData, oldData) {
   if (oldData) {
-    let chart = this.$data._chart
+    const chart = this.$data._chart
 
     // Get new and old DataSet Labels
-    let newDatasetLabels = newData.datasets.map((dataset) => {
+    const newDatasetLabels = newData.datasets.map((dataset) => {
       return dataset.label
     })
 
-    let oldDatasetLabels = oldData.datasets.map((dataset) => {
+    const oldDatasetLabels = oldData.datasets.map((dataset) => {
       return dataset.label
     })
 
@@ -72,7 +72,7 @@ export const reactiveData = {
   },
 
   watch: {
-    'chartData': dataHandler
+    chartData: dataHandler
   }
 }
 
@@ -83,7 +83,7 @@ export const reactiveProp = {
     }
   },
   watch: {
-    'chartData': dataHandler
+    chartData: dataHandler
   }
 }
 

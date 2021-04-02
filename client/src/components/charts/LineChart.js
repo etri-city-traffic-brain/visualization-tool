@@ -1,6 +1,6 @@
 
 import { Line } from 'vue-chartjs'
-import { reactiveProp } from './mixins';
+import { reactiveProp } from './mixins'
 
 export default {
   extends: Line,

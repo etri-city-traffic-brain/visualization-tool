@@ -6,43 +6,43 @@
  * 2: when the simulation is finihsed
  */
 
-import Vue from 'vue';
+import Vue from 'vue'
 
-import StepPlayer from '@/stepper/step-runner';
-import stepperMixin from '@/stepper/mixin';
+import StepPlayer from '@/stepper/step-runner'
+import stepperMixin from '@/stepper/mixin'
 // import * as d3 from 'd3'
 import * as R from 'ramda'
-import makeMap from '@/map2/make-map';
-import MapManager from '@/map2/map-manager';
+import makeMap from '@/map2/make-map'
+import MapManager from '@/map2/map-manager'
 
-import WebSocketClient from '@/realtime/ws-client';
+import WebSocketClient from '@/realtime/ws-client'
 
-import simulationService from '@/service/simulation-service';
+import simulationService from '@/service/simulation-service'
 
-import SimulationResult from '@/pages/SimulationResult.vue';
+import SimulationResult from '@/pages/SimulationResult.vue'
 
-import HistogramChart from '@/components/charts/HistogramChart';
-import Doughnut from '@/components/charts/Doughnut';
+import HistogramChart from '@/components/charts/HistogramChart'
+import Doughnut from '@/components/charts/Doughnut'
 
-import statisticsService from '@/service/statistics-service';
-import congestionColor from '@/utils/colors';
-import LineChart from '@/components/charts/LineChart';
-import BarChart from '@/components/charts/BarChart';
-import UniqCongestionColorBar from '@/components/CongestionColorBar';
-import UniqSimulationResultExt from '@/components/UniqSimulationResultExt';
-import UniqMapChanger from '@/components/UniqMapChanger';
+import statisticsService from '@/service/statistics-service'
+import congestionColor from '@/utils/colors'
+import LineChart from '@/components/charts/LineChart'
+import BarChart from '@/components/charts/BarChart'
+import UniqCongestionColorBar from '@/components/CongestionColorBar'
+import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
+import UniqMapChanger from '@/components/UniqMapChanger'
 
-import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning';
-import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished';
+import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
+import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 
-import UniqCardTitle from '@/components/func/UniqCardTitle';
+import UniqCardTitle from '@/components/func/UniqCardTitle'
 import region from '@/map2/region'
-import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart';
+import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart'
 import { optimizationService } from '@/service'
 
-import toastMixin from '@/components/mixins/toast-mixin';
-
-import style from '@/components/style';
+import toastMixin from '@/components/mixins/toast-mixin'
+import lineChartOption from '@/charts/chartjs/line-chart-option'
+import style from '@/components/style'
 
 const makeLinkSpeedChartData = (data1, data2) => {
   const dataset = (label, color, data) => ({
@@ -52,7 +52,7 @@ const makeLinkSpeedChartData = (data1, data2) => {
     backgroundColor: color,
     borderWidth: 2,
     pointRadius: 1,
-    data,
+    data
   })
 
   const idx = data1.findIndex(d => d == null) || data1.length
@@ -61,8 +61,8 @@ const makeLinkSpeedChartData = (data1, data2) => {
     labels: new Array(idx).fill(0).map((_, i) => i),
     datasets: [
       dataset('기존신호', 'grey', data1),
-      dataset('최적화신호', 'blue', data2),
-    ],
+      dataset('최적화신호', 'blue', data2)
+    ]
   }
 }
 
@@ -73,21 +73,20 @@ const dataset = (label, color, data) => ({
   backgroundColor: color,
   borderWidth: 2,
   pointRadius: 1,
-  data,
+  data
 })
 
 const makeLineData = (data1, data2) => {
-
   return {
     labels: new Array(data1.length).fill(0).map((_, i) => i),
     datasets: [
       dataset('기존신호', 'grey', data1),
-      dataset('최적화신호', 'blue', data2),
-    ],
+      dataset('최적화신호', 'blue', data2)
+    ]
   }
 }
 
-const lineChartOption  = () => ({
+const lineChartOption2 = () => ({
   responsive: true,
   title: {
     display: false,
@@ -95,7 +94,7 @@ const lineChartOption  = () => ({
   },
   tooltips: {
     mode: 'index',
-    intersect: false,
+    intersect: false
   },
   hover: {
     mode: 'nearest',
@@ -106,36 +105,36 @@ const lineChartOption  = () => ({
       ticks: {
         autoSkip: true,
         autoSkipPadding: 50,
-        maxRotation:0,
-        display: true,
+        maxRotation: 0,
+        display: true
         // fontColor: 'white',
       },
       gridLines: {
-        display: true,
+        display: true
         // color: 'grey',
-      },
+      }
     }],
     yAxes: [{
       ticks: {
         autoSkip: true,
         autoSkipPadding: 10,
-        maxRotation:0,
-        display: true,
+        maxRotation: 0,
+        display: true
         // fontColor: 'white',
       },
       gridLines: {
-        display: true,
+        display: true
         // color: 'grey',
-      },
+      }
     }]
   },
   legend: {
     display: false,
     labels: {
-      fontColor: "white",
+      fontColor: 'white',
       fontSize: 12
     }
-  },
+  }
 })
 
 const barChartOption = () => ({
@@ -144,7 +143,7 @@ const barChartOption = () => ({
     text: 'Chart.js Bar Chart - Stacked'
   },
   legend: {
-    display: false,
+    display: false
   },
   tooltips: {
     mode: 'index',
@@ -154,9 +153,23 @@ const barChartOption = () => ({
   scales: {
     xAxes: [{
       stacked: true,
+      ticks: {
+        autoSkip: true,
+        autoSkipPadding: 50,
+        maxRotation: 0,
+        display: true,
+        fontColor: 'white'
+      }
     }],
     yAxes: [{
-      stacked: true
+      stacked: true,
+      ticks: {
+        autoSkip: true,
+        autoSkipPadding: 10,
+        maxRotation: 0,
+        display: true,
+        fontColor: 'white'
+      }
     }]
   }
 })
@@ -164,7 +177,7 @@ const barChartOption = () => ({
 const makePhaseChart = (data, type) => {
   const colors = ['skyblue', 'orange', 'green', 'blue', 'red']
   // const sl = type === 'fixed' ? 1 : 2
-  const datasets = data.slice(1).map((d,i) => {
+  const datasets = data.slice(1).map((d, i) => {
     return {
       label: `phase ${i}`,
       backgroundColor: colors[i],
@@ -176,7 +189,7 @@ const makePhaseChart = (data, type) => {
 
   return {
     labels: data[0],
-    datasets,
+    datasets
     // datasets: [{
     //   label: 'Dataset 1',
     //   backgroundColor: 'skyblue',
@@ -195,7 +208,7 @@ const randomId = () => `map-${Math.floor(Math.random() * 100)}`
 
 const calcAvgSpeed = roads => roads
   .map(road => road.speed)
-  .reduce((acc, cur) => (acc += cur), 0 ) / roads.length
+  .reduce((acc, cur) => (acc += cur), 0) / roads.length
 
 export default {
   name: 'OptimizationResultComparisonMap',
@@ -213,7 +226,7 @@ export default {
     UniqMapChanger,
     UniqCardTitle
   },
-  data() {
+  data () {
     return {
       // simulationId: null,
       simulation: { configuration: {} },
@@ -241,7 +254,7 @@ export default {
         pieData: null,
         linkSpeeds: [],
         currentSpeeds: [],
-        speedsPerStep: {},
+        speedsPerStep: {}
       },
       chart2: {
         histogramDataStep: null,
@@ -250,13 +263,13 @@ export default {
         pieData: null,
         linkSpeeds: [],
         currentSpeeds: [],
-        speedsPerStep: {},
+        speedsPerStep: {}
       },
       chart: {
-        currentSpeedChart: {},
+        currentSpeedChart: {}
       },
-      progress1: 0,
-      progress2: 0,
+      progress1: 100,
+      progress2: 50,
       bottomStyle: { ...style.bottomStyle },
       playerStyle: { ...style.playerStyle },
       chartContainerStyle: {
@@ -264,7 +277,8 @@ export default {
         height: this.mapHeight + 'px',
         overflow: 'auto'
       },
-      lineChartOption,
+      lineChartOption: lineChartOption2,
+      defaultOption: lineChartOption,
       barChartOption,
       rewards: {},
       phaseFixed: {},
@@ -272,60 +286,59 @@ export default {
       testSlave: null,
       fixedSlave: null,
       selectedEpoch: 0,
-    };
+      showEpoch: false
+    }
   },
-  destroyed() {
+  destroyed () {
     if (this.map1) {
-      this.map1.remove();
+      this.map1.remove()
     }
     if (this.map2) {
-      this.map2.remove();
+      this.map2.remove()
     }
-    if(this.stepPlayer) {
-      this.stepPlayer.stop();
+    if (this.stepPlayer) {
+      this.stepPlayer.stop()
     }
-    if(this.wsClient) {
+    if (this.wsClient) {
       this.wsClient1.close()
     }
-    if(this.wsClient2) {
+    if (this.wsClient2) {
       this.wsClient2.close()
     }
-    window.removeEventListener("resize", this.getWindowHeight);
+    window.removeEventListener('resize', this.getWindowHeight)
   },
-  async mounted() {
+  async mounted () {
     log(`${this.$options.name} is mounted`)
-    const optimizationId = this.$route.params ? this.$route.params.id : null;
+    const optimizationId = this.$route.params ? this.$route.params.id : null
 
-    const { simulation, ticks } = await simulationService.getSimulationInfo(optimizationId);
+    const { simulation, ticks } = await simulationService.getSimulationInfo(optimizationId)
 
-    this.simulation = simulation;
+    this.simulation = simulation
     this.testSlave = simulation.slaves[0]
     this.fixedSlave = simulation.slaves[1]
     this.slideMax = ticks - 1
 
     this.resize()
 
-    this.map1 = makeMap({ mapId: this.mapId1 });
-    this.map2 = makeMap({ mapId: this.mapId2 });
+    this.map1 = makeMap({ mapId: this.mapId1 })
+    this.map2 = makeMap({ mapId: this.mapId2 })
 
     const bus1 = new Vue({})
     const bus2 = new Vue({})
 
-    this.mapManager1 = MapManager({ map: this.map1, simulationId: this.fixedSlave, eventBus: bus1 });
-    this.mapManager2 = MapManager({ map: this.map2, simulationId: this.testSlave, eventBus: bus2 });
+    this.mapManager1 = MapManager({ map: this.map1, simulationId: this.fixedSlave, eventBus: bus1 })
+    this.mapManager2 = MapManager({ map: this.map2, simulationId: this.testSlave, eventBus: bus2 })
 
     this.wsClient1 = WebSocketClient({ simulationId: this.fixedSlave, eventBus: bus1 })
     this.wsClient2 = WebSocketClient({ simulationId: this.testSlave, eventBus: bus2 })
 
     this.map1.on('moveend', (e) => {
-      this.map2.setCenter(e.target.getCenter());
-    });
+      this.map2.setCenter(e.target.getCenter())
+    })
 
     this.map1.on('zoomend', (e) => {
-      this.map2.setCenterAndZoom(e.target.getCenter(), e.target.getZoom());
-    });
-
-
+      this.map2.setCenterAndZoom(e.target.getCenter(), e.target.getZoom())
+    })
 
     this.updateChartRealtime()
 
@@ -362,13 +375,13 @@ export default {
 
     bus1.$on('ws:error', (error) => {
       this.makeToast(error.message, 'warning')
-    });
+    })
 
     bus1.$on('ws:close', () => {
       this.makeToast('ws connection closed', 'warning')
-    });
+    })
 
-    window.addEventListener('resize', this.resize);
+    window.addEventListener('resize', this.resize)
     try {
       const c = (await optimizationService.getReward(this.fixedSlave)).data
       this.rewards = makeRewardChartData(c)
@@ -379,67 +392,75 @@ export default {
   },
   methods: {
     ...stepperMixin,
-    toggleFocusTool() {
+    chartClicked (value) {
+      this.selectedEpoch = value
+      this.showEpoch = true
+      setTimeout(() => {
+        this.showEpoch = false
+      }, 1500)
+    },
+    toggleFocusTool () {
       this.mapManager.toggleFocusTool()
     },
-    toggleState() {
+    toggleState () {
       return this.playBtnToggle ? 'M' : 'A'
     },
 
-    updateChartRealtime() {
-      if( this.progress2 >= 100 && this.progress1 >= 100) {
+    updateChartRealtime () {
+      if (this.progress2 >= 100 && this.progress1 >= 100) {
         log('all simulations are finished')
         return
       }
       setTimeout(() => {
         this.chart.currentSpeedChart = makeLineData(
           this.chart1.currentSpeeds,
-          this.chart2.currentSpeeds,
+          this.chart2.currentSpeeds
         )
         this.updateChartRealtime()
       }, 1000)
     },
-    async updateChart() {
-      this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this));
-      this.chart1.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, 0);
-      this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.testSlave, 0);
-      this.chart1.histogramData = await statisticsService.getHistogramChart(this.fixedSlave);
-      this.chart2.histogramData = await statisticsService.getHistogramChart(this.testSlave);
-      this.chart1.pieData = await statisticsService.getPieChart(this.fixedSlave);
-      this.chart1.speedsPerStep = await statisticsService.getSummaryChart(this.testSlave);
-      this.chart2.speedsPerStep = await statisticsService.getSummaryChart(this.fixedSlave);
+    async updateChart () {
+      this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this))
+      this.chart1.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, 0)
+      this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.testSlave, 0)
+      this.chart1.histogramData = await statisticsService.getHistogramChart(this.fixedSlave)
+      this.chart2.histogramData = await statisticsService.getHistogramChart(this.testSlave)
+      this.chart1.pieData = await statisticsService.getPieChart(this.fixedSlave)
+      this.chart1.speedsPerStep = await statisticsService.getSummaryChart(this.testSlave)
+      this.chart2.speedsPerStep = await statisticsService.getSummaryChart(this.fixedSlave)
       this.chart1.linkSpeeds = makeLinkSpeedChartData(
-        this.chart1.speedsPerStep.datasets[0].data, //text
-        this.chart2.speedsPerStep.datasets[0].data, // fixed
+        this.chart1.speedsPerStep.datasets[0].data, // text
+        this.chart2.speedsPerStep.datasets[0].data // fixed
       )
     },
-    resize() {
+    resize () {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
-      this.mapHeight = window.innerHeight - 180 - 60; // update map height to current height
+      // this.mapHeight = window.innerHeight - 180 - 60 // update map height to current height
+      this.mapHeight = window.innerHeight - 50 // update map height to current height
     },
-    togglePlay() {
+    togglePlay () {
       this.playBtnToggle = !this.playBtnToggle;
 
       (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()
     },
-    async stepChanged(step) {
-      if(this.simulation.status === 'finished') {
-        this.mapManager1.changeStep(step);
-        this.mapManager2.changeStep(step);
-        this.chart1.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step);
-        this.chart1.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step);
-        this.chart2.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step);
-        this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step);
+    async stepChanged (step) {
+      if (this.simulation.status === 'finished') {
+        this.mapManager1.changeStep(step)
+        this.mapManager2.changeStep(step)
+        this.chart1.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step)
+        this.chart1.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step)
+        this.chart2.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step)
+        this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step)
       }
     },
-    centerTo(locationCode) {
+    centerTo (locationCode) {
       const center = region[locationCode] || region[1]
-      this.map.animateTo({ center, }, { duration: 2000 })
+      this.map.animateTo({ center }, { duration: 2000 })
     },
-    async connectWebSocket() {
+    async connectWebSocket () {
       this.wsClient.init()
     },
-    async runTest() {
+    async runTest () {
       this.chart1.currentSpeeds = []
       this.chart2.currentSpeeds = []
 
@@ -449,13 +470,13 @@ export default {
       this.progress2 = 0
       this.updateChartRealtime()
     },
-    async updatePhaseChart() {
+    async updatePhaseChart () {
       const phaseFixed = (await optimizationService.getPhase(this.fixedSlave, 'fixed')).data
       const phaseTest = (await optimizationService.getPhase(this.testSlave)).data
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
-console.log(this.phaseTest.datasets)
+      console.log(this.phaseTest.datasets)
       this.updateChart()
     }
-  },
-};
+  }
+}
