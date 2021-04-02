@@ -1,7 +1,7 @@
 import Vehicle from './vehicle'
 
 class Car extends Vehicle {
-  constructor({ start, angle }) {
+  constructor ({ start, angle }) {
     super({
       start,
       angle,
@@ -11,10 +11,10 @@ class Car extends Vehicle {
     })
   }
 
-  drawMe(context) {
+  drawMe (context) {
     context.fillStyle = 'black'
-    context.fillRect(0 + 5,  -3 , 4, 6);
-    context.fillRect(0 + 16, -3, 2, 6);
+    context.fillRect(0 + 5, -3, 4, 6)
+    context.fillRect(0 + 16, -3, 2, 6)
   }
 }
 

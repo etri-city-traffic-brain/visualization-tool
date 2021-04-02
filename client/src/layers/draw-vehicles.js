@@ -1,12 +1,13 @@
-import makeVehicles from '../vehicles/calc-vehicles';
+import makeVehicles from '../vehicles/calc-vehicles'
 import VehicleFactory from '../vehicles/model/factory'
-
+import * as d3 from 'd3'
 import divideChunks from '../vehicles/divide-chunks'
 
 const chunkLength = 0.007
 
 const linkId = cell => cell.properties.LINK_ID
 
+const sc = d3.scaleLinear().domain([18, 20]).range([0.6, 2.5])
 /**
  *
  * @param {Object} obj - An object
@@ -14,7 +15,7 @@ const linkId = cell => cell.properties.LINK_ID
  * @param {Object} obj.map - Maptalks map object
  * @param {Function} obj.getEdges - get edges
  */
-function drawVehicles({
+function drawVehicles ({
   context,
   map,
   getEdges,
@@ -24,8 +25,8 @@ function drawVehicles({
 
   getEdges()
     .filter(hasRealtimeData)
-    .map((edge => {
-      const startLocation = map.coordinateToContainerPoint(edge.getFirstCoordinate());
+    .map(edge => {
+      const startLocation = map.coordinateToContainerPoint(edge.getFirstCoordinate())
       const edgeRealtime = realtimeEdgeData[edge.properties.LINK_ID]
 
       const edgeChunks = divideChunks({
@@ -38,13 +39,13 @@ function drawVehicles({
       return makeVehicles({
         startLocation,
         vehicles: [vehicleTypes, edgeChunks],
-        VehicleFactory,
+        VehicleFactory
       }
       )
-    }))
+    })
     .forEach(vehicles => {
       vehicles.forEach(vehicle => {
-        vehicle.draw(context, map.getZoom())
+        vehicle.draw(context, map.getZoom(), sc(map.getZoom()))
       })
     })
 }

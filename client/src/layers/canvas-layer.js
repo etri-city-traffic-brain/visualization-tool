@@ -1,18 +1,18 @@
-import * as maptalks from 'maptalks';
+import * as maptalks from 'maptalks'
 
-import drawVehicles from './draw-vehicles';
+import drawVehicles from './draw-vehicles'
 
-const MAX_ZOOM = 19;
+const MAX_ZOOM = 20
 
-function makeCanvasLayer(map, getEdges) {
+function makeCanvasLayer (map, getEdges) {
   const canvasLayer = new maptalks.CanvasLayer('c', {
     forceRenderOnMoving: true,
     forceRenderOnZooming: true
-  });
+  })
 
   let realtimeEdgeData = {}
 
-  canvasLayer.draw = function draw(context) {
+  canvasLayer.draw = function draw (context) {
     drawVehicles({
       context,
       map,
@@ -20,12 +20,12 @@ function makeCanvasLayer(map, getEdges) {
       realtimeEdgeData: realtimeEdgeData
     })
 
-    canvasLayer.completeRender();
-  };
+    canvasLayer.completeRender()
+  }
 
   canvasLayer.drawOnInteracting = (context, view) => {
     canvasLayer.draw(context, view)
-  };
+  }
 
   canvasLayer.updateRealtimeData = (data) => {
     realtimeEdgeData = data
@@ -38,15 +38,15 @@ function makeCanvasLayer(map, getEdges) {
 export default (map, getEdges) => {
   const canvasLayer = makeCanvasLayer(map, getEdges)
 
-  canvasLayer.show();
+  canvasLayer.show()
 
   map.on('zoomend moveend', () => {
-    if(map.getZoom() >= MAX_ZOOM - 1) {
-      canvasLayer.show()
-    } else {
-      canvasLayer.hide()
-    }
-  });
+    // if (map.getZoom() >= MAX_ZOOM) {
+    //   canvasLayer.show()
+    // } else {
+    //   canvasLayer.hide()
+    // }
+  })
 
   return canvasLayer
 }
