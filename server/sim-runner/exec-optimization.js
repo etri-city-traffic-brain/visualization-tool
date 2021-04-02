@@ -2,14 +2,13 @@ const exec = require('./exec')
 const chalk = require('chalk')
 
 const {
-  saltPath: { home, scripts },
-} = require('../config');
+  saltPath: { home, scripts }
+} = require('../config')
 
 const { log } = console
 
-async function run(simulation, mode, modelNum) {
-
-  if(!simulation || !mode) {
+async function run (simulation, mode, modelNum) {
+  if (!simulation || !mode) {
     log('check argruments: simulation or mode is missed')
     return false
   }
@@ -26,7 +25,6 @@ async function run(simulation, mode, modelNum) {
   const script = `${scripts}/${simulation.configuration.script}`
   const pythonPath = `${home}/tools/libsalt/`
 
-
   exec({
     // home,
     // scriptDir: scripts,
@@ -40,7 +38,7 @@ async function run(simulation, mode, modelNum) {
       '-o', optimizationId,
       '-b', simulation.configuration.begin, // 시작
       '-e', simulation.configuration.end, // 종료
-      '-ep', simulation.configuration.epoch || 9, // epoch 회수
+      '-ep', simulation.configuration.epoch || 9 // epoch 회수
     ]
   })
 }

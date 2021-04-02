@@ -1,4 +1,4 @@
 module.exports = {
   executeSimulation: require('./exec-simulation'),
-  executeOptimization: require('./exec-optimization')
+  runSignalOptimization: require('./exec-optimization')
 }
