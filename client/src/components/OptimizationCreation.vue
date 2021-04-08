@@ -124,8 +124,8 @@
         header-class="pt-2 pb-0"
         hide-footer
       >
-        <!-- <signal-map > </signal-map> -->
-        <SignalEditor v-on:junction:select="selectJunction"/>
+        <signal-map > </signal-map>
+        <!-- <SignalEditor v-on:junction:select="selectJunction"/> -->
     </b-modal>
 
   </div>

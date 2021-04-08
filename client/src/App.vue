@@ -15,31 +15,28 @@
         <span>UNIQ-VIS</span>
       </b-navbar-brand>
       <b-navbar-nav>
-        <b-nav-item to="/SimulationList" >
-          <span v-if="currentRoute.startsWith('Simulation')" style="color:skyblue"> <strong>트래픽시뮬레이션 </strong> </span>
-          <span v-else> 트래픽시뮬레이션  </span>
-        </b-nav-item>
-        <b-nav-item to="/OptimizationList" >
-          <span v-if="currentRoute.startsWith('Optimization')" style="color:skyblue"> <strong>신호최적화 </strong> </span>
-          <span v-else> 신호최적화  </span>
+        <b-nav-item
+          v-for="{path, name } of menus"
+          :key="path"
+          :active="currentRoute === path"
+          :to="'/' + path"
+        >
+          {{ name }}
         </b-nav-item>
       </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
-      <!-- <b-collapse is-nav id="nav_dropdown_collapse" > -->
-          <b-nav-item size="sm" to="/SignalEditor" >
-            신호편집
+          <b-nav-item size="sm" to="" >
+            v0.1
           </b-nav-item>
-      <!-- </b-collapse> -->
         </b-navbar-nav>
     </b-navbar>
-    <transition name="fade">
+    <!-- <transition name="bounce"> -->
       <router-view/>
-    </transition>
-
+    <!-- </transition> -->
     <!--
       BOTTOM COPYRIGHT
     -->
-    <!-- <b-card
+    <b-card
       bg-variant="dark"
       text-variant="white"
       class="no-round-corner"
@@ -51,7 +48,8 @@
         <small class="text-muted">Copyright 2020. ETRI All rights reserved.</small>
         <small class="text-muted">Copyright ⓒ 2020. <em>Modutech</em> Inc. All rights reserved.</small>
       </b-container>
-    </b-card> -->
+    </b-card>
+
   </div>
 </template>
 
@@ -82,12 +80,14 @@ export default {
       }
     }, 1000)
 
-    // $router.currentRoute.name
+    const route = localStorage.getItem('currentRoute')
+    this.currentRoute = route
   },
 
   watch:{
-    $route (to, from){
+    $route (to){
       this.currentRoute = to.name
+      localStorage.setItem('currentRoute', to.name)
     }
   },
   data() {
@@ -97,6 +97,24 @@ export default {
       userState,
       variantLogo: 'dark',
       currentRoute: '',
+      menus: [
+        {
+          path:'SimulationList',
+          name:'시뮬레이션'
+        },
+        {
+          path:'OptimizationList',
+          name:'신호최적화'
+        },
+        {
+          path:'OptEnvList',
+          name:'최적화환경'
+        },
+        {
+          path:'SignalEditor',
+          name:'신호편집'
+        },
+      ]
     };
   },
 
@@ -150,4 +168,23 @@ html {
 .no-round-corner {
   border-radius: 0
 }
+
+.bounce-enter-active {
+  animation: bounce-in .5s;
+}
+.bounce-leave-active {
+  animation: bounce-in .5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 </style>

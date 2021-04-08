@@ -89,7 +89,7 @@ export default {
   },
   mounted () {
     setTimeout(() => {
-      this.map = makeMap({ mapId, zoom: 19 })
+      this.map = makeMap({ mapId, zoom: 15 })
       // this.map.config('scrollWheelZoom', false)
       this.tl = TrafficLightManager(this.map, this.$refs.connectionEditor, eventBus)
       this.tl.load()

@@ -6,7 +6,22 @@
       :style="{height: '500px'}"
       class="map"
     />
+    <b-card>
+      <b-card-text>
+      <b-badge
+        v-for="junction of junctions"
+        :key="junction"
+        class="m-1"
+      >
+        {{ junction }}
+        <b-badge href="#" class="m-1" variant="dark" size="sm" @click="deleteJunction(junction)">X</b-badge>
+      </b-badge>
+      </b-card-text>
 
+      <b-card-text>
+        <b-btn size="sm" @click="ok">확인</b-btn>
+      </b-card-text>
+    </b-card>
   </div>
 </template>
 
@@ -15,16 +30,16 @@
 import makeMap from '@/map2/make-map';
 import TrafficLightManager from '@/map2/map-traffic-lights';
 
-const mapId = `map-${Math.floor(Math.random() * 100)}`;
+const { log } = console
+
 export default {
   data() {
     return {
       map: null,
-      mapId,
+      mapId: `map-${Math.floor(Math.random() * 100)}`,
+      junctions: [],
+      trafficLightManager: null,
     }
-  },
-
-  created() {
   },
   destroyed() {
     if (this.map) {
@@ -34,15 +49,39 @@ export default {
   mounted() {
     setTimeout(() => {
       try {
-        this.map = makeMap({ mapId, zoom:15 });
-        this.tl = TrafficLightManager(this.map, this.$refs.connectionEditor, this);
-        this.tl.load();
+        this.map = makeMap({ mapId: this.mapId, zoom:15 });
+        this.trafficLightManager = TrafficLightManager(this.map, this.$refs.connectionEditor, this);
+        this.trafficLightManager.load();
+
+        this.$on('junction:clicked', node => {
+          this.addItem(node.nodeId)
+        })
+
+        this.$on('signalGroup:clicked', group => {
+          this.addItem(group.groupId)
+        })
 
       } catch (err) {
-        // console.log(err)
+        log(err)
       }
     }, 200)
-
+  },
+  methods: {
+    addItem(item) {
+      if(this.junctions.includes(item)) {
+        return;
+      }
+      this.junctions.push(item)
+    },
+    ok() {
+      this.$emit('ok', [1,2,3])
+    },
+    deleteJunction(junction) {
+      const idx = this.junctions.indexOf(junction)
+      if(idx >= 0) {
+        this.junctions.splice(idx,1)
+      }
+    }
   }
 }
 </script>
