@@ -103,12 +103,12 @@ export default {
           name:'시뮬레이션'
         },
         {
-          path:'OptimizationList',
-          name:'신호최적화'
-        },
-        {
           path:'OptEnvList',
           name:'최적화환경'
+        },
+        {
+          path:'OptimizationList',
+          name:'신호최적화'
         },
         {
           path:'SignalEditor',

@@ -11,12 +11,12 @@ const format = date => moment(date).format('YYYY-MM-DD')
 const getToday = () => format(new Date())
 
 const periodOptions = [
-  { value: 10, text: '10분' },
-  { value: 30, text: '30분' },
-  { value: 60, text: '1시간' },
-  { value: 120, text: '2시간' },
-  { value: 240, text: '4시간' },
-  { value: 360, text: '6시간' }
+  { value: 10 * 60, text: '10분' },
+  { value: 30 * 60, text: '30분' },
+  { value: 60 * 60, text: '1시간' },
+  { value: 120 * 60, text: '2시간' },
+  { value: 240 * 60, text: '4시간' },
+  { value: 360 * 60, text: '6시간' }
 ]
 
 const areaOptions = [
@@ -50,34 +50,61 @@ const { log } = console
 
 export default {
   name: 'uniq-registration',
-  props: ['userId', 'modalName', 'intersectionField', 'epochField', 'role'],
+  props: [
+    'userId',
+    'modalName',
+    'intersectionField',
+    'epochField',
+    'role',
+    'env'
+  ],
   components: {
     SignalMap,
     SignalEditor
   },
   data () {
     return {
-      id: generateRandomId(this.role),
-      description: '...',
-      fromDate: getToday(),
-      toDate: getToday(),
-      fromTime: '07:00',
-      toTime: '08:59',
-      periodSelected: periodOptions[0].value,
+      envName: '', //
+      id: generateRandomId(this.role), //
+      description: '...', //
+      fromDate: getToday(), //
+      toDate: getToday(), //
+      fromTime: '07:00', //
+      toTime: '08:59', //
+      periodSelected: periodOptions[0].value, //
+      areaSelected: areaOptions[0].value, //
+      scriptSelected: scriptOptions[0].value, //
+      intervalSelected: intervalOptions[0].value, //
+      junctionId: '',
+      epoch: 10,
+
       periodOptions: [...periodOptions],
-      areaSelected: areaOptions[0].value,
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],
-      scriptSelected: scriptOptions[0].value,
-      intervalSelected: intervalOptions[0].value,
       intervalOptions: [...intervalOptions],
-      junctionId: '563103625', // Yuseong Middle School
-      epoch: 10,
       loading: false,
       showMap: false
     }
   },
   async mounted () {
+    const env = this.env
+    if (this.env) {
+      this.envName = env.envName
+      this.description = env.description
+      this.fromDate = env.configuration.fromDate
+      this.toDate = env.configuration.toDate
+      this.fromTime = env.configuration.fromTime
+      this.toTime = env.configuration.toTime
+      this.periodSelected = env.configuration.period
+      this.areaSelected = env.configuration.region
+      this.scriptSelected = env.configuration.script
+      this.intervalSelected = env.configuration.interval
+      this.junctionId = env.configuration.junctionId
+      this.epoch = env.configuration.epoch
+    } else {
+
+    }
+
     try {
       this.scriptOptions = await simulationService.getScripts()
     } catch (err) {
@@ -100,36 +127,47 @@ export default {
       const end = (to.diff(from) / 1000 - 1) + begin
       const days = to.diff(from, 'days') + 1
       const day = from.day()
-      try {
-        await simulationService.createSimulation(this.userId, {
-          id: this.id,
-          user: this.userId,
-          description: this.description,
-          role: this.role,
-          type: this.role,
-          configuration: {
-            region: this.areaSelected,
-            fromDate: this.fromDate,
-            toDate: this.toDate,
-            fromTime: `${this.fromTime}:00`,
-            toTime: `${this.toTime}:00`,
-            period: this.periodSelected * 60,
-            begin,
-            end,
-            day,
-            days,
-            interval: this.intervalSelected,
-            junctionId: this.junctionId,
-            script: this.scriptSelected,
-            epoch: this.epoch
-          }
-        })
-      } catch (err) {
-        log(err)
+
+      if (!this.envName || this.envName.length < 3) {
+        this.$bvToast.toast('환경 이름이 너무 짧거나 비어 있습니다.(3글자이상)')
+        return
       }
+
+      const simulationConfig = {
+        id: this.id,
+        user: this.userId,
+        description: this.description,
+        role: this.role,
+        type: this.role,
+        envName: this.envName,
+        configuration: {
+          region: this.areaSelected,
+          fromDate: this.fromDate,
+          toDate: this.toDate,
+          fromTime: `${this.fromTime}`,
+          toTime: `${this.toTime}`,
+          period: this.periodSelected,
+          begin,
+          end,
+          day,
+          days,
+          interval: this.intervalSelected,
+          junctionId: this.junctionId,
+          script: this.scriptSelected,
+          epoch: this.epoch
+        }
+      }
+      // console.log(JSON.stringify(simulationConfig, false, 2))
+      this.$emit('optenvconfig:save', simulationConfig)
       this.loading = false
-      this.resetForm()
-      this.hide()
+      // try {
+      //   await simulationService.createSimulation(this.userId, simulationConfig)
+      // } catch (err) {
+      //   log(err)
+      // }
+      // this.loading = false
+      // this.resetForm()
+      // this.hide()
     },
     hide () {
       this.$emit('hide')

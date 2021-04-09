@@ -1,9 +1,12 @@
 <template>
   <div>
     <b-card bg-variant="secondary" text-variant="light" no-body class="pr-2 pt-2">
-      <b-form-group label-cols-sm="3" label="시뮬레이션 ID" label-class="text-sm-right" label-for="id">
-        <b-form-input autofocus id="id" v-model="id" focus select></b-form-input>
+      <b-form-group label-cols-sm="3" label="환경명" label-class="text-sm-right" label-for="envName">
+        <b-form-input autofocus id="envName" v-model="envName" focus select></b-form-input>
       </b-form-group>
+      <!-- <b-form-group label-cols-sm="3" label="시뮬레이션 ID" label-class="text-sm-right" label-for="id">
+        <b-form-input autofocus id="id" v-model="id" focus select></b-form-input>
+      </b-form-group> -->
       <b-form-group label-cols-sm="3" label="설명" label-class="text-sm-right" label-for="description">
         <b-form-input id="description" v-model="description"></b-form-input>
       </b-form-group>

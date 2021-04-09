@@ -1,19 +1,19 @@
 // const { getSimulations } = require('../../main/dbms/db');
 // const { getSimulations } = global.SALT.db;
 
-const { getSimulations } = require('../../globals');
+const { getSimulations } = require('../../globals')
 
-function get(req, res) {
-  const { params: { id } } = req;
+function get (req, res) {
+  const { params: { id } } = req
 
-  const obj = getSimulations().find({ id }).value();
+  const obj = getSimulations().find({ id }).value()
   if (!obj) {
-    res.statusMessage = 'Not Found';
-    res.status(404).end();
-    return;
+    res.statusMessage = 'Not Found'
+    res.status(404).end()
+    return
   }
 
-  res.json(obj);
+  res.json(obj)
 }
 
-module.exports = get;
+module.exports = get

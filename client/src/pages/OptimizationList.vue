@@ -16,10 +16,17 @@
       <b-row class="m-0 p-0">
         <b-col class="p-0">
           <b-form inline>
-            <b-btn variant="dark" size="sm" v-b-modal.create-simulation-modal>
+            <!-- // do not support
+            <b-btn
+              variant="dark"
+              size="sm"
+              v-b-modal.create-simulation-modal
+            >
               <b-icon icon="file-earmark-plus"/>
               <strong>최적화 등록</strong>
             </b-btn>
+            -->
+
             <b-btn variant="dark" size="sm" @click.stop="updateTable" class="ml-1">
               <b-icon icon="arrow-clockwise"/> 새로고침
             </b-btn>
@@ -83,6 +90,7 @@
         </template>
 
         <template v-slot:cell(actions)="row">
+          <!--
           <b-button
             size="sm"
             variant="secondary"
@@ -93,14 +101,15 @@
             >
               <b-icon icon="play-fill"/> 최적화 시작
           </b-button>
+          -->
           <b-button
             size="sm"
-            variant="warning"
+            variant="secondary"
             v-b-tooltip.hover
             title="시뮬레이션을 중지합니다."
             @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
             v-if="row.item.status === 'running'">
-              <b-icon icon="stop-fill"/> 중지
+              <b-icon icon="stop-fill"/>
           </b-button>
         </template>
 
@@ -121,7 +130,7 @@
               params: {id: row.item.id}
             }"
           >
-            <b-icon icon="hammer"></b-icon> 신호최적화
+            🚦 최적화
           </b-button>
 
           <b-button
@@ -131,7 +140,8 @@
             title="신호비교"
             :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
           >
-            <b-icon icon="circle-square"></b-icon> 신호비교
+            <!-- <b-icon icon="circle-square"></b-icon> -->
+            🚥 분석
           </b-button>
 
         </template>

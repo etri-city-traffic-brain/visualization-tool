@@ -1,29 +1,29 @@
 
-import moment from "moment";
+import moment from 'moment'
 
-import SimulationCreationPanel from '@/components/SimulationCreation';
-import UniqRegister from '@/components/UniqRegister';
+import SimulationCreationPanel from '@/components/SimulationCreation'
+import UniqRegister from '@/components/UniqRegister'
 
-import BarChart from '@/components/charts/BarChart';
+import BarChart from '@/components/charts/BarChart'
 
 import { simulationService, statisticsService } from '@/service'
 
-import userState from '@/user-state';
-import calcInterval from '@/utils/calc-time-interval';
+import userState from '@/user-state'
+import calcInterval from '@/utils/calc-time-interval'
 
-import dragDropMixin from './drag-drop-mixin';
-import fileMgmtMixin from './file-mgmt-mixin';
+import dragDropMixin from './drag-drop-mixin'
+import fileMgmtMixin from './file-mgmt-mixin'
 
-import map from '@/region-code';
+import map from '@/region-code'
 
 const variant = {
   finished: 'primary',
   running: 'success',
   error: 'danger',
-  ready: 'secondary',
-};
+  ready: 'secondary'
+}
 
-const { log } = console;
+const { log } = console
 
 export default {
   name: 'SimulationList',
@@ -33,19 +33,19 @@ export default {
     UniqRegister
   },
   mixins: [dragDropMixin, fileMgmtMixin],
-  data() {
+  data () {
     return {
       fields: [
-        { class: "text-center", key: "num", label: "#" },
-        { class: "text-center", key: "id", label: "시뮬레이션 아이디", },
-        { class: "text-center", key: "status", label: "상태" },
-        { class: "text-center", key: "statusText", label: "상태" },
-        { class: "text-center", key: "configuration.period", label: "주기" },
-        { class: "text-center", key: "started", label: "시작" },
-        { class: "text-center", key: "ended", label: "종료" },
-        { class: "text-center", key: "actions", label: "도구" },
-        { class: "text-center", key: "details", label: "상세" },
-        { class: "text-center", key: "del", label: "삭제" },
+        { class: 'text-center', key: 'num', label: '#' },
+        { class: 'text-center', key: 'id', label: '시뮬레이션 아이디' },
+        { class: 'text-center', key: 'status', label: '상태' },
+        { class: 'text-center', key: 'statusText', label: '상태' },
+        { class: 'text-center', key: 'configuration.period', label: '주기' },
+        { class: 'text-center', key: 'started', label: '시작' },
+        { class: 'text-center', key: 'ended', label: '종료' },
+        { class: 'text-center', key: 'actions', label: '도구' },
+        { class: 'text-center', key: 'details', label: '상세' },
+        { class: 'text-center', key: 'del', label: '삭제' }
       ],
       items: [],
       currentPage: 1,
@@ -61,78 +61,77 @@ export default {
       userState,
       modalShow: false,
       autoRefresh: false,
-      expanded: false,
-    };
+      expanded: false
+    }
   },
-  mounted() {
+  mounted () {
     log('트래픽시뮬레이션 목록')
     this.dataProvider({ currentPage: this.currentPage })
     this.interval = setInterval(async () => {
-      if(this.autoRefresh) {
+      if (this.autoRefresh) {
         this.dataProvider({ currentPage: this.currentPage })
       }
     }, 3000)
   },
-  destroyed() {
+  destroyed () {
     clearInterval(this.interval)
   },
   methods: {
-    calcDuration(configuration) {
-      if(configuration.status === 'finished') {
+    calcDuration (configuration) {
+      if (configuration.status === 'finished') {
         return calcInterval(configuration.started, configuration.ended)
-      } else if(configuration.status === 'running') {
+      } else if (configuration.status === 'running') {
         return calcInterval(
           configuration.started,
-          moment().format("YYYY-MM-DD HH:mm:ss")
-        );
-      }
-      else {
+          moment().format('YYYY-MM-DD HH:mm:ss')
+        )
+      } else {
         return ''
       }
     },
-    statusColor(status) {
+    statusColor (status) {
       const colors = {
         running: 'primary',
         error: 'danger',
         ready: 'secondary',
-        finished: 'success',
+        finished: 'success'
       }
       return colors[status] || 'secondary'
     },
-    getRegionName(code) {
+    getRegionName (code) {
       return map[code] || map[0]
     },
-    async toggleDetails(id, status, hide) {
+    async toggleDetails (id, status, hide) {
       if (!hide) {
         if (status === 'finished') {
-          this.barChartDataTable[id] = await statisticsService.getSummaryChart(id);
-          this.$forceUpdate();
+          this.barChartDataTable[id] = await statisticsService.getSummaryChart(id)
+          this.$forceUpdate()
         }
       } else {
-        this.barChartDataTable[id] = {};
+        this.barChartDataTable[id] = {}
       }
     },
-    showHideStart(value) {
-      return value === 'ready' || value === 'stopped';
+    showHideStart (value) {
+      return value === 'ready' || value === 'stopped'
     },
-    showHideResult(value) {
-      return value === 'finished';
+    showHideResult (value) {
+      return value === 'finished'
     },
-    async updateTable() {
+    async updateTable () {
       // this.$refs['simulations-table'].refresh()
       this.dataProvider({ currentPage: this.currentPage })
     },
-    hideAlert() {
+    hideAlert () {
       setTimeout(() => {
         this.msg = ''
-      }, 2000);
+      }, 2000)
     },
-    showInfo(item){
-      if(item.error) {
-        this.$swal( 'Problem', item.error, 'warning' )
+    showInfo (item) {
+      if (item.error) {
+        this.$swal('Problem', item.error, 'warning')
       }
     },
-    async startSimulation(id) {
+    async startSimulation (id) {
       const { value: yes } = await this.$swal({
         title: '시뮬레이션을 시작합니다.',
         text: id,
@@ -141,59 +140,57 @@ export default {
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: '시작',
-        cancelButtonText: '취소',
-      });
+        cancelButtonText: '취소'
+      })
 
       if (!yes) {
-        return;
+        return
       }
-      let seconds = 0;
+      let seconds = 0
       const interval = setInterval(() => {
-        this.msg = `시뮬레이션을 시작하고 있습니다... ${seconds++}초`;
-      }, 1000);
+        this.msg = `시뮬레이션을 시작하고 있습니다... ${seconds++}초`
+      }, 1000)
       try {
-        await simulationService.startSimulation(id, this.userState.userId);
-        this.msg = 'Started successfully...';
-        this.hideAlert();
-        this.updateTable();
-
+        await simulationService.startSimulation(id, this.userState.userId)
+        this.msg = 'Started successfully...'
+        this.hideAlert()
+        this.updateTable()
       } catch (err) {
-        log(err);
+        log(err)
         if (err.response) {
-          this.msg = err.response.data.error;
+          this.msg = err.response.data.error
         } else {
-          this.msg = err.message;
+          this.msg = err.message
         }
         this.variant = 'danger'
         // this.updateTable();
       } finally {
-        this.updateTable();
-        clearInterval(interval);
+        this.updateTable()
+        clearInterval(interval)
       }
     },
-    async stopSimulation(id) {
-      await simulationService.stopSimulation(id);
-      this.updateTable();
+    async stopSimulation (id) {
+      await simulationService.stopSimulation(id)
+      this.updateTable()
     },
-    async dataProvider({ currentPage }) {
-
+    async dataProvider ({ currentPage }) {
       this.isBusy = true
       try {
-        const { data, total, perPage } = (await simulationService.getSimulations(this.userState.userId, currentPage)).data;
-        this.totalRows = total;
+        const { data, total, perPage } = (await simulationService.getSimulations(this.userState.userId, currentPage)).data
+        this.totalRows = total
         this.isBusy = false
         this.perPage = perPage
         this.items = data
-        return data;
+        return data
       } catch (err) {
         this.isBusy = false
         return []
       }
     },
-    status(text) {
-      return variant[text];
+    status (text) {
+      return variant[text]
     },
-    async removeSimulation(param) {
+    async removeSimulation (param) {
       // const result = await this.$swal({
       //   title: `${param.id} 시뮬레이션을 삭제합니다.`,
       //   text: 'Please note that you can not cancel it',
@@ -210,24 +207,24 @@ export default {
       // }
       // this.msg = `${param.id}를 삭제하고 있습니다.`
       try {
-        await simulationService.remove(param.id);
-        this.updateTable();
+        await simulationService.remove(param.id)
+        this.updateTable()
         this.makeToast(`${param.id} is deleted successfully...`)
       } catch (err) {
         this.makeToast(`fail to delete ${err.message}`, 'warning')
       }
     },
-    hideCreateSimulationDialog() {
-      this.updateTable();
+    hideCreateSimulationDialog () {
+      this.updateTable()
     },
-    makeToast(msg, variant = 'info') {
+    makeToast (msg, variant = 'info') {
       this.$bvToast.toast(msg, {
         title: variant,
         variant,
         autoHideDelay: 3000,
         appendToast: true,
-        toaster:'b-toaster-bottom-right'
+        toaster: 'b-toaster-bottom-right'
       })
     }
-  },
-};
+  }
+}
