@@ -23,10 +23,16 @@
           <b-form-input id="junctionId" v-model="junctionId"></b-form-input>
           <b-input-group-append>
           <b-btn variant="dark" class="ml-1" @click="openSignalMap">선택</b-btn>
+          <b-btn :pressed="showMap"  variant="success" class="ml-1" @click="showMap = !showMap">선택</b-btn>
           </b-input-group-append>
         </b-input-group>
       </b-form-group>
     </b-card>
+    <transition name="slide-fade">
+    <div v-if="showMap">
+      <signal-map v-on:junction:select="selectJunction" @ok="junctionSelected"> </signal-map>
+    </div>
+    </transition>
      <b-card bg-variant="dark" border-variant="dark" text-variant="light" no-body class="pr-2 pt-3 mt-1">
       <b-form-group
         label="시뮬레이션 시작"
@@ -117,4 +123,18 @@
  .no-border-radius {
    border-radius: 10px;
  }
+
+/* Enter and leave animations can use different */
+/* durations and timing functions.              */
+.slide-fade-enter-active {
+  transition: all .3s ease;
+}
+.slide-fade-leave-active {
+  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
+}
 </style>

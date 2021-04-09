@@ -73,7 +73,8 @@ export default {
       intervalOptions: [...intervalOptions],
       junctionId: '563103625', // Yuseong Middle School
       epoch: 10,
-      loading: false
+      loading: false,
+      showMap: false
     }
   },
   async mounted () {
@@ -141,7 +142,11 @@ export default {
       console.log('*** junction selected', junction.id)
     },
     junctionSelected (junctions) {
-      console.log('junction selected:', junctions)
+      this.junctionId = junctions.join(',')
+      this.showMap = false
+    },
+    toggleMap () {
+
     }
   }
 }

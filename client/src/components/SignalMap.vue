@@ -6,7 +6,7 @@
       :style="{height: '500px'}"
       class="map"
     />
-    <b-card>
+    <b-card bg-variant="secondary">
       <b-card-text>
       <b-badge
         v-for="junction of junctions"
@@ -18,8 +18,8 @@
       </b-badge>
       </b-card-text>
 
-      <b-card-text>
-        <b-btn size="sm" @click="ok">확인</b-btn>
+      <b-card-text class="text-right">
+        <b-btn size="sm" @click="ok" variant="info">선택완료</b-btn>
       </b-card-text>
     </b-card>
   </div>
@@ -74,7 +74,7 @@ export default {
       this.junctions.push(item)
     },
     ok() {
-      this.$emit('ok', [1,2,3])
+      this.$emit('ok', this.junctions)
     },
     deleteJunction(junction) {
       const idx = this.junctions.indexOf(junction)
