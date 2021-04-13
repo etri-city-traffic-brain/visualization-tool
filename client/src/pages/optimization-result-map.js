@@ -34,7 +34,7 @@ const makeDonutDefaultDataset = () => ({
   labels: ['막힘', '정체', '원활']
 })
 
-const { log, table } = console
+const { log } = console
 
 export default {
   name: 'OptimizationResultMap',
@@ -175,7 +175,8 @@ export default {
       console.log('chart clicked', value)
     },
     resize () {
-      this.mapHeight = window.innerHeight - 60 // update map height to current height
+      // this.mapHeight = window.innerHeight - 220 // update map height to current height
+      this.mapHeight = window.innerHeight - 50
     },
     makeToast (msg, variant = 'info') {
       this.$bvToast.toast(msg, {

@@ -6,6 +6,7 @@
       ref="main-nav"
       id="main-nav"
       class="pl-3 pt-1 pb-1 m-0"
+      toggleable="md"
     >
       <b-navbar-brand href="#" to="/">
         <b-iconstack font-scale="1">
@@ -14,22 +15,26 @@
         </b-iconstack> &nbsp;
         <span>UNIQ-VIS</span>
       </b-navbar-brand>
-      <b-navbar-nav>
-        <b-nav-item
-          v-for="{path, name } of menus"
-          :key="path"
-          :active="currentRoute === path"
-          :to="'/' + path"
-        >
-          {{ name }}
-        </b-nav-item>
-      </b-navbar-nav>
+      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+      <b-collapse id="nav-collapse" is-nav>
+        <b-navbar-nav>
+          <b-nav-item
+            v-for="{path, name } of menus"
+            :key="path"
+            :active="currentRoute === path"
+            :to="'/' + path"
+          >
+            {{ name }}
+          </b-nav-item>
+        </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item size="sm" to="" >
             v0.1
           </b-nav-item>
         </b-navbar-nav>
+      </b-collapse>
     </b-navbar>
+
     <!-- <transition name="bounce"> -->
       <router-view/>
     <!-- </transition> -->
@@ -40,7 +45,7 @@
       bg-variant="dark"
       text-variant="white"
       class="no-round-corner"
-      v-if="currentRoute !== 'SimulationResultMap'"
+      v-if="currentRoute !== 'OptimizationResultMap'"
     >
       <b-container fluid class="mt-2 mb-2 p-2 text-center" >
         도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어
