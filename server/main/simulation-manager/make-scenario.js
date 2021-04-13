@@ -5,17 +5,17 @@
 
 const { config } = require('../../globals')
 
-const { output } = config.saltPath;
+const { output } = config.saltPath
 
 const { routes, routePerDay } = config.simulation
 const { tcpPort } = config.server
 
 const getRouteFor = (day) => {
-  const route =  routePerDay[day] || routePerDay[routePerDay.length - 1]
+  const route = routePerDay[day] || routePerDay[routePerDay.length - 1]
   return `${routes}/${route}`
 }
 
-module.exports = ({ id, host, configuration: {begin, end, day, period, interval = 10}}) => {
+module.exports = ({ id, host, configuration: { begin, end, day, period, interval = 10 } }) => {
   return {
     scenario: {
       id,
@@ -24,9 +24,9 @@ module.exports = ({ id, host, configuration: {begin, end, day, period, interval 
       interval,
       time: {
         begin,
-        end,
+        end
       },
-      input:  {
+      input: {
         fileType: 'SALT',
         node: 'node.xml',
         link: 'edge.xml',
@@ -36,14 +36,14 @@ module.exports = ({ id, host, configuration: {begin, end, day, period, interval 
       },
       parameter: {
         minCellLength: 30.0,
-        vehLength: 5.0,
+        vehLength: 5.0
       },
       output: {
         fileDir: `${output}/${id}/`,
         period,
         level: 'cell',
-        save: 1,
-      },
-    },
-  };
-};
+        save: 1
+      }
+    }
+  }
+}

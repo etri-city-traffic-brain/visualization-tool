@@ -46,8 +46,6 @@ const intervalOptions = [
   { text: '100 Step', value: 100 }
 ]
 
-const { log } = console
-
 export default {
   name: 'uniq-registration',
   props: [
@@ -77,6 +75,7 @@ export default {
       intervalSelected: intervalOptions[0].value, //
       junctionId: '',
       epoch: 10,
+      extent: null, // current map extent
 
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
@@ -93,18 +92,15 @@ export default {
       this.description = env.description
       this.fromDate = env.configuration.fromDate
       this.toDate = env.configuration.toDate
-      this.fromTime = env.configuration.fromTime
-      this.toTime = env.configuration.toTime
+      this.fromTime = env.configuration.fromTime.slice(0, 5)
+      this.toTime = env.configuration.toTime.slice(0, 5)
       this.periodSelected = env.configuration.period
       this.areaSelected = env.configuration.region
       this.scriptSelected = env.configuration.script
       this.intervalSelected = env.configuration.interval
       this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
-    } else {
-
     }
-
     try {
       this.scriptOptions = await simulationService.getScripts()
     } catch (err) {
@@ -142,10 +138,11 @@ export default {
         envName: this.envName,
         configuration: {
           region: this.areaSelected,
+          extent: this.extent,
           fromDate: this.fromDate,
           toDate: this.toDate,
-          fromTime: `${this.fromTime}`,
-          toTime: `${this.toTime}`,
+          fromTime: `${this.fromTime}:00`,
+          toTime: `${this.toTime}:00`,
           period: this.periodSelected,
           begin,
           end,
@@ -177,14 +174,11 @@ export default {
     selectJunction (junction) {
       this.$refs['signal-map'].hide()
       // this.junctionId = junction.id
-      console.log('*** junction selected', junction.id)
     },
-    junctionSelected (junctions) {
+    selectionFinished ({ junctions, extent }) {
       this.junctionId = junctions.join(',')
+      this.extent = extent
       this.showMap = false
-    },
-    toggleMap () {
-
     }
   }
 }

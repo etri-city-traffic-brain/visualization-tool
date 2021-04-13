@@ -73,7 +73,17 @@ async function getScripts () {
   return (await HTTP.get('/salt/v1/simulations/scripts')).data
 }
 
+async function downloadScenario (id) {
+  return (await HTTP.get('/salt/v1/simulations/download/data?id=' + id))
+}
+
+async function downloadScenarioConfig (id) {
+  return (await HTTP.get('/salt/v1/simulations/download/config?id=' + id))
+}
+
 export default {
+  downloadScenario,
+  downloadScenarioConfig,
   createSimulation,
   remove,
   getSimulationInfo,

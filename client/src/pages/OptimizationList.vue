@@ -90,6 +90,7 @@
         </template>
 
         <template v-slot:cell(actions)="row">
+          {{ row.item.configuration.junctionId.split(',').length}}
           <!--
           <b-button
             size="sm"
@@ -102,15 +103,7 @@
               <b-icon icon="play-fill"/> 최적화 시작
           </b-button>
           -->
-          <b-button
-            size="sm"
-            variant="secondary"
-            v-b-tooltip.hover
-            title="시뮬레이션을 중지합니다."
-            @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
-            v-if="row.item.status === 'running'">
-              <b-icon icon="stop-fill"/>
-          </b-button>
+
         </template>
 
         <template v-slot:cell(configuration.begin)="row">
@@ -121,7 +114,31 @@
           {{ row.item.configuration.toTime.substring(0, 5) }}
         </template>
 
+        <template v-slot:cell(stop)="row">
+    <b-button
+            size="sm"
+            variant="secondary"
+            v-b-tooltip.hover
+            title="시뮬레이션을 중지합니다."
+            @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
+            v-if="row.item.status === 'running'">
+              <b-icon icon="stop-fill"/>
+          </b-button>
+        </template>
+        <template v-slot:cell(analisys)="row">
+          <b-button
+            size="sm"
+            variant="secondary"
+            v-b-tooltip.hover
+            title="신호비교"
+            :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
+          >
+            <!-- <b-icon icon="circle-square"></b-icon> -->
+            🚥 분석
+          </b-button>
+        </template>
         <template v-slot:cell(details)="row">
+
           <b-button
             size="sm"
             variant="secondary"
@@ -133,16 +150,7 @@
             🚦 최적화
           </b-button>
 
-          <b-button
-            size="sm"
-            variant="secondary"
-            v-b-tooltip.hover
-            title="신호비교"
-            :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
-          >
-            <!-- <b-icon icon="circle-square"></b-icon> -->
-            🚥 분석
-          </b-button>
+
 
         </template>
 
@@ -158,11 +166,24 @@
 
         <template v-slot:row-details="row">
           <b-card bg-variant="secondary" text-variant="light">
+            <h5>설명: <b-badge> {{ row.item.description }} </b-badge></h5>
             <h5>시뮬레이션 시작: <b-badge> {{ row.item.started || '_' }} </b-badge></h5>
             <h5>시뮬레이션 종료: <b-badge>{{ row.item.ended || '_' }} </b-badge></h5>
             <h5>실행 스크립트: <b-badge> {{ row.item.configuration.script }} </b-badge></h5>
-            <h5>교차로 아이디: <b-badge> {{ row.item.configuration.junctionId }} </b-badge></h5>
-            <h5>설명: <b-badge> {{ row.item.description }} </b-badge></h5>
+            <!-- <h5>교차로 아이디: <b-badge> {{ row.item.configuration.junctionId }} </b-badge></h5> -->
+            <h5>Epoch: <b-badge> {{ row.item.configuration.epoch }} </b-badge></h5>
+            <h5>최적화 교차로</h5>
+            <b-badge
+              v-for="junction of row.item.configuration.junctionId.split(',')"
+              :key="junction"
+              class="m-1"
+            >
+              <b-badge href="#" class="m-1" variant="dark" size="sm" >{{ junction }}</b-badge>
+            </b-badge>
+            <b-card bg-variant="dark">
+            <b-btn variant="secondary" @click="downloadScenario(row.item.id)">다운로드 시나리오</b-btn>
+            <b-btn variant="secondary" @click="downloadScenarioConfig(row.item.id)">다운로드 설정파일</b-btn>
+            </b-card>
           </b-card>
         </template>
       </b-table>

@@ -1,13 +1,13 @@
 const {
   simulation: {
-    data,
-  },
-} = require('../../config');
+    data
+  }
+} = require('../../config')
 
 const {
   downloadScenarioByCoordinate,
-  downloadScenarioByRegion,
-} = require('../../main/service/scenario-downloader');
+  downloadScenarioByRegion
+} = require('../../main/service/scenario-downloader')
 
 /**
  * download simulation scenario from data server
@@ -22,32 +22,32 @@ const {
  * } = req.query;
  */
 
-async function handleDownloadScenarioByCoordinate(req, res) {
-  const { query } = req;
+async function handleDownloadScenarioByCoordinate (req, res) {
+  const { query } = req
   try {
-    const targetPath = await downloadScenarioByCoordinate(query, data);
-    console.log(targetPath);
+    const targetPath = await downloadScenarioByCoordinate(query, data)
+    console.log(targetPath)
     res.download(targetPath, () => {
       // fs.unlink(targetPath);
-    });
+    })
   } catch (error) {
-    res.status(500).end();
+    res.status(500).end()
   }
 }
 
-async function handleDownloadScenarioByRegion(req, res) {
-  const { query } = req;
+async function handleDownloadScenarioByRegion (req, res) {
+  const { query } = req
   try {
-    const targetPath = await downloadScenarioByRegion(query, data);
+    const targetPath = await downloadScenarioByRegion(query, data)
     res.download(targetPath, () => {
       // fs.unlink(targetPath);
-    });
+    })
   } catch (error) {
-    res.status(500).end();
+    res.status(500).end()
   }
 }
 
 module.exports = {
   handleDownloadScenarioByCoordinate,
-  handleDownloadScenarioByRegion,
-};
+  handleDownloadScenarioByRegion
+}

@@ -19,7 +19,13 @@
       </b-card-text>
 
       <b-card-text class="text-right">
-        <b-btn size="sm" @click="ok" variant="info">선택완료</b-btn>
+        <b-btn
+          @click="finishSelection"
+          size="sm"
+          variant="info"
+        >
+          선택완료
+        </b-btn>
       </b-card-text>
     </b-card>
   </div>
@@ -73,8 +79,11 @@ export default {
       }
       this.junctions.push(item)
     },
-    ok() {
-      this.$emit('ok', this.junctions)
+    finishSelection() {
+      this.$emit('selection:finished', {
+        junctions: this.junctions,
+        extent: this.map.getExtent(),
+      })
     },
     deleteJunction(junction) {
       const idx = this.junctions.indexOf(junction)

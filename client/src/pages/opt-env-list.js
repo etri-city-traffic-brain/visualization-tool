@@ -1,8 +1,15 @@
+
+//  신호 최적화를 위한 환경 목록
+//  신호 최적화 시뮬레이션을 하기 위해서는,
+//  먼저 시뮬레이션을 위한 환경을 등록해야 한다.
+
+import moment from 'moment'
+
 import userState from '@/user-state'
 import UniqRegister from '@/components/UniqRegister'
-import moment from 'moment'
 import optEnvService from '@/service/optenv-service'
 import simulationService from '@/service/simulation-service'
+
 const { log } = console
 
 export default {

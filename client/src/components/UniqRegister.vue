@@ -33,10 +33,13 @@
     </b-card>
     <transition name="slide-fade">
     <div v-if="showMap">
-      <signal-map v-on:junction:select="selectJunction" @ok="junctionSelected"> </signal-map>
+      <signal-map
+        v-on:junction:select="selectJunction"
+        @selection:finished="selectionFinished">
+      </signal-map>
     </div>
     </transition>
-     <b-card bg-variant="dark" border-variant="dark" text-variant="light" no-body class="pr-2 pt-3 mt-1">
+     <b-card bg-variant="secondary" border-variant="dark" text-variant="light" no-body class="pr-2 pt-3 mt-1">
       <b-form-group
         label="시뮬레이션 시작"
         label-cols-sm="3"
@@ -112,7 +115,6 @@
       hide-footer
       style="border-radius:0"
     >
-      <signal-map v-on:junction:select="selectJunction" @ok="junctionSelected"> </signal-map>
       <!-- <SignalEditor v-on:junction:select="selectJunction"/> -->
     </b-modal>
   </div>

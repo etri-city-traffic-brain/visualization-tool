@@ -50,11 +50,7 @@ async function prepareSimulation (id, body, role, slaves = []) {
   await addSimulation({ ...body, id, slaves, role })
   await createScenarioFile(simInputDir, { host, body, id })
 
-  if (body.configuration.region < 100) {
-    await downloadScenarioTest(simInputDir, body.configuration)
-  } else {
-    await downloadScenario(simInputDir, body.configuration)
-  }
+  await downloadScenario(simInputDir, body.configuration)
 
   updateStatus(id, 'ready', {})
 }
@@ -67,12 +63,16 @@ const ROLE = {
 }
 
 /**
- * prepare simulation data
+ * 신호최적화 시무률레이션을 위한 입력데이터를 준비한다.
  */
 module.exports = async (req, res, next) => {
-  const { body } = req
-  const { id, type } = body
+  const { body: { id, type } = {} } = req
   debug(`prepare simulation ${id}`)
+
+  if (!id) {
+    next(createError(403, 'simulation ID is missed...'))
+    return
+  }
 
   if (existSimulation(id)) {
     next(createError(409, `simulation [${id}] already exists...`))
@@ -83,12 +83,12 @@ module.exports = async (req, res, next) => {
     if (type === 'optimization') {
       const idTest = randomId(0) // for test
       const idFixed = randomId(1) // for fixed
-      await prepareSimulation(id, body, ROLE.TRAINING, [idTest, idFixed])
-      body.masterId = id
-      await prepareSimulation(idTest, body, ROLE.TEST, [])
-      await prepareSimulation(idFixed, body, ROLE.FIXED, [])
+      await prepareSimulation(id, req.body, ROLE.TRAINING, [idTest, idFixed])
+      req.body.masterId = id
+      await prepareSimulation(idTest, req.body, ROLE.TEST, [])
+      await prepareSimulation(idFixed, req.body, ROLE.FIXED, [])
     } else {
-      await prepareSimulation(id, body, ROLE.SIMULATION)
+      await prepareSimulation(id, req.body, ROLE.SIMULATION)
     }
     debug(`simulation ${id} is ready!`)
     res.json({ id })

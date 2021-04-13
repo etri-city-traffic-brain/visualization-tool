@@ -38,15 +38,17 @@ export default {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '시뮬레이션 아이디' },
-        { class: 'text-center', key: 'description', label: '설명' },
+        // { class: 'text-center', key: 'description', label: '설명' },
         { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'statusText', label: '상태' },
-        { class: 'text-center', key: 'epoch', label: 'Epoch' },
+        { class: 'text-center', key: 'configuration.epoch', label: 'Epoch' },
         { class: 'text-center', key: 'configuration.period', label: '주기(초)' },
         { class: 'text-center', key: 'configuration.begin', label: '시작' },
         { class: 'text-center', key: 'configuration.end', label: '종료' },
-        { class: 'text-center', key: 'actions', label: '도구' },
-        { class: 'text-center', key: 'details', label: '상세' },
+        { class: 'text-center', key: 'actions', label: '교차로수' },
+        { class: 'text-center', key: 'details', label: '최적화' },
+        { class: 'text-center', key: 'analisys', label: '분석' },
+        { class: 'text-center', key: 'stop', label: '중지' },
         { class: 'text-center', key: 'del', label: '삭제' }
       ],
       items: [],
@@ -175,7 +177,7 @@ export default {
     },
 
     async applyOptimization (id) {
-      console.log('apply optimization')
+
     },
     async stopSimulation (id) {
       await simulationService.stopSimulation(id)
@@ -233,6 +235,14 @@ export default {
         appendToast: true,
         toaster: 'b-toaster-bottom-right'
       })
+    },
+    async downloadScenario (id) {
+      // console.log('download')
+      // await simulationService.downloadScenario(id)
+      this.downloadDataFile({ id })
+    },
+    async downloadScenarioConfig (id) {
+      this.downloadConfigFile({ id })
     }
 
   }
