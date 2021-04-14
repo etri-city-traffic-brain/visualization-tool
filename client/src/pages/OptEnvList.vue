@@ -1,20 +1,21 @@
 <template>
   <div>
+     <b-card
+      bg-variant="dark"
+      border-variant="dark"
+      text-variant="light"
+      style="min-width:840px; border-radius:0"
+      no-body
+    >
+      <b-card-body class="p-1 d-flex">
+        <b-btn variant="outline-secondary" size="sm" v-b-modal.create-simulation-modal>
+            <b-icon icon="plus-square"></b-icon> 등록
+          </b-btn>
+      </b-card-body>
+     </b-card>
     <b-container fluid class="" style="background-color: black;">
+
       <div class="d-flex flex-wrap p-2">
-        <b-card
-          style="min-width:260px; max-width:260px;"
-          class="p-2 m-1"
-          bg-variant="dark"
-          text-variant="light"
-        >
-          <b-card-body class="d-flex align-items-center">
-            <b-btn variant="warning" size="lg" v-b-modal.create-simulation-modal>
-              <b-icon icon="file-earmark-plus"/>
-              <strong>최적화 실험환경 등록</strong>
-            </b-btn>
-          </b-card-body>
-        </b-card>
         <b-card
           style="min-width:260px;max-width:260px"
           v-for="env of envs"
@@ -63,15 +64,18 @@
                 <b-icon icon="download"></b-icon>
               </b-btn>
                -->
-               <hr style="border-top: 1px solid grey">
+               <!-- <hr style="border-top: 1px solid grey"> -->
               <b-btn
+                block
                 size="sm"
-                variant="primary"
+                href="#"
+                variant="outline-secondary"
+                squared
                 v-b-tooltip.hover
                 title="시뮬레이션을 등록합니다."
                 @click="registerSimulation(env)"
               >
-                등록
+                신호 최적화 등록
               </b-btn>
             </b-card-text>
           </b-card-body>

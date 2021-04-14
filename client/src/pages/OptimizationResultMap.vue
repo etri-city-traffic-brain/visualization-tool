@@ -125,7 +125,7 @@
     height: 100%;
     position: fixed;
     z-index:100;
-    top: 60px;
+    top: 130px;
     padding: 0;
     left: 5px;
     border: 0px solid #73AD21;

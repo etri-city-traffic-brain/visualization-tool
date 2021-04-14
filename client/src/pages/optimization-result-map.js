@@ -25,7 +25,7 @@ import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinishe
 import lineChartOption from '@/charts/chartjs/line-chart-option'
 // import donutChartOption from '@/charts/chartjs/donut-chart-option';
 import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart'
-
+import TrafficLightManager from '@/map2/map-traffic-lights'
 const makeDonutDefaultDataset = () => ({
   datasets: [{
     data: [1, 1, 1],
@@ -35,6 +35,63 @@ const makeDonutDefaultDataset = () => ({
 })
 
 const { log } = console
+
+function setupEventHandler () {
+  this.$on('salt:data', (d) => {
+    this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
+      acc += cur
+      return acc
+    }, 0) / d.roads.length
+
+    this.avgSpeedView = {
+      datasets: [{
+        data: bins(d.roads).map(R.prop('length')),
+        backgroundColor: config.colorsOfSpeed2
+      }],
+      labels: config.speeds
+    }
+  })
+
+  this.$on('salt:status', async (status) => {
+    this.progress = status.progress
+    if (status.status === 1 && status.progress === 100) {
+      // FINISHED
+    }
+  })
+
+  this.$on('salt:finished', async () => {
+    log('**** SIMULATION FINISHED *****')
+  })
+
+  this.$on('optimization:epoch', (e) => {
+    log('*** OPTIMIZATION EPOCH ***')
+    this.rewards = makeRewardChartData(e.data)
+  })
+
+  this.$on('optimization:finished', (e) => {
+    log('*** OPTIMIZATION FINISHED ***')
+    // setTimeout(() => this.$swal('신호 최적화 완료'), 2000)
+  })
+
+  this.$on('map:moved', ({ zoom, extent }) => {
+    this.currentZoom = zoom
+    this.currentExtent = [extent.min, extent.max]
+  })
+
+  this.$on('ws:open', () => {
+    this.wsStatus = 'open'
+  })
+
+  this.$on('ws:error', (error) => {
+    this.wsStatus = 'error'
+    this.makeToast(error.message, 'warning')
+  })
+
+  this.$on('ws:close', () => {
+    this.wsStatus = 'close'
+    this.makeToast('ws connection closed', 'warning')
+  })
+}
 
 export default {
   name: 'OptimizationResultMap',
@@ -77,7 +134,8 @@ export default {
       avgSpeedView: makeDonutDefaultDataset(),
       defaultOption: lineChartOption,
       rewards: { labels: [] },
-      apiErrorMessage: ''
+      apiErrorMessage: '',
+      trafficLightManager: null
     }
   },
   destroyed () {
@@ -96,13 +154,16 @@ export default {
     this.simulation = simulation
     this.showLoading = true
     this.resize()
-    this.map = makeMap({ mapId: this.mapId })
+    this.map = makeMap({ mapId: this.mapId, zoom: 16 })
     this.mapManager = MapManager({
       map: this.map,
       simulationId: this.simulationId,
       eventBus: this
     })
     this.mapManager.loadMapData()
+
+    this.trafficLightManager = TrafficLightManager(this.map, null, this)
+    await this.trafficLightManager.load()
 
     this.wsClient = WebSocketClient({
       simulationId: this.simulationId,
@@ -112,61 +173,7 @@ export default {
     this.showLoading = false
 
     this.rewards = makeRewardChartData([[1, 2, 3, 4], [10, 20, 5, 10]])
-
-    this.$on('salt:data', (d) => {
-      this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
-        acc += cur
-        return acc
-      }, 0) / d.roads.length
-
-      this.avgSpeedView = {
-        datasets: [{
-          data: bins(d.roads).map(R.prop('length')),
-          backgroundColor: config.colorsOfSpeed2
-        }],
-        labels: config.speeds
-      }
-    })
-
-    this.$on('salt:status', async (status) => {
-      this.progress = status.progress
-      if (status.status === 1 && status.progress === 100) {
-        // FINISHED
-      }
-    })
-
-    this.$on('salt:finished', async () => {
-      log('**** SIMULATION FINISHED *****')
-    })
-
-    this.$on('optimization:epoch', (e) => {
-      log('*** OPTIMIZATION EPOCH ***')
-      this.rewards = makeRewardChartData(e.data)
-    })
-
-    this.$on('optimization:finished', (e) => {
-      log('*** OPTIMIZATION FINISHED ***')
-      // setTimeout(() => this.$swal('신호 최적화 완료'), 2000)
-    })
-
-    this.$on('map:moved', ({ zoom, extent }) => {
-      this.currentZoom = zoom
-      this.currentExtent = [extent.min, extent.max]
-    })
-
-    this.$on('ws:open', () => {
-      this.wsStatus = 'open'
-    })
-
-    this.$on('ws:error', (error) => {
-      this.wsStatus = 'error'
-      this.makeToast(error.message, 'warning')
-    })
-
-    this.$on('ws:close', () => {
-      this.wsStatus = 'close'
-      this.makeToast('ws connection closed', 'warning')
-    })
+    setupEventHandler.bind(this)()
 
     window.addEventListener('resize', this.resize)
   },
@@ -192,6 +199,19 @@ export default {
     },
     // 신호 최적화 요청
     async runTrain () {
+      const junctionIds = this.simulation.configuration.junctionId.split(',')
+      const sleep = () => new Promise((resolve) => {
+        setTimeout(() => {
+          resolve()
+        }, 3000)
+      })
+      for (let i = 0; i < junctionIds.length; i++) {
+        this.trafficLightManager.setOptJunction(junctionIds[i])
+        await sleep()
+      }
+
+      this.trafficLightManager.clearOptJunction()
+
       try {
         const result = await optimizationService.runTrain(this.simulationId)
         console.log(result)

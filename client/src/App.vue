@@ -9,15 +9,22 @@
       toggleable="md"
     >
       <b-navbar-brand href="#" to="/">
-        <b-iconstack font-scale="1">
+        <!-- <b-iconstack font-scale="1">
           <b-icon stacked icon="globe" animation="throb" variant="primary" scale="0.75" ></b-icon>
           <b-icon stacked icon="globe" animation="spin-reverse" :variant="variantLogo" ></b-icon>
-        </b-iconstack> &nbsp;
-        <span>UNIQ-VIS</span>
+        </b-iconstack> &nbsp; -->
+        <!-- <span>UNIQ</span> -->
+         <!-- <b-avatar size="2em" badge="1.0">UNIQ</b-avatar> -->
+         <b-icon icon="house-fill"/>
+         UNIQ
       </b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
+          <b-nav-item to="/">
+            <!-- <b-icon icon="house-fill"/> -->
+          </b-nav-item>
+
           <b-nav-item
             v-for="{path, name } of menus"
             :key="path"
@@ -65,16 +72,16 @@ export default {
   name: 'App',
   mounted() {
     this.prevScrollpos = window.pageYOffset;
-    // const navBar = this.$refs['main-nav'];
-    // window.onscroll = () => {
-    //   const currentScrollPos = window.pageYOffset;
-    //   if (this.prevScrollpos > currentScrollPos) {
-    //     navBar.$el.style.top = '0';
-    //   } else {
-    //     navBar.$el.style.top = '-50px';
-    //   }
-    //   this.prevScrollpos = currentScrollPos;
-    // };
+    const navBar = this.$refs['main-nav'];
+    window.onscroll = () => {
+      const currentScrollPos = window.pageYOffset;
+      if (this.prevScrollpos > currentScrollPos) {
+        navBar.$el.style.top = '0';
+      } else {
+        navBar.$el.style.top = '-50px';
+      }
+      this.prevScrollpos = currentScrollPos;
+    };
     // const variants = ['success','danger', 'warning', 'primary', 'light']
     const variants = ['light', 'secondary']
     let i = 0;
@@ -126,7 +133,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -164,7 +171,7 @@ export default {
 
 html {
   background: lightgrey;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 * {
@@ -190,6 +197,31 @@ html {
   100% {
     transform: scale(1);
   }
+}
+
+/* global scrollbar style */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: green #343a40;
+}
+*::-webkit-scrollbar {
+  width: 12px;
+}
+*::-webkit-scrollbar-track {
+  background: #343a40;
+  /* background: red; */
+}
+*::-webkit-scrollbar-thumb {
+  /* background-color: #f8f9fa; */
+  background-color:grey;
+  border-radius: 15px;
+  border: 3px solid #343a40;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background:skyblue;
 }
 
 </style>

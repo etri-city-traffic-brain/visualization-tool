@@ -252,12 +252,123 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     }
   }
 
+  const options = {
+    animation: true,
+    color: ['Red', 'Blue', 'Green', 'Yellow'],
+    p: ['▖', '▘', '▝', '▗', '▗'],
+    font: '20px san-serif'
+  }
+
+  class OptStatusLayer extends maptalks.Layer {
+    constructor (id, data, options) {
+      super(id, options)
+      this.data = data
+    }
+
+    setData (data) {
+      this.data = data
+      return this
+    }
+
+    getData () {
+      return this.data
+    }
+  }
+
+  OptStatusLayer.mergeOptions(options)
+
+  class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
+    checkResources () {
+      return []
+    }
+
+    draw () {
+      const colors = this.layer.options.color
+      const now = Date.now()
+      const rndIdx = Math.round(now / 300 % colors.length)
+      const color = colors[rndIdx]
+      const p = this.layer.options.p[rndIdx]
+      const drawn = this._drawData(this.layer.getData(), color, p)
+      this._drawnData = drawn
+      this.completeRender()
+    }
+
+    drawOnInteracting (evtParam) {
+      if (!this._drawnData || this._drawnData.length === 0) {
+        return
+      }
+      const colors = this.layer.options.color
+      const now = Date.now()
+      const rndIdx = Math.round(now / 300 % colors.length)
+      const color = colors[rndIdx]
+      this._drawData(this._drawnData, color)
+    }
+
+    onSkipDrawOnInteracting () { }
+
+    needToRedraw () {
+      if (this.layer.options.animation) {
+        return true
+      }
+      return super.needToRedraw()
+    }
+
+    _drawData (data, color, p) {
+      if (!Array.isArray(data)) {
+        return
+      }
+      const map = this.getMap()
+      this.prepareCanvas()
+      const ctx = this.context
+      ctx.fillStyle = color
+      ctx.font = this.layer.options.font
+
+      const containerExtent = map.getContainerExtent()
+      const drawn = []
+      data.forEach(d => {
+        const point = map.coordinateToContainerPoint(new maptalks.Coordinate(d.coord))
+        if (!containerExtent.contains(point)) {
+          return
+        }
+        const text = d.text + p
+        const len = ctx.measureText(text)
+        ctx.fillText(text, point.x - len.width / 2, point.y)
+        drawn.push(d)
+      })
+
+      return drawn
+    }
+  }
+
+  OptStatusLayer.registerRenderer('canvas', OptStatusLayerRenderer)
+  const layer = new OptStatusLayer('hello')
+
+  function setOptJunction (junctionId) {
+    const tlayer = map.getLayer('trafficLightsLayer')
+    tlayer.getGeometries().forEach(g => {
+      if (g.properties.NODE_ID === junctionId) {
+        layer.setData([
+          {
+            coord: g.getCoordinates().add(0.00, 0.0003).toArray(),
+            text: '최적화 중 '
+          }
+        ])
+      }
+    })
+    layer.addTo(map)
+  }
+  function clearOptJunction () {
+    layer.setData([])
+  }
+
   map.on('zoomend moveend', load)
 
   return {
     load,
     show,
     hide,
-    toggleGroup: toggleGroupLayer
+    toggleGroup: toggleGroupLayer,
+    setOptJunction,
+    clearOptJunction
   }
 }

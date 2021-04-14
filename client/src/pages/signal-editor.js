@@ -72,12 +72,13 @@ export default {
       toTime: moment().format('HH:mm:ss'),
 
       textJson: '',
-      text: '신호를 선택하세요. (신호아이콘 선택 + 마우스 오른쪽 버튼)',
+      text: '',
       variant: 'info',
       rows: 3
     }
   },
   created () {
+    console.log('regiset')
     eventBus.$on('junction:selected', this.handleJunctionSelect)
     // eventBus.$on('junction:selecte', (v) => {
     //   this.$emit('junction:select', v)
@@ -99,6 +100,11 @@ export default {
     if (this.map) {
       this.map.remove()
     }
+    eventBus.$off('junction:selected')
+    eventBus.$off('junction:delete')
+    eventBus.$off('states:changed')
+    eventBus.$off('edge:removed')
+    eventBus.$off('edge:added')
   },
   methods: {
     editMode () {
@@ -247,7 +253,7 @@ export default {
           acc[cur.version] = cur.version
           return acc
         }, {})
-
+        console.log('신호버전선택')
         this.text = '로드하려는 신호의 버전을 선택하세요.'
         const { value: version } = await this.$swal.fire({
           title: '신호 버전 선택 ',

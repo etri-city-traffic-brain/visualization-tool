@@ -1,5 +1,48 @@
 <template>
 <div>
+  <b-card
+    bg-variant="dark"
+    border-variant="dark"
+    text-variant="light"
+    style="min-width:840px; border-radius:0"
+    no-body
+  >
+    <b-card-body class="p-1 d-flex">
+                <b-form inline>
+            <b-btn
+              size="sm"
+              variant="outline-secondary"
+              v-b-modal.create-simulation-modal
+            >
+              <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
+            </b-btn>
+            <b-btn
+              size="sm"
+              variant="outline-secondary"
+              v-b-toggle.collapse1 v-b-tooltip.hover
+              class="ml-1"
+            >
+              <b-icon icon="files"/> 시뮬레이션 비교
+            </b-btn>
+            <b-btn
+              size="sm"
+              class="ml-1 mr-1"
+              variant="outline-secondary"
+              @click.stop="updateTable">
+                <b-icon icon="arrow-clockwise"/> 새로고침
+              </b-btn>
+            <b-form-checkbox
+              v-model="autoRefresh"
+              name="check-button"
+              size="md"
+              switch
+            >
+              자동 새로고침
+            </b-form-checkbox>
+          </b-form>
+    </b-card-body>
+  </b-card>
+
  <b-card
     no-body
     bg-variant="secondary"
@@ -15,38 +58,7 @@
       </b-alert>
       <b-row class="m-0 p-0">
         <b-col md="12" class="p-0">
-          <b-form inline>
-            <b-btn
-              size="sm"
-              variant="dark"
-              v-b-modal.create-simulation-modal
-            >
-              <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
-            </b-btn>
-            <b-btn
-              size="sm"
-              variant="dark"
-              v-b-toggle.collapse1 v-b-tooltip.hover
-              class="ml-1"
-            >
-              <b-icon icon="files"/> 시뮬레이션 비교
-            </b-btn>
-            <b-btn
-              size="sm"
-              class="ml-1 mr-1"
-              variant="dark"
-              @click.stop="updateTable">
-                <b-icon icon="arrow-clockwise"/> 새로고침
-              </b-btn>
-            <b-form-checkbox
-              v-model="autoRefresh"
-              name="check-button"
-              size="md"
-              switch
-            >
-              자동 새로고침
-            </b-form-checkbox>
-          </b-form>
+
         </b-col>
       </b-row>
       <b-row class="m-0 p-0">

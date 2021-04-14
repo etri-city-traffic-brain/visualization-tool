@@ -62,7 +62,7 @@ export default {
   },
   data () {
     return {
-      envName: '', //
+      envName: generateRandomId('Exp'), //
       id: generateRandomId(this.role), //
       description: '...', //
       fromDate: getToday(), //
@@ -156,6 +156,7 @@ export default {
       }
       // console.log(JSON.stringify(simulationConfig, false, 2))
       this.$emit('optenvconfig:save', simulationConfig)
+      console.log(simulationConfig)
       this.loading = false
       // try {
       //   await simulationService.createSimulation(this.userId, simulationConfig)

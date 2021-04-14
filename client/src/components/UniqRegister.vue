@@ -10,7 +10,7 @@
       <b-form-group label-cols-sm="3" label="설명" label-class="text-sm-right" label-for="description">
         <b-form-input id="description" v-model="description"></b-form-input>
       </b-form-group>
-      <b-form-group label-cols-sm="3" label="시뮬레이션 지역" label-class="text-sm-right">
+      <b-form-group label-cols-sm="3" label="Region" label-class="text-sm-right">
         <b-input-group>
         <b-form-select v-model="areaSelected" :options="areaOptions" />
         </b-input-group>
@@ -90,7 +90,7 @@
 
     <b-card bg-variant="dark" text-variant="light" border-variant="dark" class="mt-1">
       <b-card-text class="text-right" >
-        <b-button class="mr-1" @click="register" variant="secondary" >
+        <b-button class="mr-1" @click="register" variant="primary" >
           등록  <b-spinner small label="Spinning" v-if="loading"></b-spinner>
         </b-button>
         <b-button class="mr-1" @click="hide" variant="secondary" >

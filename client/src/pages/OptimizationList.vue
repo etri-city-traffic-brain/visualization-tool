@@ -1,5 +1,49 @@
 <template>
 <div>
+    <b-card
+      bg-variant="dark"
+      border-variant="dark"
+      text-variant="light"
+      style="min-width:840px; border-radius:0"
+      no-body
+    >
+      <b-card-body class="p-1 d-flex">
+        <b-btn
+          variant="outline-secondary"
+          size="sm"
+          @click.stop="updateTable"
+          class="ml-1"
+           v-b-tooltip.hover title="테이블을 업데이트합니다."
+        >
+          <b-icon icon="arrow-clockwise"/> 새로고침
+        </b-btn>
+          <b-button
+            :pressed.sync="autoRefresh"
+            variant="outline-secondary"
+            size="sm"
+            class="ml-1"
+            v-b-tooltip.hover title="테이블을 주기적으로 업데이트합니다."
+          >
+          <!-- {{ autoRefresh ? 'A' : 'M' }}  -->
+            <b-icon icon="arrow-clockwise"/>
+            <b-iconstack v-if="autoRefresh" font-scale="1" animation="spin">
+              <b-icon stacked icon="slack" variant="info" scale="0.75" shift-v="-0.25"></b-icon>
+              <b-icon stacked icon="slash-circle" variant="dark"></b-icon>
+            </b-iconstack>
+            자동새로고침
+          </b-button>
+          <!-- <b-form-checkbox
+            class="ml-1"
+            v-model="autoRefresh"
+            name="check-button"
+            size="md"
+            switch
+          > -->
+        </b-form-checkbox>
+
+
+      </b-card-body>
+    </b-card>
   <b-card
     no-body
     bg-variant="secondary"
@@ -15,31 +59,7 @@
       </b-alert>
       <b-row class="m-0 p-0">
         <b-col class="p-0">
-          <b-form inline>
-            <!-- // do not support
-            <b-btn
-              variant="dark"
-              size="sm"
-              v-b-modal.create-simulation-modal
-            >
-              <b-icon icon="file-earmark-plus"/>
-              <strong>최적화 등록</strong>
-            </b-btn>
-            -->
 
-            <b-btn variant="dark" size="sm" @click.stop="updateTable" class="ml-1">
-              <b-icon icon="arrow-clockwise"/> 새로고침
-            </b-btn>
-            <b-form-checkbox
-              class="ml-1"
-              v-model="autoRefresh"
-              name="check-button"
-              size="md"
-              switch
-            >
-              자동 새로고침
-            </b-form-checkbox>
-          </b-form>
         </b-col>
       </b-row>
       <b-table
@@ -166,6 +186,7 @@
 
         <template v-slot:row-details="row">
           <b-card bg-variant="secondary" text-variant="light">
+            <h5>실험환경: <b-badge> {{ row.item.envName }} </b-badge></h5>
             <h5>설명: <b-badge> {{ row.item.description }} </b-badge></h5>
             <h5>시뮬레이션 시작: <b-badge> {{ row.item.started || '_' }} </b-badge></h5>
             <h5>시뮬레이션 종료: <b-badge>{{ row.item.ended || '_' }} </b-badge></h5>
@@ -176,9 +197,11 @@
             <b-badge
               v-for="junction of row.item.configuration.junctionId.split(',')"
               :key="junction"
-              class="m-1"
+              variant="dark"
+              class="ml-1"
             >
-              <b-badge href="#" class="m-1" variant="dark" size="sm" >{{ junction }}</b-badge>
+            {{ junction }}
+              <!-- <b-badge href="#" class="m-1" variant="dark" size="sm" ></b-badge> -->
             </b-badge>
             <b-card bg-variant="dark">
             <b-btn variant="secondary" @click="downloadScenario(row.item.id)">다운로드 시나리오</b-btn>
