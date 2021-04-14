@@ -82,15 +82,24 @@
             size="sm"
             @click="row.toggleDetails(); toggleDetails(row.item.id, row.item.status, row.detailsShowing);">
             <!-- {{ row.detailsShowing ? '-' : '+'}} -->
-            <b-icon icon="arrow-bar-up" v-if="row.detailsShowing"></b-icon>
-            <b-icon icon="arrow-bar-down" v-else></b-icon>
+            <b-icon icon="arrow-up" v-if="row.detailsShowing"></b-icon>
+            <b-icon icon="arrow-down" v-else></b-icon>
           </b-button>
         </template>
 
         <template v-slot:cell(id)="row" >
           <div draggable="true" @dragstart="drag" :data-id="row.item.id">
             <!-- <b class="text-success">{{ row.item.id.toUpperCase() }}</b> -->
-            <b>{{ row.item.id.toUpperCase() }}</b>
+            <!-- <b>{{ row.item.id.toUpperCase() }}</b> -->
+            <small
+              variant="link"
+              href="#"
+              v-b-tooltip.hover
+              :title="row.item.description">{{ row.item.id.toUpperCase() }}
+            </small>
+            <!-- <small>{{ row.item.id.toUpperCase() }}</small>
+            <small class="m-0 p-0 text-muted">({{ row.item.description }})</small> -->
+
               <!-- <h5 class="m-0"><b-badge class="p-2" :variant="statusColor(row.item.status)">{{ row.item.id.toUpperCase() }}</b-badge></h5> -->
           </div>
         </template>
@@ -101,9 +110,20 @@
           <b-icon v-else icon="shield-fill-check" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
         </template>
 
+
+        <template v-slot:cell(description)="row">
+          <b-badge
+            variant="link"
+            href="#"
+            v-b-tooltip.hover
+            :title="row.item.description">{{ row.item.description }}
+          </b-badge>
+        </template>
+
         <template v-slot:cell(epoch)="row">
           <span>{{row.item.epoch || 0}}</span>
         </template>
+
 
         <template v-slot:cell(statusText)="row">
           <b-alert :variant="statusColor(row.item.status)" class="m-0 p-0" show size="sm">{{ row.item.status.toUpperCase() }}</b-alert>

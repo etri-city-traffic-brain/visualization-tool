@@ -9,14 +9,7 @@
       toggleable="md"
     >
       <b-navbar-brand href="#" to="/">
-        <!-- <b-iconstack font-scale="1">
-          <b-icon stacked icon="globe" animation="throb" variant="primary" scale="0.75" ></b-icon>
-          <b-icon stacked icon="globe" animation="spin-reverse" :variant="variantLogo" ></b-icon>
-        </b-iconstack> &nbsp; -->
-        <!-- <span>UNIQ</span> -->
-         <!-- <b-avatar size="2em" badge="1.0">UNIQ</b-avatar> -->
-         <b-icon icon="house-fill"/>
-         UNIQ
+         <strong>UNIQ</strong>
       </b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
