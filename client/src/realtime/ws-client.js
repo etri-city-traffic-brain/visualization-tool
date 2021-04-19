@@ -26,7 +26,11 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       console.log(err.message)
     }
   }
-  const close = () => socket.close()
+  const close = () => {
+    if (socket) {
+      socket.close()
+    }
+  }
 
   function init () {
     log('web-socket init:', simulationId, wsUrl)

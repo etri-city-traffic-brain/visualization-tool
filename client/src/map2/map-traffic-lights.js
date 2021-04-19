@@ -277,6 +277,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
 
   OptStatusLayer.mergeOptions(options)
 
+  let angle = 0
   class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
     checkResources () {
       return []
@@ -334,7 +335,29 @@ export default function SaltTrafficLightsLoader (map, element, events) {
         const len = ctx.measureText(text)
         ctx.fillText(text, point.x - len.width / 2, point.y)
         drawn.push(d)
+
+        // radar
+        ctx.save()
+        ctx.beginPath()
+        ctx.strokeStyle = color
+        ctx.fillStyle = color
+        ctx.globalAlpha = 0.5
+        ctx.translate(point.x - 3, point.y + 15)
+        angle += 10
+        ctx.rotate((Math.PI / 180) * angle)
+        ctx.moveTo(0, 0)
+        const y = map.distanceToPoint(0, 50, map.getZoom())
+        // console.log()
+        ctx.arc(0, 0, y.y, (Math.PI / 180) * (angle % 360), (Math.PI / 180) * (360), true)
+        ctx.closePath()
+        ctx.stroke()
+        ctx.fill()
+        ctx.restore()
       })
+
+      // ***
+
+      //
 
       return drawn
     }
@@ -344,6 +367,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   const layer = new OptStatusLayer('hello')
 
   function setOptJunction (junctionId) {
+    console.log('set 최적화 ', junctionId)
     const tlayer = map.getLayer('trafficLightsLayer')
     tlayer.getGeometries().forEach(g => {
       if (g.properties.NODE_ID === junctionId) {

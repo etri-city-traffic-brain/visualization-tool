@@ -8,38 +8,61 @@
     no-body
   >
     <b-card-body class="p-1 d-flex">
-                <b-form inline>
-            <b-btn
-              size="sm"
-              variant="outline-secondary"
-              v-b-modal.create-simulation-modal
-            >
-              <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
-            </b-btn>
-            <b-btn
-              size="sm"
-              variant="outline-secondary"
-              v-b-toggle.collapse1 v-b-tooltip.hover
-              class="ml-1"
-            >
-              <b-icon icon="files"/> 시뮬레이션 비교
-            </b-btn>
-            <b-btn
-              size="sm"
-              class="ml-1 mr-1"
-              variant="outline-secondary"
-              @click.stop="updateTable">
-                <b-icon icon="arrow-clockwise"/> 새로고침
-              </b-btn>
-            <b-form-checkbox
-              v-model="autoRefresh"
-              name="check-button"
-              size="md"
-              switch
-            >
-              자동 새로고침
-            </b-form-checkbox>
-          </b-form>
+      <b-form inline>
+        <b-btn
+          size="sm"
+          variant="secondary"
+          v-b-modal.create-simulation-modal
+          v-b-tooltip.hover
+          title="시뮬레이션 등록"
+        >
+          <b-icon icon="file-earmark-plus"/>
+        </b-btn>
+        <b-btn
+          size="sm"
+          variant="secondary"
+          v-b-toggle.collapse1
+          v-b-tooltip.hover
+          class="ml-1"
+          title="시뮬레이션 비교"
+        >
+          <b-icon icon="files"/>
+        </b-btn>
+        <b-btn
+          size="sm"
+          class="ml-1"
+          variant="secondary"
+          @click.stop="updateTable"
+          title="새로고침"
+          v-b-tooltip.hover
+        >
+            <b-icon icon="arrow-clockwise"/>
+          </b-btn>
+          <b-button
+            :pressed.sync="autoRefresh"
+            :variant="autoRefresh ? 'primary' : 'outline-secondary'"
+            size="sm"
+            class="ml-1"
+            v-b-tooltip.hover
+            title="테이블을 주기적으로 업데이트합니다."
+          >
+          <!-- {{ autoRefresh ? 'A' : 'M' }}  -->
+            <b-icon v-if="!autoRefresh" icon="arrow-clockwise"/>
+            <b-iconstack v-if="autoRefresh" font-scale="1" animation="spin">
+              <b-icon stacked icon="slack" variant="info" scale="0.75" shift-v="-0.25"></b-icon>
+              <b-icon stacked icon="slash-circle" variant="dark"></b-icon>
+            </b-iconstack>
+          </b-button>
+
+        <!-- <b-form-checkbox
+          v-model="autoRefresh"
+          name="check-button"
+          size="md"
+          switch
+        >
+          자동 새로고침
+        </b-form-checkbox> -->
+      </b-form>
     </b-card-body>
   </b-card>
 
@@ -132,6 +155,9 @@
           </div>
         </template>
 
+        <template v-slot:cell(duration)="row">
+          {{ row.item.configuration.fromTime }} ~ {{ row.item.configuration.toTime }}
+        </template>
         <template v-slot:cell(status)="row">
           <b-icon v-if="row.item.status === 'running'" icon="gear-fill" :variant="statusColor(row.item.status)" animation="spin" font-scale="2"></b-icon>
           <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
@@ -148,9 +174,8 @@
             v-b-tooltip.hover
             title="시뮬레이션을 시작합니다."
             @click.stop="startSimulation(row.item.id, row.index, $event.target)"
-            v-if="row.item.status === 'ready' || row.item.status === 'error' || row.item.status === 'stopped'"
             >
-              <b-icon icon="play-fill"/> 시작
+              <b-icon icon="play-fill"/>
           </b-button>
           <b-button
             size="sm"
@@ -170,7 +195,7 @@
             :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
             v-if="row.item.status === 'finished' || row.item.status === 'running'"
             >
-              <b-icon icon="zoom-in"></b-icon> 상세보기
+              <b-icon icon="zoom-in"></b-icon>
           </b-button>
          </template>
          <template v-slot:cell(del)="row">
@@ -192,20 +217,35 @@
             >
               {{row.item.error }}
             </b-alert>
-            <b-input-group>
-              <b-form-file
-                accept=".csv"
-                v-model="resultFile"
-                placeholder="시뮬레이션 결과파일(.CSV)을 선택하세요.">
-              </b-form-file>
-              <b-input-group-append>
-                <b-button
-                  variant="dark"
-                  @click.prevent="uploadSimulatoinResultFile(row.item)">
-                    <b-icon icon="upload"/>
-                </b-button>
-              </b-input-group-append>
-            </b-input-group>
+            <div>
+              <h5> <b-badge variant="dark">
+                {{ row.item.envName }}
+                </b-badge>
+              </h5>
+              <h5> <b-badge variant="dark">
+                <b-badge variant="dark">시뮬레이션 걸린시간: </b-badge>
+                <b-badge>{{ calcDuration(row.item) }} </b-badge>
+              </b-badge>
+              </h5>
+              <h5><b-badge variant="dark"> {{ row.item.started }}</b-badge> ~ <b-badge variant="dark">{{ row.item.ended }}</b-badge></h5>
+            </div>
+             <b-card bg-variant="dark" border-variant="dark" text-variant="light">
+                <small>시뮬레이션 결과파일을 업로드</small>
+                <b-input-group>
+                  <b-form-file
+                    accept=".csv"
+                    v-model="resultFile"
+                    placeholder="시뮬레이션 결과파일(.CSV)을 선택하세요.">
+                  </b-form-file>
+                  <b-input-group-append>
+                    <b-button
+                      variant="primary"
+                      @click.prevent="uploadSimulatoinResultFile(row.item)">
+                        <b-icon icon="upload"/>
+                    </b-button>
+                  </b-input-group-append>
+                </b-input-group>
+             </b-card>
           </b-card>
         </template>
       </b-table>
@@ -244,6 +284,7 @@
       >
         <uniq-register
           @hide="hideCreateSimulationDialog"
+          @optenvconfig:save="saveOptEnvConfig"
           :userId="userState.userId"
           modalName="create-simulation-modal"
           :intersectionField="false"

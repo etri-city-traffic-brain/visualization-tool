@@ -32,7 +32,7 @@ import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 
 import bins from '@/stats/histogram'
-
+import userState from '@/user-state'
 import region from '@/map2/region'
 import config from '@/stats/config'
 
@@ -83,6 +83,7 @@ export default {
   },
   data () {
     return {
+      userState,
       simulationId: null,
       simulation: { configuration: {} },
       map: null,
@@ -132,7 +133,7 @@ export default {
         position: 'fixed',
         width: '300px',
         bottom: '50px',
-        left: '10px'
+        right: '10px'
       }
     }
   },
@@ -152,7 +153,7 @@ export default {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
     this.resize()
-    this.map = makeMap({ mapId: this.mapId })
+    this.map = makeMap({ mapId: this.mapId, zoom: 16 })
     await this.updateSimulation()
 
     this.mapManager = MapManager({
@@ -336,6 +337,13 @@ export default {
     },
     async connectWebSocket () {
       this.wsClient.init()
+    },
+    async startSimulation () {
+      try {
+        await simulationService.startSimulation(this.simulationId, this.userState.userId)
+      } catch (err) {
+        console.log(err)
+      }
     }
   }
 }

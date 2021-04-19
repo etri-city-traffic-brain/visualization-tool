@@ -7,6 +7,7 @@
       id="main-nav"
       class="pl-3 pt-1 pb-1 m-0"
       toggleable="md"
+      sticky
     >
       <b-navbar-brand href="#" to="/">
          <strong>UNIQ</strong>
@@ -67,13 +68,13 @@ export default {
     this.prevScrollpos = window.pageYOffset;
     const navBar = this.$refs['main-nav'];
     window.onscroll = () => {
-      const currentScrollPos = window.pageYOffset;
-      if (this.prevScrollpos > currentScrollPos) {
-        navBar.$el.style.top = '0';
-      } else {
-        navBar.$el.style.top = '-50px';
-      }
-      this.prevScrollpos = currentScrollPos;
+      // const currentScrollPos = window.pageYOffset;
+      // if (this.prevScrollpos > currentScrollPos) {
+      //   navBar.$el.style.top = '0';
+      // } else {
+      //   navBar.$el.style.top = '-50px';
+      // }
+      // this.prevScrollpos = currentScrollPos;
     };
     // const variants = ['success','danger', 'warning', 'primary', 'light']
     const variants = ['light', 'secondary']
@@ -87,6 +88,8 @@ export default {
 
     const route = localStorage.getItem('currentRoute')
     this.currentRoute = route
+
+    console.log(this.currentroute)
   },
 
   watch:{

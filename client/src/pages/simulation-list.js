@@ -41,8 +41,8 @@ export default {
         { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'statusText', label: '상태' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
-        { class: 'text-center', key: 'started', label: '시작' },
-        { class: 'text-center', key: 'ended', label: '종료' },
+        { class: 'text-center', key: 'duration', label: '대상시간' },
+        // { class: 'text-center', key: 'ended', label: '종료' },
         { class: 'text-center', key: 'actions', label: '도구' },
         { class: 'text-center', key: 'details', label: '상세' },
         { class: 'text-center', key: 'del', label: '삭제' }
@@ -86,7 +86,7 @@ export default {
           moment().format('YYYY-MM-DD HH:mm:ss')
         )
       } else {
-        return ''
+        return 'xxx'
       }
     },
     statusColor (status) {
@@ -189,6 +189,13 @@ export default {
     },
     status (text) {
       return variant[text]
+    },
+    async saveOptEnvConfig (env) {
+      try {
+        await simulationService.createSimulation(this.userId, env)
+      } catch (err) {
+        log(err)
+      }
     },
     async removeSimulation (param) {
       // const result = await this.$swal({

@@ -120,7 +120,7 @@ export default {
       const from = moment(`${this.fromDate} ${this.fromTime}`)
       const to = moment(`${this.toDate} ${this.toTime}`)
       const begin = moment.duration(this.fromTime).asSeconds()
-      const end = (to.diff(from) / 1000 - 1) + begin
+      const end = (to.diff(from) / 1000 - 60) + begin
       const days = to.diff(from, 'days') + 1
       const day = from.day()
 
@@ -154,18 +154,8 @@ export default {
           epoch: this.epoch
         }
       }
-      // console.log(JSON.stringify(simulationConfig, false, 2))
       this.$emit('optenvconfig:save', simulationConfig)
-      console.log(simulationConfig)
       this.loading = false
-      // try {
-      //   await simulationService.createSimulation(this.userId, simulationConfig)
-      // } catch (err) {
-      //   log(err)
-      // }
-      // this.loading = false
-      // this.resetForm()
-      // this.hide()
     },
     hide () {
       this.$emit('hide')
