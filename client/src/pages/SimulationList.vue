@@ -7,8 +7,10 @@
     style="min-width:840px; border-radius:0"
     no-body
   >
-    <b-card-body class="p-1 d-flex">
-      <b-form inline>
+    <b-card-body
+      class="p-1 d-flex justify-content-between"
+    >
+      <div>
         <b-btn
           size="sm"
           variant="secondary"
@@ -23,50 +25,39 @@
           variant="secondary"
           v-b-toggle.collapse1
           v-b-tooltip.hover
-          class="ml-1"
           title="시뮬레이션 비교"
         >
           <b-icon icon="files"/>
         </b-btn>
+      </div>
+      <div>
         <b-btn
           size="sm"
-          class="ml-1"
           variant="secondary"
           @click.stop="updateTable"
           title="새로고침"
           v-b-tooltip.hover
         >
             <b-icon icon="arrow-clockwise"/>
-          </b-btn>
-          <b-button
-            :pressed.sync="autoRefresh"
-            :variant="autoRefresh ? 'primary' : 'outline-secondary'"
-            size="sm"
-            class="ml-1"
-            v-b-tooltip.hover
-            title="테이블을 주기적으로 업데이트합니다."
-          >
-          <!-- {{ autoRefresh ? 'A' : 'M' }}  -->
-            <b-icon v-if="!autoRefresh" icon="arrow-clockwise"/>
-            <b-iconstack v-if="autoRefresh" font-scale="1" animation="spin">
-              <b-icon stacked icon="slack" variant="info" scale="0.75" shift-v="-0.25"></b-icon>
-              <b-icon stacked icon="slash-circle" variant="dark"></b-icon>
-            </b-iconstack>
-          </b-button>
-
-        <!-- <b-form-checkbox
-          v-model="autoRefresh"
-          name="check-button"
-          size="md"
-          switch
+        </b-btn>
+        <b-btn
+          :pressed.sync="autoRefresh"
+          :variant="autoRefresh ? 'info' : 'outline-secondary'"
+          size="sm"
+          v-b-tooltip.hover
+          title="테이블을 주기적으로 업데이트합니다."
         >
-          자동 새로고침
-        </b-form-checkbox> -->
-      </b-form>
+          <b-icon v-if="!autoRefresh" icon="arrow-clockwise"/>
+          <b-iconstack v-if="autoRefresh" font-scale="1" animation="spin">
+            <b-icon stacked icon="slack" variant="info" scale="0.75" shift-v="-0.25"></b-icon>
+            <b-icon stacked icon="slash-circle" variant="dark"></b-icon>
+          </b-iconstack>
+        </b-btn>
+      </div>
     </b-card-body>
   </b-card>
 
- <b-card
+  <b-card
     no-body
     bg-variant="secondary"
     text-variant="light"
@@ -105,8 +96,6 @@
                   <span v-if="selected.length === 0" >
                     시뮬레이션 이름을 선택 후 여기로 드래그&드랍 하세요.
                   </span>
-
-
                   <b-badge class="mx-2 p-2"
                     href="#"
                     v-for="item in selected"
@@ -120,10 +109,18 @@
                 </b-card>
               </b-card-group>
             </b-collapse> <!-- simulation drop area -->
-            <b-btn variant="warning" v-if="selected.length >= 2" size="sm" @click.stop="compare"> <b-icon icon="bar-chart-fill"></b-icon> 비교 </b-btn>
+            <b-btn
+              variant="warning"
+              v-if="selected.length >= 2"
+              size="sm"
+              @click.stop="compare"
+            >
+              <b-icon icon="bar-chart-fill"></b-icon> 비교
+            </b-btn>
           </b-card>
         </b-col>
       </b-row>
+      <!-- TABLE -->
       <b-table
         hover
         small
@@ -156,39 +153,41 @@
         </template>
 
         <template v-slot:cell(duration)="row">
-          {{ row.item.configuration.fromTime }} ~ {{ row.item.configuration.toTime }}
+          <b-badge>{{ row.item.configuration.fromTime }}</b-badge> ~ <b-badge>{{ row.item.configuration.toTime }}</b-badge>
         </template>
         <template v-slot:cell(status)="row">
-          <b-icon v-if="row.item.status === 'running'" icon="gear-fill" :variant="statusColor(row.item.status)" animation="spin" font-scale="2"></b-icon>
-          <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
-          <b-icon v-else icon="shield-fill-check" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
+          <h5><b-badge :variant="statusColor(row.item.status)" class="">
+            <b-icon v-if="row.item.status === 'running'" icon="gear-fill" variant="light" animation="spin" font-scale="1"></b-icon>
+            <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" variant="light" font-scale="1"></b-icon>
+            <b-icon v-else icon="shield-fill-check" variant="light" font-scale="1"></b-icon>
+            <span>{{ row.item.status.toUpperCase() }}</span>
+          </b-badge>
+          </h5>
         </template>
-        <template v-slot:cell(statusText)="row">
-          <b-alert :variant="statusColor(row.item.status)" class="m-0 p-0" show size="sm">{{ row.item.status.toUpperCase() }}</b-alert>
-        </template>
+        <!-- <template v-slot:cell(statusText)="row"> -->
+
+        <!-- </template> -->
 
         <template v-slot:cell(actions)="row">
           <b-button
+            @click.stop="startSimulation(row.item.id, row.index, $event.target)"
             size="sm"
-            variant="info"
+            variant="primary"
             v-b-tooltip.hover
             title="시뮬레이션을 시작합니다."
-            @click.stop="startSimulation(row.item.id, row.index, $event.target)"
-            >
+          >
               <b-icon icon="play-fill"/>
           </b-button>
           <b-button
+            @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
             size="sm"
             variant="warning"
             v-b-tooltip.hover
             title="시뮬레이션을 중지합니다."
-            @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
-            v-if="row.item.status === 'running'">
-              <b-icon icon="stop-fill"/> 중지
+            :disabled="row.item.status !== 'running'"
+          >
+              <b-icon icon="stop-fill"/>
           </b-button>
-        </template>
-
-        <template v-slot:cell(details)="row">
           <b-button
             size="sm"
             variant="secondary"
@@ -197,6 +196,10 @@
             >
               <b-icon icon="zoom-in"></b-icon>
           </b-button>
+        </template>
+
+        <template v-slot:cell(details)="row">
+
          </template>
          <template v-slot:cell(del)="row">
           <b-button
@@ -208,7 +211,7 @@
           </b-button>
         </template>
         <template v-slot:row-details="row">
-          <b-card bg-variant="secondary" text-variant="light" style="max-width: 600px">
+          <b-card bg-variant="secondary" text-variant="light">
             <b-alert
               v-if="row.item.error && row.item.status === 'error'"
               class="mb-1 p-2"
@@ -230,8 +233,8 @@
               <h5><b-badge variant="dark"> {{ row.item.started }}</b-badge> ~ <b-badge variant="dark">{{ row.item.ended }}</b-badge></h5>
             </div>
              <b-card bg-variant="dark" border-variant="dark" text-variant="light">
-                <small>시뮬레이션 결과파일을 업로드</small>
-                <b-input-group>
+                <small>시뮬레이션 결과파일 분석</small>
+                <b-input-group class="mt-1">
                   <b-form-file
                     accept=".csv"
                     v-model="resultFile"

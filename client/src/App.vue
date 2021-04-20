@@ -18,7 +18,6 @@
           <b-nav-item to="/">
             <!-- <b-icon icon="house-fill"/> -->
           </b-nav-item>
-
           <b-nav-item
             v-for="{path, name } of menus"
             :key="path"
@@ -30,7 +29,7 @@
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item size="sm" to="" >
-            v0.1
+            <b-badge>UNIQ</b-badge>
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>

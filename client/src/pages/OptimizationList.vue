@@ -95,7 +95,7 @@
               variant="link"
               href="#"
               v-b-tooltip.hover
-              :title="row.item.description">{{ row.item.id.toUpperCase() }}
+              :title="row.item.envName">{{ row.item.id.toUpperCase() }}
             </small>
             <!-- <small>{{ row.item.id.toUpperCase() }}</small>
             <small class="m-0 p-0 text-muted">({{ row.item.description }})</small> -->
@@ -105,19 +105,31 @@
         </template>
 
         <template v-slot:cell(status)="row">
-          <b-icon v-if="row.item.status === 'running'" icon="gear-fill" :variant="statusColor(row.item.status)" animation="spin" font-scale="2"></b-icon>
+          <!-- <b-icon v-if="row.item.status === 'running'" icon="gear-fill" :variant="statusColor(row.item.status)" animation="spin" font-scale="2"></b-icon>
           <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
-          <b-icon v-else icon="shield-fill-check" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
+          <b-icon v-else icon="shield-fill-check" :variant="statusColor(row.item.status)" font-scale="2"></b-icon> -->
+          <h5>
+            <b-badge :variant="statusColor(row.item.status)" style="min-width:110px" class="text-left">
+              <b-icon v-if="row.item.status === 'running'" icon="gear-fill" variant="light" animation="spin" font-scale="1"></b-icon>
+              <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" variant="light" font-scale="1"></b-icon>
+              <b-icon v-else icon="shield-fill-check" variant="light" font-scale="1"></b-icon>
+              <span>{{ row.item.status.toUpperCase() }}</span>
+            </b-badge>
+          </h5>
         </template>
 
+         <template v-slot:cell(duration)="row">
+          <b-badge>{{ row.item.configuration.fromTime.slice(0, 5) }}</b-badge> ~
+          <b-badge>{{ row.item.configuration.toTime.slice(0, 5) }}</b-badge>
+        </template>
 
         <template v-slot:cell(description)="row">
-          <b-badge
+          <!-- <b-badge
             variant="link"
             href="#"
             v-b-tooltip.hover
             :title="row.item.description">{{ row.item.description }}
-          </b-badge>
+          </b-badge> -->
         </template>
 
         <template v-slot:cell(epoch)="row">
@@ -166,19 +178,9 @@
           </b-button>
         </template>
         <template v-slot:cell(analisys)="row">
-          <b-button
-            size="sm"
-            variant="secondary"
-            v-b-tooltip.hover
-            title="신호비교"
-            :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
-          >
-            <!-- <b-icon icon="circle-square"></b-icon> -->
-            🚥 분석
-          </b-button>
+
         </template>
         <template v-slot:cell(details)="row">
-
           <b-button
             size="sm"
             variant="secondary"
@@ -189,7 +191,16 @@
           >
             🚦 최적화
           </b-button>
-
+          <b-button
+            size="sm"
+            variant="secondary"
+            v-b-tooltip.hover
+            title="신호비교"
+            :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
+          >
+            <!-- <b-icon icon="circle-square"></b-icon> -->
+            🚥 분석
+          </b-button>
 
 
         </template>

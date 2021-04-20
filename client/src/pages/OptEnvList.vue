@@ -8,94 +8,59 @@
       no-body
     >
       <b-card-body class="p-1 d-flex">
-        <b-btn variant="outline-secondary" size="sm" v-b-modal.create-simulation-modal>
-            <b-icon icon="plus-square"></b-icon> 등록
+        <b-btn variant="secondary" size="sm" v-b-modal.create-simulation-modal>
+            <b-icon icon="plus"></b-icon>
           </b-btn>
       </b-card-body>
-     </b-card>
-    <b-container fluid class="" style="background-color: black;">
+    </b-card>
 
-      <div class="d-flex flex-wrap p-2">
+    <b-container fluid class="p-1" style="background-color: black;">
+      <div class="d-flex flex-wrap">
         <b-card
-          style="min-width:260px;max-width:260px"
+          style="min-width:300px;max-width:300px"
           v-for="env of envs"
           :key="env.envName"
-          class="p-1 m-1"
-          no-body
+          class="m-1"
           bg-variant="dark"
+          border-variant="dark"
           text-variant="light"
         >
-          <div class="text-right m-0" style="">
-            <!--
-            <b-badge href="#" @click="" variant="info" v-b-tooltip.hover title="실험환경 다운로드">
-              <b-icon icon="download"></b-icon>
-            </b-badge>
-            -->
-            <b-badge href="#" @click="openModify(env)" variant="warning">M</b-badge>
-            <b-badge href="#" @click="remove(env.id)" variant="danger">X</b-badge>
-            <!-- <hr style="border-top: 1px dashed grey"> -->
-          </div>
-
-          <div>
-            <b-card-text class="m-1">
-              <div>
-              <p class="text-truncate" style="font-weight: bold">🚦 {{ env.envName }}</p>
-              </div>
-              <h5>
+          <b-card-text>
+            🚦 {{ env.envName }}
+          </b-card-text>
+          <b-card-text class="m-1">
+            <h5>
+              <b-badge>
+                <b-badge>주기</b-badge>
+                <b-badge variant="warning">{{ env.configuration.period }}</b-badge>
+              </b-badge>
+            </h5>
+            <h5>
               <b-badge>
                 <b-badge>대상시간</b-badge>
                 <b-badge variant="primary">{{ env.configuration.fromTime }}</b-badge> ~
                 <b-badge variant="primary">{{ env.configuration.toTime }}</b-badge>
               </b-badge>
-              </h5>
-              <h5>
-                <b-badge>
-                  <b-badge>주기</b-badge>
-                  <b-badge variant="warning">{{ env.configuration.period }}</b-badge>
-                </b-badge>
-              </h5>
-
-              <!-- <div style="height:100px; max-height:100px; overflow-y:auto;overflow-x:hidden"> -->
-              <!-- <h5><b-badge variant="secondary">신호</b-badge></h5> -->
-              <p class="text-truncate"  v-b-tooltip.hover :title="env.configuration.junctionId.split(',')">
-                <b-badge
+            </h5>
+            <p class="text-truncate"  v-b-tooltip.hover :title="env.configuration.junctionId.split(',')">
+              <b-badge>신호목록</b-badge>
+              <b-badge
                 v-for="(item, idx) of env.configuration.junctionId.split(',')"
                 :key="idx"
                 class="mr-1"
               >
                 {{ item }}
               </b-badge>
-              </p>
-              <!-- </div> -->
-
-
-
-            </b-card-text>
+            </p>
+          </b-card-text>
             <b-card-text class="text-right">
-              <!-- <b-btn size="sm" variant="secondary" @click="openModify(env)">수정</b-btn> -->
-              <!-- <b-btn size="sm" variant="secondary">복제</b-btn> -->
-              <!-- <b-btn
-                @click=""
-                size="sm"
-                variant="secondary"
-                v-b-tooltip.hover title="실험환경 다운로드"
-              >
+              <!-- <b-btn size="sm" variant="info" v-b-tooltip.hover title="실험환경 다운로드">
                 <b-icon icon="download"></b-icon>
-              </b-btn>
-               -->
-               <!-- <hr style="border-top: 1px solid grey"> -->
-              <h5>
-              <b-badge
-                size="sm"
-                href="#"
-                variant="link"
-                @click="registerSimulation(env)"
-              >
-                신호 최적화 실험
-              </b-badge>
-              </h5>
+              </b-btn> -->
+              <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn>
+              <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn>
+              <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn>
             </b-card-text>
-          </div>
         </b-card>
       </div>
     </b-container>
