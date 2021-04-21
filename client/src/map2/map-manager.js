@@ -135,7 +135,8 @@ function MapManager ({ map, simulationId, eventBus }) {
     try {
       const { features } = await mapService.getMap(extent(map))
       if (event === 'zoomend') {
-        removeEdges(edgesExisted)
+        // removeEdges(edgesExisted)
+        removeEdges(edgeLayer.getGeometries())
         addFeatures(features)
       } else if (event === 'moveend') {
         const edgesNew = features.map(makeId)

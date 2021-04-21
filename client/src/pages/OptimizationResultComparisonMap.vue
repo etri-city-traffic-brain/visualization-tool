@@ -14,7 +14,6 @@
         </b-btn>
       </div>
     </div>
-
     <b-sidebar
       title="UNIQ-VIS"
       v-model="sidebar"
@@ -23,7 +22,7 @@
       shadow
       right
     >
-      More Controll
+      <pre class="text-light">{{ JSON.stringify(simulation, false, 2)}}</pre>
     </b-sidebar>
 
     <b-row class="p-0 m-0">
@@ -45,20 +44,32 @@
             <div class="card-bottom" style="overflow:auto">
               <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body>
                 <b-card-text class="m-0 p-2 text-center">
-                  현시(기존 신호)
+                  신호비교
                 </b-card-text>
                 <bar-chart
                   :chartData="phaseFixed"
                   :options="barChartOption()"
-                  :height="160"
+                  :height="120"
                 />
+              </b-card>
+              <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body>
                 <div class="text-center">속도분포</div>
                 <histogram-chart
                   :chartData="chart1.histogramData"
                   :height="120"
-                  class="m-2"
                 />
               </b-card>
+              <b-card
+                class="mt-1 p-2"
+                bg-variant="dark"
+                no-body
+              >
+                <div class="text-center">속도분포(스텝)</div>
+                <histogram-chart
+                  :chartData="chart1.histogramDataStep"
+                  :height="120"
+                />
+            </b-card>
             </div>
             <div
               class="m-0 p-0"
@@ -68,16 +79,17 @@
             />
         </b-card>
       </b-col>
+      <!-- RIGHT PANEL -->
       <b-col cols="4" class="p-0">
         <b-card
           bg-variant="primary"
           border-variant="primary"
           class="no-border-radius p-0 m-0"
-          no-body
           text-variant="white"
+          no-body
         >
           <div class="card-top" style="width:100%">
-            <b-progress height="1rem" class="mt-0 w-100 no-border-radius" >
+            <b-progress height="1rem" v-if="progress2 > 0" class="mt-0 w-100 no-border-radius" >
                 <b-progress-bar :value="progress2" animated striped variant="primary">
                   <span> {{ progress2 }} %</span>
                 </b-progress-bar>
@@ -86,19 +98,29 @@
           <div class="card-bottom"  style="overflow:auto">
             <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body>
               <b-card-text class="m-0 p-2 text-center">
-                현시(최적화 신호)
+                신호비교
               </b-card-text>
               <bar-chart
                 :chartData="phaseTest"
                 :options="barChartOption()"
-                :height="160"
+                :height="120"
               />
+            </b-card>
+              <!-- <div class="text-center">속도분포</div> -->
+            <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body>
               <div class="text-center">속도분포</div>
               <histogram-chart
                 :chartData="chart2.histogramData"
                 :height="120"
-                class="mt-2"
               />
+            </b-card>
+            <b-card
+              class="mt-1 p-2"
+              bg-variant="dark"
+              no-body
+            >
+              <div class="text-center">속도분포(스텝)</div>
+              <histogram-chart :chartData="chart2.histogramDataStep" :height="120" class="mt-1"/>
             </b-card>
           </div>
           <div
@@ -107,20 +129,19 @@
             :id="mapId2"
             :style="{height: mapHeight + 'px'}"
           />
-
         </b-card>
-                    <transition name="bounce">
-        <div v-if="showEpoch" class="d-flex justify-content-center align-items-center ccc">
-          <div style="font-size: 20rem">
-            {{ selectedEpoch }}
+        <transition name="bounce">
+          <div v-if="showEpoch" class="d-flex justify-content-center align-items-center ccc">
+            <div style="font-size: 20rem">
+              {{ selectedEpoch }}
+            </div>
           </div>
-        </div>
-</transition>
+        </transition>
       </b-col>
       <b-col cols="4" class="p-0" >
         <b-card
-          bg-variant="secondary"
-          border-variant="secondary"
+          bg-variant="dark"
+          border-variant="dark"
           text-variant="light"
           style="border-radius:0"
           class="m-0 p-0"
@@ -131,17 +152,17 @@
           </b-card-text>
         </b-card>
         <b-card
-          bg-variant="dark"
+          bg-variant="secondary"
           border-variant="dark"
           text-variant="dark"
           no-body
-            v-bind:style="{
+          v-bind:style="{
             height: mapHeight - 40 + 'px',
             borderRadius: 0,
             overflow: 'auto'
           }"
         >
-        <b-card-body class="p-1">
+          <b-card-body class="p-1">
           <!----- 보상 그래프 ----->
           <b-card
             text-variant="light"
@@ -162,36 +183,18 @@
             </b-btn>
           </b-card>
 
-          <uniq-simulation-result-ext :simulation="simulation" />
 
-          <uniq-card-title title="평균속도 비교"/>
+
            <b-card class="mt-1" bg-variant="dark">
-              <line-chart :chartData="chart1.linkSpeeds" :options="defaultOption({})" :height="150"/>
+              <uniq-card-title title="평균속도 비교"/>
+              <line-chart :chartData="chart1.linkSpeeds" :options="defaultOption({})" :height="120"/>
             </b-card>
 
             <b-card class="mt-1" bg-variant="dark" border-variant="dark">
-              <!-- <line-chart :chartData="chart.currentSpeedChart" :options="defaultOption({})" :height="30"/> -->
-              <line-chart :chartData="chart1.linkSpeeds" :options="defaultOption({})" :height="150"/>
+              <line-chart :chartData="chart.currentSpeedChart" :options="defaultOption({})" :height="120"/>
             </b-card>
 
-            <uniq-card-title title="속도분포(기존 신호)"/>
-            <b-card
-              class="p-2"
-              bg-variant="dark"
-              no-body
-            >
-              <!-- <histogram-chart :chartData="chart1.histogramData" :height="150" class="mt-1"/> -->
-              <histogram-chart :chartData="chart1.histogramDataStep" :height="150" class="mt-1"/>
-            </b-card>
-            <uniq-card-title title="속도분포(최적화 신호)"/>
-            <b-card
-              class="p-2"
-              bg-variant="dark"
-              no-body
-            >
-              <!-- <histogram-chart :chartData="chart2.histogramData" :height="150" class="mt-1"/> -->
-              <histogram-chart :chartData="chart2.histogramDataStep" :height="150" class="mt-1"/>
-            </b-card>
+
 
             <!-- --------------- -->
             <!-- Step Controller -->

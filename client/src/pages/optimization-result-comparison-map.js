@@ -44,6 +44,8 @@ import toastMixin from '@/components/mixins/toast-mixin'
 import lineChartOption from '@/charts/chartjs/line-chart-option'
 import style from '@/components/style'
 
+import TrafficLightManager from '@/map2/map-traffic-lights'
+
 const makeLinkSpeedChartData = (data1, data2) => {
   const dataset = (label, color, data) => ({
     label,
@@ -78,10 +80,10 @@ const dataset = (label, color, data) => ({
 
 const makeLineData = (data1, data2) => {
   return {
-    labels: new Array(data1.length).fill(0).map((_, i) => i),
+    labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
       dataset('기존신호', 'grey', data1),
-      dataset('최적화신호', 'blue', data2)
+      dataset('최적화신호', 'orange', data2)
     ]
   }
 }
@@ -268,8 +270,8 @@ export default {
       chart: {
         currentSpeedChart: {}
       },
-      progress1: 100,
-      progress2: 50,
+      progress1: 0,
+      progress2: 0,
       bottomStyle: { ...style.bottomStyle },
       playerStyle: { ...style.playerStyle },
       chartContainerStyle: {
@@ -286,7 +288,8 @@ export default {
       testSlave: null,
       fixedSlave: null,
       selectedEpoch: 0,
-      showEpoch: false
+      showEpoch: false,
+      trafficLightManager: null
     }
   },
   destroyed () {
@@ -320,24 +323,47 @@ export default {
 
     this.resize()
 
-    this.map1 = makeMap({ mapId: this.mapId1 })
-    this.map2 = makeMap({ mapId: this.mapId2 })
+    this.map1 = makeMap({ mapId: this.mapId1, zoom: 15 })
+    this.map2 = makeMap({ mapId: this.mapId2, zoom: 15 })
 
     const bus1 = new Vue({})
     const bus2 = new Vue({})
 
     this.mapManager1 = MapManager({ map: this.map1, simulationId: this.fixedSlave, eventBus: bus1 })
     this.mapManager2 = MapManager({ map: this.map2, simulationId: this.testSlave, eventBus: bus2 })
+    // this.mapManager1.toggleFocusTool()
+    // this.mapManager2.toggleFocusTool()
 
     this.wsClient1 = WebSocketClient({ simulationId: this.fixedSlave, eventBus: bus1 })
     this.wsClient2 = WebSocketClient({ simulationId: this.testSlave, eventBus: bus2 })
+    this.wsClient1.init()
+    this.wsClient2.init()
 
+    this.trafficLightManager = TrafficLightManager(this.map2, null, this)
+    await this.trafficLightManager.load()
+
+    const moveTo = (map, center, zoom) => map.animateTo({ center, zoom })
     this.map1.on('moveend', (e) => {
-      this.map2.setCenter(e.target.getCenter())
+      if (e.domEvent) {
+        moveTo(this.map2, e.target.getCenter(), e.target.getZoom())
+      }
+    })
+
+    this.map2.on('moveend', (e) => {
+      if (e.domEvent) {
+        moveTo(this.map1, e.target.getCenter(), e.target.getZoom())
+      }
     })
 
     this.map1.on('zoomend', (e) => {
-      this.map2.setCenterAndZoom(e.target.getCenter(), e.target.getZoom())
+      if (e.target.id === this.map1.id) {
+        moveTo(this.map2, e.target.getCenter(), e.target.getZoom())
+      }
+    })
+    this.map2.on('zoomend', (e) => {
+      if (e.target.id === this.map2.id) {
+        moveTo(this.map1, e.target.getCenter(), e.target.getZoom())
+      }
     })
 
     this.updateChartRealtime()
@@ -349,6 +375,7 @@ export default {
 
     bus2.$on('salt:data', d => {
       const avgSpeed = calcAvgSpeed(d.roads)
+      this.trafficLightManager.setCurrentLoads(d.roads)
       this.chart2.currentSpeeds.push((avgSpeed).toFixed(2) * 1)
     })
 
@@ -381,6 +408,10 @@ export default {
       this.makeToast('ws connection closed', 'warning')
     })
 
+    this.$on('junction:selected', () => {
+      console.log('junction:selected')
+    })
+
     window.addEventListener('resize', this.resize)
     try {
       const c = (await optimizationService.getReward(this.fixedSlave)).data
@@ -409,6 +440,7 @@ export default {
     updateChartRealtime () {
       if (this.progress2 >= 100 && this.progress1 >= 100) {
         log('all simulations are finished')
+        this.updatePhaseChart()
         return
       }
       setTimeout(() => {
@@ -417,7 +449,7 @@ export default {
           this.chart2.currentSpeeds
         )
         this.updateChartRealtime()
-      }, 1000)
+      }, 500)
     },
     async updateChart () {
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this))
@@ -434,23 +466,23 @@ export default {
       )
     },
     resize () {
-      // this.mapHeight = window.innerHeight - 220; // update map height to current height
-      // this.mapHeight = window.innerHeight - 180 - 60 // update map height to current height
       this.mapHeight = window.innerHeight - 50 // update map height to current height
     },
     togglePlay () {
-      this.playBtnToggle = !this.playBtnToggle;
-
-      (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()
+      this.playBtnToggle = !this.playBtnToggle
+      if (this.stepPlayer) {
+        (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()
+      }
     },
     async stepChanged (step) {
+      this.mapManager1.changeStep(step)
+      this.mapManager2.changeStep(step)
+      this.chart1.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step)
+      this.chart1.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step)
+      this.chart2.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step)
+      this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step)
       if (this.simulation.status === 'finished') {
-        this.mapManager1.changeStep(step)
-        this.mapManager2.changeStep(step)
-        this.chart1.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step)
-        this.chart1.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step)
-        this.chart2.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step)
-        this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step)
+        //
       }
     },
     centerTo (locationCode) {
@@ -475,7 +507,6 @@ export default {
       const phaseTest = (await optimizationService.getPhase(this.testSlave)).data
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
-      console.log(this.phaseTest.datasets)
       this.updateChart()
     }
   }

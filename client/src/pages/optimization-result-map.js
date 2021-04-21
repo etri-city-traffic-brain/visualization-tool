@@ -59,18 +59,45 @@ function setupEventHandler () {
     }
   })
 
+  this.$on('optimization:progress', async (e) => {
+    this.progressOpt = e.progress
+    console.log('optimization:progress', e)
+  })
+
   this.$on('salt:finished', async () => {
     log('**** SIMULATION FINISHED *****')
+    this.$bvToast.toast('Simulation Finished', {
+      title: 'xxxx',
+      variant: 'info',
+      autoHideDelay: 3000,
+      appendToast: true,
+      toaster: 'b-toaster-top-right'
+    })
   })
 
   this.$on('optimization:epoch', (e) => {
     log('*** OPTIMIZATION EPOCH ***')
     this.rewards = makeRewardChartData(e.data)
+
+    this.$bvToast.toast('OPTIMIZATION EPOCH', {
+      title: 'OPTIMIZATION EPOCH',
+      variant: 'info',
+      autoHideDelay: 3000,
+      appendToast: true,
+      toaster: 'b-toaster-top-right'
+    })
   })
 
   this.$on('optimization:finished', (e) => {
     log('*** OPTIMIZATION FINISHED ***')
     // setTimeout(() => this.$swal('신호 최적화 완료'), 2000)
+    this.$bvToast.toast('OPTIMIZATION FINISHED', {
+      title: 'OPTIMIZATION FINISHED',
+      variant: 'info',
+      autoHideDelay: 3000,
+      appendToast: true,
+      toaster: 'b-toaster-top-right'
+    })
   })
 
   this.$on('map:moved', ({ zoom, extent }) => {
@@ -90,6 +117,10 @@ function setupEventHandler () {
   this.$on('ws:close', () => {
     this.wsStatus = 'close'
     this.makeToast('ws connection closed', 'warning')
+  })
+
+  this.$on('junction:selected', () => {
+    console.log('junction:selected')
   })
 }
 
@@ -131,6 +162,7 @@ export default {
       wsStatus: 'ready',
       avgSpeed: 0.00,
       progress: 0,
+      progressOpt: 0,
       avgSpeedView: makeDonutDefaultDataset(),
       defaultOption: lineChartOption,
       rewards: { labels: [] },

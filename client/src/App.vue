@@ -45,7 +45,7 @@
       bg-variant="dark"
       text-variant="white"
       class="no-round-corner"
-      v-if="currentRoute !== 'OptimizationResultMap'"
+      v-if="showOrHide()"
     >
       <b-container fluid class="mt-2 mb-2 p-2 text-center" >
         도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어
@@ -87,8 +87,6 @@ export default {
 
     const route = localStorage.getItem('currentRoute')
     this.currentRoute = route
-
-    console.log(this.currentroute)
   },
 
   watch:{
@@ -124,7 +122,16 @@ export default {
       ]
     };
   },
-
+  methods: {
+    showOrHide() {
+      const hides = [
+        'OptimizationResultMap',
+        'OptimizationResultComparisonMap'
+      ]
+      return !hides.includes(this.currentRoute)
+      // return this.currentRoute !== 'OptimizationResultMap'
+    }
+  }
 };
 </script>
 

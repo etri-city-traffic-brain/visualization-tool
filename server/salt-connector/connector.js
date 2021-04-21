@@ -34,7 +34,7 @@ module.exports = (httpServer, tcpPort) => {
   // send to simulator
   webSocketServer.on(EVENT_SET, (data) => {
     tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
-    // console.log('***** SET *****')
+    console.log('***** SET *****')
     // console.log(data)
   })
 
@@ -75,18 +75,26 @@ module.exports = (httpServer, tcpPort) => {
         if (epochCounter.count >= +simulation.configuration.epoch) {
           debug(epochCounter.count, simulation.epoch)
           debug('*** OPTIMIZATION FINISHED ***')
-          updateStatus(simulationId, 'finished')
+          // updateStatus(simulationId, 'finished', { epoch: 0 })
+          delete epochCounterTable[simulationId]
+
           webSocketServer.send(simulationId, {
             event: 'optimization:finished'
           })
         }
+
+        webSocketServer.send(simulationId, {
+          event: 'optimization:progress',
+          progress: epochCounter.count
+        })
         setTimeout(async () => {
           const data = await readReward(simulationId)
           webSocketServer.send(simulationId, {
             event: 'optimization:epoch',
-            data
+            data,
+            progress: epochCounter.count
           })
-        }, 5000)
+        }, 3000)
       } else {
         try {
           debug('**** start cook ***', simulationId)
@@ -109,7 +117,7 @@ module.exports = (httpServer, tcpPort) => {
 
   // send to web
   tcpServer.on(EVENT_DATA, (data) => {
-    // console.log('send client', data)
+    console.log(data.simulationId)
     webSocketServer.send(data.simulationId, { ...data })
   })
 }

@@ -22,7 +22,7 @@ export default function MakeMap ({ center = DEFAULT_CENTER, zoom = DEFAULT_ZOOM,
     minZoom: 12,
     zoomControl: {
       position: 'top-right',
-      slider: true,
+      slider: false,
       zoomLevel: true
     },
     baseLayer: new TileLayer('base', {

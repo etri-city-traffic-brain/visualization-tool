@@ -11,9 +11,11 @@ const webApp = require('../web-app')
 const startMessenger = require('../salt-connector/connector')
 const startHttpServer = require('../http-server')
 
-const { server: { webPort, tcpPort }, db } = require('../config');
+const { server: { webPort, tcpPort }, db } = require('../config')
 
 connectDB(db)
 
 const httpServer = startHttpServer(webApp, webPort)
 startMessenger(httpServer, tcpPort)
+
+console.log(`This process is pid ${process.pid}`)

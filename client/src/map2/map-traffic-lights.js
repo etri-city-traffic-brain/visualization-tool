@@ -9,6 +9,7 @@ import extent from './map-extent'
 import mapService from '../service/map-service'
 
 import signalGroups from '@/config/junction-config'
+import OptStatusLayer from './opt-status-layer'
 
 const addLayerTo = map => name => new maptalks.VectorLayer(name, [], {}).addTo(map)
 
@@ -109,7 +110,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   const trafficLightsLayer = addLayer('trafficLightsLayer')
   const linkLayer = addLayer('tmpLinkLayer')
   const signalGroupLayer = addLayer('signalGroupLayer')
-
+  signalGroupLayer.hide()
   new maptalks.control.Toolbar({
     position: 'top-left',
     items: [{
@@ -129,6 +130,14 @@ export default function SaltTrafficLightsLoader (map, element, events) {
 
   signalGroupLayer.addGeometry(groups)
 
+  const selectConnection = async (target) => {
+    const linkIds = await getLinkIds(map, target.owner)
+    const lines = linkIds.map(makeLinkLine)
+    linkLayer.clear()
+    linkLayer.addGeometry(lines)
+    map.addLayer(linkLayer)
+  }
+
   const editConnection = async (target) => {
     const { owner } = target
     const [x, y] = owner.toGeoJSONGeometry().coordinates
@@ -138,6 +147,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
 
     const lines = linkIds.map(link => makeLinkLine(link))
 
+    linkLayer.clear()
     linkLayer.addGeometry(lines)
     map.addLayer(linkLayer)
     events.$emit('junction:selected', {
@@ -155,14 +165,6 @@ export default function SaltTrafficLightsLoader (map, element, events) {
       x,
       y
     })
-  }
-  const selectConnection = async (target) => {
-    const linkIds = await getLinkIds(map, target.owner)
-
-    const lines = linkIds.map(makeLinkLine)
-
-    linkLayer.addGeometry(lines)
-    map.addLayer(linkLayer)
   }
 
   function makeTrafficLight (feature, color) {
@@ -207,17 +209,17 @@ export default function SaltTrafficLightsLoader (map, element, events) {
       .setMenu({
         items: [
           {
-            item: `편집(${feature.properties.NODE_ID.substring(0, 10)})`,
+            item: `선택(${feature.properties.NODE_ID.substring(0, 10)})`,
             click: editConnection
-          },
-          {
-            item: '삭제',
-            click: deleteConnection
-          },
-          {
-            item: '선택',
-            click: selectConnection
           }
+          // {
+          //   item: '삭제',
+          //   click: deleteConnection
+          // },
+          // {
+          //   item: '선택',
+          //   click: selectConnection
+          // }
         ]
       })
       .openMenu()
@@ -252,122 +254,9 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     }
   }
 
-  const options = {
-    animation: true,
-    color: ['Red', 'Blue', 'Green', 'Yellow'],
-    p: ['▖', '▘', '▝', '▗', '▗'],
-    font: '20px san-serif'
-  }
-
-  class OptStatusLayer extends maptalks.Layer {
-    constructor (id, data, options) {
-      super(id, options)
-      this.data = data
-    }
-
-    setData (data) {
-      this.data = data
-      return this
-    }
-
-    getData () {
-      return this.data
-    }
-  }
-
-  OptStatusLayer.mergeOptions(options)
-
-  let angle = 0
-  class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
-    checkResources () {
-      return []
-    }
-
-    draw () {
-      const colors = this.layer.options.color
-      const now = Date.now()
-      const rndIdx = Math.round(now / 300 % colors.length)
-      const color = colors[rndIdx]
-      const p = this.layer.options.p[rndIdx]
-      const drawn = this._drawData(this.layer.getData(), color, p)
-      this._drawnData = drawn
-      this.completeRender()
-    }
-
-    drawOnInteracting (evtParam) {
-      if (!this._drawnData || this._drawnData.length === 0) {
-        return
-      }
-      const colors = this.layer.options.color
-      const now = Date.now()
-      const rndIdx = Math.round(now / 300 % colors.length)
-      const color = colors[rndIdx]
-      this._drawData(this._drawnData, color)
-    }
-
-    onSkipDrawOnInteracting () { }
-
-    needToRedraw () {
-      if (this.layer.options.animation) {
-        return true
-      }
-      return super.needToRedraw()
-    }
-
-    _drawData (data, color, p) {
-      if (!Array.isArray(data)) {
-        return
-      }
-      const map = this.getMap()
-      this.prepareCanvas()
-      const ctx = this.context
-      ctx.fillStyle = color
-      ctx.font = this.layer.options.font
-
-      const containerExtent = map.getContainerExtent()
-      const drawn = []
-      data.forEach(d => {
-        const point = map.coordinateToContainerPoint(new maptalks.Coordinate(d.coord))
-        if (!containerExtent.contains(point)) {
-          return
-        }
-        const text = d.text + p
-        const len = ctx.measureText(text)
-        ctx.fillText(text, point.x - len.width / 2, point.y)
-        drawn.push(d)
-
-        // radar
-        ctx.save()
-        ctx.beginPath()
-        ctx.strokeStyle = color
-        ctx.fillStyle = color
-        ctx.globalAlpha = 0.5
-        ctx.translate(point.x - 3, point.y + 15)
-        angle += 10
-        ctx.rotate((Math.PI / 180) * angle)
-        ctx.moveTo(0, 0)
-        const y = map.distanceToPoint(0, 50, map.getZoom())
-        // console.log()
-        ctx.arc(0, 0, y.y, (Math.PI / 180) * (angle % 360), (Math.PI / 180) * (360), true)
-        ctx.closePath()
-        ctx.stroke()
-        ctx.fill()
-        ctx.restore()
-      })
-
-      // ***
-
-      //
-
-      return drawn
-    }
-  }
-
-  OptStatusLayer.registerRenderer('canvas', OptStatusLayerRenderer)
   const layer = new OptStatusLayer('hello')
 
   function setOptJunction (junctionId) {
-    console.log('set 최적화 ', junctionId)
     const tlayer = map.getLayer('trafficLightsLayer')
     tlayer.getGeometries().forEach(g => {
       if (g.properties.NODE_ID === junctionId) {
@@ -385,6 +274,10 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     layer.setData([])
   }
 
+  function setCurrentLoads (loads) {
+
+  }
+
   map.on('zoomend moveend', load)
 
   return {
@@ -393,6 +286,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     hide,
     toggleGroup: toggleGroupLayer,
     setOptJunction,
-    clearOptJunction
+    clearOptJunction,
+    setCurrentLoads
   }
 }

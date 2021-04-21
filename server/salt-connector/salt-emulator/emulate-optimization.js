@@ -101,31 +101,26 @@ const makeData = () => {
 }
 
 socket.on('connect', async () => {
-  console.log('socket connected')
   const init = msgFactory.makeInit({
     simulationId: str2CharCodes(simulationId)
   })
 
-  const status = msgFactory.makeStatus({
-    status: 0,
-    progress: 20
-  })
+  const status = msgFactory.makeStatus({ status: 0, progress: 20 })
 
-  // console.log(data.length - 16)
   send(init)
   // send(data);
-  send(msgFactory.makeStatus({ status: 0, progress: 20 }))
+  // send(msgFactory.makeStatus({ status: 0, progress: 20 }))
   // log('send status')
   // await sleep(1000)
 
-  for (let j = 0; j < 3; j++) {
-    for (let i = 1; i < 6; i++) {
-      await sleep(1000)
+  for (let j = 0; j < 3; j++) { // epoch
+    for (let i = 0; i <= 100; i += 20) { // simulation
+      await sleep(500)
       send(makeData())
       // send(msgFactory.makeStatus({ status: 1, progress: i * 20 }))
       send(msgFactory.makeStatus({ status: 1, progress: i }))
     }
-    await sleep(3000)
+    await sleep(1000)
   }
 
   // log('send status')
@@ -150,8 +145,8 @@ socket.on('connect', async () => {
 
 socket.on('data', (buffer) => {
   const header = Header(buffer)
-  log(chalk.green('*** Command received ***'))
-  log(header)
+  // log(chalk.green('*** Command received ***'))
+  // log(header)
   const bodyLength = header.length + HEADER_LENGTH
   const bodyBuffer = buffer.slice(HEADER_LENGTH, bodyLength)
 

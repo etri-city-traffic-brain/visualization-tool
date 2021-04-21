@@ -2,7 +2,8 @@
 
 const serialize = obj => JSON.stringify(obj)
 
-const { log } = console
+const { log, group, groupEnd } = console
+const { WebSocket } = window
 
 // eslint-disable-next-line no-undef
 const env = process && process.env
@@ -10,6 +11,20 @@ const env = process && process.env
 const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.114:8080/'
 
 log('execution mode:', env.NODE_ENV)
+
+const extend = (extent) => {
+  const { min, max } = extent
+  return {
+    min: {
+      x: min.x - 0.0012,
+      y: min.y - 0.0014
+    },
+    max: {
+      x: max.x + 0.0012,
+      y: max.y + 0.0014
+    }
+  }
+}
 
 function Client ({ url = wsUrl, simulationId, eventBus }) {
   if (!eventBus) {
@@ -23,7 +38,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     try {
       socket.send(serialize(obj))
     } catch (err) {
-      console.log(err.message)
+      log(err.message)
     }
   }
   const close = () => {
@@ -33,7 +48,11 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   }
 
   function init () {
-    log('web-socket init:', simulationId, wsUrl)
+    // log('init websocket:', simulationId, wsUrl)
+    group('init websocket')
+    log(simulationId)
+    log(wsUrl)
+    groupEnd()
     if (status === 'open') {
       log('WebSocket is already opened!!')
       return
@@ -43,7 +62,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       send({ type: 0, simulationId })
       status = 'open'
       eventBus.$emit('ws:open')
-      console.log('websocket is opened')
+      log('websocket is opened')
     })
 
     socket.addEventListener('message', ({ data }) => {
@@ -58,6 +77,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     socket.addEventListener('close', () => {
       eventBus.$emit('ws:close', {})
       status = 'close'
+      log('websocket is closed')
     })
 
     socket.addEventListener('error', () => {
@@ -67,13 +87,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
 
     eventBus.$on('salt:set', ({ extent, zoom }) => {
       const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
-      const { min, max } = extent
-      console.log('send salt:set')
-      min.x -= 0.0012
-      min.y -= 0.0014
-      max.x += 0.0012
-      max.y += 0.0014
-
+      const { min, max } = extend(extent)
       send({
         simulationId,
         type: 10, // Set
@@ -88,13 +102,10 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
           simulationId,
           type: 11 // Set
         })
-      } else {
-        console.log('igno')
       }
     })
   }
 
-  // init()
   return {
     init,
     send,
