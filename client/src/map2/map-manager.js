@@ -16,7 +16,7 @@ import makeGeometry from './make-geometry'
 import simulationService from '../service/simulation-service'
 import mapService from '../service/map-service'
 
-import { makeEdgeLayer, makeCanvasLayer, makeGridLayer, makeToolLayer } from '../layers'
+import { makeEdgeLayer, makeCanvasLayer, makeToolLayer } from '../layers'
 
 const ZOOM_MINIMUM = 14
 
@@ -34,11 +34,11 @@ function MapManager ({ map, simulationId, eventBus }) {
   let currentStep = 0
 
   const edgeLayer = makeEdgeLayer(map, eventBus)
-  const gridLayer = makeGridLayer(map)
+  // const gridLayer = makeGridLayer(map)
   const canvasLayer = makeCanvasLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus, extent)
   const toolLayer = makeToolLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
   map.addLayer(edgeLayer)
-  map.addLayer(gridLayer)
+  // map.addLayer(gridLayer)
   map.addLayer(canvasLayer)
   map.addLayer(toolLayer)
 
@@ -117,7 +117,7 @@ function MapManager ({ map, simulationId, eventBus }) {
   async function updateSimulationResult () {
     currentSpeedsPerLink = await simulationService.getSimulationResult(simulationId, extent(map))
     edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
-    gridLayer.updateGrid(simulationId, currentStep)
+    // gridLayer.updateGrid(simulationId, currentStep)
   }
 
   function addFeatures (features) {
@@ -156,13 +156,13 @@ function MapManager ({ map, simulationId, eventBus }) {
   function changeStep (step) {
     currentStep = step
     edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
-    gridLayer.updateGrid(simulationId, currentStep)
+    // gridLayer.updateGrid(simulationId, currentStep)
   }
 
   const handleZoomEvent = async (event) => {
     const zoom = map.getZoom()
     if (zoom <= ZOOM_MINIMUM) {
-      gridLayer.updateGrid(simulationId, currentStep)
+      // gridLayer.updateGrid(simulationId, currentStep)
       return
     } else {
       await loadMapData(event.type)
@@ -177,15 +177,26 @@ function MapManager ({ map, simulationId, eventBus }) {
     }
   }
 
+  function getEdgesInView () {
+    // const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
+    // const { features } = await mapService.getMap(extent(map))
+
+    // console.log(currentSpeedsPerLink)
+    return currentSpeedsPerLink
+  }
+
   map.on('zoomend moveend', handleZoomEvent)
 
-  // loadMapData()
+  // map.on('zoomend', () => { console.log('zoom end') })
+  // map.on('moveend', () => { console.log('move end') })
 
   return {
     loadMapData,
     changeStep,
     toggleFocusTool,
-    map
+    map,
+    getEdgesInView,
+    bus: eventBus
   }
 }
 

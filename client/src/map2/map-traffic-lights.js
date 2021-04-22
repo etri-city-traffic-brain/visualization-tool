@@ -33,7 +33,18 @@ function makeGroupPolygon (group) {
         polygonFill: group.properties.color,
         polygonOpacity: 0.2
       }
+    }
+
+  )
+    .setMenu({
+      items: [
+        {
+          item: `🙂 연동 교차로 선택 - <div style="border: 1px solid gray;">${group.properties.groupId}</div>`,
+          click: () => {}
+        }
+      ]
     })
+    .openMenu()
   geometry.properties = group.properties
   return geometry
 }
@@ -114,11 +125,13 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   new maptalks.control.Toolbar({
     position: 'top-left',
     items: [{
-      item: 'Toggle Signal Group',
+      item: '연동교차로 ',
       click: () => toggleGroupLayer()
     }]
   })
     .addTo(map)
+  const show = () => trafficLightsLayer.show()
+  const hide = () => trafficLightsLayer.hide()
 
   const groups = signalGroups.map(group => {
     const area = makeGroupPolygon(group)
@@ -126,6 +139,14 @@ export default function SaltTrafficLightsLoader (map, element, events) {
       events.$emit('signalGroup:clicked', e.target.properties)
     })
     return area
+  })
+
+  map.on('zoomend', (event) => {
+    if (event.to < 16) {
+      hide()
+    } else {
+      show()
+    }
   })
 
   signalGroupLayer.addGeometry(groups)
@@ -242,9 +263,6 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     })
     trafficLightsLayer.addGeometry(geometries)
   }
-
-  const show = () => trafficLightsLayer.show()
-  const hide = () => trafficLightsLayer.hide()
 
   const toggleGroupLayer = () => {
     if (signalGroupLayer.isVisible()) {
