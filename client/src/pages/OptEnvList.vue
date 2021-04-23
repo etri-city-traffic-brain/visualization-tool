@@ -16,8 +16,7 @@
 
     <div class="p-0 bg-gray-600 max-w-full min-h-screen">
       <div class="d-flex flex-wrap pb-1">
-
-        <div class="text-white max-w-sm w-full md:max-w-sm bg-gray-700 hover:bg-gray-500 ml-1 mt-1 p-2 rounded-2xl " v-for="env of envs" :key="env.envName">
+        <div class="text-white max-w-full w-full md:max-w-sm bg-gray-700 hover:bg-gray-500 ml-1 mt-1 p-2 rounded-2xl " v-for="env of envs" :key="env.envName">
           <div class="px-2 py-1">
             <div class="font-bold text-lg">{{ env.envName }} </div>
             <p class="text-gray-400 text-base text-sm mt-1">

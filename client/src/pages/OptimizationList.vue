@@ -8,18 +8,38 @@
       no-body
     >
       <b-card-body class="p-1 d-flex">
+
+          <!-- <b-form-checkbox
+            class="ml-1"
+            v-model="autoRefresh"
+            name="check-button"
+            size="md"
+            switch
+          > -->
+        <!-- </b-form-checkbox> -->
+
+
+      </b-card-body>
+    </b-card>
+  <b-card
+    no-body
+    bg-variant="secondary"
+    text-variant="light"
+    style="min-width:840px; border-radius:0"
+  >
+    <b-container fluid class="mt-0 p-1">
+      <div>
         <b-btn
-          variant="outline-secondary"
+          variant="dark"
           size="sm"
           @click.stop="updateTable"
-          class="ml-1"
            v-b-tooltip.hover title="테이블을 업데이트합니다."
         >
           <b-icon icon="arrow-clockwise"/> 새로고침
         </b-btn>
-          <b-button
+          <b-btn
             :pressed.sync="autoRefresh"
-            variant="outline-secondary"
+            variant="dark"
             size="sm"
             class="ml-1"
             v-b-tooltip.hover title="테이블을 주기적으로 업데이트합니다."
@@ -31,26 +51,8 @@
               <b-icon stacked icon="slash-circle" variant="dark"></b-icon>
             </b-iconstack>
             자동새로고침
-          </b-button>
-          <!-- <b-form-checkbox
-            class="ml-1"
-            v-model="autoRefresh"
-            name="check-button"
-            size="md"
-            switch
-          > -->
-        </b-form-checkbox>
-
-
-      </b-card-body>
-    </b-card>
-  <b-card
-    no-body
-    bg-variant="secondary"
-    text-variant="light"
-    style="min-width:840px; border-radius:0"
-  >
-    <b-container fluid class="mt-1 p-1">
+          </b-btn>
+      </div>
       <b-alert
         :show="warning"
         dismissible variant="warning"
@@ -66,6 +68,7 @@
         hover
         small
         striped
+        responsive
         ref="simulations-table"
         table-variant="dark"
         head-variant="dark"
@@ -91,12 +94,12 @@
           <div draggable="true" @dragstart="drag" :data-id="row.item.id">
             <!-- <b class="text-success">{{ row.item.id.toUpperCase() }}</b> -->
             <!-- <b>{{ row.item.id.toUpperCase() }}</b> -->
-            <small
+            <span
               variant="link"
               href="#"
               v-b-tooltip.hover
               :title="row.item.envName">{{ row.item.id.toUpperCase() }}
-            </small>
+            </span>
             <!-- <small>{{ row.item.id.toUpperCase() }}</small>
             <small class="m-0 p-0 text-muted">({{ row.item.description }})</small> -->
 
@@ -109,18 +112,18 @@
           <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" :variant="statusColor(row.item.status)" font-scale="2"></b-icon>
           <b-icon v-else icon="shield-fill-check" :variant="statusColor(row.item.status)" font-scale="2"></b-icon> -->
           <h5>
-            <b-badge :variant="statusColor(row.item.status)" style="min-width:110px" class="text-left">
-              <b-icon v-if="row.item.status === 'running'" icon="gear-fill" variant="light" animation="spin" font-scale="1"></b-icon>
-              <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" variant="light" font-scale="1"></b-icon>
-              <b-icon v-else icon="shield-fill-check" variant="light" font-scale="1"></b-icon>
+            <b-icon v-if="row.item.status === 'running'" icon="gear-fill" variant="light" animation="spin" font-scale="1"></b-icon>
+            <b-icon v-else-if="row.item.status === 'error'" icon="exclamation-square-fill" variant="light" font-scale="1"></b-icon>
+            <b-icon v-else icon="shield-fill-check" variant="light" font-scale="1"></b-icon>
+            <b-badge :variant="statusColor(row.item.status)" style="min-width:110px" class="text-center">
               <span>{{ row.item.status.toUpperCase() }}</span>
             </b-badge>
           </h5>
         </template>
 
          <template v-slot:cell(duration)="row">
-          <b-badge>{{ row.item.configuration.fromTime.slice(0, 5) }}</b-badge> ~
-          <b-badge>{{ row.item.configuration.toTime.slice(0, 5) }}</b-badge>
+          <h5><b-badge>{{ row.item.configuration.fromTime.slice(0, 5) }}</b-badge> ~
+          <b-badge>{{ row.item.configuration.toTime.slice(0, 5) }}</b-badge></h5>
         </template>
 
         <template v-slot:cell(description)="row">
@@ -253,12 +256,7 @@
         :total-rows="totalRows"
         :per-page="perPage"
         v-model="currentPage"
-        first-text="|◀"
-        prev-text="◀"
-        next-text="▶"
-        last-text="▶|"
         align="center"
-        size="sm"
       />
     </b-container>
   </b-card>
