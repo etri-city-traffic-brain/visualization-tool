@@ -87,6 +87,7 @@ export default {
 
     const route = localStorage.getItem('currentRoute')
     this.currentRoute = route
+    console.log(this.currentRoute)
   },
 
   watch:{
@@ -125,6 +126,7 @@ export default {
   methods: {
     showOrHide() {
       const hides = [
+        'Intro',
         'OptimizationResultMap',
         'OptimizationResultComparisonMap'
       ]
@@ -138,41 +140,17 @@ export default {
 <style>
 
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* font-family: 'Avenir', Helvetica, Arial, sans-serif; */
+  /* -webkit-font-smoothing: antialiased; */
+  /* -moz-osx-font-smoothing: grayscale; */
   /* text-align: center; */
-  color: #2c3e50;
+  /* color: #2c3e50; */
   margin-top: 0px;
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition-property: opacity;
-  transition-duration: .25s;
-}
-
-.fade-enter-active {
-  transition-delay: .25s;
-}
-
-.fade-enter, .fade-leave-active {
-  opacity: 0;
-}
-
-.btn .fa-icon {
-  vertical-align: middle;
-  margin-right: 0.5rem;
-}
-.btn .fa-icon:last-child {
-  margin-right: 0;
-}
-
-#main-nav {
-  transition: top 0.3s;
-}
 
 html {
-  background: lightgrey;
+  /* background: lightgrey; */
   /* overflow: hidden; */
 }
 

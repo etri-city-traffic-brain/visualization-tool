@@ -7,7 +7,7 @@
     style="min-width:840px; border-radius:0"
     no-body
   >
-    <b-card-body
+    <div
       class="p-1 d-flex justify-content-between"
     >
       <div>
@@ -54,7 +54,7 @@
           </b-iconstack>
         </b-btn>
       </div>
-    </b-card-body>
+    </div>
   </b-card>
 
   <b-card
@@ -63,7 +63,7 @@
     text-variant="light"
     style="min-width:840px; border-radius:0"
   >
-    <b-container fluid class="mt-1 p-1">
+    <div fluid class="">
       <b-alert
         :show="warning"
         dismissible variant="warning"
@@ -296,7 +296,7 @@
           >
         </uniq-register>
       </b-modal>
-    </b-container>
+    </div>
  </b-card>
 </div>
 </template>

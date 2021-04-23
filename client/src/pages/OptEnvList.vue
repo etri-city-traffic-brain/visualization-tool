@@ -1,22 +1,49 @@
 <template>
   <div>
-     <b-card
+    <!-- <b-card
       bg-variant="dark"
       border-variant="dark"
       text-variant="light"
       style="min-width:840px; border-radius:0"
       no-body
-    >
-      <b-card-body class="p-1 d-flex">
+    > -->
+      <!-- <div class="p-1 d-flex bg-gray-600">
         <b-btn variant="secondary" size="sm" v-b-modal.create-simulation-modal>
             <b-icon icon="plus"></b-icon>
           </b-btn>
-      </b-card-body>
-    </b-card>
+      </div> -->
+    <!-- </b-card> -->
 
-    <b-container fluid class="p-1" style="background-color: black;">
-      <div class="d-flex flex-wrap">
-        <b-card
+    <div class="p-0 bg-gray-600 max-w-full min-h-screen">
+      <div class="d-flex flex-wrap pb-1">
+
+        <div class="text-white max-w-sm w-full md:max-w-sm bg-gray-700 hover:bg-gray-500 ml-1 mt-1 p-2 rounded-2xl " v-for="env of envs" :key="env.envName">
+          <div class="px-2 py-1">
+            <div class="font-bold text-lg">{{ env.envName }} </div>
+            <p class="text-gray-400 text-base text-sm mt-1">
+              {{ env.description }}
+            </p>
+            <p>주기: <span class="bg-purple-200 rounded px-2 text-black font-bold">{{ env.configuration.period }}</span></p>
+            <div>
+              대상시간: {{ env.configuration.fromTime }} ~ {{ env.configuration.toTime }}
+            </div>
+          </div>
+          <div class="p-2">
+             <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn>
+              <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn>
+              <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn>
+          </div>
+        </div>
+        <div class="text-white max-w-sm w-full md:max-w-sm bg-gray-700 hover:bg-gray-500 ml-1 mt-1 p-2 rounded-2xl ">
+          <div class="w-full min-h-full flex flex-col justify-center items-center" v-b-modal.create-simulation-modal>
+          <!-- <b-btn variant="secondary" size="sm" v-b-modal.create-simulation-modal> -->
+            <div class="text-lg font-bold leading-10">추가</div>
+            <!-- <b-icon icon="plus"></b-icon> -->
+          <!-- </b-btn> -->
+        </div>
+        </div>
+
+        <!-- <b-card
           style="min-width:300px;max-width:300px"
           v-for="env of envs"
           :key="env.envName"
@@ -54,16 +81,13 @@
             </p>
           </b-card-text>
             <b-card-text class="text-right">
-              <!-- <b-btn size="sm" variant="info" v-b-tooltip.hover title="실험환경 다운로드">
-                <b-icon icon="download"></b-icon>
-              </b-btn> -->
               <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn>
               <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn>
               <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn>
             </b-card-text>
-        </b-card>
+        </b-card> -->
       </div>
-    </b-container>
+    </div>
 
     <b-modal
       title="최적화 등록"
