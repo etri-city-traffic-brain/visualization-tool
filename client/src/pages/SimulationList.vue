@@ -1,19 +1,11 @@
 <template>
 <div>
-  <b-card
-    bg-variant="dark"
-    border-variant="dark"
-    text-variant="light"
-    style="min-width:840px; border-radius:0"
-    no-body
-  >
-    <div
-      class="p-1 d-flex justify-content-between"
-    >
+  <div class="bg-gray-500 py-2 min-w-max">
+    <div class="p-1 flex justify-between" >
       <div>
         <b-btn
           size="sm"
-          variant="secondary"
+          variant="dark"
           v-b-modal.create-simulation-modal
           v-b-tooltip.hover
           title="시뮬레이션 등록"
@@ -22,7 +14,7 @@
         </b-btn>
         <b-btn
           size="sm"
-          variant="secondary"
+          variant="dark"
           v-b-toggle.collapse1
           v-b-tooltip.hover
           title="시뮬레이션 비교"
@@ -33,7 +25,7 @@
       <div>
         <b-btn
           size="sm"
-          variant="secondary"
+          variant="dark"
           @click.stop="updateTable"
           title="새로고침"
           v-b-tooltip.hover
@@ -44,57 +36,41 @@
           :pressed.sync="autoRefresh"
           :variant="autoRefresh ? 'info' : 'outline-secondary'"
           size="sm"
+          variant="info"
           v-b-tooltip.hover
           title="테이블을 주기적으로 업데이트합니다."
         >
           <b-icon v-if="!autoRefresh" icon="arrow-clockwise"/>
           <b-iconstack v-if="autoRefresh" font-scale="1" animation="spin">
             <b-icon stacked icon="slack" variant="info" scale="0.75" shift-v="-0.25"></b-icon>
-            <b-icon stacked icon="slash-circle" variant="dark"></b-icon>
+            <b-icon stacked icon="slash-circle" variant="light"></b-icon>
           </b-iconstack>
         </b-btn>
       </div>
     </div>
-  </b-card>
 
-  <b-card
-    no-body
-    bg-variant="secondary"
-    text-variant="light"
-    style="min-width:840px; border-radius:0"
-  >
-    <div fluid class="">
+    <div class="">
       <b-alert
         :show="warning"
         dismissible variant="warning"
       >
         {{ warning }}
       </b-alert>
-      <b-row class="m-0 p-0">
-        <b-col md="12" class="p-0">
+      <!-- <b-row class="m-0 p-0"> -->
+        <!-- <b-col md="12" class="m-0 p-0"> -->
 
-        </b-col>
-      </b-row>
-      <b-row class="m-0 p-0">
-        <b-col md="12" class="m-0 p-0">
-          <b-card
-            class="m-0 p-0"
-            text-variant="white" style="border-radius:0" no-body
-            border-variant="secondary"
-            >
 
           <!-- simulation drop area -->
             <b-collapse id="collapse1" class="mt-0">
-              <b-card-group deck>
-                <b-card
-                  class="m-0"
+              <!-- <b-card-group deck> -->
+                <div
+
                   @drop="drop"
                   @dragover="dragover"
-                  bg-variant="secondary"
-                  border-variant="secondary"
+                  class="bg-indigo-100 p-3 text-center"
                 >
                   <span v-if="selected.length === 0" >
-                    시뮬레이션 이름을 선택 후 여기로 드래그&드랍 하세요.
+                    시뮬레이션을 여기로 드래그&드랍 하세요.
                   </span>
                   <b-badge class="mx-2 p-2"
                     href="#"
@@ -106,8 +82,8 @@
                     {{ item }}
                     <b-icon @click="deleteSelected(item)" icon="x"/>
                   </b-badge>
-                </b-card>
-              </b-card-group>
+                </div>
+              <!-- </b-card-group> -->
             </b-collapse> <!-- simulation drop area -->
             <b-btn
               variant="warning"
@@ -117,9 +93,9 @@
             >
               <b-icon icon="bar-chart-fill"></b-icon> 비교
             </b-btn>
-          </b-card>
-        </b-col>
-      </b-row>
+
+        <!-- </b-col> -->
+      <!-- </b-row> -->
       <!-- TABLE -->
       <b-table
         hover
@@ -153,7 +129,9 @@
         </template>
 
         <template v-slot:cell(duration)="row">
-          <b-badge>{{ row.item.configuration.fromTime }}</b-badge> ~ <b-badge>{{ row.item.configuration.toTime }}</b-badge>
+
+            <div>{{ row.item.configuration.fromTime + ' ~ ' + row.item.configuration.toTime}} </div>
+
         </template>
         <template v-slot:cell(status)="row">
           <h5><b-badge :variant="statusColor(row.item.status)" class="">
@@ -169,46 +147,41 @@
         <!-- </template> -->
 
         <template v-slot:cell(actions)="row">
-          <b-button
+          <button
             @click.stop="startSimulation(row.item.id, row.index, $event.target)"
-            size="sm"
-            variant="primary"
             v-b-tooltip.hover
             title="시뮬레이션을 시작합니다."
+            class="px-1 bg-indigo-400 hover:bg-indigo-500 rounded"
           >
               <b-icon icon="play-fill"/>
-          </b-button>
-          <b-button
+          </button>
+            <!-- :disabled="row.item.status !== 'running'" -->
+          <button
             @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
-            size="sm"
-            variant="warning"
             v-b-tooltip.hover
             title="시뮬레이션을 중지합니다."
-            :disabled="row.item.status !== 'running'"
+            class="px-1 bg-yellow-400 hover:bg-yellow-500 rounded"
           >
               <b-icon icon="stop-fill"/>
-          </b-button>
-          <b-button
-            size="sm"
-            variant="secondary"
+          </button>
+          <router-link
             :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
             v-if="row.item.status === 'finished' || row.item.status === 'running'"
+            class="px-1 py-1 bg-blue-200 hover:bg-blue-500 rounded"
             >
               <b-icon icon="zoom-in"></b-icon>
-          </b-button>
+          </router-link>
+          <button
+            class="px-1 bg-red-400 hover:bg-red-500 rounded"
+            @click.stop="removeSimulation(row.item)">
+              <b-icon icon="trash-fill" aria-hidden="true"/>
+          </button>
         </template>
 
         <template v-slot:cell(details)="row">
 
          </template>
          <template v-slot:cell(del)="row">
-          <b-button
-            size="sm"
-            variant="danger"
-            class="mr-1"
-            @click.stop="removeSimulation(row.item)">
-              <b-icon icon="trash-fill" aria-hidden="true"/>
-          </b-button>
         </template>
         <template v-slot:row-details="row">
           <b-card bg-variant="secondary" text-variant="light">
@@ -297,7 +270,7 @@
         </uniq-register>
       </b-modal>
     </div>
- </b-card>
+ </div>
 </div>
 </template>
 

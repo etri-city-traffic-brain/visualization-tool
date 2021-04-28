@@ -123,7 +123,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   const signalGroupLayer = addLayer('signalGroupLayer')
   signalGroupLayer.hide()
   new maptalks.control.Toolbar({
-    position: 'top-left',
+    position: 'top-right',
     items: [{
       item: '연동교차로 ',
       click: () => toggleGroupLayer()

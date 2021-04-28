@@ -14,32 +14,40 @@
       </div> -->
     <!-- </b-card> -->
 
-    <div class="p-0 bg-gray-600 max-w-full min-h-screen">
-      <div class="d-flex flex-wrap pb-1">
-        <div class="text-white max-w-full w-full md:max-w-sm bg-gray-700 hover:bg-gray-500 ml-1 mt-1 p-2 rounded-2xl " v-for="env of envs" :key="env.envName">
-          <div class="px-2 py-1">
-            <div class="font-bold text-lg">{{ env.envName }} </div>
-            <p class="text-gray-400 text-base text-sm mt-1">
-              {{ env.description }}
-            </p>
-            <p>주기: <span class="bg-purple-200 rounded px-2 text-black font-bold">{{ env.configuration.period }}</span></p>
-            <div>
-              대상시간: {{ env.configuration.fromTime }} ~ {{ env.configuration.toTime }}
+    <div class="p-0 bg-gray-600 max-w-full min-h-full">
+      <div class="d-flex flex-wrap pb-3 pl-1 pr-1">
+        <div
+          v-for="env of envs"
+          :key="env.envName"
+          class="text-white max-w-full w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6 mt-1"
+        >
+          <div class="bg-gray-700 hover:bg-gray-500 m-1 p-2 rounded-md min-h-full divide-y-2 divide-blue-100 divide-solid">
+            <div class="p-1">
+              <div class="font-bold text-md px-2 pt-1">{{ env.envName }} </div>
+              <p class="text-gray-400 text-base text-sm mt-1">
+                {{ env.description }}
+              </p>
+              <p>주기: <span class="bg-purple-200 rounded px-2 text-black font-bold">{{ env.configuration.period }}</span></p>
+              <div>
+                대상시간: {{ env.configuration.fromTime }} ~ {{ env.configuration.toTime }}
+              </div>
+            </div>
+            <div class="pt-2 pr-3 text-right">
+                <!-- <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn> -->
+                <!-- <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn> -->
+                <!-- <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn> -->
+                <button class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700" @click="openModify(env)">수정</button>
+                <button class="bg-yellow-400 px-2 py-1 rounded text-sm text-black font-bold hover:bg-yellow-700" @click="remove(env.id)">삭제</button>
+                <button class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700" @click="registerSimulation(env)">실험</button>
             </div>
           </div>
-          <div class="p-2">
-             <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn>
-              <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn>
-              <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn>
+        </div>
+        <div class="text-white max-w-full w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6 mt-1">
+          <div class="bg-gray-700 hover:bg-gray-500 m-1 rounded-2xl min-h-full">
+            <div class="w-full min-h-full flex flex-col justify-center items-center" v-b-modal.create-simulation-modal>
+              <div class="text-lg font-bold leading-10">추가</div>
+            </div>
           </div>
-        </div>
-        <div class="text-white max-w-sm w-full md:max-w-sm bg-gray-700 hover:bg-gray-500 ml-1 mt-1 p-2 rounded-2xl ">
-          <div class="w-full min-h-full flex flex-col justify-center items-center" v-b-modal.create-simulation-modal>
-          <!-- <b-btn variant="secondary" size="sm" v-b-modal.create-simulation-modal> -->
-            <div class="text-lg font-bold leading-10">추가</div>
-            <!-- <b-icon icon="plus"></b-icon> -->
-          <!-- </b-btn> -->
-        </div>
         </div>
 
         <!-- <b-card

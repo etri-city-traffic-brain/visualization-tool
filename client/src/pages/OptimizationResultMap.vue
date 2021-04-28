@@ -1,7 +1,10 @@
 <template>
   <b-container fluid class="m-0 p-0">
     <div class="uniq-top-left">
-      <uniq-congestion-color-bar/>
+      <div class="bg-gray-500 bg-opacity-50 py-1 mt-1 font-bold text-center">
+      {{ simulationId }}
+      </div>
+      <uniq-congestion-color-bar class="mt-1"/>
       <b-card
         bg-variant="dark"
         text-variant="light"
@@ -46,38 +49,35 @@
           :height="220"
         />
       </b-card>
-      <b-card
-        bg-variant="dark"
-        text-variant="light"
-        no-body
-        class="mt-1 p-2"
-      >
+      <div class="mt-1 p-2 bg-blue-400 font-bold text-sm opacity-90 rounded">
       <!-- 최적화 진행률 -->
-      <b-card-text class="text-center mb-1">
+      <div class="text-center mb-1 uppercase">
         Epoch
-      </b-card-text>
+      </div>
 
-      <b-progress :max="simulation.configuration.epoch" class="ml-2">
+      <b-progress :max="simulation.configuration.epoch" height="8px">
         <b-progress-bar :value="progressOpt" animated striped variant="success" >
-          <span>Epoch {{ progressOpt }} / {{ simulation.configuration.epoch }}</span>
+          <!-- <span>Epoch {{ progressOpt }} / {{ simulation.configuration.epoch }}</span> -->
         </b-progress-bar>
       </b-progress>
-    </b-card>
-    <b-card
-      bg-variant="dark"
-      text-variant="light"
-      no-body
-      class="mt-1 p-2"
-    >
-      <b-card-text class="text-center mb-1">
+
+    <!-- <div class="relative pt-1">
+      <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+        <div style="width:30%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
+      </div>
+    </div> -->
+
+    </div>
+    <div class="mt-1 p-2 bg-indigo-400 font-bold text-sm opacity-90 rounded">
+      <div class="text-center mb-1">
         시뮬레이션 진행률
-      </b-card-text>
-      <b-progress class="ml-2">
+      </div>
+      <b-progress class="" height="8px">
         <b-progress-bar :value="progress" animated striped variant="primary">
           <span> {{ progress }} %</span>
         </b-progress-bar>
       </b-progress>
-    </b-card>
+    </div>
     <b-card
       bg-variant="dark"
       text-variant="light"
@@ -155,10 +155,9 @@
     height: 100%;
     position: fixed;
     z-index:100;
-    top: 130px;
+    top: 50px;
     padding: 0;
     left: 5px;
-    border: 0px solid #73AD21;
   }
 
   .uniq-bottom-left {
@@ -205,22 +204,5 @@
     transform: translateY(-50%);
   }
 
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #f8f9fa #343a40;
-  }
-  *::-webkit-scrollbar {
-    width: 12px;
-  }
-  *::-webkit-scrollbar-track {
-    background: #343a40;
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: #f8f9fa;
-    border-radius: 20px;
-    border: 3px solid #343a40;
-  }
-
-  /* @import '@/assets/images/gb1.jpg'; */
   @import '@/assets/styles/style.css';
 </style>

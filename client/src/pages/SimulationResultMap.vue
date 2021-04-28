@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="uniq-top-menu">
-      <uniq-congestion-color-bar/>
+
     </div>
 
     <!-- ----------- -->
@@ -37,6 +37,11 @@
     <!-- TOP LEFT PANEL -->
     <!-- -------------- -->
     <div class="uniq-top-left">
+      <div class="bg-gray-500 bg-opacity-50 py-1 mt-1 font-bold text-center">
+      {{ simulationId }}
+      </div>
+      <uniq-congestion-color-bar/>
+
       <SimulationDetailsOnFinished
         v-if="simulation.status === 'finished'"
         :simulation="simulation"
@@ -62,17 +67,14 @@
         :logs="logs"
       >
       </SimulationDetailsOnRunning>
-      <b-card
-        bg-variant="dark"
-        border-variant="dark"
-        no-body
-        class="p-1 mt-1 info-card"
+      <div
+        class="py-1"
       >
         <div>
           <b-button @click.stop="startSimulation()" size="sm" variant="primary"> 시작 <b-icon icon="caret-right-fill"/> </b-button>
           <b-button @click="stop" size="sm" variant="warning" class="ml-1"> 중지 <b-icon icon="stop-fill"/> </b-button>
         </div>
-      </b-card>
+      </div>
       <b-card
         bg-variant="dark"
         border-variant="dark"
@@ -149,12 +151,15 @@
   .uniq-top-left {
     max-width: 260px;
     height: 100%;
+    /* height: 500px; */
+    overflow: auto;
+    /* max-height: 500px; */
     position: fixed;
     z-index:100;
     top: 80px;
     padding: 0;
     left: 5px;
-    border: 0px solid #73AD21;
+    /* border: 0px solid #73AD21; */
   }
 
   .loading-container {
@@ -172,21 +177,7 @@
     transform: translateY(-50%);
   }
 
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #f8f9fa #343a40;
-  }
-  *::-webkit-scrollbar {
-    width: 12px;
-  }
-  *::-webkit-scrollbar-track {
-    background: #343a40;
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: #f8f9fa;
-    border-radius: 20px;
-    border: 3px solid #343a40;
-  }
+
 
   /* @import '@/assets/images/gb1.jpg'; */
   /* @import '@/assets/styles/style.css'; */

@@ -357,22 +357,6 @@
     transform: translateY(-50%);
   }
 
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #f8f9fa #343a40;
-  }
-  *::-webkit-scrollbar {
-    width: 12px;
-  }
-  *::-webkit-scrollbar-track {
-    background: #343a40;
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: #f8f9fa;
-    border-radius: 20px;
-    border: 3px solid #343a40;
-  }
-
 
   .bounce-enter-active {
   animation: bounce-in .5s;

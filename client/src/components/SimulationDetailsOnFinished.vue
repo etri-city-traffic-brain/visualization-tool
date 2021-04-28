@@ -1,5 +1,6 @@
 <template>
   <div>
+
     <uniq-card-title title="시뮬레이션 평균속도" class="info-card"/>
     <b-card
       bg-variant="dark"
@@ -145,7 +146,7 @@ export default {
 
 <style scoped>
   .info-card {
-    opacity: 0.7;
+    opacity: 0.8;
     border-radius: 0px;
   }
 </style>

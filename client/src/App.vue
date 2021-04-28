@@ -10,7 +10,7 @@
       sticky
     >
       <b-navbar-brand href="#" to="/">
-         <strong>UNIQ</strong>
+        <strong>UNIQ</strong>
       </b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
@@ -21,39 +21,34 @@
           <b-nav-item
             v-for="{path, name } of menus"
             :key="path"
-            :active="currentRoute === path"
+            :active="currentRouteName === path"
             :to="'/' + path"
           >
-            {{ name }}
+            <span :class="currentRouteName === path ? 'border-b-2 border-blue-400 pb-1': ''">{{ name }}</span>
           </b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
-          <b-nav-item size="sm" to="" >
-            <b-badge>UNIQ</b-badge>
+          <b-nav-item size="sm" to="">
+            <span class="bg-indigo-100 p-1 text-black text-sm rounded-md font-bold">UNIQ</span>
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
-
-    <!-- <transition name="bounce"> -->
-      <router-view/>
-    <!-- </transition> -->
+    <router-view/>
     <!--
       BOTTOM COPYRIGHT
     -->
-    <b-card
-      bg-variant="dark"
-      text-variant="white"
+    <div
       class="no-round-corner"
       v-if="showOrHide()"
     >
-      <b-container fluid class="mt-2 mb-2 p-2 text-center" >
-        도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 소프트웨어
-        <hr class="my-3">
-        <small class="text-muted">Copyright 2020. ETRI All rights reserved.</small>
-        <small class="text-muted">Copyright ⓒ 2020. <em>Modutech</em> Inc. All rights reserved.</small>
-      </b-container>
-    </b-card>
+      <div fluid class="mt-2 mb-2 p-2 text-center" >
+        <p class="godo">도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 SW</p>
+        <hr class="my-2">
+        <!-- <small class="text-muted">Copyright 2021. ETRI All rights reserved.</small> -->
+        <small class="text-muted">Copyright ⓒ 2021. <em>Modutech</em> Inc. All rights reserved.</small>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -64,43 +59,17 @@ import userState from '@/user-state';
 export default {
   name: 'App',
   mounted() {
-    this.prevScrollpos = window.pageYOffset;
-    const navBar = this.$refs['main-nav'];
-    window.onscroll = () => {
-      // const currentScrollPos = window.pageYOffset;
-      // if (this.prevScrollpos > currentScrollPos) {
-      //   navBar.$el.style.top = '0';
-      // } else {
-      //   navBar.$el.style.top = '-50px';
-      // }
-      // this.prevScrollpos = currentScrollPos;
-    };
-    // const variants = ['success','danger', 'warning', 'primary', 'light']
-    const variants = ['light', 'secondary']
-    let i = 0;
-    setInterval(() => {
-      this.variantLogo = variants[i++ % variants.length]
-      if ( i >= 100) {
-        i = 0
-      }
-    }, 1000)
 
-    const route = localStorage.getItem('currentRoute')
-    this.currentRoute = route
-    console.log(this.currentRoute)
   },
-
-  watch:{
-    $route (to){
-      this.currentRoute = to.name
-      localStorage.setItem('currentRoute', to.name)
+  computed: {
+    currentRouteName() {
+      return this.$route.name;
     }
   },
   data() {
     return {
-      prevScrollpos: window.pageYOffset,
-      variant: 'dark',
       userState,
+      variant: 'dark',
       variantLogo: 'dark',
       currentRoute: '',
       menus: [
@@ -130,8 +99,7 @@ export default {
         'OptimizationResultMap',
         'OptimizationResultComparisonMap'
       ]
-      return !hides.includes(this.currentRoute)
-      // return this.currentRoute !== 'OptimizationResultMap'
+      return !hides.includes(this.currentRouteName)
     }
   }
 };
@@ -140,60 +108,33 @@ export default {
 <style>
 
 #app {
-  /* font-family: 'Avenir', Helvetica, Arial, sans-serif; */
-  /* -webkit-font-smoothing: antialiased; */
-  /* -moz-osx-font-smoothing: grayscale; */
-  /* text-align: center; */
-  /* color: #2c3e50; */
-  margin-top: 0px;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
 }
 
-
-html {
-  /* background: lightgrey; */
-  /* overflow: hidden; */
+.godo {
+  font-family: 'Godo'
 }
 
 * {
   box-sizing: border-box;
-}
-.no-round-corner {
-  border-radius: 0
-}
-
-.bounce-enter-active {
-  animation: bounce-in .5s;
-}
-.bounce-leave-active {
-  animation: bounce-in .5s reverse;
-}
-@keyframes bounce-in {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.5);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* global scrollbar style */
-
-* {
   scrollbar-width: thin;
   scrollbar-color: green #343a40;
 }
+
 *::-webkit-scrollbar {
   width: 12px;
 }
+
+*::-webkit-scrollbar-button {
+  /* display: none */
+  background: #343a40;
+}
+
 *::-webkit-scrollbar-track {
   background: #343a40;
-  /* background: red; */
 }
+
 *::-webkit-scrollbar-thumb {
-  /* background-color: #f8f9fa; */
   background-color:grey;
   border-radius: 15px;
   border: 3px solid #343a40;
@@ -202,6 +143,13 @@ html {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background:skyblue;
+}
+
+ @font-face {
+  font-family: 'Godo';
+  font-style: normal;
+  font-weight: 100;
+  src: url('//cdn.jsdelivr.net/korean-webfonts/1/corps/godo/Godo/GodoM.woff2') format('woff2'), url('//cdn.jsdelivr.net/korean-webfonts/1/corps/godo/Godo/GodoM.woff') format('woff');
 }
 
 </style>

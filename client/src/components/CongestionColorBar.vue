@@ -1,19 +1,19 @@
 <template>
-  <b-button-group>
-    <b-button
+  <div class="flex">
+    <div
       v-for="(value, id) in congestionColor.domain()"
       v-bind:key="id"
       :style="{'background-color': congestionColor(value),}"
-      size="sm"
+      class="px-2 py-1 flex-grow font-bold text-white"
     >
       {{ value }}
-    </b-button>
+    </div>
 
     <!-- <b-button size="sm" variant="danger" class="ml-1">막힘(~15km)</b-button> -->
     <!-- <b-button size="sm" variant="warning">정체(16~30km)</b-button> -->
     <!-- <b-button size="sm" variant="success">워활(31km~)</b-button> -->
 
-  </b-button-group>
+  </div>
 </template>
 
 <script>

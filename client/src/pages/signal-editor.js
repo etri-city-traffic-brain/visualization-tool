@@ -78,7 +78,6 @@ export default {
     }
   },
   created () {
-    console.log('regiset')
     eventBus.$on('junction:selected', this.handleJunctionSelect)
     // eventBus.$on('junction:selecte', (v) => {
     //   this.$emit('junction:select', v)

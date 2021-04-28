@@ -70,7 +70,6 @@ export default {
     }
   },
   mounted () {
-    log('신호최적화 목록')
     this.dataProvider({ currentPage: this.currentPage })
     this.interval = setInterval(async () => {
       if (this.autoRefresh) {

@@ -3,7 +3,7 @@
     //-->
 <template>
 <div>
-  <div>
+  <div class="godo">
     <div class="min-h-screen bg-gray-500 py-6 flex flex-col justify-center sm:py-12" v-bind:style="{backgroundImage: 'url(' + introImg + ')'}" >
       <div class="relative py-3 max-w-xl sm:max-w-3xl sm:mx-auto">
         <div class="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-900 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl bg-opacity-25"></div>
@@ -143,19 +143,9 @@ export default {
 </script>
 
 <style scoped>
-* {
-    scrollbar-width: thin;
-    scrollbar-color: #f8f9fa #343a40;
-  }
-  *::-webkit-scrollbar {
-    width: 12px;
-  }
-  *::-webkit-scrollbar-track {
-    background: #343a40;
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: #f8f9fa;
-    border-radius: 20px;
-    border: 3px solid #343a40;
-  }
+
+.godo {
+  font-family: 'Godo', sans-serif;
+  /* font-size: 20px */
+}
 </style>

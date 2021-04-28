@@ -45,7 +45,7 @@ export default {
         // { class: 'text-center', key: 'ended', label: '종료' },
         { class: 'text-center', key: 'actions', label: '제어' },
         // { class: 'text-center', key: 'details', label: '상세' },
-        { class: 'text-center', key: 'del', label: '삭제' }
+        // { class: 'text-center', key: 'del', label: '삭제' }
       ],
       items: [],
       currentPage: 1,
@@ -65,7 +65,6 @@ export default {
     }
   },
   mounted () {
-    log('트래픽시뮬레이션 목록')
     this.dataProvider({ currentPage: this.currentPage })
     this.interval = setInterval(async () => {
       if (this.autoRefresh) {

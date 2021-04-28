@@ -1,33 +1,7 @@
 <template>
 <div>
-    <b-card
-      bg-variant="dark"
-      border-variant="dark"
-      text-variant="light"
-      style="min-width:840px; border-radius:0"
-      no-body
-    >
-      <b-card-body class="p-1 d-flex">
-
-          <!-- <b-form-checkbox
-            class="ml-1"
-            v-model="autoRefresh"
-            name="check-button"
-            size="md"
-            switch
-          > -->
-        <!-- </b-form-checkbox> -->
-
-
-      </b-card-body>
-    </b-card>
-  <b-card
-    no-body
-    bg-variant="secondary"
-    text-variant="light"
-    style="min-width:840px; border-radius:0"
-  >
-    <b-container fluid class="mt-0 p-1">
+  <div class="bg-gray-500 min-w-max" >
+    <div fluid class="mt-0 p-1">
       <div>
         <b-btn
           variant="dark"
@@ -219,29 +193,60 @@
         </template>
 
         <template v-slot:row-details="row">
-          <b-card bg-variant="secondary" text-variant="light">
-            <h5>실험환경: <b-badge> {{ row.item.envName }} </b-badge></h5>
-            <h5>설명: <b-badge> {{ row.item.description }} </b-badge></h5>
-            <h5>시뮬레이션 시작: <b-badge> {{ row.item.started || '_' }} </b-badge></h5>
-            <h5>시뮬레이션 종료: <b-badge>{{ row.item.ended || '_' }} </b-badge></h5>
-            <h5>실행 스크립트: <b-badge> {{ row.item.configuration.script }} </b-badge></h5>
+          <div class="bg-indigo-100 rounded-xl text-black p-4">
+            <p class="px-2 py-1 rounded max-w-sm font-bold text-lg">{{ row.item.envName }} </p>
+            <p>{{ row.item.description }}</p>
+
+            <ul class="list-disc space-y-1 ml-4">
+              <li class="">
+                <div>
+                시뮬레이션 상태:
+                <span class="relative inline-flex rounded-md shadow-sm">
+                <span type="button"
+                  class="inline-flex items-center px-2 py-1 border border-purple-400 text-base leading-6 font-medium rounded-md text-purple-800 bg-white hover:text-purple-700 focus:border-purple-300 transition ease-in-out duration-150 cc_pointer">
+                  {{ row.item.status.toUpperCase() }}
+                </span>
+                <span v-if=" row.item.status === 'running'"  class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                </span>
+              </span>
+                </div>
+              </li>
+              <li class="">
+                시뮬레이션 시간: {{ row.item.started || '' }} ~ {{ row.item.ended || '' }}
+              </li>
+              <li class="">
+                스크립트: {{ row.item.configuration.script }}
+              </li>
+              <li class="">
+                Epoch: {{ row.item.configuration.epoch }}
+              </li>
+            </ul>
+
+
             <!-- <h5>교차로 아이디: <b-badge> {{ row.item.configuration.junctionId }} </b-badge></h5> -->
-            <h5>Epoch: <b-badge> {{ row.item.configuration.epoch }} </b-badge></h5>
-            <h5>최적화 교차로</h5>
-            <b-badge
-              v-for="junction of row.item.configuration.junctionId.split(',')"
-              :key="junction"
-              variant="dark"
-              class="ml-1"
-            >
-            {{ junction }}
-              <!-- <b-badge href="#" class="m-1" variant="dark" size="sm" ></b-badge> -->
-            </b-badge>
-            <b-card bg-variant="dark">
-            <b-btn variant="secondary" @click="downloadScenario(row.item.id)">다운로드 시나리오</b-btn>
-            <b-btn variant="secondary" @click="downloadScenarioConfig(row.item.id)">다운로드 설정파일</b-btn>
-            </b-card>
-          </b-card>
+
+            <div class="mb-2">
+              <div class="font-bold">최적화 교차로:</div>
+              <div class="flex flex-column max-w-md">
+                <span
+                  v-for="junction of row.item.configuration.junctionId.split(',')"
+                  :key="junction"
+                  variant="dark"
+                  class="ml-1 px-1 bg-indigo-100 rounded text-indigo-700 font-bold"
+                >
+                {{ junction.slice(0, 20) }}
+                  <!-- <b-badge href="#" class="m-1" variant="dark" size="sm" ></b-badge> -->
+                </span>
+              </div>
+            </div>
+
+            <div class="">
+              <button class="bg-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 font-bold text-white" @click="downloadScenario(row.item.id)">다운로드 시나리오</button>
+              <button class="bg-blue-700 px-2 py-1 rounded hover:bg-blue-200 font-bold text-white" @click="downloadScenarioConfig(row.item.id)">다운로드 설정파일</button>
+            </div>
+          </div>
         </template>
       </b-table>
       <b-alert
@@ -258,8 +263,8 @@
         v-model="currentPage"
         align="center"
       />
-    </b-container>
-  </b-card>
+    </div>
+  </div>
   <b-modal
     title="최적화 등록"
     id="create-simulation-modal"
