@@ -193,58 +193,61 @@
         </template>
 
         <template v-slot:row-details="row">
-          <div class="bg-indigo-100 rounded-xl text-black p-4">
-            <p class="px-2 py-1 rounded max-w-sm font-bold text-lg">{{ row.item.envName }} </p>
-            <p>{{ row.item.description }}</p>
+          <div class="flex bg-indigo-100 rounded-xl text-black p-4">
+            <div class="flex-1">
+              <p class="px-2 py-1 rounded max-w-sm font-bold text-lg">{{ row.item.envName }} </p>
+              <p>{{ row.item.description }}</p>
 
-            <ul class="list-disc space-y-1 ml-4">
-              <li class="">
-                <div>
-                시뮬레이션 상태:
-                <span class="relative inline-flex rounded-md shadow-sm">
-                <span type="button"
-                  class="inline-flex items-center px-2 py-1 border border-purple-400 text-base leading-6 font-medium rounded-md text-purple-800 bg-white hover:text-purple-700 focus:border-purple-300 transition ease-in-out duration-150 cc_pointer">
-                  {{ row.item.status.toUpperCase() }}
+              <ul class="list-disc space-y-1 ml-4">
+                <li class="">
+                  <div>
+                  시뮬레이션 상태:
+                  <span class="relative inline-flex rounded-md shadow-sm">
+                  <span type="button"
+                    class="inline-flex items-center px-2 py-1 border border-purple-400 text-base leading-6 font-medium rounded-md text-purple-800 bg-white hover:text-purple-700 focus:border-purple-300 transition ease-in-out duration-150 cc_pointer">
+                    {{ row.item.status.toUpperCase() }}
+                  </span>
+                  <span v-if=" row.item.status === 'running'"  class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                  </span>
                 </span>
-                <span v-if=" row.item.status === 'running'"  class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                </span>
-              </span>
-                </div>
-              </li>
-              <li class="">
-                시뮬레이션 시간: {{ row.item.started || '' }} ~ {{ row.item.ended || '' }}
-              </li>
-              <li class="">
-                스크립트: {{ row.item.configuration.script }}
-              </li>
-              <li class="">
-                Epoch: {{ row.item.configuration.epoch }}
-              </li>
-            </ul>
+                  </div>
+                </li>
+                <li class="">
+                  시뮬레이션 시간: {{ row.item.started || '' }} ~ {{ row.item.ended || '' }}
+                </li>
+                <li class="">
+                  스크립트: {{ row.item.configuration.script }}
+                </li>
+                <li class="">
+                  Epoch: {{ row.item.configuration.epoch }}
+                </li>
+              </ul>
 
 
-            <!-- <h5>교차로 아이디: <b-badge> {{ row.item.configuration.junctionId }} </b-badge></h5> -->
+              <!-- <h5>교차로 아이디: <b-badge> {{ row.item.configuration.junctionId }} </b-badge></h5> -->
 
-            <div class="mb-2">
-              <div class="font-bold">최적화 교차로:</div>
-              <div class="flex flex-column max-w-md">
+
+
+              <div class="">
+                <button class="bg-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 font-bold text-white" @click="downloadScenario(row.item.id)">다운로드 시나리오</button>
+                <button class="bg-blue-700 px-2 py-1 rounded hover:bg-blue-200 font-bold text-white" @click="downloadScenarioConfig(row.item.id)">다운로드 설정파일</button>
+              </div>
+            </div>
+            <div class="mb-2 flex-1">
+              <div class="font-bold">최적화 대상 교차로:</div>
+              <div class="flex flex-column max-w-xs max-h-60 overflow-y-auto">
                 <span
                   v-for="junction of row.item.configuration.junctionId.split(',')"
                   :key="junction"
                   variant="dark"
-                  class="ml-1 px-1 bg-indigo-100 rounded text-indigo-700 font-bold"
+                  class="m-1 px-2 py-1 bg-indigo-500 rounded max-w-xs rounded text-white"
                 >
                 {{ junction.slice(0, 20) }}
                   <!-- <b-badge href="#" class="m-1" variant="dark" size="sm" ></b-badge> -->
                 </span>
               </div>
-            </div>
-
-            <div class="">
-              <button class="bg-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 font-bold text-white" @click="downloadScenario(row.item.id)">다운로드 시나리오</button>
-              <button class="bg-blue-700 px-2 py-1 rounded hover:bg-blue-200 font-bold text-white" @click="downloadScenarioConfig(row.item.id)">다운로드 설정파일</button>
             </div>
           </div>
         </template>

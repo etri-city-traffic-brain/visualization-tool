@@ -126,8 +126,8 @@ export default {
 }
 
 *::-webkit-scrollbar-button {
-  /* display: none */
-  background: #343a40;
+  display: none
+  /* background: #343a40; */
 }
 
 *::-webkit-scrollbar-track {
