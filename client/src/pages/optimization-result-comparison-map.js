@@ -383,6 +383,7 @@ export default {
     async updatePhaseChart () {
       const phaseFixed = (await optimizationService.getPhase(this.fixedSlave, 'fixed')).data
       const phaseTest = (await optimizationService.getPhase(this.testSlave)).data
+      console.log('update chart')
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
       // this.updateChart()

@@ -91,7 +91,7 @@
     <b-card bg-variant="dark" text-variant="light" border-variant="dark" class="mt-1">
       <b-card-text class="text-right" >
         <b-button class="mr-1" @click="register" variant="primary" >
-          등록  <b-spinner small label="Spinning" v-if="loading"></b-spinner>
+          확인  <b-spinner small label="Spinning" v-if="loading"></b-spinner>
         </b-button>
         <b-button class="mr-1" @click="hide" variant="secondary" >
           닫기
