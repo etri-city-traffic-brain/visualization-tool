@@ -6,6 +6,8 @@ const findFeatures = require('../../routes/map/find-features')
 
 const parseMapReqParam = require('../../utils/parse-req-query')
 
+const controller = require('./controller')
+
 const router = express.Router()
 
 const useDb = name => mongoose.connection.useDb(name)
@@ -66,5 +68,7 @@ router.get('/:id', async (req, res) => {
     .toArray()
   res.json(arrayToObj(speeds, fieldName))
 })
+
+router.get('/result/:simulationId/:linkOrCellId', controller.getValueByLink)
 
 module.exports = router

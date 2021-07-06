@@ -171,8 +171,6 @@
           <b-button
             size="sm"
             variant="secondary"
-            v-b-tooltip.hover
-            title="신호비교"
             :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
           >
             <!-- <b-icon icon="circle-square"></b-icon> -->

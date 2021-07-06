@@ -51,7 +51,8 @@ const cook = ({ simulationId, duration, period }) => {
 
   return new Promise((resolve, reject) => {
     const stream = fs.createReadStream(simulationResultFile)
-    const transform = ([start, end, id, vehPassed, speed, avgDensity, waitingLength, waitingTime, sumTravelLength, sumTravelTime]) => ({ start, id, speed, sumTravelTime })
+    const transform = ([start, end, id, vehPassed, speed, avgDensity, waitingLength, waitingTime, sumTravelLength, sumTravelTime]) =>
+      ({ start, id, speed, sumTravelTime, vehPassed, waitingTime })
 
     const cells = {}
     const start = Date.now()
@@ -71,9 +72,13 @@ const cook = ({ simulationId, duration, period }) => {
         cell.cellId = cellId
         cell.values = cell.values || []
         cell.travelTimes = cell.travelTimes || []
+        cell.vehPassed = cell.vehPassed || []
+        cell.waitingTime = cell.waitingTime || []
 
         cell.values.push(speed)
         cell.travelTimes.push(Number(row.sumTravelTime))
+        cell.vehPassed.push(Number(row.vehPassed))
+        cell.waitingTime.push(Number(row.waitingTime))
         cells[cellId] = cell
       }
     }

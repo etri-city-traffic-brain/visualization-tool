@@ -81,6 +81,10 @@ async function downloadScenarioConfig (id) {
   return (await HTTP.get('/salt/v1/simulations/download/config?id=' + id))
 }
 
+async function getValueByLinkOrCell (simulationId, linkOrCellId, valueType) {
+  return (await HTTP.get(`/salt/v1/simulation/result/${simulationId}/${linkOrCellId}?type=${valueType}`)).data
+}
+
 export default {
   downloadScenario,
   downloadScenarioConfig,
@@ -93,5 +97,7 @@ export default {
   getSimulations,
   getOptimizations,
   uploadResult,
-  getScripts
+  getScripts,
+
+  getValueByLinkOrCell
 }

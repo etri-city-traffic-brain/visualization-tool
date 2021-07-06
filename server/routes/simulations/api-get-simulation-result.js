@@ -1,27 +1,27 @@
 
-const path = require('path');
+const path = require('path')
 
-const { getSimulations } = require('../../globals');
+const { getSimulations } = require('../../globals')
 
-const config = require('../../config');
+const config = require('../../config')
 
-const { saltPath: { output } } = config;
-async function getSimulationResult(req, res) {
-  const { params: { id } } = req;
+const { saltPath: { output } } = config
+async function getSimulationResult (req, res) {
+  const { params: { id } } = req
 
-  const obj = getSimulations().find({ id }).value();
+  const obj = getSimulations().find({ id }).value()
   if (!obj) {
-    res.status(404).end();
-    return;
+    res.status(404).end()
+    return
   }
 
-  const mapType = obj.configuration.map;
-  const fileName = [mapType, 'speeds', 'json'].join('.');
+  const mapType = obj.configuration.map
+  const fileName = [mapType, 'speeds', 'json'].join('.')
 
   // const filePath = path.join(simulationDir, id, fileName);
   // /salt/output/{simulation_id}/link.speeds.json
-  const filePath = path.join(output, id, fileName);
-  res.download(filePath, fileName);
+  const filePath = path.join(output, id, fileName)
+  res.download(filePath, fileName)
 }
 
-module.exports = getSimulationResult;
+module.exports = getSimulationResult

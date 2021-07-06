@@ -31,6 +31,7 @@ import UniqMapChanger from '@/components/UniqMapChanger'
 import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 
+// import D3SpeedBar from '../charts/d3/D3SpeedBar.vue';
 import bins from '@/stats/histogram'
 import userState from '@/user-state'
 import region from '@/map2/region'
@@ -43,6 +44,27 @@ const pieDefault = () => ({
   }],
   labels: ['막힘', '정체', '원활']
 })
+
+const makeLineChart = (data, label, color) => {
+  const dataset = (label, color, data) => ({
+    label,
+    fill: false,
+    borderColor: color,
+    backgroundColor: color,
+    borderWidth: 2,
+    pointRadius: 1,
+    data
+  })
+
+  return {
+    labels: new Array(data.length).fill(0).map((_, i) => i),
+    datasets: [
+      dataset(label, color, data)
+      // dataset('평균속도', '#1E90FF', data2)
+      // dataset('제한속도', '#FF0000', data3),
+    ]
+  }
+}
 
 const makeLinkSpeedChartData = (data1, data2, data3) => {
   const dataset = (label, color, data) => ({
@@ -80,6 +102,7 @@ export default {
     UniqCongestionColorBar,
     UniqSimulationResultExt,
     UniqMapChanger
+
   },
   data () {
     return {
@@ -105,7 +128,10 @@ export default {
         histogramData: null,
         pieDataStep: null,
         pieData: null,
-        linkSpeeds: []
+        linkMeanSpeeds: [],
+        linkSpeeds: [],
+        linkVehPassed: [],
+        linkWaitingTime: []
       },
       currentZoom: '',
       currentExtent: '',
@@ -174,18 +200,25 @@ export default {
 
     this.showLoading = false
 
-    this.$on('link:selected', (link) => {
+    this.$on('link:selected', async (link) => {
       this.currentEdge = link
       if (link.speeds) {
         if (!this.speedsPerStep.datasets) {
           return
         }
-        this.chart.linkSpeeds = makeLinkSpeedChartData(
-          link.speeds,
-          this.speedsPerStep.datasets[0].data,
-          new Array(link.speeds.length).fill(this.edgeSpeed())
-        )
+        // this.chart.linkSpeeds = makeLinkSpeedChartData(
+        //   link.speeds,
+        //   this.speedsPerStep.datasets[0].data,
+        //   new Array(link.speeds.length).fill(this.edgeSpeed())
+        // )
       }
+
+      // const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, link.LINK_ID, 'vehPassed')
+      // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
+      // this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
+      // this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
+
+      await this.updateLinkChart(link.LINK_ID)
     })
 
     this.$on('link:hover', (link) => {
@@ -261,15 +294,6 @@ export default {
     stop () {
       this.$emit('salt:stop', this.simulationId)
     },
-    // toggleBottom() {
-    //   if (this.bottomStyle.height === '220px') {
-    //     this.bottomStyle.height = '390px'
-    //     this.playerStyle.bottom = '400px'
-    //   } else if (this.bottomStyle.height === '390px') {
-    //     this.bottomStyle.height = '220px'
-    //     this.playerStyle.bottom = '230px'
-    //   }
-    // },
     addLog (text) {
       this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
       if (this.logs.length > 5) {
@@ -294,10 +318,10 @@ export default {
       this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0)
       this.chart.pieData = await statisticsService.getPieChart(this.simulationId)
       this.speedsPerStep = await statisticsService.getSummaryChart(this.simulationId)
-      this.chart.linkSpeeds = makeLinkSpeedChartData(
-        [],
+      this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
         this.speedsPerStep.datasets[0].data,
-        new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed())
+        new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed()),
+        []
       )
     },
     edgeSpeed () {
@@ -344,6 +368,13 @@ export default {
       } catch (err) {
         console.log(err)
       }
+    },
+    async updateLinkChart (linkId) {
+      const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, linkId)
+
+      this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
+      this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
+      this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
     }
   }
 }

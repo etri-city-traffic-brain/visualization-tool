@@ -37,11 +37,29 @@
     <!-- TOP LEFT PANEL -->
     <!-- -------------- -->
     <div class="uniq-top-left">
-      <div class="bg-gray-500 bg-opacity-50 py-1 mt-1 font-bold text-center">
-      {{ simulationId }}
+      <div>
+        <uniq-map-changer :map="map"/>
+        <b-button @click="centerTo(1)" class="ml-1" size="sm" variant="secondary">
+          <b-icon icon="dice1"></b-icon>
+        </b-button>
+        <!-- <b-button @click="stop" class="ml-1" size="sm" variant="secondary"> 중지 </b-button>
+        <b-button
+          size="sm"
+          variant="info"
+          v-b-tooltip.hover
+          title="시뮬레이션을 시작합니다."
+          @click.stop="startSimulation()"
+          >
+            <b-icon icon="play-fill"/>
+        </b-button> -->
+        <b-button @click="sidebar = !sidebar" size="sm" variant="secondary">
+          <b-icon icon="align-end"/>
+        </b-button>
+      </div>
+      <div class="bg-gray-600 py-1 mt-1 text-center">
+        <div class="text-white">{{ simulationId }}</div>
       </div>
       <uniq-congestion-color-bar/>
-
       <SimulationDetailsOnFinished
         v-if="simulation.status === 'finished'"
         :simulation="simulation"
@@ -50,7 +68,10 @@
         :chart="chart"
         :currentEdge="currentEdge"
         :edgeSpeed="edgeSpeed"
+
       >
+      <!-- :linkVehPasswd="linkVehPassed"
+        :linkWaitingTime="linkWaitingTime" -->
       </SimulationDetailsOnFinished>
       <SimulationDetailsOnRunning
         v-if="simulation.status === 'running'"
@@ -67,9 +88,7 @@
         :logs="logs"
       >
       </SimulationDetailsOnRunning>
-      <div
-        class="py-1"
-      >
+      <div class="py-1">
         <div>
           <b-button @click.stop="startSimulation()" size="sm" variant="primary"> 시작 <b-icon icon="caret-right-fill"/> </b-button>
           <b-button @click="stop" size="sm" variant="warning" class="ml-1"> 중지 <b-icon icon="stop-fill"/> </b-button>
@@ -81,29 +100,16 @@
         no-body
         class="p-1 mt-1"
       >
-        <div>
-          <uniq-map-changer :map="map"/>
-          <b-button @click="centerTo(1)" class="ml-1" size="sm" variant="secondary">
-            <b-icon icon="dice1"></b-icon>
-          </b-button>
 
-
-
-          <!-- <b-button @click="stop" class="ml-1" size="sm" variant="secondary"> 중지 </b-button>
-          <b-button
-            size="sm"
-            variant="info"
-            v-b-tooltip.hover
-            title="시뮬레이션을 시작합니다."
-            @click.stop="startSimulation()"
-            >
-              <b-icon icon="play-fill"/>
-          </b-button> -->
-          <b-button @click="sidebar = !sidebar" size="sm" variant="secondary">
-            <b-icon icon="align-end"/>
-          </b-button>
-        </div>
       </b-card>
+    </div>
+
+    <div class="uniq-top-right">
+      <div class="bg-gray-500">
+        <!-- <line-chart :chartData="chart.vehPassed" :options="defaultOption()" :height="150"/> -->
+        <!-- {{ chart.vehPassed }} -->
+
+      </div>
     </div>
 
     <!-- MAP CONTAINER -->
@@ -125,6 +131,7 @@
 </template>
 
 <script src="./simulation-result-map.js"> </script>
+
 
 <style>
   .uniq-box-panel {
@@ -151,16 +158,19 @@
   .uniq-top-left {
     max-width: 260px;
     height: 100%;
-    /* height: 500px; */
     overflow: auto;
-    /* max-height: 500px; */
     position: fixed;
     z-index:100;
-    top: 80px;
+    top: 50px;
     padding: 0;
     left: 5px;
+    /* height: 500px; */
+    /* max-height: 500px; */
     /* border: 0px solid #73AD21; */
   }
+
+
+
 
   .loading-container {
     position: fixed;
