@@ -2,7 +2,7 @@
 const fs = require('fs-extra')
 const csv = require('neat-csv')
 
-async function read(simulationId) {
+async function read (simulationId) {
   const file = `/home/ubuntu/uniq-sim/output/${simulationId}/output-reward.csv`
 
   const str = await fs.readFile(file, 'utf-8')
@@ -12,7 +12,7 @@ async function read(simulationId) {
     acc[0].push(cur[0])
     acc[1].push(cur[1])
     return acc
-  }, [[],[]])
+  }, [[], []])
 }
 
 module.exports = read

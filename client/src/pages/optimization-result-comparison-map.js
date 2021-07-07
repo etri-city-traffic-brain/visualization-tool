@@ -203,6 +203,7 @@ export default {
 
     this.simulation = simulation
     this.fixedSlave = simulation.slaves[1]
+
     this.testSlave = simulation.slaves[0]
     this.slideMax = ticks - 1
 
