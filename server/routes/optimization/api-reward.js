@@ -2,6 +2,7 @@ const createError = require('http-errors')
 const read = require('../../main/signal-optimization/read-reward')
 const { getSimulation } = require('../../globals');
 module.exports = async (req, res, next) => {
+  console.log('*** read reward')
   const { id, } = req.query;
 
   const sim = await getSimulation(id)

@@ -5,6 +5,7 @@ const csv = require('neat-csv')
 async function read(simulationId) {
   const file = `/home/ubuntu/uniq-sim/output/${simulationId}/output-reward.csv`
 
+  console.log("read reward", simulationId)
   const str = await fs.readFile(file, 'utf-8')
   const array = await csv(str)
   const result = array.map(v => Object.values(v))
