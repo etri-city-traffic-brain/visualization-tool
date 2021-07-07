@@ -97,6 +97,9 @@ const initSimulationData = async (mapId, slave, eventTarget) => {
 }
 
 const aggregate = (objs1) => {
+  if(objs1.length < 1) {
+    return []
+  }
   const speeds = []
   for (let i = 0; i < objs1[0].length; i++) {
     let sum = 0
@@ -299,6 +302,7 @@ export default {
     })
 
     window.addEventListener('resize', this.resize)
+
     try {
       const c = (await optimizationService.getReward(this.fixedSlave)).data
       this.rewards = makeRewardChartData(c)
