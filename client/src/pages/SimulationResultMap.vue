@@ -1,65 +1,54 @@
 <template>
   <div>
-    <div class="uniq-top-menu">
-
-    </div>
-
-    <!-- ----------- -->
-    <!-- STEP PLAYER -->
-    <!-- ----------- -->
     <div
-      class="mt-1"
+      class="bg-gray-700 p-1 rounded-lg"
       v-bind:style="playerStyle"
       no-body v-if="simulation.status === 'finished'"
-      style="max-width:200px"
     >
-      <b-button-group class="mt-1">
-        <b-button size="sm" variant="dark" @click="togglePlay" > {{ toggleState() }} </b-button>
-        <b-button size="sm" variant="dark" @click="stepBackward" class="ml-1"> <b-icon icon="caret-left-fill"/> </b-button>
-        <b-button size="sm" variant="dark" @click="stepForward" > <b-icon icon="caret-right-fill"/> </b-button>
+      <b-button-group>
+        <b-btn size="sm" variant="secondary" @click="togglePlay" > {{ toggleState() }} </b-btn>
+        <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="caret-left-fill"/> </b-btn>
+        <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="caret-right-fill"/> </b-btn>
+        <b-input-group size="sm">
+          <b-form-input
+            variant="dark"
+            type="range"
+            min="0"
+            :max="slideMax"
+            :value="currentStep"
+            @change="onChange"
+            @input="onInput"
+          />
+          <b-input-group-append>
+            <b-btn size="sm" variant="dark">{{ currentStep }} </b-btn>
+          </b-input-group-append>
+        </b-input-group>
       </b-button-group>
-      <b-input-group size="sm" class="mt-1">
-        <b-form-input
-          variant="dark"
-          type="range"
-          min="0"
-          :max="slideMax"
-          :value="currentStep"
-          @change="onChange"
-          @input="onInput"
-        />
-        <b-input-group-append>
-          <b-button size="sm" variant="dark">{{ currentStep }} </b-button>
-        </b-input-group-append>
-      </b-input-group>
     </div>
+
+    <!-- <div class="uniq-bottom-left">
+      <uniq-congestion-color-bar/>
+    </div> -->
 
     <!-- TOP LEFT PANEL -->
     <!-- -------------- -->
     <div class="uniq-top-left">
-      <div>
+      <div class="bg-gray-700 rounded-xl p-2">
+        <span class="mx-2 text-white">{{ simulationId }}</span>
+
         <uniq-map-changer :map="map"/>
-        <b-button @click="centerTo(1)" class="ml-1" size="sm" variant="secondary">
+        <b-btn @click="centerTo(1)" class="ml-1" size="sm" variant="secondary">
           <b-icon icon="dice1"></b-icon>
-        </b-button>
-        <!-- <b-button @click="stop" class="ml-1" size="sm" variant="secondary"> 중지 </b-button>
-        <b-button
-          size="sm"
-          variant="info"
-          v-b-tooltip.hover
-          title="시뮬레이션을 시작합니다."
-          @click.stop="startSimulation()"
-          >
-            <b-icon icon="play-fill"/>
-        </b-button> -->
-        <b-button @click="sidebar = !sidebar" size="sm" variant="secondary">
-          <b-icon icon="align-end"/>
-        </b-button>
+        </b-btn>
+        <b-btn @click="sidebar = !sidebar" size="sm" variant="secondary">
+          VDS
+        </b-btn>
+        <div class="mt-1">
+          <b-btn @click.stop="startSimulation()" size="sm"> 시작 <b-icon icon="caret-right-fill"/> </b-btn>
+          <b-btn @click="stop" size="sm" class="ml-1"> 중지 <b-icon icon="stop-fill"/> </b-btn>
+        </div>
+
       </div>
-      <div class="bg-gray-600 py-1 mt-1 text-center">
-        <div class="text-white">{{ simulationId }}</div>
-      </div>
-      <uniq-congestion-color-bar/>
       <SimulationDetailsOnFinished
         v-if="simulation.status === 'finished'"
         :simulation="simulation"
@@ -70,8 +59,6 @@
         :edgeSpeed="edgeSpeed"
 
       >
-      <!-- :linkVehPasswd="linkVehPassed"
-        :linkWaitingTime="linkWaitingTime" -->
       </SimulationDetailsOnFinished>
       <SimulationDetailsOnRunning
         v-if="simulation.status === 'running'"
@@ -88,36 +75,52 @@
         :logs="logs"
       >
       </SimulationDetailsOnRunning>
-      <div class="py-1">
-        <div>
-          <b-button @click.stop="startSimulation()" size="sm" variant="primary"> 시작 <b-icon icon="caret-right-fill"/> </b-button>
-          <b-button @click="stop" size="sm" variant="warning" class="ml-1"> 중지 <b-icon icon="stop-fill"/> </b-button>
+    </div>
+
+    <div class="uniq-top-left2">
+      <div class="bg-gray-700 rounded-xl p-2">
+        <div v-for="link of chart.links" :key="link.linkId">
+          <div class="flex items-center">
+          <d3-speed-bar :value="link.speeds"></d3-speed-bar>
+          <div class="bg-yellow-500 w-32 text-xs ml-1 mr-1 px-1 rounded py-1 ">{{ link.linkId }}</div>
+          <b-btn size="sm" @click="removeLinkChart(link.linkId)">delete</b-btn>
+          </div>
         </div>
       </div>
-      <b-card
-        bg-variant="dark"
-        border-variant="dark"
-        no-body
-        class="p-1 mt-1"
-      >
-
-      </b-card>
     </div>
+    <div class="p-2 space-y-1 uniq-top-right rounded-xl" >
+      <div v-if="currentEdge">
+        <div class="bg-gray-800 p-2 rounded-xl text-white">
+          <h5>
+            <b-badge>{{ currentEdge.LINK_ID }}</b-badge>
+            <b-badge>{{ currentEdge.vdsId }}</b-badge>
+          </h5>
+        </div>
+        <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+          <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="150"/>
+        </div>
+        <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+        <line-chart :chartData="chart.linkVehPassed" :options="defaultOption()" :height="150"/>
+        </div>
+        <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+        <line-chart :chartData="chart.linkWaitingTime" :options="defaultOption()" :height="150"/>
+        </div>
 
-    <div class="uniq-top-right">
-      <div class="bg-gray-500">
-        <!-- <line-chart :chartData="chart.vehPassed" :options="defaultOption()" :height="150"/> -->
-        <!-- {{ chart.vehPassed }} -->
+         <!-- <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+          <d3-heatmap :value="chart.linkSpeeds"></d3-heatmap>
+        </div> -->
 
+      </div>
+      <div v-else>
+        <div class="bg-gray-800 p-2 rounded-xl text-white text-center">링크를 선택하세요.</div>
       </div>
     </div>
 
-    <!-- MAP CONTAINER -->
-    <div
-      :ref="mapId"
-      :id="mapId"
-      :style="{height: mapHeight + 'px'}"
-    />
+     <div
+        :ref="mapId"
+        :id="mapId"
+        :style="{height: mapHeight + 'px'}"
+      />
     <b-sidebar
       title="UNIQ-VIS"
       v-model="sidebar"
@@ -126,6 +129,18 @@
       right
     >
       <uniq-simulation-result-ext :simulation="simulation" />
+
+        <!-- <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+          <d3-speed-bar :value="chart.linkSpeeds"></d3-speed-bar>
+        </div> -->
+
+      <div
+        v-for="(entry, idx) of Object.entries(vdsList)"
+        :key="idx"
+        class="bg-gray-400 rounded m-1 px-2"
+      >
+        <b-badge class="cursor-pointer" @click="goToLink(entry[0])">{{ entry[0] }}</b-badge> {{ entry[1].vdsId }} {{ entry[1].sectionId }}
+      </div>
     </b-sidebar>
   </div>
 </template>
@@ -143,7 +158,7 @@
 
   .map {
     /* max-height: 1024px; */
-    max-height: calc(100%);
+    /* max-height: calc(100%); */
   }
 
   .uniq-top-menu {
@@ -156,19 +171,34 @@
   }
 
   .uniq-top-left {
-    max-width: 260px;
-    height: 100%;
-    overflow: auto;
     position: fixed;
+    top: 55px;
+    max-width: 300px;
+    overflow: auto;
+    height: 100%;
     z-index:100;
-    top: 50px;
     padding: 0;
     left: 5px;
-    /* height: 500px; */
-    /* max-height: 500px; */
-    /* border: 0px solid #73AD21; */
+    /* max-height: 490px; */
   }
 
+  .uniq-bottom-left {
+    position: fixed;
+    bottom: 10px;
+
+    padding: 0;
+    left: 5px;
+    z-index:100;
+  }
+
+  .uniq-top-left2 {
+   position: fixed;
+    top: 55px;
+    max-width: 300px;
+    z-index:100;
+    padding: 0;
+    left: 310px;
+  }
 
 
 
@@ -187,8 +217,25 @@
     transform: translateY(-50%);
   }
 
+  .uniq-bottom {
+    position: fixed;
+    bottom: 10px;
+    padding: 0;
+    left: 5px;
+    z-index:100;
+  }
 
 
+  .uniq-top-right {
+    width: 300px;
+    /* height: 100%; */
+    height: 520px;
+    position: fixed;
+    padding: 0;
+    top: 180px;
+    right: 5px;
+    z-index:100;
+  }
   /* @import '@/assets/images/gb1.jpg'; */
   /* @import '@/assets/styles/style.css'; */
 </style>

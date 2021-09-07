@@ -30,7 +30,8 @@ import UniqMapChanger from '@/components/UniqMapChanger'
 
 import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
-
+import D3SpeedBar from '@/charts/d3/D3SpeedBar'
+import axios from 'axios'
 // import D3SpeedBar from '../charts/d3/D3SpeedBar.vue';
 import bins from '@/stats/histogram'
 import userState from '@/user-state'
@@ -43,6 +44,49 @@ const pieDefault = () => ({
     backgroundColor: ['red', 'orange', 'green']
   }],
   labels: ['막힘', '정체', '원활']
+})
+
+const defaultOption = () => ({
+  responsive: true,
+  title: {
+    display: false,
+    text: 'Line Chart'
+  },
+  tooltips: {
+    mode: 'index',
+    intersect: false
+  },
+  hover: {
+    mode: 'nearest',
+    intersect: true
+  },
+  scales: {
+    xAxes: [{
+      ticks: {
+        autoSkip: true,
+        autoSkipPadding: 50,
+        maxRotation: 0,
+        display: true,
+        fontColor: 'white'
+      }
+    }],
+    yAxes: [{
+      ticks: {
+        autoSkip: true,
+        autoSkipPadding: 10,
+        maxRotation: 0,
+        display: true,
+        fontColor: 'white'
+      }
+    }]
+  },
+  legend: {
+    display: true,
+    labels: {
+      fontColor: 'white',
+      fontSize: 12
+    }
+  }
 })
 
 const makeLineChart = (data, label, color) => {
@@ -101,11 +145,13 @@ export default {
     Doughnut,
     UniqCongestionColorBar,
     UniqSimulationResultExt,
-    UniqMapChanger
+    UniqMapChanger,
+    D3SpeedBar
 
   },
   data () {
     return {
+      defaultOption,
       userState,
       simulationId: null,
       simulation: { configuration: {} },
@@ -131,7 +177,8 @@ export default {
         linkMeanSpeeds: [],
         linkSpeeds: [],
         linkVehPassed: [],
-        linkWaitingTime: []
+        linkWaitingTime: [],
+        links: []
       },
       currentZoom: '',
       currentExtent: '',
@@ -157,10 +204,12 @@ export default {
       playerStyle: {
         zIndex: 999,
         position: 'fixed',
-        width: '300px',
-        bottom: '50px',
+        // width: '300px',
+        // bottom: '150px',
+        top: '50px',
         right: '10px'
-      }
+      },
+      vdsList: {}
     }
   },
   destroyed () {
@@ -180,6 +229,7 @@ export default {
     this.showLoading = true
     this.resize()
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
+
     await this.updateSimulation()
 
     this.mapManager = MapManager({
@@ -199,6 +249,12 @@ export default {
     // this.wsClient.init()
 
     this.showLoading = false
+
+    const res = await axios({
+      url: '/salt/v1/vds',
+      method: 'get'
+    })
+    this.vdsList = res.data
 
     this.$on('link:selected', async (link) => {
       this.currentEdge = link
@@ -332,7 +388,7 @@ export default {
     },
     resize () {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
-      this.mapHeight = window.innerHeight - 60 // update map height to current height
+      this.mapHeight = window.innerHeight - 160 // update map height to current height
     },
     togglePlay () {
       this.playBtnToggle = !this.playBtnToggle;
@@ -369,12 +425,34 @@ export default {
         console.log(err)
       }
     },
+
+    removeLinkChart (linkId) {
+      const idx = this.chart.links.findIndex(obj => obj.linkId === linkId)
+      if (idx >= 0) {
+        this.chart.links.splice(idx, 1)
+      }
+    },
     async updateLinkChart (linkId) {
       const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, linkId)
-
       this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
+
+      this.chart.links.push({
+        linkId,
+        speeds: makeLineChart(linkData.values, '링크속도', 'skyblue')
+      })
+
       this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
       this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
+    },
+    async goToLink (linkId) {
+      const res = await axios({
+        method: 'get',
+        url: `/salt/v1/map/links/${linkId}`
+      })
+      const link = res.data
+      this.map.animateTo({
+        center: link.geometry.coordinates[0]
+      })
     }
   }
 }

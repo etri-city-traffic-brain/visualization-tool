@@ -33,6 +33,8 @@ app.use('/salt/v1/simulations', require('./routes/simulations'))
 app.use('/salt/v1/optimization', require('./routes/optimization'))
 
 app.use('/salt/v1/optenv', require('./routes/optenv'))
+app.use('/salt/v1/vds', require('./routes/vds'))
+
 app.use(require('./middleware/not-found'))
 app.use(require('./middleware/server-error'))
 

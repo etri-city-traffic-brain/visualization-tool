@@ -1,5 +1,5 @@
 <template>
-  <svg width="100%" height="500px"></svg>
+  <svg width="100%" height=""></svg>
 </template>
 
 
@@ -21,16 +21,16 @@
   stroke-width: 2px;
 }
 
-.axisRed line{
-  stroke: red;
+.axis line{
+  stroke: white;
 }
 
-.axisRed path{
-  stroke: red;
+.axis path{
+  stroke: gray;
 }
 
-.axisRed text{
-  fill: red;
+.axis text{
+  fill: gray;
 }
 
 

@@ -15,8 +15,13 @@ import makeId from './make-id'
 import makeGeometry from './make-geometry'
 import simulationService from '../service/simulation-service'
 import mapService from '../service/map-service'
-
-import { makeEdgeLayer, makeCanvasLayer, makeToolLayer } from '../layers'
+import axios from 'axios'
+import {
+  makeEdgeLayer,
+  makeCanvasLayer,
+  makeToolLayer,
+  makeVdsLayer
+} from '../layers'
 
 const ZOOM_MINIMUM = 14
 
@@ -37,10 +42,12 @@ function MapManager ({ map, simulationId, eventBus }) {
   // const gridLayer = makeGridLayer(map)
   const canvasLayer = makeCanvasLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus, extent)
   const toolLayer = makeToolLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
+  const vdsLayer = makeVdsLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
   map.addLayer(edgeLayer)
   // map.addLayer(gridLayer)
   map.addLayer(canvasLayer)
   map.addLayer(toolLayer)
+  map.addLayer(vdsLayer)
 
   function toggleFocusTool () {
     const showHide = toolLayer.isVisible()
@@ -86,26 +93,32 @@ function MapManager ({ map, simulationId, eventBus }) {
     // target.updateSymbol({ lineWidth: 1 });
   }
 
+  eventBus.$on('vds:selected', (edge) => {
+    console.log('vds clicked', edge)
+    edgeClicked({ target: edge })
+  })
+
   const edgeClicked = ({ target }) => {
     if (eventBus) {
       eventBus.$emit('link:selected', {
         ...target.properties,
         id: target.getId(),
-        speeds: currentSpeedsPerLink[target.getId()]
+        speeds: currentSpeedsPerLink[target.getId()],
+        ...target.properties
       })
     }
 
-    target.setInfoWindow({
-      title: target.properties.LINK_ID,
-      content: `
-      <div class="content">
-          <div> 속도: ${target.properties.SPEEDLH} </div>
-          <div> 링크 길이: ${target.properties.edgeLen} m</div>
-          <div></div>
-          </div>
-      `
-    })
-    target.openInfoWindow()
+    // target.setInfoWindow({
+    //   title: target.properties.LINK_ID,
+    //   content: `
+    //   <div class="content">
+    //       <div> 속도: ${target.properties.SPEEDLH} </div>
+    //       <div> 링크 길이: ${target.properties.edgeLen} m</div>
+    //       <div></div>
+    //       </div>
+    //   `
+    // })
+    // target.openInfoWindow()
   }
 
   const addEventHandler = geometry =>
@@ -121,6 +134,17 @@ function MapManager ({ map, simulationId, eventBus }) {
   }
 
   function addFeatures (features) {
+    console.log('add feature')
+    features.forEach(feature => {
+      const vdsId = vdsTable[feature.properties.LINK_ID]
+      if (vdsId) {
+        feature.properties.vdsId = vdsId.vdsId
+        feature.properties.secionId = vdsId.sectionId
+        feature.properties.sId = vdsId.sId
+        feature.properties.dId = vdsId.dId
+      }
+    })
+
     features.forEach((feature) => {
       R.compose(
         edgeLayer.addGeometry.bind(edgeLayer),
@@ -128,12 +152,24 @@ function MapManager ({ map, simulationId, eventBus }) {
         makeGeometry
       )(feature)
     })
+
+    vdsLayer.updateRealtimeData()
   }
+  let vdsTable = {}
 
   async function loadMapData (event) {
+    if (Object.keys(vdsTable).length < 1) {
+      const res = await axios({
+        url: '/salt/v1/vds',
+        method: 'get'
+      })
+      vdsTable = res.data
+    }
+
     const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
     try {
       const { features } = await mapService.getMap(extent(map))
+
       if (event === 'zoomend') {
         // removeEdges(edgesExisted)
         removeEdges(edgeLayer.getGeometries())

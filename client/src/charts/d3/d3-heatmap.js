@@ -46,43 +46,52 @@ export default {
           'translate(' + margin.left + ',' + margin.top + ')')
 
       // Labels of row and columns
-      const linkIds = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-      const time = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7', 'v8', 'v9', 'v10']
+      const times = [
+        '00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',
+        '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'
+      ]
+      const links = ['v1', 'v2', 'v3', 'v4', 'v5']
 
       // Build X scales and axis:
       const x = d3.scaleBand()
         .range([0, width])
-        .domain(linkIds)
+        .domain(times)
         .padding(0.01)
       svg.append('g')
         .attr('transform', 'translate(0,' + height + ')')
-        .call(d3.axisBottom(x))
+        .attr('class', 'axis')
+        .call(d3.axisBottom(x).ticks(5))
 
       // Build X scales and axis:
       const y = d3.scaleBand()
         .range([height, 0])
-        .domain(time)
+        .domain(links)
         .padding(0.01)
       svg.append('g')
-        .attr('class', 'axisRed')
+        .attr('class', 'axis')
         .call(d3.axisLeft(y))
 
       // Build color scale
       const myColor = d3.scaleLinear()
-        .range(['white', '#69b3a2'])
-        .domain([1, 100])
+      // .range(['black', 'red', 'yellow'])
+      // .domain([1, 50, 100])
+        .domain([0, 25, 50, 70])
+        .range(['black', 'red', 'orange', 'yellow'])
 
       const data = [
-        { group: 'A', variable: 'v1', value: '10' },
-        { group: 'A', variable: 'v2', value: '20' },
-        { group: 'A', variable: 'v3', value: '30' }
+        { time: '00', linkId: 'v1', value: '3' },
+        { time: '00', linkId: 'v2', value: '50' },
+        { time: '00', linkId: 'v3', value: '100' },
+        { time: '01', linkId: 'v1', value: '100' },
+        { time: '01', linkId: 'v2', value: '10' },
+        { time: '01', linkId: 'v3', value: '10' }
       ]
       svg.selectAll()
-        .data(data, function (d) { return d.group + ':' + d.variable })
+        .data(data, function (d) { return d.time + ':' + d.linkId })
         .enter()
         .append('rect')
-        .attr('x', function (d) { return x(d.group) })
-        .attr('y', function (d) { return y(d.variable) })
+        .attr('x', function (d) { return x(d.time) })
+        .attr('y', function (d) { return y(d.linkId) })
         .attr('width', x.bandwidth())
         .attr('height', y.bandwidth())
         .style('fill', function (d) { return myColor(d.value) })

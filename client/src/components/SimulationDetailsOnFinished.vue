@@ -1,25 +1,5 @@
 <template>
-  <div>
-
-    <!-- <uniq-card-title title="시뮬레이션 평균속도" class="info-card"/> -->
-
-
-    <div class="bg-gray-700 p-2 space-y-1 uniq-top-right rounded-xl" >
-      <div v-if="currentEdge">
-      <div class="text-white">{{ currentEdge.LINK_ID }}</div>
-        <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="150"/>
-        <line-chart :chartData="chart.linkVehPassed" :options="defaultOption()" :height="150"/>
-        <line-chart :chartData="chart.linkWaitingTime" :options="defaultOption()" :height="150"/>
-        <div class="mt-1">
-        <d3-speed-bar :value="chart.linkSpeeds"></d3-speed-bar>
-        <div><d3-heatmap :value="chart.linkSpeeds"></d3-heatmap></div>
-        </div>
-        <!-- <d3-speed-bar :value="[1,2,3,4,5]"></d3-speed-bar> -->
-      </div>
-      <div v-else>
-        <div class="text-white">링크를 선택하세요.</div>
-      </div>
-    </div>
+  <div class="space-y-1">
     <div class="bg-gray-700 p-2 space-y-1 rounded-xl mt-1" >
       <div class="text-white text-center text-sm">평균속도</div>
       <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption()" :height="150"/>
