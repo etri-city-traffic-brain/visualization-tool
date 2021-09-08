@@ -161,6 +161,7 @@ export default {
       mapManager: null,
       speedsPerStep: {},
       sidebar: false,
+      sidebarRse: false,
       currentStep: 1,
       slideMax: 0,
       showLoading: false,
@@ -209,7 +210,11 @@ export default {
         top: '50px',
         right: '10px'
       },
-      vdsList: {}
+      vdsList: {},
+      rseList: {
+        RSE1501RSE1504: ['-563111309', '-563105261', '-563105256', '563108468'],
+        RSE1501RSE1505: ['563105249', '-563108169', '563108170', '563108165', '-563104339', '-563105246', '-563105250', '-563104128']
+      }
     }
   },
   destroyed () {
@@ -246,7 +251,7 @@ export default {
       simulationId: this.simulationId,
       eventBus: this
     })
-    // this.wsClient.init()
+    this.wsClient.init()
 
     this.showLoading = false
 
@@ -257,10 +262,11 @@ export default {
     this.vdsList = res.data
 
     this.$on('link:selected', async (link) => {
+      console.log('link selected')
       this.currentEdge = link
       if (link.speeds) {
         if (!this.speedsPerStep.datasets) {
-          return
+
         }
         // this.chart.linkSpeeds = makeLinkSpeedChartData(
         //   link.speeds,
@@ -436,10 +442,13 @@ export default {
       const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, linkId)
       this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
 
-      this.chart.links.push({
-        linkId,
-        speeds: makeLineChart(linkData.values, '링크속도', 'skyblue')
-      })
+      const e = this.chart.links.findIndex(v => v.linkId === linkId)
+      if (e < 0) {
+        this.chart.links.push({
+          linkId,
+          speeds: makeLineChart(linkData.values, '링크속도', 'skyblue')
+        })
+      }
 
       this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
       this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
@@ -453,6 +462,20 @@ export default {
       this.map.animateTo({
         center: link.geometry.coordinates[0]
       })
+    },
+    async goToRse (rseId) {
+      console.log(rseId)
+      console.log(this.rseList[rseId])
+      const link0 = this.rseList[rseId][0]
+      const res = await axios({
+        method: 'get',
+        url: `/salt/v1/map/links/${link0}`
+      })
+      const link = res.data
+      this.map.animateTo({
+        center: link.geometry.coordinates[0]
+      })
+      this.mapManager.showRse(rseId, this.rseList[rseId])
     }
   }
 }

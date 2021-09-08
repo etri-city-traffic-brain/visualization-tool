@@ -33,6 +33,7 @@
     <!-- TOP LEFT PANEL -->
     <!-- -------------- -->
     <div class="uniq-top-left">
+      <div class="bg-indigo-400">ddd</div>
       <div class="bg-gray-700 rounded-xl p-2">
         <span class="mx-2 text-white">{{ simulationId }}</span>
 
@@ -42,6 +43,9 @@
         </b-btn>
         <b-btn @click="sidebar = !sidebar" size="sm" variant="secondary">
           VDS
+        </b-btn>
+        <b-btn @click="sidebarRse = !sidebarRse" size="sm" variant="secondary">
+          RSE
         </b-btn>
         <div class="mt-1">
           <b-btn @click.stop="startSimulation()" size="sm"> 시작 <b-icon icon="caret-right-fill"/> </b-btn>
@@ -121,27 +125,45 @@
         :id="mapId"
         :style="{height: mapHeight + 'px'}"
       />
-    <b-sidebar
-      title="UNIQ-VIS"
-      v-model="sidebar"
-      bg-variant="dark"
-      text-variant="white"
-      right
-    >
-      <uniq-simulation-result-ext :simulation="simulation" />
-
-        <!-- <div class="bg-gray-800 p-2 rounded-xl mt-1" >
-          <d3-speed-bar :value="chart.linkSpeeds"></d3-speed-bar>
-        </div> -->
-
-      <div
-        v-for="(entry, idx) of Object.entries(vdsList)"
-        :key="idx"
-        class="bg-gray-400 rounded m-1 px-2"
+      <b-sidebar
+        title="UNIQ-VIS"
+        v-model="sidebar"
+        bg-variant="dark"
+        text-variant="white"
+        right
       >
-        <b-badge class="cursor-pointer" @click="goToLink(entry[0])">{{ entry[0] }}</b-badge> {{ entry[1].vdsId }} {{ entry[1].sectionId }}
-      </div>
-    </b-sidebar>
+        <uniq-simulation-result-ext :simulation="simulation" />
+
+          <!-- <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+            <d3-speed-bar :value="chart.linkSpeeds"></d3-speed-bar>
+          </div> -->
+
+        <div
+          v-for="(entry, idx) of Object.entries(vdsList)"
+          :key="idx"
+          class="bg-gray-400 rounded m-1 px-2"
+        >
+          <b-badge class="cursor-pointer" @click="goToLink(entry[0])">{{ entry[0] }}</b-badge> {{ entry[1].vdsId }} {{ entry[1].sectionId }}
+        </div>
+      </b-sidebar>
+
+      <b-sidebar
+        title="UNIQ-VIS"
+        v-model="sidebarRse"
+        bg-variant="dark"
+        text-variant="white"
+        right
+      >
+        <div
+          v-for="(entry, idx) of Object.entries(rseList)"
+          :key="idx"
+          class="bg-gray-400 rounded m-1 px-2"
+        >
+          <b-badge class="cursor-pointer"
+            @click="goToRse(entry[0])">{{ entry[0] }}</b-badge>
+        </div>
+      </b-sidebar>
+
   </div>
 </template>
 

@@ -5,15 +5,18 @@
 
 const { config } = require('../../globals')
 
-const { output } = config.saltPath
+// const { output } = config.saltPath
 
-const { routes, routePerDay } = config.simulation
+const { routePerDay } = config.simulation
 const { tcpPort } = config.server
 
 const getRouteFor = (day) => {
   const route = routePerDay[day] || routePerDay[routePerDay.length - 1]
-  return `${routes}/${route}`
+  // return `${routes}/${route}`
+  return `../../routes/${route}`
 }
+
+const output = '/uniq/simulator/salt/volume/output'
 
 module.exports = ({ id, host, configuration: { begin, end, day, period, interval = 10 } }) => {
   return {

@@ -232,7 +232,36 @@ function MapManager ({ map, simulationId, eventBus }) {
     toggleFocusTool,
     map,
     getEdgesInView,
-    bus: eventBus
+    bus: eventBus,
+    showRse (rseId, links) {
+      console.log('show rse', rseId, links)
+      edgeLayer.getGeometries().forEach(feature => {
+        const linkId = feature.properties.LINK_ID
+
+        links.forEach(link => {
+          if (linkId === link) {
+            console.log('find link', link)
+            // feature.properties.vdsId = vdsId.vdsId
+            // feature.properties.secionId = vdsId.sectionId
+            // feature.properties.sId = vdsId.sId
+            // feature.properties.dId = vdsId.dId
+            feature.properties.rseId = rseId
+
+            feature.updateSymbol({
+              lineWidth: 10,
+              lineColor: '#1bbc9b'
+            })
+
+            feature.flash(
+              200, // flash interval in ms
+              5, // count
+              function () { // callback when flash end
+                // alert('flash ended')
+              })
+          }
+        })
+      })
+    }
   }
 }
 

@@ -260,7 +260,7 @@
       >
         <uniq-register
           @hide="hideCreateSimulationDialog"
-          @optenvconfig:save="saveOptEnvConfig"
+          @simulationconfig:save="saveOptEnvConfig"
           :userId="userState.userId"
           modalName="create-simulation-modal"
           :intersectionField="false"

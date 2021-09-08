@@ -88,6 +88,7 @@ module.exports = async (req, res, next) => {
       await prepareSimulation(idTest, req.body, ROLE.TEST, [])
       await prepareSimulation(idFixed, req.body, ROLE.FIXED, [])
     } else {
+      console.log('prepare simulation data')
       await prepareSimulation(id, req.body, ROLE.SIMULATION)
     }
     debug(`simulation ${id} is ready!`)

@@ -86,6 +86,7 @@ export default {
     }
   },
   async mounted () {
+    console.log('simulation register ui')
     const env = this.env
     if (this.env) {
       this.envName = env.envName
@@ -154,7 +155,12 @@ export default {
           epoch: this.epoch
         }
       }
-      this.$emit('optenvconfig:save', simulationConfig)
+
+      if (this.role === 'simulation') {
+        this.$emit('simulationconfig:save', simulationConfig)
+      } else {
+        this.$emit('optenvconfig:save', simulationConfig)
+      }
       this.loading = false
     },
     hide () {

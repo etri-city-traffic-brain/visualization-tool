@@ -10,6 +10,7 @@ let tableSimulation
 let tableOptEnv
 module.exports = {
   start ({ lowDBFile }) {
+    console.log('*** lowDBFile:', lowDBFile)
     low(new FileAsync(lowDBFile))
       .then((db) => {
         debug('LowDB connected...')

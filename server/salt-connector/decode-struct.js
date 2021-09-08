@@ -1,2 +1,2 @@
 
-module.exports = (Struct, buffer) => Struct(buffer);
+module.exports = (Struct, buffer) => Struct(buffer)
