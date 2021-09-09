@@ -6,7 +6,9 @@
 
 const config = require('../config')
 // const exec = require('./exec')
-
+const moment = require('moment')
+const cookSimulationResult = require('../main/simulation-manager/cook')
+const { getSimulation, updateStatus } = require('../globals')
 const { exec } = require('child_process')
 
 const {
@@ -35,14 +37,16 @@ async function run (sId) {
       }
       if (stderr) {
         log(`stderr: ${stderr}`)
-        reject(stderr)
+        reject(new Error(stderr))
         return
       }
       log(`stdout: ${stdout}`)
-      resolve(stdout)
+      resolve(new Error(stdout))
     })
   })
 }
+
+const currentTimeFormatted = () => moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
 
 module.exports = (simulation) => {
   // const simulation = getSimulation(simulationId)
@@ -50,9 +54,30 @@ module.exports = (simulation) => {
   // const script = `${scripts}/${simulation.configuration.script}`
   // const pythonPath = `${home}/tools/libsalt/`
 
-  console.log('*** start simulation ***')
+  log('*** start simulation ***')
   log('simulation', simulation.id)
-  run(simulation.id)
+  run(simulation.id).then(r_ => {
+    console.log('*** simulation finished ***')
+
+    log('**** start cook ***', simulation.id)
+    cookSimulationResult({
+      simulationId: simulation.id,
+      duration: simulation.configuration.end,
+      period: simulation.configuration.period
+    }).then(() => {
+      updateStatus(simulation.id, 'finished')
+    }).catch(err => {
+      updateStatus(simulation.id, 'error', {
+        error: `fail to start simulation ${err.message}`,
+        ended: currentTimeFormatted()
+      })
+    })
+  }).catch(err => {
+    updateStatus(simulation.id, 'error', {
+      error: `fail to start simulation ${err.message}`,
+      ended: currentTimeFormatted()
+    })
+  })
   // exec({
   //   pythonPath,
   //   script,

@@ -33,7 +33,6 @@
     <!-- TOP LEFT PANEL -->
     <!-- -------------- -->
     <div class="uniq-top-left">
-      <div class="bg-indigo-400">ddd</div>
       <div class="bg-gray-700 rounded-xl p-2">
         <span class="mx-2 text-white">{{ simulationId }}</span>
 
@@ -101,14 +100,16 @@
           </h5>
         </div>
         <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+          <div class="text-white text-sm text-center">SPEED</div>
           <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="150"/>
         </div>
         <div class="bg-gray-800 p-2 rounded-xl mt-1" >
-        <line-chart :chartData="chart.linkVehPassed" :options="defaultOption()" :height="150"/>
+          <div class="text-white text-sm text-center">VOLUME</div>
+          <line-chart :chartData="chart.linkVehPassed" :options="defaultOption()" :height="150"/>
         </div>
-        <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+        <!-- <div class="bg-gray-800 p-2 rounded-xl mt-1" >
         <line-chart :chartData="chart.linkWaitingTime" :options="defaultOption()" :height="150"/>
-        </div>
+        </div> -->
 
          <!-- <div class="bg-gray-800 p-2 rounded-xl mt-1" >
           <d3-heatmap :value="chart.linkSpeeds"></d3-heatmap>

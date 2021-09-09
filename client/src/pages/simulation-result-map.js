@@ -110,6 +110,31 @@ const makeLineChart = (data, label, color) => {
   }
 }
 
+function makeLinkCompChart (data) {
+  console.log(data)
+  const ll = data.map(d => d.data.length)
+  const maxValue = Math.max(...ll)
+  const maxIdx = data.findIndex(d => d.data.length === maxValue)
+  console.log('maxIdx:', maxIdx)
+  const dataset = (label, color, data) => ({
+    label,
+    fill: false,
+    borderColor: color,
+    backgroundColor: color,
+    borderWidth: 2,
+    pointRadius: 1,
+    data
+  })
+  const labels = new Array(data[maxIdx].data.length).fill(0).map((_, i) => i)
+  const datasets = data.map(d => {
+    return dataset(d.label, d.color, d.data)
+  })
+  return {
+    labels,
+    datasets
+  }
+}
+
 const makeLinkSpeedChartData = (data1, data2, data3) => {
   const dataset = (label, color, data) => ({
     label,
@@ -122,7 +147,7 @@ const makeLinkSpeedChartData = (data1, data2, data3) => {
   })
 
   return {
-    labels: new Array(data2.length).fill(0).map((_, i) => i),
+    labels: new Array(data1.length).fill(0).map((_, i) => i),
     datasets: [
       dataset('링크속도', '#7FFFD4', data1),
       dataset('평균속도', '#1E90FF', data2)
@@ -262,11 +287,10 @@ export default {
     this.vdsList = res.data
 
     this.$on('link:selected', async (link) => {
-      console.log('link selected')
       this.currentEdge = link
       if (link.speeds) {
         if (!this.speedsPerStep.datasets) {
-
+          //
         }
         // this.chart.linkSpeeds = makeLinkSpeedChartData(
         //   link.speeds,
@@ -275,12 +299,7 @@ export default {
         // )
       }
 
-      // const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, link.LINK_ID, 'vehPassed')
-      // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
-      // this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
-      // this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
-
-      await this.updateLinkChart(link.LINK_ID)
+      await this.updateLinkChart(link.LINK_ID, link.vdsId)
     })
 
     this.$on('link:hover', (link) => {
@@ -438,20 +457,51 @@ export default {
         this.chart.links.splice(idx, 1)
       }
     },
-    async updateLinkChart (linkId) {
+    async updateLinkChart (linkId, vdsId) {
+      console.log('VDSID:', vdsId)
       const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, linkId)
-      this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
+      // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
+      // this.chart.linkSpeeds = makeLinkSpeedChartData(linkData.values, [10, 20, 30, 10, 20, 30])
+      const vdsSpeedData = { label: 'vds', color: 'skyblue', data: [] }
+
+      if (vdsId) {
+        const res = await axios({
+          url: '/salt/v1/vds/speed/' + vdsId,
+          method: 'get'
+        })
+        const vdsD = res.data
+        vdsSpeedData.data = vdsD.map(v => v[1])
+      }
+      this.chart.linkSpeeds = makeLinkCompChart([
+        { label: 'simulation', color: '#FF8C00', data: linkData.values },
+        vdsSpeedData
+      ])
 
       const e = this.chart.links.findIndex(v => v.linkId === linkId)
       if (e < 0) {
         this.chart.links.push({
           linkId,
-          speeds: makeLineChart(linkData.values, '링크속도', 'skyblue')
+          speeds: makeLineChart(linkData.values, 'simulation', 'skyblue')
         })
       }
 
-      this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
-      this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
+      const vdsVolumeData = { label: 'vds', color: '#8FBC8F', data: [] }
+      if (vdsId) {
+        const res = await axios({
+          url: '/salt/v1/vds/volume/' + vdsId,
+          method: 'get'
+        })
+        const vdsD = res.data
+        vdsVolumeData.data = vdsD.map(v => v[1])
+      }
+
+      this.chart.linkVehPassed = makeLinkCompChart([
+        { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed },
+        vdsVolumeData
+      ])
+
+      // this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
+      // this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
     },
     async goToLink (linkId) {
       const res = await axios({

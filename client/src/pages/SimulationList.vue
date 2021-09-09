@@ -166,7 +166,7 @@
           </button>
           <router-link
             :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
-            v-if="row.item.status === 'finished' || row.item.status === 'running'"
+
             class="px-1 py-1 bg-blue-200 hover:bg-blue-500 rounded"
             >
               <b-icon icon="zoom-in"></b-icon>
@@ -185,14 +185,18 @@
         </template>
         <template v-slot:row-details="row">
           <b-card bg-variant="secondary" text-variant="light">
-            <b-alert
+            <div style="overflow-wrap: break-word; max-width:1024px">
+                {{row.item.error }}
+            </div>
+            <!-- <b-alert
               v-if="row.item.error && row.item.status === 'error'"
               class="mb-1 p-2"
               variant="danger"
               show
+              style="overflow-wrap: break-word;"
             >
               {{row.item.error }}
-            </b-alert>
+            </b-alert> -->
             <div>
               <h5> <b-badge variant="dark">
                 {{ row.item.envName }}

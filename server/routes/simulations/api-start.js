@@ -1,6 +1,6 @@
 
 const debug = require('debug')('api:create')
-
+const moment = require('moment')
 const { updateStatus, currentTimeFormatted, getSimulations } = require('../../globals')
 const { executeSimulation } = require('../../sim-runner')
 

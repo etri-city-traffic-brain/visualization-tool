@@ -3,6 +3,7 @@ const router = require('express').Router()
 const createError = require('http-errors')
 
 const fs = require('fs')
+const path = require('path')
 const {
   config
 } = require('../../globals')
@@ -33,6 +34,63 @@ router.get('/', (req, res) => {
       return acc
     }, {})
     res.send(result)
+  })
+})
+
+router.get('/speed/:vdsId', (req, res) => {
+  const vdsPath = path.join(config.base, 'vds')
+  const vdsId = req.params.vdsId
+  const prefix = 'SPD_15MIN_'
+
+  fs.readdir(vdsPath, (err, files) => {
+    if (err) {
+      res.send([])
+    }
+    const targetFile = files.find(file => {
+      console.log(file, '==>', prefix + vdsId)
+      if (file.indexOf(prefix + vdsId) >= 0) {
+        return true
+      }
+      return false
+    })
+
+    if (targetFile) {
+      const tFile = path.join(vdsPath, targetFile)
+      const str = fs.readFileSync(tFile, 'utf-8')
+      const lines = str.split('\n')
+      const l2 = lines.slice(1)
+      res.send(l2.map(l => l.split(',')))
+    } else {
+      res.send([])
+    }
+  })
+})
+
+router.get('/volume/:vdsId', (req, res) => {
+  const vdsPath = path.join(config.base, 'vds')
+  const vdsId = req.params.vdsId
+  const prefix = 'VOL_15MIN_'
+
+  fs.readdir(vdsPath, (err, files) => {
+    if (err) {
+      res.send([])
+    }
+    const targetFile = files.find(file => {
+      if (file.indexOf(prefix + vdsId) >= 0) {
+        return true
+      }
+      return false
+    })
+
+    if (targetFile) {
+      const tFile = path.join(vdsPath, targetFile)
+      const str = fs.readFileSync(tFile, 'utf-8')
+      const lines = str.split('\n')
+      const l2 = lines.slice(1)
+      res.send(l2.map(l => l.split(',')))
+    } else {
+      res.send([])
+    }
   })
 })
 

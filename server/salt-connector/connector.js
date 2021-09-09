@@ -97,14 +97,14 @@ module.exports = (httpServer, tcpPort) => {
         }, 3000)
       } else {
         try {
-          debug('**** start cook ***', simulationId)
-          await cookSimulationResult({
-            simulationId,
-            duration: configuration.end,
-            period: configuration.period
-          })
-          // just for test
-          updateStatus(simulationId, 'finished')
+          // moved to exec-simulation.js 0909
+          // debug('**** start cook ***', simulationId)
+          // await cookSimulationResult({
+          //   simulationId,
+          //   duration: configuration.end,
+          //   period: configuration.period
+          // })
+          // updateStatus(simulationId, 'finished')
           webSocketServer.send(simulationId, {
             event: EVENT_FINISHED
           })
