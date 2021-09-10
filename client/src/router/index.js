@@ -17,6 +17,8 @@ import OptimizationResultComparisonMap from '@/pages/OptimizationResultCompariso
 
 import OptEnvList from '@/pages/OptEnvList'
 
+import Dashboard from '@/pages/Dashboard'
+
 Vue.use(Router)
 
 const route = (path, component) => ({
@@ -36,6 +38,7 @@ export default new Router({
     route('/OptimizationResultComparisonMap/:id', OptimizationResultComparisonMap),
     route('/SimulationComparisonResult', SimulationComparisonResult),
     route('/SignalEditor', SignalEditor),
-    route('/OptEnvList', OptEnvList)
+    route('/OptEnvList', OptEnvList),
+    route('/Dashboard', Dashboard)
   ]
 })

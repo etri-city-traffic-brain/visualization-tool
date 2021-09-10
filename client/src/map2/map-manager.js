@@ -20,10 +20,11 @@ import {
   makeEdgeLayer,
   makeCanvasLayer,
   makeToolLayer,
-  makeVdsLayer
+  makeVdsLayer,
+  makeCctvLayer
 } from '../layers'
 
-const ZOOM_MINIMUM = 14
+const ZOOM_MINIMUM = 13
 
 const { log } = console
 
@@ -43,11 +44,13 @@ function MapManager ({ map, simulationId, eventBus }) {
   const canvasLayer = makeCanvasLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus, extent)
   const toolLayer = makeToolLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
   const vdsLayer = makeVdsLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
+  const cctvLayer = makeCctvLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
   map.addLayer(edgeLayer)
   // map.addLayer(gridLayer)
   map.addLayer(canvasLayer)
   map.addLayer(toolLayer)
   map.addLayer(vdsLayer)
+  map.addLayer(cctvLayer)
 
   function toggleFocusTool () {
     const showHide = toolLayer.isVisible()
@@ -134,7 +137,6 @@ function MapManager ({ map, simulationId, eventBus }) {
   }
 
   function addFeatures (features) {
-    console.log('add feature')
     features.forEach(feature => {
       const vdsId = vdsTable[feature.properties.LINK_ID]
       if (vdsId) {
@@ -261,6 +263,9 @@ function MapManager ({ map, simulationId, eventBus }) {
           }
         })
       })
+    },
+    getCurrentLinks () {
+      return edgeLayer.getGeometries()
     }
   }
 }

@@ -20,6 +20,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(express.static(PUBLIC))
 
+app.use('/video', express.static(path.join(__dirname, '/video')))
+
 app.use('/', require('./routes/index'))
 app.use('/salt/v1/map', require('./routes/map'))
 app.use('/salt/v1/statistics', require('./routes/statistics/index'))
@@ -34,6 +36,7 @@ app.use('/salt/v1/optimization', require('./routes/optimization'))
 
 app.use('/salt/v1/optenv', require('./routes/optenv'))
 app.use('/salt/v1/vds', require('./routes/vds'))
+app.use('/salt/v1/dashboard', require('./routes/dashboard'))
 
 app.use(require('./middleware/not-found'))
 app.use(require('./middleware/server-error'))

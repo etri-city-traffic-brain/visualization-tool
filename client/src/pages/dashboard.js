@@ -1,0 +1,116 @@
+
+import axios from 'axios'
+import * as R from 'ramda'
+import * as d3 from 'd3'
+// import * as d3 from 'd3'
+import makeMap from '@/map2/make-map'
+import MapManager from '@/map2/map-manager'
+
+export default {
+  name: 'Dashboard',
+  components: {
+  },
+  data () {
+    return {
+      map: null,
+      mapId: `map-${Math.floor(Math.random() * 100)}`,
+      mapHeight: 1024, // map view height
+      mapManager: null,
+      dtgData: {},
+      dtgDate: '2019-08-01'
+    }
+  },
+  async mounted () {
+    this.map = makeMap({ mapId: this.mapId, zoom: 16 })
+    this.mapManager = MapManager({
+      map: this.map,
+      simulationId: this.simulationId,
+      eventBus: this
+    })
+
+    this.$on('cctv:selected', () => {
+      console.log('cctv:selected')
+      this.showModal()
+    })
+    this.mapManager.loadMapData()
+
+    // setTimeout(() => {
+
+    // }, 2000)
+  },
+  methods: {
+    showModal () {
+      this.$refs['cctv-modal'].show()
+    },
+    hideModal () {
+      this.$refs['cctv-modal'].hide()
+    },
+    async analizeDtg () {
+      const res = await axios({
+        url: '/salt/v1/dashboard/dtg?date=' + this.dtgDate,
+        method: 'get'
+      })
+      this.dtgData = res.data
+
+      const color = d3.scaleLinear()
+        .domain([3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 40])
+        // .range(['rgb(250, 250, 110)', 'rgb(197, 236, 113)', 'rgb(148, 220, 121)', 'rgb(105, 201, 129)', 'rgb(66, 181, 136)', 'rgb(35, 159, 138)', 'rgb(19, 137, 134)', 'rgb(26, 115, 124)', 'rgb(37, 93, 108)', 'rgb(42, 72, 88)'])
+        .range(['rgb(244, 225, 83)', 'rgb(248, 191, 79)', 'rgb(243, 159, 83)', 'rgb(230, 130, 89)', 'rgb(209, 104, 95)', 'rgb(183, 84, 99)', 'rgb(152, 67, 98)', 'rgb(119, 55, 93)', 'rgb(85, 44, 82)', 'rgb(54, 33, 66)'])
+        .interpolate(d3.interpolateHcl)
+      // const color = d3.scaleOrdinal(d3.schemeCategory20)
+      // const color = d3.quantize(d3.interpolateHcl('#fafa6e', '#2A4858'), 10)
+      const max = Math.max(...Object.values(this.dtgData))
+      const links = this.mapManager.getCurrentLinks()
+      // links.forEach(link => {
+      //   link.updateSymbol({
+      //     lineWidth: 0
+      //   })
+      // })
+      // links.forEach((link, i) => {
+      //   link.properties.dtg = this.dtgData[link.properties.LINK_ID] || -1
+      //   link.animate({
+      //     symbol: {
+      //       lineColor: color(link.properties.dtg / 50),
+      //       lineWidth: link.properties.dtg / 50,
+      //       easing: 'out',
+      //       textPlacement: 'line'
+      //     }
+      //   },
+      //   {
+      //     duration: 2000,
+      //     repeat: false
+      //   },
+      //   function (frame) {
+      //     if (frame.state.playState === 'finished') {
+      //       console.log('animation finished')
+      //     }
+      //   }
+      //   )
+      // })
+
+      let tValue = 0
+      const t = setInterval(() => {
+        links.forEach(link => {
+          link.properties.dtg = this.dtgData[link.properties.LINK_ID] || -1
+          if (tValue <= link.properties.dtg) {
+            link.updateSymbol({
+              lineWidth: tValue / 50,
+              lineColor: color(link.properties.dtg / 50)
+            })
+          }
+        })
+        tValue = tValue + 20
+        if (tValue >= max) {
+          clearInterval(t)
+        }
+      }, 20)
+    }
+  },
+
+  destroyed () {
+    if (this.map) {
+      this.map.remove()
+    }
+  }
+
+}

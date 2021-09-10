@@ -89,6 +89,10 @@ export default {
           path:'SignalEditor',
           name:'신호편집'
         },
+        {
+          path: 'Dashboard',
+          name:'대시보드',
+        }
       ]
     };
   },

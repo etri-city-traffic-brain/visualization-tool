@@ -22,6 +22,7 @@ module.exports = {
       '/statistics': target,
       '/map': target,
       '/salt': target,
+      '/video': target
     },
 
     // Various Dev Server settings
@@ -31,7 +32,6 @@ module.exports = {
     errorOverlay: true,
     notifyOnErrors: true,
     poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
-
 
     /**
      * Source Maps
