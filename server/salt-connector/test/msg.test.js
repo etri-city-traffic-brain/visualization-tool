@@ -1,29 +1,25 @@
 
 const test = require('tape')
-const { Header, Init, Data } = require('../salt-msg')
-
-const encode = require('../encode-struct')
-const decode = require('../decode-struct')
+const Struct = require('awestruct')
 test('test Init', (assert) => {
-  const base = Init(Buffer.alloc(1024))
-  const obj = Object.assign(base, {
-    header: {
-      type: 1,
-      timestamp: 1
-    },
-    simulationId: 'SALT-20200801-0000000001'
-  })
-  // const data = Init(Init.encode(obj))
-
-  const x = encode(Init, {
-    simulationId: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-  })
-
-  decode(x)
-
   // assert.equals('aaa', 'aaa');
-
   // assert.strictEqual(obj.simulationId, data.simulationId)
+
+  const Packet = Struct([
+    ['len', Struct.types.int8],
+    ['age', Struct.types.uint32]
+  ])
+
+  const buffer = Buffer.from([3, 1, 0, 0, 0])
+
+  // Packet.size()
+
+  try {
+    const obj = Packet(buffer)
+    console.log(obj)
+  } catch (err) {
+    console.log(err.message)
+  }
   assert.end()
 })
 

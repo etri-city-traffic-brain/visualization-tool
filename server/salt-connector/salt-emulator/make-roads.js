@@ -79,6 +79,8 @@ const makeData = () => {
     numRoads: roads.length,
     roads
   })
+  console.log(data.length)
+  console.log(data)
   return data
 }
 
