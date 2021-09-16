@@ -36,21 +36,45 @@
       <div class="bg-gray-700 rounded-xl p-2">
         <span class="mx-2 text-white">{{ simulationId }}</span>
 
-        <uniq-map-changer :map="map"/>
-        <b-btn @click="centerTo(1)" class="ml-1" size="sm" variant="secondary">
-          <b-icon icon="dice1"></b-icon>
-        </b-btn>
-        <b-btn @click="sidebar = !sidebar" size="sm" variant="secondary">
-          VDS
-        </b-btn>
-        <b-btn @click="sidebarRse = !sidebarRse" size="sm" variant="secondary">
-          RSE
-        </b-btn>
-        <div class="mt-1">
-          <b-btn @click.stop="startSimulation()" size="sm"> 시작 <b-icon icon="caret-right-fill"/> </b-btn>
-          <b-btn @click="stop" size="sm" class="ml-1"> 중지 <b-icon icon="stop-fill"/> </b-btn>
+        <div>
+          <uniq-map-changer :map="map"/>
+          <b-btn @click="centerTo(1)" class="ml-1" size="sm" variant="secondary">
+            <b-icon icon="dice1"></b-icon>
+          </b-btn>
+          <b-btn @click="sidebar = !sidebar" size="sm" variant="secondary">
+            VDS
+          </b-btn>
+          <b-btn @click="sidebarRse = !sidebarRse" size="sm" variant="secondary">
+            RSE
+          </b-btn>
         </div>
+        <div class="flex mt-1 space-x-1">
+          <button
+            class="flex-1 bg-indigo-400 rounded px-2 py-1 text-sm font-bold hover:bg-indigo-200"
+            @click.stop="startSimulation()"
+          >
+            시뮬레이션 시작 <b-icon icon="caret-right-fill"/>
+          </button>
+          <button
+            class="flex-1 bg-indigo-400 rounded px-2 py-1 text-sm font-bold hover:bg-indigo-200"
+            @click="stop"
+          >
+            시뮬레이션 중지 <b-icon icon="stop-fill"/>
+          </button>
 
+          <button
+            class="flex-1 bg-indigo-400 rounded px-2 py-1 text-sm font-bold hover:bg-indigo-200"
+            @click.stop="startReplay"
+          >
+            Replay <b-icon icon="caret-right-fill"/>
+          </button>
+          <button
+            class="flex-1 bg-indigo-400 rounded px-2 py-1 text-sm font-bold hover:bg-indigo-200"
+            @click="stopReplay"
+          >
+            Stop Replay <b-icon icon="stop-fill"/>
+          </button>
+        </div>
       </div>
       <SimulationDetailsOnFinished
         v-if="simulation.status === 'finished'"
@@ -91,9 +115,9 @@
         </div>
       </div>
     </div>
-    <div class="p-2 space-y-1 uniq-top-right rounded-xl" >
+    <div class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
       <div v-if="currentEdge">
-        <div class="bg-gray-800 p-2 rounded-xl text-white">
+        <div class="rounded-xl text-white text-center">
           <h5>
             <b-badge>{{ currentEdge.LINK_ID }}</b-badge>
             <b-badge>{{ currentEdge.vdsId }}</b-badge>
@@ -111,7 +135,7 @@
         <line-chart :chartData="chart.linkWaitingTime" :options="defaultOption()" :height="150"/>
         </div> -->
 
-         <!-- <div class="bg-gray-800 p-2 rounded-xl mt-1" >
+          <!-- <div class="bg-gray-800 p-2 rounded-xl mt-1" >
           <d3-heatmap :value="chart.linkSpeeds"></d3-heatmap>
         </div> -->
 
@@ -252,7 +276,7 @@
   .uniq-top-right {
     width: 300px;
     /* height: 100%; */
-    height: 520px;
+    /* height: 520px; */
     position: fixed;
     padding: 0;
     top: 180px;

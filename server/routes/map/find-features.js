@@ -10,7 +10,6 @@ const zoomSpeed = {
 }
 
 module.exports = async (collection, { extent, zoom }) => {
-  console.log('zoom: ', zoom)
   if (zoom < ZOOM_MIN) {
     return []
   }

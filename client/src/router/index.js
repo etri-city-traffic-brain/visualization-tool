@@ -17,12 +17,13 @@ import OptimizationResultComparisonMap from '@/pages/OptimizationResultCompariso
 
 import OptEnvList from '@/pages/OptEnvList'
 
-import Dashboard from '@/pages/Dashboard'
+import Dashboard from '@/pages/Dashboard.vue'
 
 Vue.use(Router)
 
 const route = (path, component) => ({
   path,
+  mode: 'history',
   name: component.name,
   component
 })

@@ -171,7 +171,6 @@ function MapManager ({ map, simulationId, eventBus }) {
     const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
     try {
       const { features } = await mapService.getMap(extent(map))
-
       if (event === 'zoomend') {
         // removeEdges(edgesExisted)
         removeEdges(edgeLayer.getGeometries())
@@ -236,13 +235,11 @@ function MapManager ({ map, simulationId, eventBus }) {
     getEdgesInView,
     bus: eventBus,
     showRse (rseId, links) {
-      console.log('show rse', rseId, links)
       edgeLayer.getGeometries().forEach(feature => {
         const linkId = feature.properties.LINK_ID
 
         links.forEach(link => {
           if (linkId === link) {
-            console.log('find link', link)
             // feature.properties.vdsId = vdsId.vdsId
             // feature.properties.secionId = vdsId.sectionId
             // feature.properties.sId = vdsId.sId
@@ -250,7 +247,7 @@ function MapManager ({ map, simulationId, eventBus }) {
             feature.properties.rseId = rseId
 
             feature.updateSymbol({
-              lineWidth: 10,
+              lineWidth: 20,
               lineColor: '#1bbc9b'
             })
 
@@ -259,6 +256,10 @@ function MapManager ({ map, simulationId, eventBus }) {
               5, // count
               function () { // callback when flash end
                 // alert('flash ended')
+                feature.updateSymbol({
+                  lineWidth: 5,
+                  lineColor: 'black'
+                })
               })
           }
         })

@@ -19,9 +19,8 @@ const {
 const scenarioFile = 'salt.scenario.json'
 
 const volume = 'C:\\home\\ubuntu\\uniq-sim'
-const imgName = 'images4uniq/salt:v2.1a.0622'
-const exeFile = '/uniq/simulator/salt/bin/salt-standalone'
-// const config = '/uniq/simulator/salt/volume/data/sample/sample.json'
+const imgName = 'images4uniq/salt:v2.1a.20210915.test_BUS'
+const exeFile = '/uniq/simulator/salt/bin/salt.sh'
 const { log } = console
 const buildConfigPath = sId => `/uniq/simulator/salt/volume/data/${sId}/salt.scenario.json`
 
@@ -30,7 +29,7 @@ async function run (sId) {
   return new Promise((resolve, reject) => {
     exec(`docker run -v ${volume}:/uniq/simulator/salt/volume ${imgName} ${exeFile} ${configPath} --rm`, (error, stdout, stderr) => {
       if (error) {
-        log('error')
+        // log('error')
         log(error.message)
         reject(error)
         return
@@ -40,8 +39,8 @@ async function run (sId) {
         reject(new Error(stderr))
         return
       }
-      log(`stdout: ${stdout}`)
-      resolve(new Error(stdout))
+      // log(`stdout: ${stdout}`)
+      resolve()
     })
   })
 }
@@ -57,26 +56,25 @@ module.exports = (simulation) => {
   log('*** start simulation ***')
   log('simulation', simulation.id)
   run(simulation.id).then(r_ => {
-    console.log('*** simulation finished ***')
-
-    log('**** start cook ***', simulation.id)
-    cookSimulationResult({
-      simulationId: simulation.id,
-      duration: simulation.configuration.end,
-      period: simulation.configuration.period
-    }).then(() => {
-      updateStatus(simulation.id, 'finished')
-    }).catch(err => {
-      updateStatus(simulation.id, 'error', {
-        error: `fail to start simulation ${err.message}`,
-        ended: currentTimeFormatted()
-      })
-    })
-  }).catch(err => {
-    updateStatus(simulation.id, 'error', {
-      error: `fail to start simulation ${err.message}`,
-      ended: currentTimeFormatted()
-    })
+  //   log('**** after run start cook ***', simulation.id)
+  //   cookSimulationResult({
+  //     simulationId: simulation.id,
+  //     duration: simulation.configuration.end,
+  //     period: simulation.configuration.period
+  //   }).then(() => {
+  //     updateStatus(simulation.id, 'finished')
+  //   }).catch(err => {
+  //     console.log(err)
+  //     updateStatus(simulation.id, 'error', {
+  //       error: `fail to start simulation ${err.message}`,
+  //       ended: currentTimeFormatted()
+  //     })
+  //   })
+  // }).catch(err => {
+  //   updateStatus(simulation.id, 'error', {
+  //     error: `fail to start simulation ${err.message}`,
+  //     ended: currentTimeFormatted()
+  //   })
   })
   // exec({
   //   pythonPath,

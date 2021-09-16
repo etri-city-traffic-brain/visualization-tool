@@ -1,7 +1,9 @@
 <template>
   <div>
     <b-card bg-variant="secondary" text-variant="light" no-body class="pr-2 pt-2">
-      <b-form-group label-cols-sm="3" label="환경명" label-class="text-sm-right" label-for="envName">
+      <b-form-group
+        v-if="showEnv"
+        label-cols-sm="3" label="환경명" label-class="text-sm-right" label-for="envName">
         <b-form-input autofocus id="envName" v-model="envName" focus select></b-form-input>
       </b-form-group>
       <b-form-group label-cols-sm="3" label="시뮬레이션 ID" label-class="text-sm-right" label-for="id">

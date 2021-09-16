@@ -53,7 +53,7 @@ router.get('/:id', async (req, res) => {
   const collectionName = map[linkOrCell]
 
   const { id: simulationId } = req.params
-  console.log(simulationId, linkOrCell)
+  // console.log(simulationId, linkOrCell)
   const collection = useDb(DB_MAP).collection(collectionName)
   const features = await findFeatures(collection, { extent, zoom })
 

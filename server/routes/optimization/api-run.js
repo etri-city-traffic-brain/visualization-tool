@@ -6,8 +6,6 @@ const { updateStatus, currentTimeFormatted, getSimulation } = require('../../glo
 const { runSignalOptimization } = require('../../sim-runner')
 
 module.exports = async (req, res, next) => {
-  console.log('execute api-run')
-
   const { id, mode, modelNum } = req.query
   const simulation = getSimulation(id)
 

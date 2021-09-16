@@ -50,7 +50,11 @@ async function prepareSimulation (id, body, role, slaves = []) {
   await addSimulation({ ...body, id, slaves, role })
   await createScenarioFile(simInputDir, { host, body, id })
 
-  await downloadScenario(simInputDir, body.configuration)
+  // await downloadScenario(simInputDir, body.configuration)
+
+  await downloadScenarioTest(simInputDir, body.configuration)
+  console.log('*** caution: you have to update this scenario download ***')
+  console.log('file: api-create.js, line: 55')
 
   updateStatus(id, 'ready', {})
 }

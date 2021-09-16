@@ -30,7 +30,15 @@ function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
 }
 
 export default (map) => {
-  const edgeLayer = new maptalks.VectorLayer('edgeLayer', [])
+  const edgeLayer = new maptalks.VectorLayer('edgeLayer', [], {
+    enableAltitude: true,
+    drawAltitude: {
+      // polygonFill: '#1bbc9b',
+      polygonFill: 'blue',
+      polygonOpacity: 0.3,
+      lineWidth: 0
+    }
+  })
 
   map.on('zoomend moveend', (event) => {
     const map = event.target

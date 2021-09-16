@@ -13,7 +13,6 @@ if (require.main === module) {
       duration: 600,
       period: 600
     })
-    console.log('**** END ****')
     process.exit(1)
   }, 1000)
 }

@@ -9,6 +9,7 @@ const PUBLIC = path.join(__dirname, 'public')
 const VIEWS = path.join(__dirname, 'views')
 const FAVICON = favicon(`${__dirname}/public/favicon.ico`)
 
+const config = require('./config')
 app.set('views', VIEWS)
 app.set('view engine', 'ejs')
 
@@ -19,8 +20,9 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(express.static(PUBLIC))
-
-app.use('/video', express.static(path.join(__dirname, '/video')))
+console.log(config.base)
+// app.use('/video', express.static(path.join(__dirname, '/video')))
+app.use('/video', express.static(path.join(config.base, 'cctv')))
 
 app.use('/', require('./routes/index'))
 app.use('/salt/v1/map', require('./routes/map'))
@@ -37,6 +39,8 @@ app.use('/salt/v1/optimization', require('./routes/optimization'))
 app.use('/salt/v1/optenv', require('./routes/optenv'))
 app.use('/salt/v1/vds', require('./routes/vds'))
 app.use('/salt/v1/dashboard', require('./routes/dashboard'))
+
+app.use('/salt/v1/cctv', require('./routes/cctv'))
 
 app.use(require('./middleware/not-found'))
 app.use(require('./middleware/server-error'))

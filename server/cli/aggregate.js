@@ -29,11 +29,9 @@ async function run () {
     }
   ]
 
-  const start = +new Date()
-  const result = await connection.db.collection(collection).aggregate(option).toArray()
-  console.log(result)
-  console.log('num of results:', result.length)
-  console.log('duration:', (+new Date() - start))
+  // const start = +new Date()
+  // const result = await connection.db.collection(collection).aggregate(option).toArray()
+
   connection.close()
 }
 

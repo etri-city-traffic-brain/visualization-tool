@@ -12,6 +12,9 @@ const target = {
 module.exports = {
   dev: {
 
+    // resolve: {
+    //   symlinks: false
+    // },
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',

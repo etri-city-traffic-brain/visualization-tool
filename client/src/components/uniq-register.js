@@ -82,11 +82,15 @@ export default {
       scriptOptions: [...scriptOptions],
       intervalOptions: [...intervalOptions],
       loading: false,
-      showMap: false
+      showMap: false,
+      showEnv: true
     }
   },
   async mounted () {
-    console.log('simulation register ui')
+    // console.log('simulation register ui', this.modalName)
+    if (this.modalName === 'create-simulation-modal') {
+      this.showEnv = false
+    }
     const env = this.env
     if (this.env) {
       this.envName = env.envName
@@ -161,6 +165,7 @@ export default {
       } else {
         this.$emit('optenvconfig:save', simulationConfig)
       }
+      this.hide()
       this.loading = false
     },
     hide () {

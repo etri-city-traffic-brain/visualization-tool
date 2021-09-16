@@ -3,7 +3,6 @@ const { getOptEnvs } = require('../../globals')
 
 module.exports = {
   async add (req, res, next) {
-    console.log('add env')
     const env = req.body
 
     const exists = await getOptEnvs().find({ envName: env.envName }).value()

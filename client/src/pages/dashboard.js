@@ -17,7 +17,9 @@ export default {
       mapHeight: 1024, // map view height
       mapManager: null,
       dtgData: {},
-      dtgDate: '2019-08-01'
+      dtgDate: '2019-08-01',
+      videoUrl: '',
+      cctv: {}
     }
   },
   async mounted () {
@@ -28,13 +30,13 @@ export default {
       eventBus: this
     })
 
-    this.$on('cctv:selected', () => {
-      console.log('cctv:selected')
+    this.$on('cctv:selected', (cctv) => {
+      // console.log('cctv:selected')
+      this.videoUrl = cctv.videoUrl
+      this.cctv = cctv
       this.showModal()
     })
     this.mapManager.loadMapData()
-
-    // setTimeout(() => {
 
     // }, 2000)
   },
@@ -88,22 +90,38 @@ export default {
       //   )
       // })
 
-      let tValue = 0
-      const t = setInterval(() => {
-        links.forEach(link => {
-          link.properties.dtg = this.dtgData[link.properties.LINK_ID] || -1
-          if (tValue <= link.properties.dtg) {
-            link.updateSymbol({
-              lineWidth: tValue / 50,
-              lineColor: color(link.properties.dtg / 50)
-            })
+      const animatte = () => {
+        let tValue = 0
+        const t = setInterval(() => {
+          links.forEach(link => {
+            link.properties.dtg = this.dtgData[link.properties.LINK_ID] || -1
+            if (tValue <= link.properties.dtg) {
+              link.updateSymbol({
+                // lineWidth: tValue / 50,
+                lineWidth: 2,
+                lineColor: color(link.properties.dtg / 50)
+              })
+
+              const al = new Array(link.getCoordinates().length).fill(tValue / 5)
+              link.properties.altitude = al
+            }
+          })
+          tValue = tValue + 20
+          if (tValue >= max) {
+            clearInterval(t)
           }
-        })
-        tValue = tValue + 20
-        if (tValue >= max) {
-          clearInterval(t)
-        }
-      }, 20)
+        }, 10)
+      }
+
+      this.map.animateTo({
+        pitch: 65
+      }, {
+        duration: 1000
+      })
+
+      setTimeout(() => {
+        animatte()
+      }, 1500)
     }
   },
 

@@ -3,34 +3,27 @@
   <div class="bg-gray-500 py-2 min-w-max">
     <div class="p-1 flex justify-between" >
       <div>
-        <b-btn
-          size="sm"
-          variant="dark"
+        <button
           v-b-modal.create-simulation-modal
-          v-b-tooltip.hover
-          title="시뮬레이션 등록"
+          class="px-2 bg-blue-400 text-sm py-1 hover:bg-blue-600 hover:text-white rounded font-bold text-white"
         >
-          <b-icon icon="file-earmark-plus"/>
-        </b-btn>
-        <b-btn
-          size="sm"
-          variant="dark"
+          시뮬레이션 생성 <b-icon icon="file-earmark-plus"/>
+        </button>
+        <button
+          class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
           v-b-toggle.collapse1
-          v-b-tooltip.hover
           title="시뮬레이션 비교"
         >
           <b-icon icon="files"/>
-        </b-btn>
+        </button>
       </div>
       <div>
         <b-btn
           size="sm"
           variant="dark"
           @click.stop="updateTable"
-          title="새로고침"
-          v-b-tooltip.hover
         >
-            <b-icon icon="arrow-clockwise"/>
+            새로고침 <b-icon icon="arrow-clockwise"/>
         </b-btn>
         <b-btn
           :pressed.sync="autoRefresh"
@@ -40,6 +33,7 @@
           v-b-tooltip.hover
           title="테이블을 주기적으로 업데이트합니다."
         >
+          새로고침(Auto)
           <b-icon v-if="!autoRefresh" icon="arrow-clockwise"/>
           <b-iconstack v-if="autoRefresh" font-scale="1" animation="spin">
             <b-icon stacked icon="slack" variant="info" scale="0.75" shift-v="-0.25"></b-icon>
@@ -149,32 +143,29 @@
         <template v-slot:cell(actions)="row">
           <button
             @click.stop="startSimulation(row.item.id, row.index, $event.target)"
-            v-b-tooltip.hover
-            title="시뮬레이션을 시작합니다."
-            class="px-1 bg-indigo-400 hover:bg-indigo-500 rounded"
+            class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-500 rounded"
           >
-              <b-icon icon="play-fill"/>
+              시뮬레이션 시작 <b-icon icon="play-fill"/>
           </button>
             <!-- :disabled="row.item.status !== 'running'" -->
           <button
             @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
-            v-b-tooltip.hover
-            title="시뮬레이션을 중지합니다."
-            class="px-1 bg-yellow-400 hover:bg-yellow-500 rounded"
+            class="px-2 py-1 text-sm bg-yellow-500 hover:bg-yellow-500 rounded text-black"
           >
-              <b-icon icon="stop-fill"/>
+               중지 <b-icon icon="stop-fill"/>
           </button>
           <router-link
             :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
-
-            class="px-1 py-1 bg-blue-200 hover:bg-blue-500 rounded"
             >
-              <b-icon icon="zoom-in"></b-icon>
+              <button
+              class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-300 rounded text-white"
+              >상세보기 <b-icon icon="zoom-in"></b-icon> </button>
+
           </router-link>
           <button
-            class="px-1 bg-red-400 hover:bg-red-500 rounded"
+            class="px-2 bg-red-600 hover:bg-red-500 rounded text-sm py-1"
             @click.stop="removeSimulation(row.item)">
-              <b-icon icon="trash-fill" aria-hidden="true"/>
+              삭제 <b-icon icon="trash-fill" aria-hidden="true"/>
           </button>
         </template>
 

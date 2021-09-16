@@ -9,7 +9,7 @@ const BufferManager = require('./socket-buffer-manager')
 const { Header } = require('./salt-msg')
 
 const HEADER_LENGTH = 16
-
+const hex = require('./utils/hex')
 const { green } = chalk
 
 module.exports = (port = 1337) => {
@@ -25,12 +25,14 @@ module.exports = (port = 1337) => {
       if (handler) {
         const bodyLength = header.length + HEADER_LENGTH
         handler(socket, buffer.slice(HEADER_LENGTH, bodyLength))
+        // console.log(header)
+        // console.log(bodyLength, buffer.length)
         bufferManager.setBuffer(socket, buffer.slice(bodyLength))
       } else {
         bufferManager.setBuffer(socket, Buffer.alloc(0))
       }
     }
-    timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 10)
+    timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 20)
   }
 
   const bufferManagerRegistry = {}
@@ -41,14 +43,16 @@ module.exports = (port = 1337) => {
   }
 
   const handleClose = socket => () => {
-    saltMsgHandler.clearResource(socket)
-    const bufferManager = bufferManagerRegistry[socket.remotePort]
-    if (bufferManager) {
-      bufferManager.deleteBuffer(socket)
-    }
-    delete bufferManagerRegistry[socket.remotePort]
-    clearTimeout(timer)
-    debug(chalk.red('[close]'))
+    setTimeout(() => {
+      saltMsgHandler.clearResource(socket)
+      const bufferManager = bufferManagerRegistry[socket.remotePort]
+      if (bufferManager) {
+        bufferManager.deleteBuffer(socket)
+      }
+      delete bufferManagerRegistry[socket.remotePort]
+      clearTimeout(timer)
+      debug(chalk.red('[close]'))
+    }, 3000)
   }
 
   const handleError = socket => () => {

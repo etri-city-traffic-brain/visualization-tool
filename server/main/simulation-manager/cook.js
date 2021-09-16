@@ -17,7 +17,7 @@ const { currentTimeFormatted, updateStatus } = require('../../globals')
 
 const makeChartData = require('../chart-data-maker')
 const recordResult = require('./insert-to-mongo')
-
+debug('xxxx')
 const config = require('../../config')
 const { output } = config.saltPath
 
@@ -39,6 +39,7 @@ const pickResultFile = id => {
 const cook = ({ simulationId, duration, period }) => {
   updateStatus(simulationId, 'processing')
   debug('Start cooking simulation result', simulationId)
+  console.log('start cooking....')
   if (!simulationId) {
     return Promise.reject(new Error('simulation id missed'))
   }
@@ -96,7 +97,7 @@ const cook = ({ simulationId, duration, period }) => {
           },
           data: cells
         })
-        debug('😀chart data created, elapsedTime:', elapsedTime)
+        debug('😀 chart data created, elapsedTime:', elapsedTime)
 
         const memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024
         debug(`The job uses approximately ${Math.round(memoryUsed * 100) / 100} MB`)

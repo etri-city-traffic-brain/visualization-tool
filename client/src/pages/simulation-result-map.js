@@ -111,11 +111,11 @@ const makeLineChart = (data, label, color) => {
 }
 
 function makeLinkCompChart (data) {
-  console.log(data)
+  // console.log(data)
   const ll = data.map(d => d.data.length)
   const maxValue = Math.max(...ll)
   const maxIdx = data.findIndex(d => d.data.length === maxValue)
-  console.log('maxIdx:', maxIdx)
+  // console.log('maxIdx:', maxIdx)
   const dataset = (label, color, data) => ({
     label,
     fill: false,
@@ -344,6 +344,7 @@ export default {
 
     this.$on('salt:finished', async () => {
       log('**** SIMULATION FINISHED *****')
+      this.simulation.status = 'finished'
       await this.updateSimulation()
       await this.updateChart()
     })
@@ -370,6 +371,22 @@ export default {
     window.addEventListener('resize', this.resize)
   },
   methods: {
+    startReplay () {
+      this.wsClient.send({
+        simulationId: this.simulationId,
+        type: 'replay',
+        command: 'start',
+        step: 0
+      })
+    },
+    stopReplay () {
+      this.wsClient.send({
+        simulationId: this.simulationId,
+        type: 'replay',
+        command: 'stop',
+        step: 0
+      })
+    },
     ...stepperMixin,
 
     stop () {
@@ -444,6 +461,7 @@ export default {
       this.wsClient.init()
     },
     async startSimulation () {
+      this.simulation.status = 'running'
       try {
         await simulationService.startSimulation(this.simulationId, this.userState.userId)
       } catch (err) {
@@ -458,7 +476,6 @@ export default {
       }
     },
     async updateLinkChart (linkId, vdsId) {
-      console.log('VDSID:', vdsId)
       const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, linkId)
       // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
       // this.chart.linkSpeeds = makeLinkSpeedChartData(linkData.values, [10, 20, 30, 10, 20, 30])
@@ -514,8 +531,6 @@ export default {
       })
     },
     async goToRse (rseId) {
-      console.log(rseId)
-      console.log(this.rseList[rseId])
       const link0 = this.rseList[rseId][0]
       const res = await axios({
         method: 'get',

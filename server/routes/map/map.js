@@ -3,9 +3,7 @@ const findFeatures = require('./find-features')
 const parse = require('../../utils/parse-req-query')
 
 module.exports = async (req, res) => {
-  // console.log('******************** map *****')
   const { extent, zoom } = parse(req)
-  // const collectionName = zoom <= 17 ? 'links' : 'cells';
   const collectionName = zoom <= 17 ? 'ulinks' : 'ucells'
 
   const collections = mongoose.connection.db.collection(collectionName)
@@ -13,5 +11,13 @@ module.exports = async (req, res) => {
     extent,
     zoom
   })
+
   res.json({ features: links })
 }
+
+// mongoose.connection.on('open', function (ref) {
+//   console.log('Connected to mongo server.')
+//   mongoose.connection.db.listCollections().toArray(function (err, names) {
+//     console.log(names) // [{ name: 'dbname.myCollection' }]
+//   })
+// })

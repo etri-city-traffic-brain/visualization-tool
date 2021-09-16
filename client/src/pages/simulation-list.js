@@ -37,11 +37,11 @@ export default {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
-        { class: 'text-center', key: 'id', label: '시뮬레이션 아이디' },
-        { class: 'text-center', key: 'status', label: '진행상태' },
+        { class: 'text-center', key: 'id', label: '아이디' },
+        { class: 'text-center', key: 'status', label: '상태' },
         // { class: 'text-center', key: 'statusText', label: '상태' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
-        { class: 'text-center', key: 'duration', label: '대상시간' },
+        { class: 'text-center', key: 'duration', label: '기간' },
         // { class: 'text-center', key: 'ended', label: '종료' },
         { class: 'text-center', key: 'actions', label: '제어' }
         // { class: 'text-center', key: 'details', label: '상세' },

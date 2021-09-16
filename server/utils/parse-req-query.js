@@ -1,15 +1,15 @@
 
 const parseMapReqParam = (req) => {
-  const { query } = req;
+  const { query } = req
 
-  const extent = JSON.parse(query.extent);
-  const zoom = +query.zoom;
-  const type = zoom > 17 ? 'cells' : 'links';
+  const extent = JSON.parse(query.extent)
+  const zoom = +query.zoom
+  const type = zoom > 17 ? 'cells' : 'links'
   return {
     type,
     extent,
-    zoom,
-  };
-};
+    zoom
+  }
+}
 
-module.exports = parseMapReqParam;
+module.exports = parseMapReqParam

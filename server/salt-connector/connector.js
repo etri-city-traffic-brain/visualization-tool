@@ -34,8 +34,6 @@ module.exports = (httpServer, tcpPort) => {
   // send to simulator
   webSocketServer.on(EVENT_SET, (data) => {
     tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
-    console.log('***** SET *****')
-    // console.log(data)
   })
 
   webSocketServer.on(EVENT_STOP, (data) => {
@@ -54,7 +52,7 @@ module.exports = (httpServer, tcpPort) => {
 
   tcpServer.on(EVENT_STATUS, async (data) => {
     const { simulationId } = data
-    debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`)
+    // debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`)
     webSocketServer.send(data.simulationId, { ...data })
 
     if (isFinished(data)) {
@@ -98,12 +96,12 @@ module.exports = (httpServer, tcpPort) => {
       } else {
         try {
           // moved to exec-simulation.js 0909
-          // debug('**** start cook ***', simulationId)
-          // await cookSimulationResult({
-          //   simulationId,
-          //   duration: configuration.end,
-          //   period: configuration.period
-          // })
+          debug('**** connector start cook ***', simulationId)
+          await cookSimulationResult({
+            simulationId,
+            duration: configuration.end,
+            period: configuration.period
+          })
           // updateStatus(simulationId, 'finished')
           webSocketServer.send(simulationId, {
             event: EVENT_FINISHED
@@ -117,7 +115,7 @@ module.exports = (httpServer, tcpPort) => {
 
   // send to web
   tcpServer.on(EVENT_DATA, (data) => {
-    console.log(data.simulationId)
+    // console.log(data.simulationId)
     webSocketServer.send(data.simulationId, { ...data })
   })
 }
