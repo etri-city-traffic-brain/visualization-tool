@@ -4,7 +4,7 @@ const parse = require('../../utils/parse-req-query')
 
 module.exports = async (req, res) => {
   const { extent, zoom } = parse(req)
-  const collectionName = zoom <= 17 ? 'ulinks' : 'ucells'
+  const collectionName = zoom <= 16 ? 'ulinks' : 'ucells'
 
   const collections = mongoose.connection.db.collection(collectionName)
   const links = await findFeatures(collections, {

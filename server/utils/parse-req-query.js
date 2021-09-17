@@ -4,7 +4,7 @@ const parseMapReqParam = (req) => {
 
   const extent = JSON.parse(query.extent)
   const zoom = +query.zoom
-  const type = zoom > 17 ? 'cells' : 'links'
+  const type = zoom > 16 ? 'cells' : 'links'
   return {
     type,
     extent,

@@ -15,8 +15,8 @@ function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
       geometry.updateSymbol({
         lineWidth,
         lineColor,
-        markerPlacement: 'vertex-last', // vertex, point, vertex-first, vertex-last, center
-        lineDasharray: [1]
+        markerPlacement: 'vertex-last' // vertex, point, vertex-first, vertex-last, center
+        // lineDasharray: [1]
       })
     } else {
       geometry.updateSymbol({

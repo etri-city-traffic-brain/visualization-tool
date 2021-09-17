@@ -16,7 +16,7 @@ export default {
   data () {
     return {
       width: 250,
-      height: 50,
+      height: 25,
       xScale: null
     }
   },

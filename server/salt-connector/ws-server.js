@@ -100,45 +100,49 @@ function Replayer (send) {
 module.exports = (httpServer) => {
   const wss = new WebSocket.Server({ server: httpServer })
   const eventBus = Object.create(events.EventEmitter.prototype)
+
+  // send message to all web clients
   const send = (simulationId, data) => {
     wss.clients.forEach((client) => {
       // @ts-ignore
-      // console.log(client.$simulationId, simulationId)
       if (client.$simulationId === simulationId) {
-        client.send(JSON.stringify(data))
-        // console.log(data)
+        try {
+          client.send(JSON.stringify(data))
+        } catch (err) {
+          debug(err.message)
+        }
       }
     })
   }
 
   let replayer = Replayer(send)
 
+  function handleReplayMessage (msg) {
+    const tFile = path.join(config.saltPath.output, msg.simulationId, 'log.txt')
+
+    if (msg.type === 'replay' && msg.command === 'start') {
+      if (replayer) {
+        replayer.stop()
+        replayer = Replayer(send)
+        replayer.init(msg.simulationId, tFile)
+      }
+    }
+    if (msg.type === 'replay' && msg.command === 'stop') {
+      if (replayer) {
+        replayer.stop()
+      }
+    }
+  }
+
   function handleConnection (client) {
     const msgHandler = MsgHandler(client, eventBus)
 
     client.on('message', (data) => {
-      // console.log('[WebSocket Message]:', data)
       try {
         const msg = JSON.parse(data)
         const handler = msgHandler[msg.type] || (() => {})
         handler(msg)
-        console.log(msg)
-
-        const tFile = path.join(config.saltPath.output, msg.simulationId, 'log.txt')
-
-        if (msg.type === 'replay' && msg.command === 'start') {
-          if (replayer) {
-            replayer.stop()
-            replayer = Replayer(send)
-            replayer.init(msg.simulationId, tFile)
-          }
-        }
-        if (msg.type === 'replay' && msg.command === 'stop') {
-          console.log('stop please')
-          if (replayer) {
-            replayer.stop()
-          }
-        }
+        handleReplayMessage(msg)
       } catch (err) {
         debug(err.message)
       }

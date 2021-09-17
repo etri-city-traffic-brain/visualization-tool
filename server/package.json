@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "node ./node_modules/nodemon/bin/nodemon.js --ignore db/ --ignore './db.json' --ignore '*.swp' --ignore 'data/'",
-    "test": "npx tape test/**/*.js | faucet"
+    "dev2": "node ./node_modules/nodemon/bin/nodemon.js --ignore db/ --ignore './db.json' --ignore '*.swp' --ignore 'data/'",
+    "test": "npx tape test/**/*.js | faucet",
+    "dev": "nodemon ./bin/www"
   },
   "nodemonConfig": {
     "ignore": [

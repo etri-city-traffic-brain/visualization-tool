@@ -358,9 +358,9 @@ export default {
       this.wsStatus = 'open'
     })
 
-    this.$on('ws:error', (error) => {
+    this.$on('ws:error', () => {
       this.wsStatus = 'error'
-      this.makeToast(error.message, 'warning')
+      this.makeToast('ws connection error', 'warning')
     })
 
     this.$on('ws:close', () => {

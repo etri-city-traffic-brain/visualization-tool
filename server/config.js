@@ -53,11 +53,12 @@ module.exports = {
     mongodbUrl: 'mongodb://127.0.0.1:27017/map',
     mongoOption: {
       useNewUrlParser: true,
-      autoReconnect: true,
-      reconnectTries: Number.MAX_VALUE,
-      reconnectInterval: 1000,
+      //  autoReconnect: true,
+      // reconnectTries: Number.MAX_VALUE,
+      // reconnectInterval: 1000,
       keepAlive: 1,
-      connectTimeoutMS: 30000
+      connectTimeoutMS: 30000,
+      useUnifiedTopology: true
     },
     lowDBFile: process.env.db || './db.json'
   }

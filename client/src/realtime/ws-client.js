@@ -79,7 +79,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       eventBus.$emit('ws:close', {})
       status = 'close'
       log('websocket is closed')
-      init()
+      setTimeout(() => init(), 1000)
     })
 
     socket.addEventListener('error', () => {

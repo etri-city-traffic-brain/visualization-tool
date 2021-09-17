@@ -17,5 +17,3 @@ connectDB(db)
 
 const httpServer = startHttpServer(webApp, webPort)
 startMessenger(httpServer, tcpPort)
-
-console.log(`This process is pid ${process.pid}`)

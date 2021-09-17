@@ -109,8 +109,14 @@
         <div v-for="link of chart.links" :key="link.linkId">
           <div class="flex items-center">
           <d3-speed-bar :value="link.speeds"></d3-speed-bar>
-          <div class="bg-yellow-500 w-32 text-xs ml-1 mr-1 px-1 rounded py-1 ">{{ link.linkId }}</div>
-          <b-btn size="sm" @click="removeLinkChart(link.linkId)">delete</b-btn>
+          <div class="text-white w-32 text-xs ml-1 mr-1 px-1 py-1 ">{{ link.linkId }}</div>
+          <button
+            class="text-yellow-400 hover:text-white"
+            @click="removeLinkChart(link.linkId)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
           </div>
         </div>
       </div>
