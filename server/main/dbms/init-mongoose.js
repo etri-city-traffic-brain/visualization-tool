@@ -3,6 +3,10 @@ const debug = require('debug')('server:db')
 const chalk = require('chalk')
 const mongoose = require('mongoose')
 
+mongoose.set('useNewUrlParser', true)
+mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
+
 function start ({ mongodbUrl, mongoOption }) {
   const { connection } = mongoose
   let lastReconnectAttempt // saves the timestamp of the last reconnect attempt
