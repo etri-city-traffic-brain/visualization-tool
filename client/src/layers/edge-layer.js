@@ -3,7 +3,8 @@ import * as maptalks from 'maptalks'
 
 import color from '@/utils/colors'
 
-const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1.5
+// const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1.5
+const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1
 
 function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
   const lineWidth = calcLineWidth(map.getZoom())
@@ -34,7 +35,8 @@ export default (map) => {
     enableAltitude: true,
     drawAltitude: {
       // polygonFill: '#1bbc9b',
-      polygonFill: 'blue',
+      // polygonFill: 'blue',
+      polygonFill: 'orange',
       polygonOpacity: 0.3,
       lineWidth: 0
     }

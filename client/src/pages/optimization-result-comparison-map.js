@@ -48,6 +48,8 @@ import style from '@/components/style'
 
 import TrafficLightManager from '@/map2/map-traffic-lights'
 
+import drawChart from '@/optsig/chart-reward-phase'
+
 const dataset = (label, color, data) => ({
   label,
   fill: false,
@@ -57,6 +59,32 @@ const dataset = (label, color, data) => ({
   pointRadius: 1,
   data
 })
+
+const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
+  return {
+    labels,
+    label,
+    datasets: [{
+      label: 'reward',
+      backgroundColor: 'skyblue',
+      borderColor: 'skyblue',
+      data,
+      fill: false,
+      borderWidth: 1,
+      pointRadius: 1
+    },
+    {
+      label: '40avg',
+      backgroundColor: 'red',
+      borderColor: 'red',
+      data: data2,
+      fill: false,
+      borderWidth: 1,
+      pointRadius: 1
+    }
+    ]
+  }
+}
 
 const makeLineData = (data1 = [], data2 = []) => {
   return {
@@ -97,7 +125,7 @@ const initSimulationData = async (mapId, slave, eventTarget) => {
 }
 
 const aggregate = (objs1) => {
-  if(objs1.length < 1) {
+  if (objs1.length < 1) {
     return []
   }
   const speeds = []
@@ -135,7 +163,8 @@ export default {
       mapIds: [randomId(), randomId()],
       simulations: null,
       log,
-      mapHeight: 1024, // map view height
+      // mapHeight: 1024, // map view height
+      mapHeight: 600, // map view height
       sidebar: false,
       currentStep: 1,
       slideMax: 0,
@@ -186,7 +215,9 @@ export default {
       fixedSlave: null,
       selectedEpoch: 0,
       showEpoch: false,
-      trafficLightManager: null
+      trafficLightManager: null,
+      phaseRewardChartFt: null,
+      phaseRewardChartRl: null
     }
   },
   destroyed () {
@@ -217,7 +248,7 @@ export default {
       await initSimulationData(this.mapIds[1], this.testSlave, this)
     ]
 
-    await this.updateChart()
+    // await this.updateChart()
     await this.updateChartInView()
 
     this.initMapEventHandler()
@@ -303,13 +334,38 @@ export default {
 
     window.addEventListener('resize', this.resize)
 
-    try {
-      const c = (await optimizationService.getReward(this.fixedSlave)).data
-      this.rewards = makeRewardChartData(c)
-    } catch (err) {
-      log(err.message)
-      this.makeToast(err.message, 'warning')
-    }
+    const result = await optimizationService.getRewardTotal(this.simulation.id)
+    const results = Object.values(result.data)
+
+    const total = results[0]
+    const label = new Array(total.length).fill(0).map((v, i) => i)
+    const reward = total.map(v => Math.floor(v.reward))
+    const avg = total.map(v => Math.floor(v.rewardAvg))
+
+    this.rewards = makeRewardChart('total', label, reward, avg)
+
+    // this.rewards = makeRewardChartData([label, reward])
+
+    // try {
+    //   const c = (await optimizationService.getReward(this.fixedSlave)).data
+    //   this.rewards = makeRewardChartData(c)
+    // } catch (err) {
+    //   log(err.message)
+    //   this.makeToast(err.message, 'warning')
+    // }
+
+    const phaseRewardFt = await optimizationService.getPhaseReward(this.simulation.id, 'ft')
+    const phaseRewardRl = await optimizationService.getPhaseReward(this.simulation.id, 'rl')
+
+    const dataFt = phaseRewardFt.data
+    const dataRl = phaseRewardRl.data
+    const ft = dataFt['목원대네거리']
+    const rl = dataRl['목원대네거리']
+    // const d2 = data['유성중삼거리']
+
+    this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], ft)
+    this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], rl)
+    // const c2 = drawChart(document.getElementById('c2'), d2)
   },
   methods: {
     ...stepperMixin,
@@ -356,6 +412,12 @@ export default {
     },
     resize () {
       this.mapHeight = window.innerHeight - 50 // update map height to current height
+      if (this.phaseRewardChartFt) {
+        this.phaseRewardChartFt.resize()
+      }
+      if (this.phaseRewardChartRl) {
+        this.phaseRewardChartRl.resize()
+      }
     },
     togglePlay () {
       this.playBtnToggle = !this.playBtnToggle
@@ -419,8 +481,8 @@ export default {
       const moveHandler = (map1, map2) => {
         const moveTo = (map, target) => {
           map.animateTo({
-            center: target.getCenter()
-            // zoom: target.getZoom()
+            center: target.getCenter(),
+            zoom: target.getZoom()
           })
         }
 

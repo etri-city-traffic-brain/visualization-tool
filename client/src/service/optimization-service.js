@@ -39,11 +39,22 @@ async function getReward (optId) {
   return HTTP.get(`${base}/reward?id=${optId}`)
   // return [10, 20, 30, 100, 30, 20, 10]
 }
+async function getRewardTotal (optId) {
+  return HTTP.get(`${base}/reward/total?id=${optId}`)
+  // return [10, 20, 30, 100, 30, 20, 10]
+}
+
+// type one of 'ft' or 'rl'
+async function getPhaseReward (optId, type = 'ft') {
+  return HTTP.get(`${base}/phasereward?id=${optId}&type=${type}`)
+}
 
 export default {
   runTrain,
   runFixed,
   runTest,
   getPhase,
-  getReward
+  getReward,
+  getRewardTotal,
+  getPhaseReward
 }

@@ -1,7 +1,7 @@
 
 const createError = require('http-errors')
 
-const read = require('../../main/signal-optimization/read-reward')
+const read = require('../../main/signal-optimization/read-reward-total')
 
 module.exports = async (req, res, next) => {
   const { id } = req.query

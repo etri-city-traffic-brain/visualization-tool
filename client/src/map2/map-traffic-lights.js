@@ -142,7 +142,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   })
 
   map.on('zoomend', (event) => {
-    if (event.to < 16) {
+    if (event.to < 14) {
       hide()
     } else {
       show()
@@ -274,17 +274,27 @@ export default function SaltTrafficLightsLoader (map, element, events) {
 
   const layer = new OptStatusLayer('hello')
 
-  function setOptJunction (junctionId) {
+  function setOptJunction (junctionIds) {
     const tlayer = map.getLayer('trafficLightsLayer')
+    const data = []
     tlayer.getGeometries().forEach(g => {
-      if (g.properties.NODE_ID === junctionId) {
-        layer.setData([
-          {
+      junctionIds.forEach(junctionId => {
+        if (g.properties.NODE_ID === junctionId) {
+          data.push({
             coord: g.getCoordinates().add(0.00, 0.0003).toArray(),
-            text: '최적화 중 '
-          }
-        ])
-      }
+            // text: '최적화 중 '
+            text: ''
+
+          })
+          // layer.setData([
+          //   {
+          //     coord: g.getCoordinates().add(0.00, 0.0003).toArray(),
+          //     text: '최적화 중 '
+          //   }
+          // ])
+        }
+      })
+      layer.setData(data)
     })
     layer.addTo(map)
   }

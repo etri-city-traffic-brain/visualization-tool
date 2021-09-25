@@ -26,6 +26,9 @@ import lineChartOption from '@/charts/chartjs/line-chart-option'
 // import donutChartOption from '@/charts/chartjs/donut-chart-option';
 import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart'
 import TrafficLightManager from '@/map2/map-traffic-lights'
+
+import axios from 'axios'
+
 const makeDonutDefaultDataset = () => ({
   datasets: [{
     data: [1, 1, 1],
@@ -33,6 +36,32 @@ const makeDonutDefaultDataset = () => ({
   }],
   labels: ['막힘', '정체', '원활']
 })
+
+const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
+  return {
+    labels,
+    label,
+    datasets: [{
+      label: 'reward',
+      backgroundColor: 'skyblue',
+      borderColor: 'skyblue',
+      data,
+      fill: false,
+      borderWidth: 1,
+      pointRadius: 1
+    },
+    {
+      label: '40avg',
+      backgroundColor: 'red',
+      borderColor: 'red',
+      data: data2,
+      fill: false,
+      borderWidth: 1,
+      pointRadius: 1
+    }
+    ]
+  }
+}
 
 const { log } = console
 
@@ -167,7 +196,9 @@ export default {
       defaultOption: lineChartOption,
       rewards: { labels: [] },
       apiErrorMessage: '',
-      trafficLightManager: null
+      trafficLightManager: null,
+      rewardCharts: [],
+      rewardTotal: {}
     }
   },
   destroyed () {
@@ -183,6 +214,7 @@ export default {
     this.simulationId = this.$route.params ? this.$route.params.id : null
 
     const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
+    console.log('epoch:', simulation.configuration.epoch)
     this.simulation = simulation
     this.showLoading = true
     this.resize()
@@ -237,12 +269,12 @@ export default {
           resolve()
         }, 3000)
       })
-      for (let i = 0; i < junctionIds.length; i++) {
-        this.trafficLightManager.setOptJunction(junctionIds[i])
-        await sleep()
-      }
+      // for (let i = 0; i < junctionIds.length; i++) {
+      this.trafficLightManager.setOptJunction(junctionIds)
+      // await sleep()
+      // }
 
-      this.trafficLightManager.clearOptJunction()
+      // this.trafficLightManager.clearOptJunction()
 
       try {
         const result = await optimizationService.runTrain(this.simulationId)
@@ -250,6 +282,47 @@ export default {
       } catch (err) {
         console.log(err.message)
         this.apiErrorMessage = err.message
+      }
+    },
+    async getReward () {
+      // console.log('get reward', this.simulationId)
+
+      const result = await optimizationService.getReward(this.simulationId)
+      // console.log(result.data)
+      this.rewardCharts = []
+      Object.keys(result.data).forEach(key => {
+        // console.log(key, '--->', result.data[key])
+        const value = result.data[key]
+        const label = new Array(value.length).fill(0).map((v, i) => i)
+        const reward = value.map(v => Math.floor(v.reward))
+        const avg = value.map(v => Math.floor(v.rewardAvg))
+        // console.log(makeRewardChart(label, reward))
+        // console.log(avg)
+        this.rewardCharts.push(makeRewardChart(key, label, reward, avg))
+      })
+
+      await this.getRewardTotal()
+    },
+    async getRewardTotal () {
+      try {
+        const result = await optimizationService.getRewardTotal(this.simulationId)
+        const results = Object.values(result.data)
+
+        const total = results[0]
+        const label = new Array(total.length).fill(0).map((v, i) => i)
+        const reward = total.map(v => Math.floor(v.reward))
+        const avg = total.map(v => Math.floor(v.rewardAvg))
+
+        this.rewardTotal = makeRewardChart('total', label, reward, avg)
+        this.progressOpt = total.length
+      } catch (err) {
+        this.$bvToast.toast('Fail to load reward total', {
+          title: 'Error',
+          variant: 'danger',
+          autoHideDelay: 3000,
+          appendToast: true,
+          toaster: 'b-toaster-top-right'
+        })
       }
     }
   }

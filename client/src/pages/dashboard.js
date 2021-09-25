@@ -19,7 +19,8 @@ export default {
       dtgData: {},
       dtgDate: '2019-08-01',
       videoUrl: '',
-      cctv: {}
+      cctv: {},
+      isRunning: false
     }
   },
   async mounted () {
@@ -48,6 +49,16 @@ export default {
       this.$refs['cctv-modal'].hide()
     },
     async analizeDtg () {
+      if (this.isRunning) {
+        this.$bvToast.toast('DTG is processing', {
+          title: 'Wait',
+          variant: 'info',
+          autoHideDelay: 3000,
+          appendToast: true,
+          toaster: 'b-toaster-top-right'
+        })
+        return
+      }
       const res = await axios({
         url: '/salt/v1/dashboard/dtg?date=' + this.dtgDate,
         method: 'get'
@@ -90,6 +101,11 @@ export default {
       //   )
       // })
 
+      links.forEach(link => {
+        const al = new Array(link.getCoordinates().length).fill(0)
+        link.properties.altitude = al
+      })
+
       const animatte = () => {
         let tValue = 0
         const t = setInterval(() => {
@@ -109,6 +125,8 @@ export default {
           tValue = tValue + 20
           if (tValue >= max) {
             clearInterval(t)
+            console.log('clear interval')
+            this.isRunning = false
           }
         }, 10)
       }
@@ -120,6 +138,7 @@ export default {
       })
 
       setTimeout(() => {
+        this.isRunning = true
         animatte()
       }, 1500)
     }

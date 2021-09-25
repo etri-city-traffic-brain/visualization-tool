@@ -7,7 +7,9 @@ export default ([labels = [], data = []] = []) => {
       backgroundColor: 'skyblue',
       borderColor: 'skyblue',
       data,
-      fill: false
+      fill: false,
+      borderWidth: 1,
+      pointRadius: 1
     }]
   }
 }

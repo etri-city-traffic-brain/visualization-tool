@@ -3,8 +3,9 @@ import * as maptalks from 'maptalks'
 
 const options = {
   animation: true,
-  color: ['Red', 'Blue', 'Green', 'Yellow'],
-  p: ['▖', '▘', '▝', '▗', '▗'],
+  color: ['LightPink', 'LightGreen', 'Orange', 'Red', 'Black'],
+  p: ['▖', '▖', '▘', '▝', '▗', '▗'],
+  // p: ['▘', '▘▘', '▘▘▘', '▘▘▘▘'],
   font: '20px san-serif'
 }
 
@@ -80,7 +81,7 @@ class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
       if (!containerExtent.contains(point)) {
         return
       }
-      const text = d.text + p
+      const text = d.text + (p || '')
       const len = ctx.measureText(text)
       ctx.fillText(text, point.x - len.width / 2, point.y)
       drawn.push(d)
@@ -89,17 +90,16 @@ class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
       ctx.save()
       ctx.beginPath()
       ctx.strokeStyle = color
-      ctx.fillStyle = color
+      ctx.fillStyle = 'gray'
       ctx.globalAlpha = 0.5
       ctx.translate(point.x - 3, point.y + 15)
-      angle += 10
+      angle += 0.5
       ctx.rotate((Math.PI / 180) * angle)
       ctx.moveTo(0, 0)
       const y = map.distanceToPoint(0, 50, map.getZoom())
-      // console.log()
       ctx.arc(0, 0, y.y, (Math.PI / 180) * (angle % 360), (Math.PI / 180) * (360), true)
       ctx.closePath()
-      ctx.stroke()
+      // ctx.stroke()
       ctx.fill()
       ctx.restore()
     })

@@ -10,7 +10,7 @@ const env = process && process.env
 
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://101.79.1.124:8080' : 'ws://101.79.1.124:8080/'
 const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.124:8080/'
-console.log(env.NODE_ENV)
+
 log('execution mode:', env.NODE_ENV)
 
 const extend = (extent) => {

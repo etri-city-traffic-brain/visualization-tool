@@ -1,17 +1,13 @@
 <template>
-  <b-container fluid class="m-0 p-0">
+  <div>
     <div class="uniq-top-left">
-      <div class="bg-gray-500 bg-opacity-50 py-1 mt-1 font-bold text-center">
+      <div class="bg-gray-700 py-1 font-bold text-center text-white">
       {{ simulationId }}
       </div>
-      <uniq-congestion-color-bar class="mt-1"/>
-      <b-card
-        bg-variant="dark"
-        text-variant="light"
-        no-body
-        class="p-1 mt-1"
-      >
+      <!-- <uniq-congestion-color-bar class="mt-1"/> -->
+      <div >
         <!-- 혼잡도 차트 -->
+        <!--
         <div class="d-flex justify-content-around align-items-center">
           <doughnut :chartData="avgSpeedView" :height="50" :width="100" class="mt-1"/>
           <span
@@ -24,6 +20,7 @@
             {{ (avgSpeed).toFixed(2) }} km
           </span>
         </div>
+        -->
         <!-- <b-card
           class="mt-1 p-1"
           text-variant="dark"
@@ -34,29 +31,33 @@
             <h2> {{ (avgSpeed).toFixed(2) }} km </h2>
           </b-card-text>
         </b-card> -->
-       </b-card>
+       </div>
 
-      <b-card
-        bg-variant="dark"
-        text-variant="light"
-        no-body
-        class="mt-1 p-1 info-card"
-      >
+      <div class="bg-gray-700 mt-1" >
+        <div class="text-white text-center p-1 text-sm">Total Reward</div>
+
       <!-- 보상 그래프 -->
-        <line-chart
+        <!-- <line-chart
           :chartData="rewards"
           :options="defaultOption({}, chartClicked)"
           :height="220"
+        /> -->
+        <line-chart
+          :chartData="rewardTotal"
+          :options="defaultOption({}, chartClicked)"
+          :height="220"
         />
-      </b-card>
-      <div class="mt-1 p-2 bg-blue-400 font-bold text-sm opacity-90 rounded">
+
+
+      </div>
+      <div class="mt-1 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded">
       <!-- 최적화 진행률 -->
       <div class="text-center mb-1 uppercase">
-        Epoch
+        Epoch: {{ progressOpt }} / {{ simulation.configuration.epoch }}
       </div>
 
       <b-progress :max="simulation.configuration.epoch" height="8px">
-        <b-progress-bar :value="progressOpt" animated striped variant="success" >
+        <b-progress-bar :value="progressOpt" animated striped variant="primary" >
           <!-- <span>Epoch {{ progressOpt }} / {{ simulation.configuration.epoch }}</span> -->
         </b-progress-bar>
       </b-progress>
@@ -68,6 +69,8 @@
     </div> -->
 
     </div>
+
+    <!--
     <div class="mt-1 p-2 bg-indigo-400 font-bold text-sm opacity-90 rounded">
       <div class="text-center mb-1">
         시뮬레이션 진행률
@@ -78,6 +81,8 @@
         </b-progress-bar>
       </b-progress>
     </div>
+    -->
+
     <b-card
       bg-variant="dark"
       text-variant="light"
@@ -100,6 +105,8 @@
         >
           <b-icon icon="front"/>
         </b-btn>
+
+        <b-btn @click="getReward" size="sm">리워드 가져오기</b-btn>
       </div>
     </b-card>
     </div>
@@ -117,8 +124,22 @@
     >
 
     </div>
-    <!-- TOP RIGHT -->
-    <div class="uniq-top-right">
+
+    <!-- -------------------- -->
+    <!-- 교차로별 보상 그래프 -->
+    <!-- -------------------- -->
+    <div class="reward-charts flex flex-wrap">
+      <div v-for="(chart, idx) of rewardCharts" :key="idx" class="p-1">
+        <div class="text-center text-xs text-white px-2 pt-1 w-36 bg-gray-500 rounded-t-2xl">{{ chart.label }}</div>
+        <div class="bg-gray-700 pb-1 pr-1">
+          <line-chart
+            :chartData="chart"
+            :options="defaultOption({}, ()=>{})"
+            :height="90"
+            :width="200"
+          />
+        </div>
+      </div>
     </div>
 
     <!------------- -->
@@ -130,7 +151,7 @@
       :style="{height: mapHeight + 'px'}"
       class="m-0 p-0"
     />
-  </b-container>
+  </div>
 </template>
 
 <script src="./optimization-result-map.js"> </script>
@@ -158,6 +179,16 @@
     top: 50px;
     padding: 0;
     left: 5px;
+  }
+  .reward-charts {
+    /* max-width: 260px; */
+    width: 80%;
+    /* height: 100%; */
+    position: fixed;
+    z-index:100;
+    top: 50px;
+    padding: 0;
+    left: 280px;
   }
 
   .uniq-bottom-left {
