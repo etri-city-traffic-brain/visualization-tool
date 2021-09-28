@@ -1,6 +1,9 @@
 import * as echarts from 'echarts/dist/echarts.js'
 
 function makeOption (data) {
+  if (!data) {
+    return {}
+  }
   const dReward = data.map(v => v.reward)
   const dPhase = data.map((v, idx) => {
     return {
@@ -155,5 +158,5 @@ function drawChart (el, data) {
   chart.setOption(option)
   return chart
 }
-
+drawChart.makeOption = makeOption
 export default drawChart

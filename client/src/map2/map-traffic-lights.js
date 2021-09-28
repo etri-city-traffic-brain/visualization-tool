@@ -280,10 +280,11 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     tlayer.getGeometries().forEach(g => {
       junctionIds.forEach(junctionId => {
         if (g.properties.NODE_ID === junctionId) {
+          console.log('same')
           data.push({
             coord: g.getCoordinates().add(0.00, 0.0003).toArray(),
-            // text: '최적화 중 '
-            text: ''
+            text: '최적화 중 '
+            // text: ''
 
           })
           // layer.setData([

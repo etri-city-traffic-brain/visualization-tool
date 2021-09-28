@@ -40,7 +40,7 @@ export default (map, getGeometries, eventBus) => {
   }
 
   circle.on('dragend', () => {
-    updateEdgeFocused()
+    // updateEdgeFocused()
   })
 
   layer.toggleFocusTool = () => {
@@ -49,15 +49,15 @@ export default (map, getGeometries, eventBus) => {
 
   layer.updateRealtimeData = (realtimeEdgeData) => {
     if (edgesFocused == null) {
-      updateEdgeFocused()
+      // updateEdgeFocused()
     }
     const roadsRealtime = Object.values(realtimeEdgeData)
     const { speed, vehicles, roadsFocused } = roadsRealtime.reduce((acc, cur) => {
-      if (edgesFocused[cur.roadId]) {
-        acc.roadsFocused.push(cur)
-        acc.speed += cur.speed
-        acc.vehicles += cur.numVehicles
-      }
+      // if (edgesFocused[cur.roadId]) {
+      acc.roadsFocused.push(cur)
+      acc.speed += cur.speed
+      acc.vehicles += cur.numVehicles
+      // }
       return acc
     }, { speed: 0, vehicles: 0, roadsFocused: [] })
 

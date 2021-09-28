@@ -38,7 +38,9 @@ function SaltMsgHandler () {
       simulationIdToSocket[simulationId] = socket
       debug(`[INIT] ${simulationId}, ${socket.remotePort}`)
       // console.log(initMsg)
-      fs.writeFileSync(path.join(config.saltPath.output, simulationId, LOG_FILE), '')
+      if (simulationId.startsWith('SIM')) {
+        fs.writeFileSync(path.join(config.saltPath.output, simulationId, LOG_FILE), '')
+      }
       const setBuffer = msgFactory.makeSet({
         // extent: [127.33342, 36.3517, 127.34806, 36.34478], // max.y 가 min.y 보다 작아야 함
         extent: [127.3373, 36.34837, 127.34303, 36.34303 - 0.0005], // max.y 가 min.y 보다 작아야 함], // max.y 가 min.y 보다 작아야 함
@@ -47,6 +49,7 @@ function SaltMsgHandler () {
 
       send(simulationId, setBuffer)
     } catch (err) {
+      console.log(err)
       console.log('**** error parse Init ***')
     }
   }
@@ -65,16 +68,18 @@ function SaltMsgHandler () {
         ...data
       })
 
-      const logFile = path.join(config.saltPath.output, simulationId, LOG_FILE)
+      if (simulationId.startsWith('SIM')) {
+        const logFile = path.join(config.saltPath.output, simulationId, LOG_FILE)
 
-      const line = data.roads.reduce((acc, cur) => {
-        const result = acc + cur.roadId + ':' + cur.numVehicles + ','
-        return result
-      }, '')
+        const line = data.roads.reduce((acc, cur) => {
+          const result = acc + cur.roadId + ':' + cur.numVehicles + ','
+          return result
+        }, '')
 
-      fs.appendFile(logFile, line + '\n', function (err) {
-        if (err) throw err
-      })
+        fs.appendFile(logFile, line + '\n', function (err) {
+          if (err) throw err
+        })
+      }
 
       // fs.access(logFile, fs.F_OK, (err) => {
       //   if (err) {

@@ -6,9 +6,9 @@ const csv = require('csv-parser')
 async function read (simulationId, type) {
   let file
   if (type === 'ft') {
-    file = `/home/ubuntu/uniq-sim/output/${simulationId}/ft/ft_phase_reward_output.txt`
+    file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/ft/ft_phase_reward_output.txt`
   } else {
-    file = `/home/ubuntu/uniq-sim/output/${simulationId}/ft/rl_phase_reward_output.txt`
+    file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/test/rl_phase_reward_output.txt`
   }
 
   await fse.access(file, fs.F_OK)

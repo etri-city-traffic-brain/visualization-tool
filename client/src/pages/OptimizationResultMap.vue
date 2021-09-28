@@ -70,7 +70,7 @@
 
     </div>
 
-    <!--
+
     <div class="mt-1 p-2 bg-indigo-400 font-bold text-sm opacity-90 rounded">
       <div class="text-center mb-1">
         시뮬레이션 진행률
@@ -81,7 +81,7 @@
         </b-progress-bar>
       </b-progress>
     </div>
-    -->
+
 
     <b-card
       bg-variant="dark"

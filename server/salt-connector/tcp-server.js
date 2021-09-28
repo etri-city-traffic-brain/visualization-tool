@@ -29,7 +29,7 @@ module.exports = (port = 1337) => {
         }
       }
     }
-    timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 10)
+    timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 20)
   }
 
   const bufferManagerRegistry = {}

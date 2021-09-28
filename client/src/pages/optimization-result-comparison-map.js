@@ -41,6 +41,8 @@ import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart'
 import makePhaseChart from '@/charts/chartjs/utils/make-phase-chart'
 import { optimizationService } from '@/service'
 
+import signalService from '@/service/signal-service'
+
 import toastMixin from '@/components/mixins/toast-mixin'
 import lineChartOption from '@/charts/chartjs/line-chart-option'
 import barChartOption from '@/charts/chartjs/bar-chart-option'
@@ -217,7 +219,8 @@ export default {
       showEpoch: false,
       trafficLightManager: null,
       phaseRewardChartFt: null,
-      phaseRewardChartRl: null
+      phaseRewardChartRl: null,
+      selectedNode: null
     }
   },
   destroyed () {
@@ -227,6 +230,11 @@ export default {
     })
 
     this.stepPlayer && this.stepPlayer.stop()
+
+    if (this.updateTimer) {
+      clearTimeout(this.updateTimer)
+    }
+
     window.removeEventListener('resize', this.getWindowHeight)
   },
   async mounted () {
@@ -249,11 +257,11 @@ export default {
     ]
 
     // await this.updateChart()
-    await this.updateChartInView()
+    // await this.updateChartInView()
 
     this.initMapEventHandler()
 
-    this.updateChartRealtime()
+    // this.updateChartRealtime()
 
     this.simulations[0].map.on('moveend', () => {
       this.updateChartInView()
@@ -269,6 +277,7 @@ export default {
       })
       bus.$on('salt:status', async (status) => {
         target.progress1 = status.progress
+        console.log('salt:status', status.progress)
       })
       bus.$on('salt:finished', async () => {
         log('**** SIMULATION FINISHED *****')
@@ -280,30 +289,16 @@ export default {
 
     initSaltEventHandler(bus1, this.chart1, this)
 
-    // bus1.$on('salt:data', (d) => {
-    //   const avgSpeed = calcAvgSpeed(d.roads)
-    //   this.chart1.currentSpeeds.push((avgSpeed).toFixed(2) * 1)
-    // })
-
     bus2.$on('salt:data', d => {
       const avgSpeed = calcAvgSpeed(d.roads)
       this.chart2.currentSpeeds.push((avgSpeed).toFixed(2) * 1)
     })
 
-    // bus1.$on('salt:status', async (status) => {
-    //   this.progress1 = status.progress
-    // })
-
     bus2.$on('salt:status', async (status) => {
       this.progress2 = status.progress
+      console.log('salt:status', status.progress)
     })
 
-    // bus1.$on('salt:finished', async () => {
-    //   log('**** SIMULATION FINISHED *****')
-    //   if (this.progress1 >= 100 && this.progress2 >= 100) {
-    //     this.updateChart()
-    //   }
-    // })
     bus2.$on('salt:finished', async () => {
       log('**** SIMULATION FINISHED *****')
       if (this.progress1 >= 100 && this.progress2 >= 100) {
@@ -323,13 +318,25 @@ export default {
       this.makeToast(p.groupId, 'info')
     })
 
-    this.$on('junction:clicked', (p) => {
-      this.makeToast(p.nodeId, 'info')
+    this.$on('junction:clicked', async (p) => {
+      const crossName = signalService.nodeIdToName(p.nodeId)
+      this.selectedNode = crossName
+      const phaseRewardFt = await optimizationService.getPhaseReward(this.simulation.id, 'ft')
+      const phaseRewardRl = await optimizationService.getPhaseReward(this.simulation.id, 'rl')
+
+      const dataFt = phaseRewardFt.data
+      const dataRl = phaseRewardRl.data
+      const ft = dataFt[crossName]
+      const rl = dataRl[crossName]
+
+      this.phaseRewardChartFt.setOption(drawChart.makeOption(ft))
+      this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
     })
 
     this.$on('junction:selected', async (d) => {
       this.updateJunctionSpeed(d)
       this.updatePhaseChart()
+      console.log('junction:selected')
     })
 
     window.addEventListener('resize', this.resize)
@@ -361,6 +368,8 @@ export default {
     const dataRl = phaseRewardRl.data
     const ft = dataFt['목원대네거리']
     const rl = dataRl['목원대네거리']
+
+    this.selectedNode = '목원대네거리'
     // const d2 = data['유성중삼거리']
 
     this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], ft)
@@ -387,7 +396,7 @@ export default {
         this.updatePhaseChart()
         return
       }
-      setTimeout(() => {
+      this.updateTimer = setTimeout(() => {
         this.chart.currentSpeedChart = makeLineData(
           this.chart1.currentSpeeds,
           this.chart2.currentSpeeds
@@ -404,7 +413,6 @@ export default {
       this.chart1.pieData = await statisticsService.getPieChart(this.fixedSlave)
       this.chart1.speedsPerStep = await statisticsService.getSummaryChart(this.testSlave)
       this.chart2.speedsPerStep = await statisticsService.getSummaryChart(this.fixedSlave)
-      // this.chart1.linkSpeeds = makeLinkSpeedChartData(
       this.chart1.linkSpeeds = makeLineData(
         this.chart1.speedsPerStep.datasets[0].data, // text
         this.chart2.speedsPerStep.datasets[0].data // fixed
@@ -441,8 +449,8 @@ export default {
       this.chart1.currentSpeeds = []
       this.chart2.currentSpeeds = []
 
-      optimizationService.runFixed(this.fixedSlave).then(v => {})
-      optimizationService.runTest(this.testSlave, this.selectedEpoch).then(v => {})
+      // optimizationService.runFixed(this.simulation.id, this.fixedSlave).then(v => {})
+      optimizationService.runTest(this.simulation.id, this.testSlave, this.selectedEpoch).then(v => {})
       this.progress1 = 0
       this.progress2 = 0
       this.updateChartRealtime()

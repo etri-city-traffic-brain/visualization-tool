@@ -2,7 +2,7 @@
 import { HTTP } from '@/http-common'
 
 const base = '/salt/v1/optimization'
-
+const { console } = window
 async function runTrain (optId) {
   // console.group('신호 최적화 요청')
   console.log('시뮬레이션 아이디:', optId)
@@ -18,12 +18,12 @@ async function runTrain (optId) {
   }
 }
 
-async function runFixed (optId) {
-  return HTTP.post(`${base}/fixed?id=${optId}&mode=fixed`)
+async function runFixed (mId, optId) {
+  return HTTP.post(`${base}/fixed?slaveId=${optId}&id=${mId}&mode=fixed`)
 }
 
-async function runTest (optId, modelNum) {
-  return HTTP.post(`${base}/test?id=${optId}&modelNum=${modelNum}&mode=test`)
+async function runTest (mId, optId, modelNum) {
+  return HTTP.post(`${base}/test?slaveId=${mId}&id=${mId}&modelNum=${modelNum}&mode=test`)
 }
 
 async function getPhase (optId, type) {

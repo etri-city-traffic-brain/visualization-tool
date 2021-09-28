@@ -35,6 +35,7 @@ module.exports = async (dir, configuration) => {
   const path = '/home/ubuntu/uniq-sim/sample/sample.zip'
   log(chalk.red('check me!! I am tester...'))
   log(chalk.red('you have to change real downloader'))
-  console.log(configuration)
+  log(chalk.red('prepare-scenario-test.js'))
+  // console.log(configuration)
   await unzip(path, { dir })
 }

@@ -26,7 +26,7 @@ import lineChartOption from '@/charts/chartjs/line-chart-option'
 // import donutChartOption from '@/charts/chartjs/donut-chart-option';
 import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart'
 import TrafficLightManager from '@/map2/map-traffic-lights'
-
+import signalGroups from '@/config/junction-config'
 import axios from 'axios'
 
 const makeDonutDefaultDataset = () => ({
@@ -90,7 +90,7 @@ function setupEventHandler () {
 
   this.$on('optimization:progress', async (e) => {
     this.progressOpt = e.progress
-    console.log('optimization:progress', e)
+    log('optimization:progress', e)
   })
 
   this.$on('salt:finished', async () => {
@@ -106,7 +106,7 @@ function setupEventHandler () {
 
   this.$on('optimization:epoch', (e) => {
     log('*** OPTIMIZATION EPOCH ***')
-    this.rewards = makeRewardChartData(e.data)
+    // this.rewards = makeRewardChartData(e.data)
 
     this.$bvToast.toast('OPTIMIZATION EPOCH', {
       title: 'OPTIMIZATION EPOCH',
@@ -149,7 +149,7 @@ function setupEventHandler () {
   })
 
   this.$on('junction:selected', () => {
-    console.log('junction:selected')
+    log('junction:selected')
   })
 }
 
@@ -212,9 +212,8 @@ export default {
   },
   async mounted () {
     this.simulationId = this.$route.params ? this.$route.params.id : null
-
     const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
-    console.log('epoch:', simulation.configuration.epoch)
+
     this.simulation = simulation
     this.showLoading = true
     this.resize()
@@ -240,10 +239,35 @@ export default {
     setupEventHandler.bind(this)()
 
     window.addEventListener('resize', this.resize)
+
+    if (simulation.status === 'running') {
+      this.showProgressing()
+    }
+
+    if (simulation.status === 'finished') {
+      await this.getReward()
+    }
   },
   methods: {
+
+    showProgressing () {
+      const junctionIds = this.simulation.configuration.junctionId.split(',')
+      if (junctionIds[0].indexOf('SA') >= 0) {
+        let jids = []
+        junctionIds.forEach(jId => {
+          signalGroups.forEach(s => {
+            if (s.properties.groupId === jId) {
+              jids = jids.concat(s.properties.junctions)
+            }
+          })
+        })
+        this.trafficLightManager.setOptJunction(jids)
+      } else {
+        this.trafficLightManager.setOptJunction(junctionIds)
+      }
+    },
     chartClicked (value) {
-      console.log('chart clicked', value)
+      log('chart clicked value:', value)
     },
     resize () {
       // this.mapHeight = window.innerHeight - 220 // update map height to current height
@@ -261,43 +285,31 @@ export default {
     async connectWebSocket () {
       this.wsClient.init()
     },
-    // 신호 최적화 요청
+
     async runTrain () {
-      const junctionIds = this.simulation.configuration.junctionId.split(',')
-      const sleep = () => new Promise((resolve) => {
-        setTimeout(() => {
-          resolve()
-        }, 3000)
-      })
-      // for (let i = 0; i < junctionIds.length; i++) {
-      this.trafficLightManager.setOptJunction(junctionIds)
-      // await sleep()
-      // }
-
-      // this.trafficLightManager.clearOptJunction()
-
       try {
-        const result = await optimizationService.runTrain(this.simulationId)
-        console.log(result)
+        await optimizationService.runTrain(this.simulationId)
+        this.showProgressing()
       } catch (err) {
-        console.log(err.message)
+        log(err.message)
         this.apiErrorMessage = err.message
+        this.$bvToast.toast('최적화를 중지하고 다시 시도하세요.', {
+          title: '최적화 실패',
+          variant: 'danger',
+          autoHideDelay: 3000,
+          appendToast: true,
+          toaster: 'b-toaster-top-right'
+        })
       }
     },
     async getReward () {
-      // console.log('get reward', this.simulationId)
-
       const result = await optimizationService.getReward(this.simulationId)
-      // console.log(result.data)
       this.rewardCharts = []
       Object.keys(result.data).forEach(key => {
-        // console.log(key, '--->', result.data[key])
         const value = result.data[key]
         const label = new Array(value.length).fill(0).map((v, i) => i)
         const reward = value.map(v => Math.floor(v.reward))
         const avg = value.map(v => Math.floor(v.rewardAvg))
-        // console.log(makeRewardChart(label, reward))
-        // console.log(avg)
         this.rewardCharts.push(makeRewardChart(key, label, reward, avg))
       })
 
@@ -307,15 +319,22 @@ export default {
       try {
         const result = await optimizationService.getRewardTotal(this.simulationId)
         const results = Object.values(result.data)
+        if (results.length > 0) {
+          const total = results[0]
 
-        const total = results[0]
-        const label = new Array(total.length).fill(0).map((v, i) => i)
-        const reward = total.map(v => Math.floor(v.reward))
-        const avg = total.map(v => Math.floor(v.rewardAvg))
+          const label = new Array(total.length).fill(0).map((v, i) => i)
+          const reward = total.map(v => Math.floor(v.reward))
+          const avg = total.map(v => Math.floor(v.rewardAvg))
 
-        this.rewardTotal = makeRewardChart('total', label, reward, avg)
-        this.progressOpt = total.length
+          this.rewardTotal = makeRewardChart('total', label, reward, avg)
+          this.progressOpt = total.length
+        }
+
+        if (this.progressOpt + '' === this.simulation.configuration.epoch) {
+          this.trafficLightManager.clearOptJunction()
+        }
       } catch (err) {
+        log(err)
         this.$bvToast.toast('Fail to load reward total', {
           title: 'Error',
           variant: 'danger',

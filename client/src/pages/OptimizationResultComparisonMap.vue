@@ -20,11 +20,11 @@
                 :id="mapIds[0]"
                 :style="{height: '600px'}"
               />
-              <!-- <b-progress height="1rem" v-if="progress1 >= 0" class="no-border-radius" >
+              <b-progress height="1rem" v-if="progress1 >= 0" class="no-border-radius" >
                 <b-progress-bar :value="progress1" animated striped variant="primary">
                   <span> {{ progress1 }} %</span>
                 </b-progress-bar>
-              </b-progress> -->
+              </b-progress>
             </div>
             <div class="flex-1">
               <div class="text-center text-sm text-black font-bold pt-1 w-36 bg-yellow-500 rounded-t-2xl">최적신호</div>
@@ -34,21 +34,25 @@
                 :id="mapIds[1]"
                 :style="{height: '600px'}"
               />
-              <!-- <b-progress height="1rem" v-if="progress2 >= 0" class="no-border-radius"  >
+              <b-progress height="1rem" v-if="progress2 >= 0" class="no-border-radius"  >
                 <b-progress-bar :value="progress2" animated striped variant="primary">
                   <span> {{ progress2 }} %</span>
                 </b-progress-bar>
-              </b-progress> -->
+              </b-progress>
             </div>
           </div>
           <div class="mt-1">
-            <div class="text-sm text-white text-center font-bold px-1 py-1 w-32 bg-gray-700 rounded-t-2xl">기존신호</div>
+            <div class="text-sm text-white text-center- font-bold pl-3 py-1 w-64 bg-gray-700 rounded-t-2xl">
+              기존신호 <span class="text-xs">({{ selectedNode }})</span>
+            </div>
             <div class="">
               <div style="height:120px;" ref="phase-reward-ft"></div>
             </div>
           </div>
           <div class="mt-1">
-            <div class="text-sm text-black text-center font-bold px-1 py-1 w-32 bg-yellow-500 rounded-t-2xl">최적신호</div>
+            <div class="text-sm text-black text-center- font-bold pl-3 py-1 w-64 bg-yellow-500 rounded-t-2xl">
+              최적신호 <span class="text-xs">({{ selectedNode }})</span>
+            </div>
             <div class="">
               <div style="height:120px;" ref="phase-reward-rl"></div>
             </div>
@@ -104,8 +108,8 @@
                     />
                   </div>
                 </div>
+<!--
                 <div class="mt-1" bg-variant="dark" text-variant="light">
-                    <!-- <uniq-card-title title="평균속도 비교"/> -->
                   <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
                     평균속도(전체)
                   </div>
@@ -117,6 +121,7 @@
                     />
                   </div>
                 </div>
+                 -->
                 <div class="mt-1" >
                   <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
                       평균속도(뷰영역)
@@ -125,7 +130,7 @@
                     <line-chart :chartData="chart.currentSpeedInViewChart" :options="lineChartOption({})" :height="120"/>
                   </div>
                 </div>
-
+                <!--
                 <div class="mt-1" >
                   <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
                     선택 교차로
@@ -137,7 +142,7 @@
                       :height="120"
                     />
                   </div>
-                </div>
+                </div> -->
 
                 <b-card
                   class="mt-1 p-1"
