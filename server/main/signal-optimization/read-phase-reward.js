@@ -13,7 +13,8 @@ async function read (simulationId, type) {
 
   await fse.access(file, fs.F_OK)
 
-  return csvToObj(file)
+  const r = await csvToObj(file)
+  return r
 }
 
 async function csvToObj (file) {

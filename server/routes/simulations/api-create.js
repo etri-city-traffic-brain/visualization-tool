@@ -98,6 +98,7 @@ async function prepareOptimization (ids, body) {
   createOPtScenarioFile(ids[0], body, `${targetDir}/scenario/doan/salt.scenario.train.json`, 'output/rl/')
   createOPtScenarioFile(ids[1], body, `${targetDir}/scenario/doan/salt.scenario.test.json`, 'output/test/')
   createOPtScenarioFile(ids[2], body, `${targetDir}/scenario/doan/salt.scenario.simulation.json`, 'output/ft/')
+  updateStatus(ids[0], 'ready', {})
 }
 
 async function prepareSimulation (id, body, role, slaves = [], type) {

@@ -161,6 +161,7 @@ export default {
   },
   data () {
     return {
+      status: '',
       simulation: { configuration: {} }, // means optimization
       mapIds: [randomId(), randomId()],
       simulations: null,
@@ -243,6 +244,8 @@ export default {
 
     const { simulation, ticks } = await simulationService.getSimulationInfo(optimizationId)
 
+    this.status = simulation.status
+
     this.simulation = simulation
     this.fixedSlave = simulation.slaves[1]
 
@@ -277,7 +280,6 @@ export default {
       })
       bus.$on('salt:status', async (status) => {
         target.progress1 = status.progress
-        console.log('salt:status', status.progress)
       })
       bus.$on('salt:finished', async () => {
         log('**** SIMULATION FINISHED *****')
@@ -296,7 +298,6 @@ export default {
 
     bus2.$on('salt:status', async (status) => {
       this.progress2 = status.progress
-      console.log('salt:status', status.progress)
     })
 
     bus2.$on('salt:finished', async () => {
@@ -366,8 +367,12 @@ export default {
 
     const dataFt = phaseRewardFt.data
     const dataRl = phaseRewardRl.data
+
     const ft = dataFt['목원대네거리']
     const rl = dataRl['목원대네거리']
+
+    // console.log(ft)
+    console.log(rl)
 
     this.selectedNode = '목원대네거리'
     // const d2 = data['유성중삼거리']
@@ -391,6 +396,13 @@ export default {
     },
 
     updateChartRealtime () {
+      if (this.status !== 'running') {
+        if (this.updateTimer) {
+          clearTimeout(this.updateTimer)
+        }
+        return
+      }
+
       if (this.progress2 >= 100 && this.progress1 >= 100) {
         log('all simulations are finished')
         this.updatePhaseChart()
@@ -453,6 +465,7 @@ export default {
       optimizationService.runTest(this.simulation.id, this.testSlave, this.selectedEpoch).then(v => {})
       this.progress1 = 0
       this.progress2 = 0
+      this.status = 'running'
       this.updateChartRealtime()
     },
     async updatePhaseChart () {
@@ -508,7 +521,11 @@ export default {
       map2.on('moveend', map2ToMap1)
       map1.on('zoomend', map1ToMap2)
       map2.on('zoomend', map2ToMap1)
+    },
+    async checkStatus () {
+      const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulation.id)
+      console.log(simulation)
+      this.status = simulation.status
     }
-
   }
 }

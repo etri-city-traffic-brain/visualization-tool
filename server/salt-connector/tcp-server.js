@@ -9,7 +9,7 @@ const BufferManager = require('./socket-buffer-manager')
 const { Header } = require('./salt-msg')
 
 const HEADER_LENGTH = 16
-const { green } = chalk
+const { green, red } = chalk
 
 module.exports = (port = 1337) => {
   let timer
@@ -18,8 +18,12 @@ module.exports = (port = 1337) => {
 
   const consumeSaltMsg = (socket, bufferManager) => {
     const buffer = bufferManager.getBuffer(socket)
+    // console.log('----------------> consume <----------------------', buffer.length)
     if (buffer && buffer.length >= HEADER_LENGTH) {
       const header = Header(buffer)
+      // console.log(red('************************************'))
+      // console.log(red(JSON.stringify(header)))
+      // console.log(red('************************************'))
       const handler = saltMsgHandler.get(header.type)
       if (handler) {
         const bodyLength = header.length + HEADER_LENGTH
@@ -29,7 +33,7 @@ module.exports = (port = 1337) => {
         }
       }
     }
-    timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 20)
+    // timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 20)
   }
 
   const bufferManagerRegistry = {}
@@ -37,6 +41,7 @@ module.exports = (port = 1337) => {
   const handleData = socket => (buffer) => {
     const bufferManager = bufferManagerRegistry[socket.remotePort]
     bufferManager.addBuffer(socket, buffer)
+    consumeSaltMsg(socket, bufferManager)
   }
 
   const handleClose = socket => () => {
@@ -63,7 +68,7 @@ module.exports = (port = 1337) => {
 
     const bufferManager = BufferManager()
     bufferManagerRegistry[socket.remotePort] = bufferManager
-    consumeSaltMsg(socket, bufferManager)
+    // consumeSaltMsg(socket, bufferManager)
   })
 
   server.on('connection', (socket) => {

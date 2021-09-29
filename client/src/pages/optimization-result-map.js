@@ -172,6 +172,9 @@ export default {
     progressOfEpoch () {
       if (this.rewards.labels.length === 0) return 0
       return ((this.rewards.labels.length) / +this.simulation.configuration.epoch) * 100
+    },
+    status () {
+      return this.simulation.status
     }
   },
   data () {
@@ -210,6 +213,7 @@ export default {
     }
     window.removeEventListener('resize', this.getWindowHeight)
   },
+
   async mounted () {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     const { simulation } = await simulationService.getSimulationInfo(this.simulationId)

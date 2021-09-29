@@ -45,7 +45,7 @@ export default ({ title, displayLegend = true, fontColor = 'white' } = {}, callb
     }
   },
   onClick: function (evt, item) {
-    if (callback) {
+    if (callback && item.length > 0) {
       callback(item[0]._index)
     }
   }

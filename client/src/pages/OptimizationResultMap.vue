@@ -71,7 +71,7 @@
     </div>
 
 
-    <div class="mt-1 p-2 bg-indigo-400 font-bold text-sm opacity-90 rounded">
+    <div class="mt-1 p-2 bg-indigo-400 font-bold text-sm opacity-90 rounded" v-if="status === 'running'">
       <div class="text-center mb-1">
         시뮬레이션 진행률
       </div>
@@ -106,7 +106,7 @@
           <b-icon icon="front"/>
         </b-btn>
 
-        <b-btn @click="getReward" size="sm">리워드 가져오기</b-btn>
+        <b-btn @click="getReward" size="sm">리워드</b-btn>
       </div>
     </b-card>
     </div>

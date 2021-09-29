@@ -2,7 +2,7 @@ const debug = require('debug')('salt-connector:msg-handler')
 
 const msgFactory = require('./salt-msg-factory')
 const { EventEmitter } = require('events')
-
+const chalk = require('chalk')
 const { Init, Data, Status } = require('./salt-msg')
 const { INIT, DATA, STATUS } = require('./salt-msg-type').MsgType
 const { EVENT_DATA, EVENT_STATUS } = require('./event-types')
@@ -34,9 +34,18 @@ function SaltMsgHandler () {
     try {
       const initMsg = Init(buffer)
       const simulationId = initMsg.simulationId
-      socketToSimulationId[socket.remotePort] = simulationId
-      simulationIdToSocket[simulationId] = socket
+      if (!socketToSimulationId[socket.remotePort]) {
+        socketToSimulationId[socket.remotePort] = simulationId
+        simulationIdToSocket[simulationId] = socket
+      }
       debug(`[INIT] ${simulationId}, ${socket.remotePort}`)
+      console.log(chalk.green('[INIT] =====>'))
+      console.log(chalk.green(`[INIT] =====> ${simulationId}, ${socket.remotePort}`))
+      console.log(chalk.green('[INIT] =====> ', buffer.length))
+
+      if (buffer.length > 100) {
+        handleSaltData(socket, buffer)
+      }
       // console.log(initMsg)
       if (simulationId.startsWith('SIM')) {
         fs.writeFileSync(path.join(config.saltPath.output, simulationId, LOG_FILE), '')
@@ -61,6 +70,7 @@ function SaltMsgHandler () {
 
     try {
       const data = Data(buffer)
+
       const simulationId = socketToSimulationId[socket.remotePort]
       eventBus.emit(EVENT_DATA, {
         event: EVENT_DATA,
@@ -91,6 +101,7 @@ function SaltMsgHandler () {
       //   })
       // })
     } catch (err) {
+      console.log(err.message)
       // console.log(hex(buffer))
       // console.log(buffer.length)
     }
@@ -99,8 +110,9 @@ function SaltMsgHandler () {
   //  STATUS
   const handleSaltStatus = (socket, buffer) => {
     const status = Status(buffer)
-    console.log(status)
+    console.log('*****', status, '******')
     const simulationId = socketToSimulationId[socket.remotePort]
+    console.log(simulationId)
     eventBus.emit(EVENT_STATUS, {
       event: EVENT_STATUS,
       simulationId,

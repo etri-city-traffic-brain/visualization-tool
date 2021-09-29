@@ -12,6 +12,7 @@ const env = process && process.env
 const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.124:8080/'
 
 log('execution mode:', env.NODE_ENV)
+log('ws:', wsUrl)
 
 const extend = (extent) => {
   const { min, max } = extent
@@ -88,13 +89,14 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     })
 
     eventBus.$on('salt:set', ({ extent, zoom }) => {
-      const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
+      // const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
+      // const roadType = zoom >= 17 ? 1 : 0 // 1: cell, 0: link
       const { min, max } = extend(extent)
       send({
         simulationId,
         type: 10, // Set
         extent: [min.x, max.y, max.x, min.y],
-        roadType
+        roadType: 1
       })
     })
 

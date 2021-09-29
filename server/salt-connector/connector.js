@@ -46,7 +46,7 @@ module.exports = (httpServer, tcpPort) => {
 
   const isFinished = ({ status, progress }) =>
     status === StatusType.FINISHED &&
-    progress >= 100
+    progress >= 99
 
   const epochCounterTable = {}
 
@@ -54,10 +54,13 @@ module.exports = (httpServer, tcpPort) => {
     const { simulationId } = data
     // debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`)
     webSocketServer.send(data.simulationId, { ...data })
-
+    // console.log('------------------> SEND WEB Socket <----------------------')
+    console.log(data)
     if (isFinished(data)) {
       debug('*** SIMULATION FINISHED ***')
-
+      webSocketServer.send(simulationId, {
+        event: EVENT_FINISHED
+      })
       const simulation = getSimulation(simulationId)
       if (!simulation) {
         debug('cannot find simulation', simulationId)

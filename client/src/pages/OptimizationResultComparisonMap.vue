@@ -6,7 +6,6 @@
     </div>
     <div v-else>
       <!-- RIGHT PANEL -->
-      <!-- LEFT PANEL -->
       <div class="grid grid-cols-4 gap-0 p-1">
         <div class="col-span-3">
           <div class="flex">
@@ -41,36 +40,59 @@
               </b-progress>
             </div>
           </div>
+          <div>
           <div class="mt-1">
-            <div class="text-sm text-white text-center- font-bold pl-3 py-1 w-64 bg-gray-700 rounded-t-2xl">
-              기존신호 <span class="text-xs">({{ selectedNode }})</span>
+            <!-- <div class="pr-2">
+              <div class="bg-gray-300 w-max px-2 mx-auto rounded font-bold">{{ selectedNode }}</div>
+            </div> -->
+            <div class="">
+            <div class="flex justify-between pr-3 items-center text-sm text-white text-center- font-bold pl-3 py-1 bg-gray-700 rounded-t-xl">
+              기존신호 <span class="bg-indigo-100 rounded text-black text-xs px-1">{{ selectedNode }}</span>
             </div>
             <div class="">
               <div style="height:120px;" ref="phase-reward-ft"></div>
             </div>
           </div>
           <div class="mt-1">
-            <div class="text-sm text-black text-center- font-bold pl-3 py-1 w-64 bg-yellow-500 rounded-t-2xl">
-              최적신호 <span class="text-xs">({{ selectedNode }})</span>
+            <div class="pr-3 flex justify-between  items-center text-sm text-black text-center- font-bold pl-3 py-1 bg-yellow-500 rounded-t-xl">
+              최적신호 <span class="bg-yellow-200 rounded text-black text-xs px-1">{{ selectedNode }}</span>
             </div>
             <div class="">
               <div style="height:120px;" ref="phase-reward-rl"></div>
             </div>
           </div>
+          </div>
+          </div>
           <!-- </div> -->
         </div>
-        <div class="p-1">
-          <div class="flex  items-center space-between text-center text-white text-sm p-2 bg-gray-700 mb-1">
-            <div>{{ simulation.id }}</div>
+        <div class="ml-1">
+          <div class="bg-gray-700 w-max px-3 rounded-t-lg font-bold text-white">정보</div>
+          <div class="space-between text-white text-sm p-1 bg-gray-700">
+            <div class="text-center">{{ simulation.id }} </div>
+            <div class="border-gray-600">
+            <pre class="p-1 text-light h-48">{{ JSON.stringify(simulation.configuration, false, 2)}}</pre>
+          </div>
             <div class="">
               <div>
-                <b-btn @click="updateChart" size="sm" variant="dark">
+
+                <!-- <b-btn @click="updateChart" size="sm" variant="dark">
                   <b-icon icon="bar-chart-fill"/>
                 </b-btn>
                 <b-btn @click="sidebar = !sidebar" size="sm" variant="dark">
                   <b-icon icon="align-start"/>
-                </b-btn>
+                </b-btn> -->
               </div>
+            </div>
+          </div>
+
+          <div class="mt-1 mb-1">
+            <div v-if="status === 'running'" class="animate-pulse bg-indigo-200 text-center px-2 uppercase">
+              {{ status }}
+              <b-btn variant="dark" size="sm" @click="checkStatus">상태확인</b-btn>
+            </div>
+            <div v-else class="bg-indigo-200 text-center px-2 uppercase">
+              {{ status }}
+              <b-btn variant="dark" size="sm" @click="checkStatus">상태확인</b-btn>
             </div>
           </div>
           <div
@@ -82,7 +104,7 @@
             >
               <div class="">
                 <!----- 보상 그래프 ----->
-                <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-lg">보상그래프</div>
+                <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg">보상그래프</div>
                 <div class="p-2 bg-gray-700" >
                   <line-chart
                     :chartData="rewards"
@@ -96,9 +118,9 @@
                   </b-btn>
                 </div>
                 <div class="mt-1">
-                  <div class="m-0 p-0 text-center text-white w-36 bg-gray-700 rounded-t-lg">
-                    <small>평균속도(실시간) </small>
-                    <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon>
+                  <div class="m-0 p-0 text-center text-white w-24 bg-gray-700 rounded-t-lg">
+                    <small>평균속도 </small>
+                    <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
                   </div>
                   <div class="bg-gray-700">
                     <line-chart
@@ -108,7 +130,7 @@
                     />
                   </div>
                 </div>
-<!--
+                <!--
                 <div class="mt-1" bg-variant="dark" text-variant="light">
                   <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
                     평균속도(전체)
@@ -122,6 +144,7 @@
                   </div>
                 </div>
                  -->
+                <!--
                 <div class="mt-1" >
                   <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
                       평균속도(뷰영역)
@@ -129,7 +152,7 @@
                   <div class="bg-gray-700">
                     <line-chart :chartData="chart.currentSpeedInViewChart" :options="lineChartOption({})" :height="120"/>
                   </div>
-                </div>
+                </div> -->
                 <!--
                 <div class="mt-1" >
                   <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
@@ -150,16 +173,15 @@
                   text-variant="light"
                   no-body
                 >
-                  <div>
-                    <b-btn
-                      size="sm"
+                  <div class="flex flex-wrap">
+                    <div
                       v-for="reward of rewards.labels"
                       :key="reward"
-                      class="ml-1"
+                      class="ml-1 bg-indigo-500 text-xs rounded text-black px-1 cursor-pointer hover:bg-indigo-200"
                       @click="selectedEpoch = reward"
                     >
                       {{ reward }}
-                    </b-btn>
+                    </div>
                   </div>
                 </b-card>
               </div>

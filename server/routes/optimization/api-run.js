@@ -14,7 +14,6 @@ module.exports = async (req, res, next) => {
     next(createError(400, `${id} is already running...`))
     return
   }
-  console.log(simulation)
 
   if (!simulation) {
     next(createError(404, `${id}) is not found`))
