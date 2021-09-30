@@ -36,7 +36,7 @@ function makeOption (data) {
       }
     },
     xAxis: {
-      data: new Array(data.length).fill(0).map((v, i) => i),
+      data: new Array(data.length).fill(0).map((v, i) => data[i].step),
       axisLabel: {
         textStyle: {
           color: '#ccc'

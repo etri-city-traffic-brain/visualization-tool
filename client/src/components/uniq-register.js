@@ -83,7 +83,8 @@ export default {
       intervalOptions: [...intervalOptions],
       loading: false,
       showMap: false,
-      showEnv: true
+      showEnv: true,
+      modelSavePeriod: 20
     }
   },
   async mounted () {
@@ -105,6 +106,7 @@ export default {
       this.intervalSelected = env.configuration.interval
       this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
+      this.modelSavePeriod = env.configuration.modelSavePeriod
     }
     try {
       this.scriptOptions = await simulationService.getScripts()
@@ -156,7 +158,8 @@ export default {
           interval: this.intervalSelected,
           junctionId: this.junctionId,
           script: this.scriptSelected,
-          epoch: this.epoch
+          epoch: this.epoch,
+          modelSavePeriod: this.modelSavePeriod
         }
       }
 

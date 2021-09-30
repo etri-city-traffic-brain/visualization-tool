@@ -27,7 +27,7 @@
         <b-input-group>
           <b-form-input id="junctionId" v-model="junctionId"></b-form-input>
           <b-input-group-append>
-          <b-btn variant="dark" class="ml-1" @click="openSignalMap">선택</b-btn>
+          <!-- <b-btn variant="dark" class="ml-1" @click="openSignalMap">선택</b-btn> -->
           <b-btn :pressed="showMap"  variant="success" class="ml-1" @click="showMap = !showMap">선택</b-btn>
           </b-input-group-append>
         </b-input-group>
@@ -67,28 +67,35 @@
 
     </b-card>
 
-    <b-card bg-variant="secondary" text-variant="light" no-body class="pr-2 pt-2 mt-1">
-      <b-form-group label-cols-sm="3" label="스크립트" label-class="text-sm-right">
+    <div class="bg-gray-500 pr-2 pt-2 mt-1 text-white pb-2">
+      <div class="flex space-x-1 pl-5 mb-2">
+      <div label-cols-sm="4" label="스크립트" label-class="">
+        스크립트
         <b-form-select v-model="scriptSelected" :options="scriptOptions" />
-      </b-form-group>
-       <b-form-group label-cols-sm="3" label="통계 주기" label-class="text-sm-right" label-for="Period">
+      </div>
+       <div>
+         통계주기
         <b-form-select v-model="periodSelected" :options="periodOptions" class="" />
-      </b-form-group>
+      </div>
 
-      <b-form-group label-cols-sm="3" label="가시화 주기" label-class="text-sm-right">
+      <div>
+        가시화주기
         <b-form-select v-model="intervalSelected" :options="intervalOptions" class="" />
-      </b-form-group>
+      </div>
+      </div>
 
-      <b-form-group
-        label-cols-sm="3"
-        label="Epoch"
-        label-class="text-sm-right"
-        label-for="id"
-        v-if="epochField"
-      >
-        <b-form-input v-model="epoch"></b-form-input>
-      </b-form-group>
-    </b-card>
+      <div class="flex space-x-1 mt-1 pl-5 mb-2">
+      <div v-if="epochField" >
+        Epoch(*)
+        <b-form-input v-model="epoch" type="number"></b-form-input>
+      </div>
+      <div v-if="epochField" >
+        모델저장주기(*)
+        <b-form-input v-model="modelSavePeriod" type="number" min="1"></b-form-input>
+      </div>
+
+      </div>
+    </div>
 
     <b-card bg-variant="dark" text-variant="light" border-variant="dark" class="mt-1">
       <b-card-text class="text-right" >

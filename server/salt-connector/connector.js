@@ -46,7 +46,7 @@ module.exports = (httpServer, tcpPort) => {
 
   const isFinished = ({ status, progress }) =>
     status === StatusType.FINISHED &&
-    progress >= 99
+    progress >= 95
 
   const epochCounterTable = {}
 

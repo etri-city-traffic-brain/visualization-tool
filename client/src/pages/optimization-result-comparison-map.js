@@ -8,10 +8,7 @@
 
 import Vue from 'vue'
 
-import StepPlayer from '@/stepper/step-runner'
 import stepperMixin from '@/stepper/mixin'
-// import * as d3 from 'd3'
-import * as R from 'ramda'
 import makeMap from '@/map2/make-map'
 import MapManager from '@/map2/map-manager'
 
@@ -36,8 +33,6 @@ import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 
 import UniqCardTitle from '@/components/func/UniqCardTitle'
-import region from '@/map2/region'
-import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart'
 import makePhaseChart from '@/charts/chartjs/utils/make-phase-chart'
 import { optimizationService } from '@/service'
 
@@ -211,7 +206,9 @@ export default {
       },
       lineChartOption,
       barChartOption,
-      rewards: {},
+      rewards: {
+        labels: []
+      },
       phaseFixed: {},
       phaseTest: {},
       testSlave: null,
@@ -221,7 +218,8 @@ export default {
       trafficLightManager: null,
       phaseRewardChartFt: null,
       phaseRewardChartRl: null,
-      selectedNode: null
+      selectedNode: '목원대네거리',
+      showWaitingMsg: false
     }
   },
   destroyed () {
@@ -237,6 +235,8 @@ export default {
     }
 
     window.removeEventListener('resize', this.getWindowHeight)
+  },
+  computed: {
   },
   async mounted () {
     log(`${this.$options.name} is mounted`)
@@ -259,16 +259,7 @@ export default {
       await initSimulationData(this.mapIds[1], this.testSlave, this)
     ]
 
-    // await this.updateChart()
-    // await this.updateChartInView()
-
     this.initMapEventHandler()
-
-    // this.updateChartRealtime()
-
-    this.simulations[0].map.on('moveend', () => {
-      this.updateChartInView()
-    })
 
     const bus1 = this.simulations[0].bus
     const bus2 = this.simulations[1].bus
@@ -280,11 +271,14 @@ export default {
       })
       bus.$on('salt:status', async (status) => {
         target.progress1 = status.progress
+        this.showWaitingMsg = false
       })
       bus.$on('salt:finished', async () => {
         log('**** SIMULATION FINISHED *****')
+        this.progress1 = 100
         if (target.progress1 >= 100 && target.progress2 >= 100) {
-          target.updateChart()
+          this.status = 'finished'
+          this.makeToast('테스트가 완료 되었습니다.', 'info')
         }
       })
     }
@@ -298,12 +292,15 @@ export default {
 
     bus2.$on('salt:status', async (status) => {
       this.progress2 = status.progress
+      this.showWaitingMsg = false
     })
 
     bus2.$on('salt:finished', async () => {
       log('**** SIMULATION FINISHED *****')
+      this.progress2 = 100
       if (this.progress1 >= 100 && this.progress2 >= 100) {
-        this.updateChart()
+        this.status = 'finished'
+        this.makeToast('테스트가 완료 되었습니다.', 'info')
       }
     })
 
@@ -337,7 +334,6 @@ export default {
     this.$on('junction:selected', async (d) => {
       this.updateJunctionSpeed(d)
       this.updatePhaseChart()
-      console.log('junction:selected')
     })
 
     window.addEventListener('resize', this.resize)
@@ -362,24 +358,28 @@ export default {
     //   this.makeToast(err.message, 'warning')
     // }
 
-    const phaseRewardFt = await optimizationService.getPhaseReward(this.simulation.id, 'ft')
-    const phaseRewardRl = await optimizationService.getPhaseReward(this.simulation.id, 'rl')
+    optimizationService.getPhaseReward(this.simulation.id, 'ft').then(phaseRewardFt => {
+      const dataFt = phaseRewardFt.data
+      const ft = dataFt[this.selectedNode]
 
-    const dataFt = phaseRewardFt.data
-    const dataRl = phaseRewardRl.data
+      if (ft) {
+        this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], ft)
+      }
+    }).catch(err => {
+      log(err.message)
+      this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
+    })
 
-    const ft = dataFt['목원대네거리']
-    const rl = dataRl['목원대네거리']
-
-    // console.log(ft)
-    console.log(rl)
-
-    this.selectedNode = '목원대네거리'
-    // const d2 = data['유성중삼거리']
-
-    this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], ft)
-    this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], rl)
-    // const c2 = drawChart(document.getElementById('c2'), d2)
+    optimizationService.getPhaseReward(this.simulation.id, 'rl').then(phaseRewardRl => {
+      const dataRl = phaseRewardRl.data
+      const rl = dataRl[this.selectedNode]
+      if (rl) {
+        this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], rl)
+      }
+    }).catch(err => {
+      this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
+      log(err.message)
+    })
   },
   methods: {
     ...stepperMixin,
@@ -416,20 +416,6 @@ export default {
         this.updateChartRealtime()
       }, 500)
     },
-    async updateChart () {
-      this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this))
-      this.chart1.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, 0)
-      this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.testSlave, 0)
-      this.chart1.histogramData = await statisticsService.getHistogramChart(this.fixedSlave)
-      this.chart2.histogramData = await statisticsService.getHistogramChart(this.testSlave)
-      this.chart1.pieData = await statisticsService.getPieChart(this.fixedSlave)
-      this.chart1.speedsPerStep = await statisticsService.getSummaryChart(this.testSlave)
-      this.chart2.speedsPerStep = await statisticsService.getSummaryChart(this.fixedSlave)
-      this.chart1.linkSpeeds = makeLineData(
-        this.chart1.speedsPerStep.datasets[0].data, // text
-        this.chart2.speedsPerStep.datasets[0].data // fixed
-      )
-    },
     resize () {
       this.mapHeight = window.innerHeight - 50 // update map height to current height
       if (this.phaseRewardChartFt) {
@@ -439,25 +425,8 @@ export default {
         this.phaseRewardChartRl.resize()
       }
     },
-    togglePlay () {
-      this.playBtnToggle = !this.playBtnToggle
-      if (this.stepPlayer) {
-        (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()
-      }
-    },
-    async stepChanged (step) {
-      this.simulations.forEach(simulation => {
-        simulation.mapManager.changeStep(step)
-      })
-      this.chart1.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step)
-      this.chart1.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step)
-      this.chart2.pieDataStep = await statisticsService.getPieChart(this.fixedSlave, step)
-      this.chart2.histogramDataStep = await statisticsService.getHistogramChart(this.fixedSlave, step)
-      if (this.simulation.status === 'finished') {
-        //
-      }
-    },
     async runTest () {
+      this.showWaitingMsg = true
       this.chart1.currentSpeeds = []
       this.chart2.currentSpeeds = []
 
@@ -471,18 +440,8 @@ export default {
     async updatePhaseChart () {
       const phaseFixed = (await optimizationService.getPhase(this.fixedSlave, 'fixed')).data
       const phaseTest = (await optimizationService.getPhase(this.testSlave)).data
-      console.log('update chart')
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
-      // this.updateChart()
-    },
-    updateChartInView () {
-      this.chart.currentSpeedInViewChart = makeLineData(
-        ...this.simulations.map(simulation => {
-          const speedsArray = simulation.mapManager.getEdgesInView()
-          return aggregate(Object.values(speedsArray))
-        })
-      )
     },
     updateJunctionSpeed (junction) {
       const linkIds = junction.linkIds.map(v => v.LINK_ID)
@@ -504,6 +463,8 @@ export default {
           map.animateTo({
             center: target.getCenter(),
             zoom: target.getZoom()
+          }, {
+            duration: 10
           })
         }
 
@@ -523,8 +484,7 @@ export default {
       map2.on('zoomend', map2ToMap1)
     },
     async checkStatus () {
-      const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulation.id)
-      console.log(simulation)
+      const { simulation } = await simulationService.getSimulationInfo(this.simulation.id)
       this.status = simulation.status
     }
   }

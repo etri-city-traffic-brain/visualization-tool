@@ -27,7 +27,8 @@ async function csvToObj (file) {
           const target = map[row.tl_name] || []
           target.push({
             phase: row.phase,
-            reward: row.reward
+            reward: row.reward,
+            step: row.step
           })
           map[row.tl_name] = target
         })

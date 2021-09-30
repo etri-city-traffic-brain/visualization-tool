@@ -9,7 +9,7 @@ const { dockerCommand } = require('docker-cli-js')
 
 const config = require('../config')
 const {
-  saltPath: { home }
+  saltPath: { home, volumeSim }
 } = config
 
 const imgName = 'images4uniq/salt:v2.1a.20210915.test_BUS'
@@ -18,8 +18,9 @@ const imgName = 'images4uniq/salt:v2.1a.20210915.test_BUS'
 const exeFile = '/uniq/simulator/salt/bin/salt.sh'
 const { log } = console
 const buildConfigPath = sId => `/uniq/simulator/salt/volume/data/${sId}/salt.scenario.json`
-const volume = home
+const volume = volumeSim
 
+console.log('volume:', volume)
 async function run (sId) {
   const configPath = buildConfigPath(sId)
 

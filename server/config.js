@@ -11,6 +11,7 @@ module.exports = {
   saltPath: {
     home: base,
     volume: '/c/home/ubuntu/uniq-sim/data',
+    volumeSim: '/c/home/ubuntu/uniq-sim',
     data: `${base}/data`,
     output: `${base}/output`,
     scripts: `${base}/scripts`

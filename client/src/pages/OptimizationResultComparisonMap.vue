@@ -1,5 +1,14 @@
 <template>
   <div class="bg-gray-500">
+
+    <div class="absolute z-50 inset-auto h-64 " v-if="showWaitingMsg">
+      <div class="w-screen">
+        <div class="animate-pulse mx-auto text-center mt-5 w-60 bg-yellow-300 p-3 text-lg font-bold">
+          잠시후 실행 됩니다.
+        </div>
+      </div>
+    </div>
+
     <div v-if="!simulation" class="w-80 mx-auto text-center">
       <div class="font-bold text-lg">We're sorry!!</div>
       <div class="font-bold text-sm">시뮬레이션 정보를 읽어오는데 실패하였습니다.</div>
@@ -10,34 +19,30 @@
         <div class="col-span-3">
           <div class="flex">
             <div class="flex-1">
-              <div class="text-center text-sm font-bold text-white w-36 pt-1 bg-gray-800 rounded-t-2xl">
-                기존신호
+              <div class="text-center text-sm font-bold text-white w-36 pt-1 bg-blue-800 rounded-t-2xl ">
+                <div class="tracking-wider">기존신호</div>
               </div>
-              <div
-                class="border-4 border-gray-800"
-                :ref="mapIds[0]"
-                :id="mapIds[0]"
-                :style="{height: '600px'}"
-              />
-              <b-progress height="1rem" v-if="progress1 >= 0" class="no-border-radius" >
-                <b-progress-bar :value="progress1" animated striped variant="primary">
-                  <span> {{ progress1 }} %</span>
-                </b-progress-bar>
-              </b-progress>
+              <div class="border-2 border-blue-800" >
+                <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" />
+                <b-progress height="1rem" v-if="progress1 >= 0" class="no-border-radius">
+                  <b-progress-bar :value="progress1" animated striped variant="primary">
+                    <span> {{ progress1 }} %</span>
+                  </b-progress-bar>
+                </b-progress>
+              </div>
             </div>
             <div class="flex-1">
-              <div class="text-center text-sm text-black font-bold pt-1 w-36 bg-yellow-500 rounded-t-2xl">최적신호</div>
-              <div
-                class="border-4 border-yellow-500"
-                :ref="mapIds[1]"
-                :id="mapIds[1]"
-                :style="{height: '600px'}"
-              />
-              <b-progress height="1rem" v-if="progress2 >= 0" class="no-border-radius"  >
-                <b-progress-bar :value="progress2" animated striped variant="primary">
-                  <span> {{ progress2 }} %</span>
-                </b-progress-bar>
-              </b-progress>
+              <div class="text-center text-sm text-black font-bold pt-1 w-36 bg-yellow-500 rounded-t-2xl">
+                <div class="tracking-wider">최적신호</div>
+              </div>
+              <div class="border-2 border-yellow-500">
+                <div :ref="mapIds[1]" :id="mapIds[1]" :style="{height: '600px'}" />
+                <b-progress height="1rem" v-if="progress2 >= 0" class="no-border-radius"  >
+                  <b-progress-bar :value="progress2" animated striped variant="primary">
+                    <span> {{ progress2 }} %</span>
+                  </b-progress-bar>
+                </b-progress>
+              </div>
             </div>
           </div>
           <div>
@@ -46,19 +51,22 @@
               <div class="bg-gray-300 w-max px-2 mx-auto rounded font-bold">{{ selectedNode }}</div>
             </div> -->
             <div class="">
-            <div class="flex justify-between pr-3 items-center text-sm text-white text-center- font-bold pl-3 py-1 bg-gray-700 rounded-t-xl">
-              기존신호 <span class="bg-indigo-100 rounded text-black text-xs px-1">{{ selectedNode }}</span>
+            <div class="text-center text-white mt-1 mb-1 bg-gray-800 p-1 rounded-lg">
+              {{ selectedNode }}
             </div>
-            <div class="">
-              <div style="height:120px;" ref="phase-reward-ft"></div>
+            <div class="flex justify-between pr-3 items-center text-sm text-white text-center- font-bold pl-3 py-1 bg-blue-800 rounded-t-xl">
+              기존신호
+            </div>
+            <div class="border-2 border-blue-800">
+              <div style="height:120px;width:100%;" ref="phase-reward-ft"></div>
             </div>
           </div>
           <div class="mt-1">
-            <div class="pr-3 flex justify-between  items-center text-sm text-black text-center- font-bold pl-3 py-1 bg-yellow-500 rounded-t-xl">
-              최적신호 <span class="bg-yellow-200 rounded text-black text-xs px-1">{{ selectedNode }}</span>
+            <div class="pr-3 flex justify-between items-center text-sm text-black font-bold pl-3 py-1 bg-yellow-500 rounded-t-lg">
+              최적신호
             </div>
-            <div class="">
-              <div style="height:120px;" ref="phase-reward-rl"></div>
+            <div class="border-2 border-yellow-500">
+              <div style="height:120px;width:100%" ref="phase-reward-rl"></div>
             </div>
           </div>
           </div>
@@ -66,7 +74,7 @@
           <!-- </div> -->
         </div>
         <div class="ml-1">
-          <div class="bg-gray-700 w-max px-3 rounded-t-lg font-bold text-white">정보</div>
+          <div class="bg-gray-700 w-max px-3 py-1 rounded-t-lg font-bold text-white">정보</div>
           <div class="space-between text-white text-sm p-1 bg-gray-700">
             <div class="text-center">{{ simulation.id }} </div>
             <div class="border-gray-600">
@@ -85,107 +93,104 @@
             </div>
           </div>
 
-          <div class="mt-1 mb-1">
-            <div v-if="status === 'running'" class="animate-pulse bg-indigo-200 text-center px-2 uppercase">
-              {{ status }}
-              <b-btn variant="dark" size="sm" @click="checkStatus">상태확인</b-btn>
+          <div class="mt-1 mb-1 flex items-center justify-between bg-indigo-200">
+            <div v-if="status === 'running'" class="animate-pulse bg-indigo-300 text-center px-3 uppercase w-full">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+
+              <!-- <b-btn variant="dark" size="sm" @click="checkStatus">상태확인</b-btn> -->
             </div>
-            <div v-else class="bg-indigo-200 text-center px-2 uppercase">
+            <div v-else class="bg-indigo-300 text-center px-3 uppercase w-full">
               {{ status }}
-              <b-btn variant="dark" size="sm" @click="checkStatus">상태확인</b-btn>
+            </div>
+            <div class="flex-shrink-0">
+              <button class="bg-gray-800 text-sm text-white px-2" @click="checkStatus">상태확인</button>
             </div>
           </div>
-          <div
-              v-bind:style="{
-                height: mapHeight - 40 + 'px',
-                borderRadius: 0,
-                overflow: 'auto'
-              }"
-            >
-              <div class="">
-                <!----- 보상 그래프 ----->
-                <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg">보상그래프</div>
-                <div class="p-2 bg-gray-700" >
-                  <line-chart
-                    :chartData="rewards"
-                    :options="lineChartOption({}, chartClicked)"
-                    :height="180"
-                  />
+          <div class="">
 
-                  <b-btn variant="secondary" @click.prevent="runTest" size="sm">
-                    <span>신호최적화 비교 {{ selectedEpoch }}</span>
-                    <b-icon icon="play-fill"/>
-                  </b-btn>
-                </div>
-                <div class="mt-1">
-                  <div class="m-0 p-0 text-center text-white w-24 bg-gray-700 rounded-t-lg">
-                    <small>평균속도 </small>
-                    <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
-                  </div>
-                  <div class="bg-gray-700">
-                    <line-chart
-                      :chartData="chart.currentSpeedChart"
-                      :options="lineChartOption({})"
-                      :height="120"
-                    />
-                  </div>
-                </div>
-                <!--
-                <div class="mt-1" bg-variant="dark" text-variant="light">
-                  <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
-                    평균속도(전체)
-                  </div>
-                  <div class="bg-gray-700">
-                    <line-chart
-                      :chartData="chart1.linkSpeeds"
-                      :options="lineChartOption({})"
-                      :height="120"
-                    />
-                  </div>
-                </div>
-                 -->
-                <!--
-                <div class="mt-1" >
-                  <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
-                      평균속도(뷰영역)
-                  </div>
-                  <div class="bg-gray-700">
-                    <line-chart :chartData="chart.currentSpeedInViewChart" :options="lineChartOption({})" :height="120"/>
-                  </div>
-                </div> -->
-                <!--
-                <div class="mt-1" >
-                  <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
-                    선택 교차로
-                  </div>
-                  <div class="bg-gray-700">
-                    <line-chart
-                      :chartData="chart.junctionSpeeds"
-                      :options="lineChartOption({})"
-                      :height="120"
-                    />
-                  </div>
-                </div> -->
+            <!----- 보상 그래프 ----->
+            <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg">보상그래프</div>
+            <div class="p-2 bg-gray-700" >
+              <line-chart
+                :chartData="rewards"
+                :options="lineChartOption({}, chartClicked)"
+                :height="180"
+              />
+            </div>
 
-                <b-card
-                  class="mt-1 p-1"
-                  bg-variant="dark"
-                  text-variant="light"
-                  no-body
+            <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg mt-1">모델 테스트</div>
+            <div class="p-2 bg-gray-700 max-h-60 overflow-y-auto ">
+              <div class="flex flex-wrap">
+                <div
+                  v-for="reward of rewards.labels.filter((v,i)=>i % simulation.configuration.modelSavePeriod == 0)"
+                  :key="reward"
+                  @click="selectedEpoch = reward"
+                  class="ml-1 mb-1 bg-indigo-500 text-xs rounded text-white px-1 cursor-pointer hover:bg-indigo-200"
                 >
-                  <div class="flex flex-wrap">
-                    <div
-                      v-for="reward of rewards.labels"
-                      :key="reward"
-                      class="ml-1 bg-indigo-500 text-xs rounded text-black px-1 cursor-pointer hover:bg-indigo-200"
-                      @click="selectedEpoch = reward"
-                    >
-                      {{ reward }}
-                    </div>
-                  </div>
-                </b-card>
+                  {{ reward }}
+                </div>
               </div>
             </div>
+            <div class="p-2 mt-1 mb-1 bg-gray-700 rounded flex justify-between">
+                <span class="rounded-full bg-yellow-300 text-black px-3">선택모델: <span class="bg-yellow-800 px-2 rounded-full text-white">{{ selectedEpoch }}</span></span>
+                <button class="bg-gray-400 text-black rounded px-2 hover:bg-gray-600 hover:text-white" @click.prevent="runTest" >Test <b-icon icon="play-fill"/></button>
+            </div>
+
+            <div class="mt-1">
+              <div class="m-0 p-0 text-center text-white w-24 bg-blue-800 rounded-t-lg">
+                <small>평균속도 </small>
+                <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
+              </div>
+              <div class="bg-gray-700 border-2 border-blue-800">
+                <line-chart
+                  :chartData="chart.currentSpeedChart"
+                  :options="lineChartOption({})"
+                  :height="120"
+                />
+              </div>
+            </div>
+
+            <!--
+            <div class="mt-1" bg-variant="dark" text-variant="light">
+              <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
+                평균속도(전체)
+              </div>
+              <div class="bg-gray-700">
+                <line-chart
+                  :chartData="chart1.linkSpeeds"
+                  :options="lineChartOption({})"
+                  :height="120"
+                />
+              </div>
+            </div>
+              -->
+            <!--
+            <div class="mt-1" >
+              <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
+                  평균속도(뷰영역)
+              </div>
+              <div class="bg-gray-700">
+                <line-chart :chartData="chart.currentSpeedInViewChart" :options="lineChartOption({})" :height="120"/>
+              </div>
+            </div> -->
+            <!--
+            <div class="mt-1" >
+              <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
+                선택 교차로
+              </div>
+              <div class="bg-gray-700">
+                <line-chart
+                  :chartData="chart.junctionSpeeds"
+                  :options="lineChartOption({})"
+                  :height="120"
+                />
+              </div>
+            </div> -->
+
+          </div>
         </div>
       </div>
       <!--
@@ -198,6 +203,8 @@
       </transition>
       -->
     </div>
+
+
     <b-sidebar title="UNIQ-VIS" v-model="sidebar" bg-variant="dark" text-variant="white" shadow right >
       <pre class="text-light h-48">{{ JSON.stringify(simulation, false, 2)}}</pre>
       <div class="bg-gray-800 p-1 text-white text-center">
@@ -263,6 +270,7 @@
         </b-input-group-append>
       </b-input-group>
     </b-sidebar>
+
   </div>
 </template>
 
@@ -285,7 +293,7 @@
   }
   .card-top {
     position: absolute;
-    top: 0;
+    top: 100px;
     left: 0;
     font-weight: bold;
     z-index:100;

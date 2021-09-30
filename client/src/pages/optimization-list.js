@@ -42,6 +42,8 @@ export default {
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
         { class: 'text-center', key: 'actions', label: '교차로수' },
+        { class: 'text-center', key: 'configuration.epoch', label: 'Epoch' },
+        { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
         { class: 'text-center', key: 'details', label: '최적화' },
         { class: 'text-center', key: 'stop', label: '제어' },
         { class: 'text-center', key: 'del', label: '삭제' }

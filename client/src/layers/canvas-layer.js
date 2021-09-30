@@ -41,11 +41,11 @@ export default (map, getEdges) => {
   canvasLayer.show()
 
   map.on('zoomend moveend', () => {
-    // if (map.getZoom() >= MAX_ZOOM) {
-    //   canvasLayer.show()
-    // } else {
-    //   canvasLayer.hide()
-    // }
+    if (map.getZoom() >= MAX_ZOOM || map.getZoom() <= 16) {
+      canvasLayer.hide()
+    } else {
+      canvasLayer.show()
+    }
   })
 
   return canvasLayer
