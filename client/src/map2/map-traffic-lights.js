@@ -49,7 +49,7 @@ function makeGroupPolygon (group) {
   return geometry
 }
 
-const [SA101, SA107, SA111] = signalGroups.map(value => {
+const [SA101, SA107, SA111, SA104] = signalGroups.map(value => {
   return {
     junctions: value.properties.junctions,
     color: value.properties.color
@@ -66,6 +66,9 @@ const groupColor = (nodeId) => {
   }
   if (SA111.junctions.includes(nodeId)) {
     color = SA111.color
+  }
+  if (SA104.junctions.includes(nodeId)) {
+    color = SA104.color
   }
   return color
 }
@@ -280,7 +283,6 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     tlayer.getGeometries().forEach(g => {
       junctionIds.forEach(junctionId => {
         if (g.properties.NODE_ID === junctionId) {
-          console.log('same')
           data.push({
             coord: g.getCoordinates().add(0.00, 0.0003).toArray(),
             text: '최적화 중 '

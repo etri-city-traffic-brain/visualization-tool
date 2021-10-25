@@ -15,7 +15,7 @@ function makeOption (data) {
       ],
       itemStyle: {
         normal: {
-          color: phaseColors[v.phase] || 'gray'
+          color: phaseColors[Number(v.phase)] || 'cyan'
         }
       }
     }
@@ -46,7 +46,7 @@ function makeOption (data) {
     yAxis: [
       {
         type: 'value',
-        max: 6,
+        max: 10,
         position: 'left',
         axisLine: {
           show: true,
@@ -119,11 +119,15 @@ function makeOption (data) {
 }
 
 const phaseColors = {
-  '1.0': 'yellow',
-  '2.0': 'green',
-  '3.0': 'orange',
-  '4.0': 'red',
-  '5.0': 'gray'
+  1: 'yellow',
+  2: 'green',
+  3: 'orange',
+  4: 'red',
+  5: 'gray',
+  6: 'blue',
+  7: 'skyblue',
+  8: 'cyan',
+  9: 'purple'
 }
 
 function renderItem (params, api) {

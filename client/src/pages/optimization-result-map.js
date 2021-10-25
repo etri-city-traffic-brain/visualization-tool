@@ -91,6 +91,11 @@ function setupEventHandler () {
   this.$on('optimization:progress', async (e) => {
     this.progressOpt = e.progress
     log('optimization:progress', e)
+    try {
+      await this.getReward()
+    } catch (err) {
+
+    }
   })
 
   this.$on('salt:finished', async () => {
@@ -216,12 +221,12 @@ export default {
 
   async mounted () {
     this.simulationId = this.$route.params ? this.$route.params.id : null
-    const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
-
-    this.simulation = simulation
+    // const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
+    // this.simulation = simulation
+    await this.updateStatus()
     this.showLoading = true
     this.resize()
-    this.map = makeMap({ mapId: this.mapId, zoom: 16 })
+    this.map = makeMap({ mapId: this.mapId, zoom: 15 })
     this.mapManager = MapManager({
       map: this.map,
       simulationId: this.simulationId,
@@ -244,13 +249,14 @@ export default {
 
     window.addEventListener('resize', this.resize)
 
-    if (simulation.status === 'running') {
+    if (this.simulation.status === 'running') {
       this.showProgressing()
     }
 
-    if (simulation.status === 'finished') {
+    if (this.simulation.status === 'finished' || this.simulation.status === 'running') {
       await this.getReward()
     }
+    console.log(this.simulation.configuration.junctionId)
   },
   methods: {
 
@@ -289,11 +295,23 @@ export default {
     async connectWebSocket () {
       this.wsClient.init()
     },
-
+    async updateStatus () {
+      try {
+        const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
+        this.simulation = simulation
+        if (simulation.status !== 'running') {
+          this.trafficLightManager.setOptJunction([])
+        }
+      } catch (e) {
+        console.log('fail to get simulation status')
+      }
+    },
     async runTrain () {
       try {
+        this.simulation.status = 'running'
         await optimizationService.runTrain(this.simulationId)
         this.showProgressing()
+        await this.updateStatus()
       } catch (err) {
         log(err.message)
         this.apiErrorMessage = err.message
@@ -318,6 +336,18 @@ export default {
       })
 
       await this.getRewardTotal()
+    },
+    async stop () {
+      this.simulation.status = 'stopping'
+      try {
+        await optimizationService.stop(this.simulationId)
+        await this.updateStatus()
+      } catch (err) {
+        log('fail to stop', err.message)
+      }
+      // const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
+      // this.simulation = simulation
+      // this.trafficLightManager.setOptJunction([])
     },
     async getRewardTotal () {
       try {

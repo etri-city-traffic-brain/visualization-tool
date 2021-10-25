@@ -26,6 +26,10 @@ async function runTest (mId, optId, modelNum) {
   return HTTP.post(`${base}/test?slaveId=${mId}&id=${mId}&modelNum=${modelNum}&mode=test`)
 }
 
+async function stop (id) {
+  return HTTP.post(`${base}/stop?id=${id}`)
+}
+
 async function getPhase (optId, type) {
   return HTTP.get(`${base}/phase?id=${optId}&type=${type}`)
   // return [
@@ -56,5 +60,6 @@ export default {
   getPhase,
   getReward,
   getRewardTotal,
-  getPhaseReward
+  getPhaseReward,
+  stop
 }

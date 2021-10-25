@@ -32,14 +32,11 @@ export default {
     })
 
     this.$on('cctv:selected', (cctv) => {
-      // console.log('cctv:selected')
       this.videoUrl = cctv.videoUrl
       this.cctv = cctv
       this.showModal()
     })
     this.mapManager.loadMapData()
-
-    // }, 2000)
   },
   methods: {
     showModal () {
@@ -74,32 +71,6 @@ export default {
       // const color = d3.quantize(d3.interpolateHcl('#fafa6e', '#2A4858'), 10)
       const max = Math.max(...Object.values(this.dtgData))
       const links = this.mapManager.getCurrentLinks()
-      // links.forEach(link => {
-      //   link.updateSymbol({
-      //     lineWidth: 0
-      //   })
-      // })
-      // links.forEach((link, i) => {
-      //   link.properties.dtg = this.dtgData[link.properties.LINK_ID] || -1
-      //   link.animate({
-      //     symbol: {
-      //       lineColor: color(link.properties.dtg / 50),
-      //       lineWidth: link.properties.dtg / 50,
-      //       easing: 'out',
-      //       textPlacement: 'line'
-      //     }
-      //   },
-      //   {
-      //     duration: 2000,
-      //     repeat: false
-      //   },
-      //   function (frame) {
-      //     if (frame.state.playState === 'finished') {
-      //       console.log('animation finished')
-      //     }
-      //   }
-      //   )
-      // })
 
       links.forEach(link => {
         const al = new Array(link.getCoordinates().length).fill(0)
@@ -125,20 +96,15 @@ export default {
           tValue = tValue + 20
           if (tValue >= max) {
             clearInterval(t)
-            console.log('clear interval')
             this.isRunning = false
           }
         }, 10)
       }
 
-      this.map.animateTo({
-        pitch: 65
-      }, {
-        duration: 1000
-      })
+      this.map.animateTo({ pitch: 65 }, { duration: 1000 })
 
+      this.isRunning = true
       setTimeout(() => {
-        this.isRunning = true
         animatte()
       }, 1500)
     }

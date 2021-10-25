@@ -48,7 +48,9 @@
           :height="220"
         />
 
-
+      </div>
+      <div class="bg-gray-700 mt-1 p-1">
+      <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="getReward" size="sm">업데이트 리워드</button>
       </div>
       <div class="mt-1 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded">
       <!-- 최적화 진행률 -->
@@ -71,7 +73,7 @@
     </div>
 
 
-    <div class="mt-1 p-2 bg-indigo-400 font-bold text-sm opacity-90 rounded" v-if="status === 'running'">
+    <div class="mt-1 p-2 bg-indigo-400 font-bold text-sm opacity-90 rounded">
       <div class="text-center mb-1">
         시뮬레이션 진행률
       </div>
@@ -82,6 +84,15 @@
       </b-progress>
     </div>
 
+    <div class="mt-1">
+      <div class="bg-gray-500 font-bold text-white text-center uppercase p-1 animate-pulse" v-if="simulation.status === 'running' || simulation.status === 'stopping'">
+        {{ simulation.status }}...
+      </div>
+      <div class="bg-gray-500 text-white text-center uppercase p-1" v-else>
+        {{ simulation.status }}...
+      </div>
+    </div>
+
 
     <b-card
       bg-variant="dark"
@@ -90,23 +101,22 @@
       class="mt-1 p-2"
     >
       <div>
-        <b-btn variant="primary" @click="runTrain" title="신호 최적화 시작" size="sm" v-b-tooltip.hover>
-          <b-icon icon="play-fill"/>
-        </b-btn>
-        <b-btn
-          size="sm"
-          variant="info"
-          v-b-tooltip.hover
-          title="신호비교"
+        <div>
+        <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="runTrain"> <b-icon icon="play-fill"/> 시작 </button>
+        <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="stop" size="sm">중지</button>
+
+        </div>
+        <div class="mt-1">
+        <router-link
+          class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1"
           :to="{
             name: 'OptimizationResultComparisonMap',
             params: {id: simulationId}
           }"
         >
-          <b-icon icon="front"/>
-        </b-btn>
-
-        <b-btn @click="getReward" size="sm">리워드</b-btn>
+          <b-icon icon="front"/> 신호비교
+        </router-link>
+        </div>
       </div>
     </b-card>
     </div>
@@ -130,7 +140,8 @@
     <!-- -------------------- -->
     <div class="reward-charts flex flex-wrap">
       <div v-for="(chart, idx) of rewardCharts" :key="idx" class="p-1">
-        <div class="text-center text-xs text-white px-2 pt-1 w-36 bg-gray-500 rounded-t-2xl">{{ chart.label }}</div>
+        <div class="text-center text-xs text-white px-2 pt-1 w-36- bg-gray-500 rounded-t-xl tracking-wide">{{ chart.label }}</div>
+        <!-- <div class="bg-white p-1"> -->
         <div class="bg-gray-700 pb-1 pr-1">
           <line-chart
             :chartData="chart"
@@ -139,6 +150,7 @@
             :width="200"
           />
         </div>
+        <!-- </div> -->
       </div>
     </div>
 
