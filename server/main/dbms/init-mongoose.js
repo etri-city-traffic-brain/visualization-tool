@@ -34,7 +34,9 @@ function start ({ mongodbUrl, mongoOption }) {
 
   connection.on('error', connectionError)
   connection.on('disconnected', connectionDisconnected)
-
+  connection.on('close', () => {
+    connection.removeAllListeners()
+  })
   const connected = () => debug('MongoDB connected...')
   const error = err => debug(chalk.red(err.message))
 

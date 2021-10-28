@@ -38,6 +38,8 @@ app.use('/salt/v1/optimization', require('./routes/optimization'))
 
 app.use('/salt/v1/optenv', require('./routes/optenv'))
 app.use('/salt/v1/vds', require('./routes/vds'))
+app.use('/salt/v1/rse', require('./routes/rse'))
+
 app.use('/salt/v1/dashboard', require('./routes/dashboard'))
 
 app.use('/salt/v1/cctv', require('./routes/cctv'))

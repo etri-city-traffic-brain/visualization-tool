@@ -40,7 +40,9 @@ async function run (simulation, mode, modelNum) {
   // const volume = `c/home/ubuntu/uniq-sim/data/${sId}:/uniq/optimizer/io`
   const volume_ = `${volume}/${sId}:/uniq/optimizer/io`
 
-  const trainCmd = ['run', '--rm',
+  const trainCmd = [
+    'run', '--rm',
+    '--name', sId,
     '-v', volume_, img,
     'python', './run.py',
     '--mode', 'train',
