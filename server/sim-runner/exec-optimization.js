@@ -11,7 +11,8 @@ const { dockerCommand } = require('docker-cli-js')
 // const img = 'images4uniq/optimizer:v0.1a.20210927'
 // const img = 'images4uniq/optimizer:v0.1a.20210929'
 // const img = 'images4uniq/optimizer:v0.1a.20210930'
-const img = 'images4uniq/optimizer:v0.1a.20210930b'
+// const img = 'images4uniq/optimizer:v0.1a.20210930b'
+const img = 'images4uniq/optimizer:v0.1a.20211028'
 
 async function run (simulation, mode, modelNum) {
   if (!simulation || !mode) {
