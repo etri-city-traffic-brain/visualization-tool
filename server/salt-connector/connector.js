@@ -55,7 +55,7 @@ module.exports = (httpServer, tcpPort) => {
     // debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`)
     webSocketServer.send(data.simulationId, { ...data })
     // console.log('------------------> SEND WEB Socket <----------------------')
-    console.log(data)
+    // console.log(data)
     if (isFinished(data)) {
       debug('*** SIMULATION FINISHED ***')
       webSocketServer.send(simulationId, {

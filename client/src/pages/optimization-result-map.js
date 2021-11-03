@@ -259,7 +259,12 @@ export default {
     console.log(this.simulation.configuration.junctionId)
   },
   methods: {
-
+    stopVis () {
+      this.wsClient.kill()
+    },
+    startVis () {
+      this.wsClient.restart()
+    },
     showProgressing () {
       const junctionIds = this.simulation.configuration.junctionId.split(',')
       if (junctionIds[0].indexOf('SA') >= 0) {

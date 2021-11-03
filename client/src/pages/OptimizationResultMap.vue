@@ -105,6 +105,15 @@
         <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="runTrain"> <b-icon icon="play-fill"/> 시작 </button>
         <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="stop" size="sm">중지</button>
 
+        <button
+        class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1"
+        @click="stopVis" size="sm">가시화 중지
+        </button>
+        <button
+        class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1"
+        @click="startVis" size="sm">가시화 시작
+        </button>
+
         </div>
         <div class="mt-1">
         <router-link

@@ -37,6 +37,13 @@ export default {
       this.showModal()
     })
     this.mapManager.loadMapData()
+
+    axios({
+      url: '/salt/v1/rse',
+      method: 'get'
+    }).then(res => res.data).then(data => {
+      console.log(data)
+    })
   },
   methods: {
     showModal () {
@@ -96,9 +103,10 @@ export default {
           tValue = tValue + 20
           if (tValue >= max) {
             clearInterval(t)
+            console.log('clear interval')
             this.isRunning = false
           }
-        }, 10)
+        }, 200)
       }
 
       this.map.animateTo({ pitch: 65 }, { duration: 1000 })

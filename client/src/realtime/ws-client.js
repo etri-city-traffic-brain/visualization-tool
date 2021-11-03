@@ -9,7 +9,8 @@ const { WebSocket } = window
 const env = process && process.env
 
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://101.79.1.124:8080' : 'ws://101.79.1.124:8080/'
-const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.124:8080/'
+// const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.124:8080/'
+const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.117:8080/'
 
 log('execution mode:', env.NODE_ENV)
 log('ws:', wsUrl)
@@ -27,7 +28,7 @@ const extend = (extent) => {
     }
   }
 }
-
+let killed = false
 function Client ({ url = wsUrl, simulationId, eventBus }) {
   if (!eventBus) {
     throw new Error('eventBus is null')
@@ -47,6 +48,18 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     if (socket) {
       socket.close()
     }
+  }
+
+  const kill = () => {
+    console.log('kill ws client')
+    killed = true
+    status = 'close'
+    close()
+  }
+
+  const restart = () => {
+    killed = false
+    init()
   }
 
   function init () {
@@ -80,6 +93,10 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       eventBus.$emit('ws:close', {})
       status = 'close'
       log('websocket is closed')
+      if (killed) {
+        console.log('killed')
+        return
+      }
       setTimeout(() => init(), 1000)
     })
 
@@ -113,7 +130,9 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   return {
     init,
     send,
-    close
+    close,
+    kill,
+    restart
   }
 }
 
