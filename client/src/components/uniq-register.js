@@ -11,12 +11,13 @@ const format = date => moment(date).format('YYYY-MM-DD')
 const getToday = () => format(new Date())
 
 const periodOptions = [
+  { value: 15, text: '15초' },
   { value: 10 * 60, text: '10분' },
   { value: 30 * 60, text: '30분' },
   { value: 60 * 60, text: '1시간' },
-  { value: 120 * 60, text: '2시간' },
-  { value: 240 * 60, text: '4시간' },
-  { value: 360 * 60, text: '6시간' }
+  { value: 120 * 60, text: '2시간' }
+  // { value: 240 * 60, text: '4시간' },
+  // { value: 360 * 60, text: '6시간' }
 ]
 
 const areaOptions = [
@@ -29,8 +30,9 @@ const areaOptions = [
 ]
 
 const scriptOptions = [
-  { value: 'default.py', text: 'default.py' },
-  { value: 'RL_2phase_pressure.py', text: 'RL_2phase_pressure.py' }
+  { value: 'run.py', text: 'run.py' }
+  // { value: 'run_1.py', text: 'run_1.py' },
+  // { value: 'run_2.py', text: 'run_2.py' }
 ]
 
 const intervalOptions = [
@@ -76,7 +78,7 @@ export default {
       junctionId: '',
       epoch: 10,
       extent: null, // current map extent
-
+      dockerImage: 'images4uniq/optimizer:v0.1a.20211028',
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],
@@ -106,13 +108,14 @@ export default {
       this.intervalSelected = env.configuration.interval
       this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
+      this.dockerImage = env.configuration.dockerImage
       this.modelSavePeriod = env.configuration.modelSavePeriod
     }
-    try {
-      this.scriptOptions = await simulationService.getScripts()
-    } catch (err) {
-      this.scriptOptions = [...scriptOptions]
-    }
+    // try {
+    //   this.scriptOptions = await simulationService.getScripts()
+    // } catch (err) {
+    //   this.scriptOptions = [...scriptOptions]
+    // }
   },
   methods: {
     openSignalMap () {
@@ -157,6 +160,7 @@ export default {
           days,
           interval: this.intervalSelected,
           junctionId: this.junctionId,
+          dockerImage: this.dockerImage,
           script: this.scriptSelected,
           epoch: this.epoch,
           modelSavePeriod: this.modelSavePeriod

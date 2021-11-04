@@ -134,7 +134,8 @@ function renderItem (params, api) {
   const categoryIndex = api.value(0)
   const start = api.coord([api.value(1), categoryIndex])
   const end = api.coord([api.value(2), categoryIndex])
-  const height = api.size([0, 1])[1] * 1.5
+  // const height = api.size([0, 1])[1] * 1.5
+  const height = api.size([0, 1])[1] * 10
 
   const rectShape = echarts.graphic.clipRectByRect({
     x: start[0],

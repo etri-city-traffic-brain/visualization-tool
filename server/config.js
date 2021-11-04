@@ -46,7 +46,7 @@ module.exports = {
     urlBase: cloudApiBase
   },
   server: {
-    ip: '192.168.1.220',
+    ip: '192.168.1.222',
     tcpPort: process.env.tcpPort || 1337,
     wsPort: 8082,
     webPort: process.env.webPort || 8080

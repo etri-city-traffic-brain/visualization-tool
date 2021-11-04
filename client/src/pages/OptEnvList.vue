@@ -13,30 +13,50 @@
           </b-btn>
       </div> -->
     <!-- </b-card> -->
-    <div class="p-0 bg-gray-400 max-w-full min-h-screen">
-      <div class="d-flex flex-wrap pb-3 pl-1 pr-1">
+    <div class="p-1 bg-gray-400 max-w-full min-h-screen">
+      <div class="ml-1">
+        <button class="rounded p-2 bg-gray-700 text-center mx-auto font-bold text-white hover:bg-gray-800" v-b-modal.create-simulation-modal>
+          <svg xmlns="http://www.w3.org/2000/svg" class="inline h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          등록
+        </button>
+      </div>
+      <div class="grid grid-cols-5 min-w-max">
         <div
           v-for="env of envs"
           :key="env.envName"
-          class="text-white max-w-full w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6 mt-1"
+          class="text-white min-w-max"
         >
-          <div class="bg-gray-700 m-1 p-2 rounded-md min-h-full divide-y-2 divide-blue-100 divide-solid">
-            <div class="font-bold text-md px-1 pt-1">{{ env.envName }} </div>
-            <div class="p-1 space-y-1 text-sm">
-              <p class="text-gray-400 text-base text-sm mt-1">
-                {{ env.description }}
-              </p>
-              <div>모델저장 주기: <span class="bg-blue-300 rounded px-2 text-black font-bold">{{ env.configuration.modelSavePeriod }}</span>
-              Epoch: <span class="bg-purple-400 rounded px-2 text-black font-bold">{{ env.configuration.epoch}}</span></div>
-              <div>
-               시뮬레이션 시간: {{ 0 }} ~ {{ env.configuration.end - env.configuration.begin + 60}}
+          <div class="bg-gray-600 m-1 p-2 rounded-md min-h-full">
+            <div class="font-bold text-md px-1 pt-1 mb-2">{{ env.envName }} </div>
+            <div class="grid grid-cols-3 text-xs gap-1">
+              <div class="bg-yellow-50 text-black p-1 rounded text-center">
+                <div>저장주기</div>
+                <div class="text-center text-xl font-bold">{{ env.configuration.modelSavePeriod }}</div>
               </div>
-              <div>Roads: <span class="bg-purple-200 rounded px-2 text-black font-bold">{{ env.configuration.junctionId}}</span></div>
-              <div>
-
+              <div class="bg-yellow-50 text-black p-1 rounded text-center">
+                <div > Epoch</div>
+                <div class="text-center text-xl font-bold">{{ env.configuration.epoch}}</div>
+              </div>
+              <div class="bg-yellow-50 text-black p-1 rounded">
+                <div class="text-center">
+                  Duration
+                </div>
+               <div class="text-center text-xl font-bold">{{ env.configuration.end - env.configuration.begin + 60}}</div>
               </div>
             </div>
-            <div class="pt-2 pr-3 text-right">
+
+            <div class="bg-blue-50 mt-2 p-2 rounded text-sm font-bold">
+              <div class="text-black mb-1">교차로</div>
+              <div class="flex flex-wrap">
+              <div
+                v-for="j of env.configuration.junctionId.split(',')" :key="j"
+                class="bg-blue-300 rounded px-1 ml-1 text-black text-xs">
+              {{ j }}</div>
+              </div>
+            </div>
+            <div class="pt-2 text-right">
                 <!-- <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn> -->
                 <!-- <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn> -->
                 <!-- <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn> -->
@@ -47,9 +67,7 @@
           </div>
 
         </div>
-        <div class="flex items-center bg-gray-700 w-24 rounded ml-2 mt-2 hover:bg-gray-800" v-b-modal.create-simulation-modal>
-          <div class="text-center mx-auto font-bold text-white">등록</div>
-        </div>
+
         <!-- <div class="text-white max-w-full w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6 mt-1">
           <div class="bg-gray-700 hover:bg-gray-500 m-1 rounded-2xl min-h-full">
 

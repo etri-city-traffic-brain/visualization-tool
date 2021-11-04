@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="">
     <b-card bg-variant="secondary" text-variant="light" no-body class="pr-2 pt-2">
       <b-form-group
         v-if="showEnv"
@@ -68,10 +68,10 @@
     </b-card>
 
     <div class="bg-gray-500 pr-2 pt-2 mt-1 text-white pb-2">
-      <div class="flex space-x-1 pl-5 mb-2">
+      <div class="grid grid-cols-5 space-x-1 pl-5 mb-2">
       <div label-cols-sm="4" label="스크립트" label-class="">
-        스크립트
-        <b-form-select v-model="scriptSelected" :options="scriptOptions" />
+        <!-- 스크립트 -->
+        <!-- <b-form-select v-model="scriptSelected" :options="scriptOptions" /> -->
       </div>
        <div>
          통계주기
@@ -82,9 +82,7 @@
         가시화주기
         <b-form-select v-model="intervalSelected" :options="intervalOptions" class="" />
       </div>
-      </div>
 
-      <div class="flex space-x-1 mt-1 pl-5 mb-2">
       <div v-if="epochField" >
         Epoch(*)
         <b-form-input v-model="epoch" type="number"></b-form-input>
@@ -93,7 +91,11 @@
         모델저장주기(*)
         <b-form-input v-model="modelSavePeriod" type="number" min="1"></b-form-input>
       </div>
+      </div>
 
+      <div class="flex space-x-1 mt-1 pl-5 mb-2 items-center">
+        <div class="flex-shrink-0 w-36 text-right">실행이미지</div>
+          <b-form-input v-model="dockerImage" type="text" class="ml-1"/>
       </div>
     </div>
 

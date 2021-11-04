@@ -12,7 +12,7 @@ const { dockerCommand } = require('docker-cli-js')
 // const img = 'images4uniq/optimizer:v0.1a.20210929'
 // const img = 'images4uniq/optimizer:v0.1a.20210930'
 // const img = 'images4uniq/optimizer:v0.1a.20210930b'
-const img = 'images4uniq/optimizer:v0.1a.20211028'
+const defaultImg = 'images4uniq/optimizer:v0.1a.20211028'
 
 async function run (simulation, mode, modelNum) {
   if (!simulation || !mode) {
@@ -20,7 +20,9 @@ async function run (simulation, mode, modelNum) {
     return false
   }
 
+  console.log('docker image: ', simulation.configuration.dockerImage)
   const epoch = simulation.configuration.epoch
+  const img = simulation.configuration.dockerImage || defaultImg
   const begin = 0
   const end = simulation.configuration.end - simulation.configuration.begin + 60
   const modelSavePeriod = simulation.configuration.modelSavePeriod || 20
