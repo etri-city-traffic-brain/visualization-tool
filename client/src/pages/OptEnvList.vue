@@ -22,7 +22,7 @@
           등록
         </button>
       </div>
-      <div class="grid grid-cols-5 min-w-max">
+      <div class="grid grid-cols-5 min-w-max max-w-screen-lg">
         <div
           v-for="env of envs"
           :key="env.envName"

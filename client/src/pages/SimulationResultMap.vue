@@ -48,32 +48,41 @@
             RSE
           </b-btn>
         </div>
-        <div class="flex mt-1 space-x-1">
-          <button
-            class="flex-1 bg-indigo-400 rounded px-2 py-1 text-sm font-bold hover:bg-indigo-200"
-            @click.stop="startSimulation()"
-          >
-            시뮬레이션 시작 <b-icon icon="caret-right-fill"/>
-          </button>
-          <button
-            class="flex-1 bg-indigo-400 rounded px-2 py-1 text-sm font-bold hover:bg-indigo-200"
-            @click="stop"
-          >
-            시뮬레이션 중지 <b-icon icon="stop-fill"/>
-          </button>
-
-          <button
-            class="flex-1 bg-indigo-400 rounded px-2 py-1 text-sm font-bold hover:bg-indigo-200"
-            @click.stop="startReplay"
-          >
-            Replay <b-icon icon="caret-right-fill"/>
-          </button>
-          <button
-            class="flex-1 bg-indigo-400 rounded px-2 py-1 text-sm font-bold hover:bg-indigo-200"
-            @click="stopReplay"
-          >
-            Stop Replay <b-icon icon="stop-fill"/>
-          </button>
+        <div class="grid grid-cols-2 mt-1 space-x-1 text-xs rounded">
+          <div class="bg-yellow-100 text-center p-1 font-bold mb-1 space-y-1 rounded">
+            <div>시뮬레이션</div>
+            <div>
+              <button
+                class="bg-yellow-200 rounded px-2 py-1 font-bold hover:bg-yellow-300"
+                @click.stop="startSimulation()"
+              >
+                시작<b-icon icon="caret-right-fill"/>
+              </button>
+              <button
+                class="bg-yellow-200 rounded px-2 py-1 font-bold hover:bg-yellow-300"
+                @click="stop"
+              >
+                중지<b-icon icon="stop-fill"/>
+              </button>
+            </div>
+          </div>
+          <div class="bg-green-100 text-center p-1 font-bold mb-1 space-y-1 rounded">
+            <div>Replay</div>
+            <div>
+              <button
+                class="flex-1 bg-green-200 rounded px-2 py-1 font-bold hover:bg-green-300"
+                @click.stop="startReplay"
+              >
+                시작<b-icon icon="caret-right-fill"/>
+              </button>
+              <button
+                class="flex-1 bg-green-200 rounded px-2 py-1 font-bold hover:bg-green-300"
+                @click="stopReplay"
+              >
+                중지<b-icon icon="stop-fill"/>
+              </button>
+'          </div>
+          </div>
         </div>
       </div>
       <SimulationDetailsOnFinished
@@ -121,7 +130,7 @@
         </div>
       </div>
     </div>
-    <div class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
+    <div v-if="currentEdge"class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
       <div v-if="currentEdge">
         <div class="rounded-xl text-white text-center">
           <h5>
@@ -147,7 +156,7 @@
 
       </div>
       <div v-else>
-        <div class="bg-gray-800 p-2 rounded-xl text-white text-center">링크를 선택하세요.</div>
+        <!-- <div class="bg-gray-800 p-2 rounded-xl text-white text-center">링크를 선택하세요.</div> -->
       </div>
     </div>
 
