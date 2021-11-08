@@ -70,7 +70,6 @@ function MapManager ({ map, simulationId, eventBus }) {
       acc[road.roadId.trim()] = road
       return acc
     }, {})
-
     canvasLayer.updateRealtimeData(speedsByEdgeId)
     edgeLayer.updateRealtimeData(speedsByEdgeId)
     toolLayer.updateRealtimeData(speedsByEdgeId)

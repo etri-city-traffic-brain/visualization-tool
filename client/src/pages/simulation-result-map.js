@@ -307,6 +307,7 @@ export default {
     })
 
     this.$on('salt:data', (d) => {
+      // console.log('salt:data', d)
       this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
         acc += cur
         return acc
@@ -430,7 +431,8 @@ export default {
     },
     resize () {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
-      this.mapHeight = window.innerHeight - 160 // update map height to current height
+      // this.mapHeight = window.innerHeight - 160 // update map height to current height
+      this.mapHeight = window.innerHeight - 50 // update map height to current height
     },
     togglePlay () {
       this.playBtnToggle = !this.playBtnToggle;

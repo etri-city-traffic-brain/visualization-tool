@@ -34,7 +34,7 @@
     <!-- -------------- -->
     <div class="uniq-top-left">
       <div class="bg-gray-700 rounded-xl p-2">
-        <span class="mx-2 text-white">{{ simulationId }}</span>
+        <div class="mb-2 text-white font-bold">{{ simulationId }}</div>
 
         <div>
           <uniq-map-changer :map="map"/>
