@@ -52,7 +52,9 @@ module.exports = {
     webPort: process.env.webPort || 8080
   },
   db: {
-    mongodbUrl: 'mongodb://127.0.0.1:27017/map',
+    // mongodbUrl: 'mongodb://1234:1234@localhost:27017/map',
+    mongodbUrl:
+      'mongodb://1234:1234@localhost:27017/map?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',
     mongoOption: {
       useNewUrlParser: true,
       //  autoReconnect: true,
