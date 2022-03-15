@@ -1,4 +1,3 @@
-
 import * as maptalks from 'maptalks'
 
 import color from '@/utils/colors'
@@ -7,8 +6,10 @@ import color from '@/utils/colors'
 const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1
 
 function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
+  console.log('updateCongestion', linkSpeeds)
+  if (Object.keys(linkSpeeds).length === 0) return
   const lineWidth = calcLineWidth(map.getZoom())
-  edgeLayer.getGeometries().forEach((geometry) => {
+  edgeLayer.getGeometries().forEach(geometry => {
     const speeds = linkSpeeds[geometry.getId()] || []
     const speed = speeds[step]
     if (speed) {
@@ -30,7 +31,7 @@ function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
   })
 }
 
-export default (map) => {
+export default map => {
   const edgeLayer = new maptalks.VectorLayer('edgeLayer', [], {
     enableAltitude: true,
     drawAltitude: {
@@ -42,7 +43,7 @@ export default (map) => {
     }
   })
 
-  map.on('zoomend moveend', (event) => {
+  map.on('zoomend moveend', event => {
     const map = event.target
     if (map.getZoom() >= 19 || map.getZoom() <= 14) {
       // layer.hide()
@@ -52,7 +53,7 @@ export default (map) => {
   })
 
   function updateRealtimeSpeed (speedByEdgeId = {}) {
-    edgeLayer.getGeometries().forEach((geometry) => {
+    edgeLayer.getGeometries().forEach(geometry => {
       const road = speedByEdgeId[geometry.getId()]
       if (road) {
         geometry.updateSymbol({
@@ -67,7 +68,7 @@ export default (map) => {
     updateCongestion(edgeLayer, map, currentSpeedsPerLink, currentStep)
   }
 
-  edgeLayer.updateRealtimeData = (data) => {
+  edgeLayer.updateRealtimeData = data => {
     updateRealtimeSpeed(data)
   }
 

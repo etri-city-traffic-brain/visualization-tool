@@ -1,4 +1,3 @@
-
 import * as maptalks from 'maptalks'
 
 // import color from '@/utils/colors'
@@ -13,7 +12,8 @@ export default (map, getEdges, eventBus) => {
   axios({
     url: '/salt/v1/cctv',
     method: 'get'
-  }).then(res => res.data)
+  })
+    .then(res => res.data)
     .then(data => {
       data.forEach(cctv => {
         // const circle = new maptalks.Circle(cctv.location, 20, {
@@ -24,23 +24,25 @@ export default (map, getEdges, eventBus) => {
         //     polygonOpacity: 0.4
         //   }
         // }).addTo(layer)
-
-        const marker4 = new maptalks.Marker(
-          cctv.location,
-          {
-            symbol: {
-              markerFile: cctv.icon,
-              markerWidth: 28,
-              markerHeight: 40,
-              markerDx: 0,
-              markerDy: 0,
-              markerOpacity: 1
-            }
+        // console.log(cctv.location)
+        const marker4 = new maptalks.Marker(cctv.location, {
+          symbol: {
+            textFaceName: 'sans-serif',
+            textName: '📹',
+            textFill: '#ff0000',
+            textHorizontalAlignment: 'right',
+            textSize: 40
+            // markerFile: cctv.icon,
+            // markerWidth: 28,
+            // markerHeight: 40,
+            // markerDx: 0,
+            // markerDy: 0,
+            // markerOpacity: 1
           }
-        ).addTo(layer)
+        }).addTo(layer)
 
         // console.log('add circle', cctv.location)
-        marker4.on('click', (x) => {
+        marker4.on('click', x => {
           eventBus.$emit('cctv:selected', {
             ...cctv
           })
@@ -50,12 +52,9 @@ export default (map, getEdges, eventBus) => {
       })
     })
 
-  map.on('zoomend moveend', (event) => {
-  })
+  map.on('zoomend moveend', event => {})
 
-  layer.updateRealtimeData = (data) => {
-
-  }
+  layer.updateRealtimeData = data => {}
 
   return layer
 }
