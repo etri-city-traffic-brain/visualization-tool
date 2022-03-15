@@ -21,11 +21,14 @@ import Dashboard from '@/pages/Dashboard.vue'
 
 Vue.use(Router)
 
-const route = (path, component) => ({
+const route = (path, component, keepAlive = false) => ({
   path,
   mode: 'history',
   name: component.name,
-  component
+  component,
+  meta: {
+    keepAlive
+  }
 })
 
 export default new Router({
@@ -36,10 +39,13 @@ export default new Router({
     route('/SimulationList', SimulationList),
     route('/OptimizationList', OptimizationList),
     route('/OptimizationResultMap/:id', OptimizationResultMap),
-    route('/OptimizationResultComparisonMap/:id', OptimizationResultComparisonMap),
+    route(
+      '/OptimizationResultComparisonMap/:id',
+      OptimizationResultComparisonMap
+    ),
     route('/SimulationComparisonResult', SimulationComparisonResult),
     route('/SignalEditor', SignalEditor),
     route('/OptEnvList', OptEnvList),
-    route('/Dashboard', Dashboard)
+    route('/Dashboard', Dashboard, true)
   ]
 })

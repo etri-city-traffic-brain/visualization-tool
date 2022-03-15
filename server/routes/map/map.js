@@ -4,6 +4,7 @@ const parse = require('../../utils/parse-req-query')
 
 module.exports = async (req, res) => {
   const { extent, zoom } = parse(req)
+  console.log(extent, zoom)
   const collectionName = zoom <= 16 ? 'ulinks' : 'ucells'
 
   const collections = mongoose.connection.db.collection(collectionName)

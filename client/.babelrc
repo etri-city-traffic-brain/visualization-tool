@@ -4,9 +4,10 @@
       "modules": false,
       "targets": {
         "browsers": ["> 1%", "last 2 versions", "not ie <= 8"]
-      }
+      },
+      "exclude": ["transform-es2015-classes"]
     }],
-    "stage-2",
+    "stage-2"
   ],
   "plugins": ["transform-vue-jsx", "transform-runtime"]
 }

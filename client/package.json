@@ -12,6 +12,7 @@
     "test": "npx babel-node --presets babel-preset-env node_modules/tape/bin/tape test/**/*.js | faucet"
   },
   "dependencies": {
+    "@babel/plugin-transform-classes": "^7.16.7",
     "@fortawesome/fontawesome-svg-core": "^1.2.7",
     "@fortawesome/free-solid-svg-icons": "^5.4.2",
     "@fortawesome/vue-fontawesome": "^0.1.2",
@@ -29,11 +30,13 @@
     "cors": "^2.8.5",
     "d3": "^5.4.0",
     "echarts": "^5.2.1",
-    "maptalks": "^0.40.2",
+    "maptalks": "^1.0.0-rc.2",
+    "maptalks.three": "^0.20.2",
     "moment": "^2.22.2",
     "portal-vue": "^2.1.7",
     "query-string": "^6.8.2",
     "ramda": "^0.25.0",
+    "three": "^0.104.0",
     "turf-linestring": "^1.0.2",
     "vis": "^4.21.0",
     "vue": "^2.6.11",

@@ -1,4 +1,3 @@
-
 const express = require('express')
 const favicon = require('express-favicon')
 const path = require('path')
@@ -7,7 +6,7 @@ const morgan = require('morgan')
 const app = express()
 const PUBLIC = path.join(__dirname, 'public')
 const VIEWS = path.join(__dirname, 'views')
-const FAVICON = favicon(`${__dirname}/public/favicon.ico`)
+// const FAVICON = favicon(`${__dirname}/public/favicon.ico`)
 
 const config = require('./config')
 app.set('views', VIEWS)
@@ -15,14 +14,15 @@ app.set('view engine', 'ejs')
 
 app.all('/*', require('./middleware/cors'))
 
-app.use(FAVICON)
+// app.use(FAVICON)
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(express.static(PUBLIC))
 console.log(config.base)
 // app.use('/video', express.static(path.join(__dirname, '/video')))
-app.use('/video', express.static(path.join(config.base, 'cctv')))
+// app.use('/video', express.static(path.join(config.base, 'cctv')))
+app.use('/public', express.static('./public'))
 
 app.use('/', require('./routes/index'))
 app.use('/salt/v1/map', require('./routes/map'))
