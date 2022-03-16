@@ -46,15 +46,76 @@ router.get('/dtg', (req, res) => {
     .catch(e => res.status(500).send(e.message))
 })
 
-router.get('/dtg/by/vehicleid', (req, res) => {
+async function fileExists (path) {
+  return new Promise((resolve, reject) => {
+    fs.access(path, fs.F_OK, err => {
+      if (err) {
+        console.error(err)
+        reject(err)
+        return
+      }
+      resolve()
+      //file exists
+    })
+  })
+}
+
+function _toJeoJson (positionsByVehicle) {
+  const geoJson = {
+    type: 'FeatureCollection',
+    features: []
+  }
+  Object.keys(positionsByVehicle).forEach(key => {
+    const feature = {
+      type: 'Feature',
+      properties: {
+        vehicleId: key
+      },
+      geometry: {
+        type: 'LineString',
+        coordinates: positionsByVehicle[key]
+      }
+    }
+    geoJson.features.push(feature)
+  })
+
+  return geoJson
+}
+
+function _saveFile (path, geoJson) {
+  fs.writeFile(path, JSON.stringify(geoJson), err => {
+    if (err) {
+      console.log(err)
+    }
+    console.log('save dtg geojson file')
+  })
+}
+
+router.get('/dtg/by/vehicleid', async (req, res) => {
   const date = req.query.date || '2019-08-01'
   const tDate = date.split('-').join('')
-  const f = 'dtg_' + tDate + '.csv'
-  const file = path.join(config.base, 'dtg', '201908', f)
+  const inputFile = 'dtg_' + tDate + '.csv'
+  const outputFile = 'dtg_' + tDate + '.geojson'
+  const file = path.join(config.base, 'dtg', '201908', inputFile)
+  const output = path.join(config.base, 'dtg', '201908', outputFile)
+
+  try {
+    await fileExists(output)
+    console.log('file exists')
+
+    fs.readFile(output, (err, data) => {
+      if (err) {
+        //
+      }
+      res.send(JSON.parse(data))
+    })
+    return
+  } catch (err) {
+    console.log('dtg geojson file not exists')
+  }
 
   const reader = readline.createInterface({
     input: fs.createReadStream(file),
-    // output: process.stdout,
     console: false
   })
   const collections = mongoose.connection.db.collection('ulinks')
@@ -73,61 +134,47 @@ router.get('/dtg/by/vehicleid', (req, res) => {
     .on('error', function (e) {})
 
   reader.on('close', async function () {
-    // console.log(Object.keys(map)[2], Object.values(map)[2])
     const vehicles = Object.entries(map)
       .filter(x => {
         return x[1].length > 100
       })
-      .slice(0, 6)
-    // console.log(Object.keys(vehicles).length)
-    // const vv = Object.values(vehicles)
-    // console.log(vehicles)
-    const obj = {}
-    for (const vehicle of vehicles) {
-      const rr = await collections
+      .slice(0, 200)
+
+    async function fileLinks (linkIds) {
+      const links = await collections
         .find({
           'properties.LINK_ID': {
-            $in: vehicle[1]
+            $in: linkIds
           }
         })
         .toArray()
-      const r = rr.reduce((acc, cur) => {
+      return links
+    }
+    const positionsByVehicle = {}
+    for (const vehicle of vehicles) {
+      const links = await fileLinks(vehicle[1])
+
+      const cooridnatesByVechicle = links.reduce((acc, cur) => {
         acc[cur.properties.LINK_ID] = cur.geometry.coordinates
         return acc
       }, {})
 
-      let array = obj[vehicle[0]] || []
-      vehicle[1].forEach(v => {
-        // r[v]
-        array = array.concat(r[v])
+      const vId = vehicle[0]
+      const linkIds = vehicle[1]
+      let positions = positionsByVehicle[vId] || []
+      linkIds.forEach(linkId => {
+        positions = positions.concat(cooridnatesByVechicle[linkId])
       })
 
-      // r.forEach(x => {
-      //   array = array.concat(x.geometry.coordinates)
-      // })
-      obj[vehicle[0]] = array
+      positionsByVehicle[vId] = positions
     }
-    const geoJson = {
-      type: 'FeatureCollection',
-      features: []
-    }
-    Object.keys(obj).forEach(key => {
-      const feature = {
-        type: 'Feature',
-        properties: {
-          vehicleId: key
-        },
-        geometry: {
-          type: 'LineString',
-          coordinates: obj[key]
-        }
-      }
-      geoJson.features.push(feature)
-    })
+
+    const geoJson = _toJeoJson(positionsByVehicle)
+
+    console.log('save', output, geoJson)
+    _saveFile(output, geoJson)
 
     console.log(geoJson)
-
-    // res.send(vehicles)
     res.send(geoJson)
   })
 })
