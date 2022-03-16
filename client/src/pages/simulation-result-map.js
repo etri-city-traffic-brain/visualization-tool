@@ -30,9 +30,11 @@ import UniqMapChanger from '@/components/UniqMapChanger'
 
 import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
-
+import D3SpeedBar from '@/charts/d3/D3SpeedBar'
+import axios from 'axios'
+// import D3SpeedBar from '../charts/d3/D3SpeedBar.vue';
 import bins from '@/stats/histogram'
-
+import userState from '@/user-state'
 import region from '@/map2/region'
 import config from '@/stats/config'
 
@@ -43,6 +45,95 @@ const pieDefault = () => ({
   }],
   labels: ['막힘', '정체', '원활']
 })
+
+const defaultOption = () => ({
+  responsive: true,
+  title: {
+    display: false,
+    text: 'Line Chart'
+  },
+  tooltips: {
+    mode: 'index',
+    intersect: false
+  },
+  hover: {
+    mode: 'nearest',
+    intersect: true
+  },
+  scales: {
+    xAxes: [{
+      ticks: {
+        autoSkip: true,
+        autoSkipPadding: 50,
+        maxRotation: 0,
+        display: true,
+        fontColor: 'white'
+      }
+    }],
+    yAxes: [{
+      ticks: {
+        autoSkip: true,
+        autoSkipPadding: 10,
+        maxRotation: 0,
+        display: true,
+        fontColor: 'white'
+      }
+    }]
+  },
+  legend: {
+    display: true,
+    labels: {
+      fontColor: 'white',
+      fontSize: 12
+    }
+  }
+})
+
+const makeLineChart = (data, label, color) => {
+  const dataset = (label, color, data) => ({
+    label,
+    fill: false,
+    borderColor: color,
+    backgroundColor: color,
+    borderWidth: 2,
+    pointRadius: 1,
+    data
+  })
+
+  return {
+    labels: new Array(data.length).fill(0).map((_, i) => i),
+    datasets: [
+      dataset(label, color, data)
+      // dataset('평균속도', '#1E90FF', data2)
+      // dataset('제한속도', '#FF0000', data3),
+    ]
+  }
+}
+
+function makeLinkCompChart (data) {
+  // console.log(data)
+  const ll = data.map(d => d.data.length)
+  const maxValue = Math.max(...ll)
+  const maxIdx = data.findIndex(d => d.data.length === maxValue)
+  // console.log('maxIdx:', maxIdx)
+  const dataset = (label, color, data) => ({
+    label,
+    fill: false,
+    borderColor: color,
+    backgroundColor: color,
+    borderWidth: 2,
+    pointRadius: 1,
+    data
+  })
+  const labels = new Array(data[maxIdx].data.length).fill(0).map((_, i) => i)
+  const datasets = data.map(d => {
+    return dataset(d.label, d.color, d.data)
+  })
+  return {
+    labels,
+    datasets
+  }
+}
 
 const makeLinkSpeedChartData = (data1, data2, data3) => {
   const dataset = (label, color, data) => ({
@@ -56,7 +147,7 @@ const makeLinkSpeedChartData = (data1, data2, data3) => {
   })
 
   return {
-    labels: new Array(data2.length).fill(0).map((_, i) => i),
+    labels: new Array(data1.length).fill(0).map((_, i) => i),
     datasets: [
       dataset('링크속도', '#7FFFD4', data1),
       dataset('평균속도', '#1E90FF', data2)
@@ -79,10 +170,14 @@ export default {
     Doughnut,
     UniqCongestionColorBar,
     UniqSimulationResultExt,
-    UniqMapChanger
+    UniqMapChanger,
+    D3SpeedBar
+
   },
   data () {
     return {
+      defaultOption,
+      userState,
       simulationId: null,
       simulation: { configuration: {} },
       map: null,
@@ -91,6 +186,7 @@ export default {
       mapManager: null,
       speedsPerStep: {},
       sidebar: false,
+      sidebarRse: false,
       currentStep: 1,
       slideMax: 0,
       showLoading: false,
@@ -104,7 +200,11 @@ export default {
         histogramData: null,
         pieDataStep: null,
         pieData: null,
-        linkSpeeds: []
+        linkMeanSpeeds: [],
+        linkSpeeds: [],
+        linkVehPassed: [],
+        linkWaitingTime: [],
+        links: []
       },
       currentZoom: '',
       currentExtent: '',
@@ -130,9 +230,15 @@ export default {
       playerStyle: {
         zIndex: 999,
         position: 'fixed',
-        width: '300px',
-        bottom: '50px',
-        left: '10px'
+        // width: '300px',
+        // bottom: '150px',
+        top: '50px',
+        right: '10px'
+      },
+      vdsList: {},
+      rseList: {
+        RSE1501RSE1504: ['-563111309', '-563105261', '-563105256', '563108468'],
+        RSE1501RSE1505: ['563105249', '-563108169', '563108170', '563108165', '-563104339', '-563105246', '-563105250', '-563104128']
       }
     }
   },
@@ -152,7 +258,8 @@ export default {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
     this.resize()
-    this.map = makeMap({ mapId: this.mapId })
+    this.map = makeMap({ mapId: this.mapId, zoom: 16 })
+
     await this.updateSimulation()
 
     this.mapManager = MapManager({
@@ -169,22 +276,30 @@ export default {
       simulationId: this.simulationId,
       eventBus: this
     })
-    // this.wsClient.init()
+    this.wsClient.init()
 
     this.showLoading = false
 
-    this.$on('link:selected', (link) => {
+    const res = await axios({
+      url: '/salt/v1/vds',
+      method: 'get'
+    })
+    this.vdsList = res.data
+
+    this.$on('link:selected', async (link) => {
       this.currentEdge = link
       if (link.speeds) {
         if (!this.speedsPerStep.datasets) {
-          return
+          //
         }
-        this.chart.linkSpeeds = makeLinkSpeedChartData(
-          link.speeds,
-          this.speedsPerStep.datasets[0].data,
-          new Array(link.speeds.length).fill(this.edgeSpeed())
-        )
+        // this.chart.linkSpeeds = makeLinkSpeedChartData(
+        //   link.speeds,
+        //   this.speedsPerStep.datasets[0].data,
+        //   new Array(link.speeds.length).fill(this.edgeSpeed())
+        // )
       }
+
+      await this.updateLinkChart(link.LINK_ID, link.vdsId)
     })
 
     this.$on('link:hover', (link) => {
@@ -192,6 +307,7 @@ export default {
     })
 
     this.$on('salt:data', (d) => {
+      // console.log('salt:data', d)
       this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
         acc += cur
         return acc
@@ -229,6 +345,7 @@ export default {
 
     this.$on('salt:finished', async () => {
       log('**** SIMULATION FINISHED *****')
+      this.simulation.status = 'finished'
       await this.updateSimulation()
       await this.updateChart()
     })
@@ -242,9 +359,9 @@ export default {
       this.wsStatus = 'open'
     })
 
-    this.$on('ws:error', (error) => {
+    this.$on('ws:error', () => {
       this.wsStatus = 'error'
-      this.makeToast(error.message, 'warning')
+      this.makeToast('ws connection error', 'warning')
     })
 
     this.$on('ws:close', () => {
@@ -255,20 +372,27 @@ export default {
     window.addEventListener('resize', this.resize)
   },
   methods: {
+    startReplay () {
+      this.wsClient.send({
+        simulationId: this.simulationId,
+        type: 'replay',
+        command: 'start',
+        step: 0
+      })
+    },
+    stopReplay () {
+      this.wsClient.send({
+        simulationId: this.simulationId,
+        type: 'replay',
+        command: 'stop',
+        step: 0
+      })
+    },
     ...stepperMixin,
 
     stop () {
       this.$emit('salt:stop', this.simulationId)
     },
-    // toggleBottom() {
-    //   if (this.bottomStyle.height === '220px') {
-    //     this.bottomStyle.height = '390px'
-    //     this.playerStyle.bottom = '400px'
-    //   } else if (this.bottomStyle.height === '390px') {
-    //     this.bottomStyle.height = '220px'
-    //     this.playerStyle.bottom = '230px'
-    //   }
-    // },
     addLog (text) {
       this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
       if (this.logs.length > 5) {
@@ -293,10 +417,10 @@ export default {
       this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0)
       this.chart.pieData = await statisticsService.getPieChart(this.simulationId)
       this.speedsPerStep = await statisticsService.getSummaryChart(this.simulationId)
-      this.chart.linkSpeeds = makeLinkSpeedChartData(
-        [],
+      this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
         this.speedsPerStep.datasets[0].data,
-        new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed())
+        new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed()),
+        []
       )
     },
     edgeSpeed () {
@@ -307,7 +431,8 @@ export default {
     },
     resize () {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
-      this.mapHeight = window.innerHeight - 60 // update map height to current height
+      // this.mapHeight = window.innerHeight - 160 // update map height to current height
+      this.mapHeight = window.innerHeight - 50 // update map height to current height
     },
     togglePlay () {
       this.playBtnToggle = !this.playBtnToggle;
@@ -336,6 +461,88 @@ export default {
     },
     async connectWebSocket () {
       this.wsClient.init()
+    },
+    async startSimulation () {
+      this.simulation.status = 'running'
+      try {
+        await simulationService.startSimulation(this.simulationId, this.userState.userId)
+      } catch (err) {
+        console.log(err)
+      }
+    },
+
+    removeLinkChart (linkId) {
+      const idx = this.chart.links.findIndex(obj => obj.linkId === linkId)
+      if (idx >= 0) {
+        this.chart.links.splice(idx, 1)
+      }
+    },
+    async updateLinkChart (linkId, vdsId) {
+      const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, linkId)
+      // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
+      // this.chart.linkSpeeds = makeLinkSpeedChartData(linkData.values, [10, 20, 30, 10, 20, 30])
+      const vdsSpeedData = { label: 'vds', color: 'skyblue', data: [] }
+
+      if (vdsId) {
+        const res = await axios({
+          url: '/salt/v1/vds/speed/' + vdsId,
+          method: 'get'
+        })
+        const vdsD = res.data
+        vdsSpeedData.data = vdsD.map(v => v[1])
+      }
+      this.chart.linkSpeeds = makeLinkCompChart([
+        { label: 'simulation', color: '#FF8C00', data: linkData.values },
+        vdsSpeedData
+      ])
+
+      const e = this.chart.links.findIndex(v => v.linkId === linkId)
+      if (e < 0) {
+        this.chart.links.push({
+          linkId,
+          speeds: makeLineChart(linkData.values, 'simulation', 'skyblue')
+        })
+      }
+
+      const vdsVolumeData = { label: 'vds', color: '#8FBC8F', data: [] }
+      if (vdsId) {
+        const res = await axios({
+          url: '/salt/v1/vds/volume/' + vdsId,
+          method: 'get'
+        })
+        const vdsD = res.data
+        vdsVolumeData.data = vdsD.map(v => v[1])
+      }
+
+      this.chart.linkVehPassed = makeLinkCompChart([
+        { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed },
+        vdsVolumeData
+      ])
+
+      // this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
+      // this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
+    },
+    async goToLink (linkId) {
+      const res = await axios({
+        method: 'get',
+        url: `/salt/v1/map/links/${linkId}`
+      })
+      const link = res.data
+      this.map.animateTo({
+        center: link.geometry.coordinates[0]
+      })
+    },
+    async goToRse (rseId) {
+      const link0 = this.rseList[rseId][0]
+      const res = await axios({
+        method: 'get',
+        url: `/salt/v1/map/links/${link0}`
+      })
+      const link = res.data
+      this.map.animateTo({
+        center: link.geometry.coordinates[0]
+      })
+      this.mapManager.showRse(rseId, this.rseList[rseId])
     }
   }
 }

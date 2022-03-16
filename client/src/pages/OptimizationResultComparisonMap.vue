@@ -1,245 +1,275 @@
 <template>
-  <div>
-  <b-container v-if="!simulation">
-    <h1>We're sorry!!</h1>
-  </b-container>
-  <b-container fluid class="m-0 p-0" v-if="simulation">
-    <div class="uniq-top-menu-right">
-      <div>
-        <b-btn @click="updatePhaseChart" size="sm" variant="dark">
-          <b-icon icon="bar-chart-fill"/>
-        </b-btn>
-        <b-btn @click="sidebar = !sidebar" size="sm" variant="dark">
-          <b-icon icon="align-start"/>
-        </b-btn>
+  <div class="bg-gray-500">
+
+    <div class="absolute z-50 inset-auto h-64 " v-if="showWaitingMsg">
+      <div class="w-screen">
+        <div class="animate-pulse mx-auto text-center mt-5 w-60 bg-yellow-300 p-3 text-lg font-bold">
+          잠시후 실행 됩니다.
+        </div>
       </div>
     </div>
 
-    <b-sidebar
-      title="UNIQ-VIS"
-      v-model="sidebar"
-      bg-variant="dark"
-      text-variant="white"
-      shadow
-      right
-    >
-      More Controll
-    </b-sidebar>
-
-    <b-row class="p-0 m-0">
-      <b-col cols="4" class="p-0">
-        <b-card
-          bg-variant="secondary"
-          border-variant="secondary"
-          class="no-border-radius p-0 m-0"
-          no-body
-          text-variant="white"
-          >
-            <div class="card-top" style="width:100%">
-              <b-progress height="1rem" v-if="progress1 > 0" class="mt-0 w-100 no-border-radius" >
-                <b-progress-bar :value="progress1" animated striped variant="primary">
-                  <span> {{ progress1 }} %</span>
-                </b-progress-bar>
-              </b-progress>
-           </div>
-            <div class="card-bottom" style="overflow:auto">
-              <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body>
-                <b-card-text class="m-0 p-2 text-center">
-                  현시(기존 신호)
-                </b-card-text>
-                <bar-chart
-                  :chartData="phaseFixed"
-                  :options="barChartOption()"
-                  :height="160"
-                />
-                <div class="text-center">속도분포</div>
-                <histogram-chart
-                  :chartData="chart1.histogramData"
-                  :height="120"
-                  class="m-2"
-                />
-              </b-card>
+    <div v-if="!simulation" class="w-80 mx-auto text-center">
+      <div class="font-bold text-lg">We're sorry!!</div>
+      <div class="font-bold text-sm">시뮬레이션 정보를 읽어오는데 실패하였습니다.</div>
+    </div>
+    <div v-else>
+      <!-- RIGHT PANEL -->
+      <div class="grid grid-cols-4 gap-0 p-1">
+        <div class="col-span-3">
+          <div class="flex">
+            <div class="flex-1">
+              <div class="text-center text-sm font-bold text-white w-36 pt-1 bg-blue-800 rounded-t-2xl ">
+                <div class="tracking-wider">기존신호</div>
+              </div>
+              <div class="border-2 border-blue-800" >
+                <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" />
+                <b-progress height="1rem" v-if="progress1 >= 0" class="no-border-radius">
+                  <b-progress-bar :value="progress1" animated striped variant="primary">
+                    <span> {{ progress1 }} %</span>
+                  </b-progress-bar>
+                </b-progress>
+              </div>
             </div>
-            <div
-              class="m-0 p-0"
-              :ref="mapId1"
-              :id="mapId1"
-              :style="{height: mapHeight + 'px'}"
-            />
-        </b-card>
-      </b-col>
-      <b-col cols="4" class="p-0">
-        <b-card
-          bg-variant="primary"
-          border-variant="primary"
-          class="no-border-radius p-0 m-0"
-          no-body
-          text-variant="white"
-        >
-          <div class="card-top" style="width:100%">
-            <b-progress height="1rem" class="mt-0 w-100 no-border-radius" >
-                <b-progress-bar :value="progress2" animated striped variant="primary">
-                  <span> {{ progress2 }} %</span>
-                </b-progress-bar>
-              </b-progress>
+            <div class="flex-1">
+              <div class="text-center text-sm text-black font-bold pt-1 w-36 bg-yellow-500 rounded-t-2xl">
+                <div class="tracking-wider">최적신호</div>
+              </div>
+              <div class="border-2 border-yellow-500">
+                <div :ref="mapIds[1]" :id="mapIds[1]" :style="{height: '600px'}" />
+                <b-progress height="1rem" v-if="progress2 >= 0" class="no-border-radius"  >
+                  <b-progress-bar :value="progress2" animated striped variant="primary">
+                    <span> {{ progress2 }} %</span>
+                  </b-progress-bar>
+                </b-progress>
+              </div>
+            </div>
           </div>
-          <div class="card-bottom"  style="overflow:auto">
-            <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body>
-              <b-card-text class="m-0 p-2 text-center">
-                현시(최적화 신호)
-              </b-card-text>
-              <bar-chart
-                :chartData="phaseTest"
-                :options="barChartOption()"
-                :height="160"
-              />
-              <div class="text-center">속도분포</div>
-              <histogram-chart
-                :chartData="chart2.histogramData"
-                :height="120"
-                class="mt-2"
-              />
-            </b-card>
+          <div>
+          <div class="mt-1">
+            <!-- <div class="pr-2">
+              <div class="bg-gray-300 w-max px-2 mx-auto rounded font-bold">{{ selectedNode }}</div>
+            </div> -->
+            <div class="">
+            <div class="text-center text-white mt-1 mb-1 bg-gray-800 p-1 rounded-lg">
+              {{ selectedNode }}
+            </div>
+            <div class="flex justify-between pr-3 items-center text-sm text-white text-center- font-bold pl-3 py-1 bg-blue-800 rounded-t-xl">
+              기존신호
+            </div>
+            <div class="border-2 border-blue-800">
+              <div style="height:120px;width:100%;" ref="phase-reward-ft"></div>
+            </div>
           </div>
-          <div
-            class="m-0 p-0"
-            :ref="mapId2"
-            :id="mapId2"
-            :style="{height: mapHeight + 'px'}"
-          />
+          <div class="mt-1">
+            <div class="pr-3 flex justify-between items-center text-sm text-black font-bold pl-3 py-1 bg-yellow-500 rounded-t-lg">
+              최적신호
+            </div>
+            <div class="border-2 border-yellow-500">
+              <div style="height:120px;width:100%" ref="phase-reward-rl"></div>
+            </div>
+          </div>
+          </div>
+          </div>
+          <!-- </div> -->
+        </div>
+        <div class="ml-1">
+          <div class="bg-gray-700 w-max px-3 py-1 rounded-t-lg font-bold text-white">정보</div>
+          <div class="space-between text-white text-sm p-1 bg-gray-700">
+            <div class="text-center">{{ simulation.id }} </div>
+            <div class="border-gray-600">
+            <pre class="p-1 text-light h-48">{{ JSON.stringify(simulation.configuration, false, 2)}}</pre>
+          </div>
+            <div class="">
+              <div>
 
-        </b-card>
-                    <transition name="bounce">
-        <div v-if="showEpoch" class="d-flex justify-content-center align-items-center ccc">
+                <!-- <b-btn @click="updateChart" size="sm" variant="dark">
+                  <b-icon icon="bar-chart-fill"/>
+                </b-btn>
+                <b-btn @click="sidebar = !sidebar" size="sm" variant="dark">
+                  <b-icon icon="align-start"/>
+                </b-btn> -->
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-1 mb-1 flex items-center justify-between bg-indigo-200">
+            <div v-if="status === 'running'" class="animate-pulse bg-indigo-300 text-center px-3 uppercase w-full">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+
+              <!-- <b-btn variant="dark" size="sm" @click="checkStatus">상태확인</b-btn> -->
+            </div>
+            <div v-else class="bg-indigo-300 text-center px-3 uppercase w-full">
+              {{ status }}
+            </div>
+            <div class="flex-shrink-0">
+              <button class="bg-gray-800 text-sm text-white px-2" @click="checkStatus">상태확인</button>
+            </div>
+          </div>
+          <div class="">
+
+            <!----- 보상 그래프 ----->
+            <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg">보상그래프</div>
+            <div class="p-2 bg-gray-700" >
+              <line-chart
+                :chartData="rewards"
+                :options="lineChartOption({}, chartClicked)"
+                :height="180"
+              />
+            </div>
+
+            <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg mt-1">모델 테스트</div>
+            <div class="p-2 bg-gray-700 max-h-60 overflow-y-auto ">
+              <div class="flex flex-wrap">
+                <div
+                  v-for="reward of rewards.labels.filter((v,i)=>i % simulation.configuration.modelSavePeriod == 0)"
+                  :key="reward"
+                  @click="selectedEpoch = reward"
+                  class="ml-1 mb-1 bg-indigo-500 text-xs rounded text-white px-1 cursor-pointer hover:bg-indigo-200"
+                >
+                  {{ reward }}
+                </div>
+              </div>
+            </div>
+            <div class="p-2 mt-1 mb-1 bg-gray-700 rounded flex justify-between">
+                <span class="rounded-full bg-yellow-300 text-black px-3">선택모델: <span class="bg-yellow-800 px-2 rounded-full text-white">{{ selectedEpoch }}</span></span>
+                <button class="bg-gray-400 text-black rounded px-2 hover:bg-gray-600 hover:text-white" @click.prevent="runTest" >Test <b-icon icon="play-fill"/></button>
+            </div>
+
+            <div class="mt-1">
+              <div class="m-0 p-0 text-center text-white w-24 bg-blue-800 rounded-t-lg">
+                <small>평균속도 </small>
+                <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
+              </div>
+              <div class="bg-gray-700 border-2 border-blue-800">
+                <line-chart
+                  :chartData="chart.currentSpeedChart"
+                  :options="lineChartOption({})"
+                  :height="120"
+                />
+              </div>
+            </div>
+
+            <!--
+            <div class="mt-1" bg-variant="dark" text-variant="light">
+              <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
+                평균속도(전체)
+              </div>
+              <div class="bg-gray-700">
+                <line-chart
+                  :chartData="chart1.linkSpeeds"
+                  :options="lineChartOption({})"
+                  :height="120"
+                />
+              </div>
+            </div>
+              -->
+            <!--
+            <div class="mt-1" >
+              <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
+                  평균속도(뷰영역)
+              </div>
+              <div class="bg-gray-700">
+                <line-chart :chartData="chart.currentSpeedInViewChart" :options="lineChartOption({})" :height="120"/>
+              </div>
+            </div> -->
+            <!--
+            <div class="mt-1" >
+              <div class="pt-1 text-center text-sm text-white w-36 bg-gray-700 rounded-t-2xl">
+                선택 교차로
+              </div>
+              <div class="bg-gray-700">
+                <line-chart
+                  :chartData="chart.junctionSpeeds"
+                  :options="lineChartOption({})"
+                  :height="120"
+                />
+              </div>
+            </div> -->
+
+          </div>
+        </div>
+      </div>
+      <!--
+      <transition name="bounce">
+        <div v-if="!showEpoch" class="" >
           <div style="font-size: 20rem">
             {{ selectedEpoch }}
           </div>
         </div>
-</transition>
-      </b-col>
-      <b-col cols="4" class="p-0" >
-        <b-card
-          bg-variant="secondary"
-          border-variant="secondary"
-          text-variant="light"
-          style="border-radius:0"
-          class="m-0 p-0"
-          no-body
-          >
-          <b-card-text class="text-center p-2 m-0">
-          {{ simulation.id }}
-          </b-card-text>
-        </b-card>
-        <b-card
-          bg-variant="dark"
-          border-variant="dark"
-          text-variant="dark"
-          no-body
-            v-bind:style="{
-            height: mapHeight - 40 + 'px',
-            borderRadius: 0,
-            overflow: 'auto'
-          }"
-        >
-        <b-card-body class="p-1">
-          <!----- 보상 그래프 ----->
-          <b-card
-            text-variant="light"
-            bg-variant="dark"
-            border-variant="dark"
-            class="mt-1 p-2"
-            no-body
-          >
-            <line-chart
-              :chartData="rewards"
-              :options="defaultOption({}, chartClicked)"
-              :height="180"
-            />
+      </transition>
+      -->
+    </div>
 
-            <b-btn variant="primary" @click.prevent="runTest">
-              <span>신호최적화 비교 {{ selectedEpoch }}</span>
-              <b-icon icon="play-fill"/>
-            </b-btn>
-          </b-card>
 
-          <uniq-simulation-result-ext :simulation="simulation" />
-
-          <uniq-card-title title="평균속도 비교"/>
-           <b-card class="mt-1" bg-variant="dark">
-              <line-chart :chartData="chart1.linkSpeeds" :options="defaultOption({})" :height="150"/>
-            </b-card>
-
-            <b-card class="mt-1" bg-variant="dark" border-variant="dark">
-              <!-- <line-chart :chartData="chart.currentSpeedChart" :options="defaultOption({})" :height="30"/> -->
-              <line-chart :chartData="chart1.linkSpeeds" :options="defaultOption({})" :height="150"/>
-            </b-card>
-
-            <uniq-card-title title="속도분포(기존 신호)"/>
-            <b-card
-              class="p-2"
-              bg-variant="dark"
-              no-body
-            >
-              <!-- <histogram-chart :chartData="chart1.histogramData" :height="150" class="mt-1"/> -->
-              <histogram-chart :chartData="chart1.histogramDataStep" :height="150" class="mt-1"/>
-            </b-card>
-            <uniq-card-title title="속도분포(최적화 신호)"/>
-            <b-card
-              class="p-2"
-              bg-variant="dark"
-              no-body
-            >
-              <!-- <histogram-chart :chartData="chart2.histogramData" :height="150" class="mt-1"/> -->
-              <histogram-chart :chartData="chart2.histogramDataStep" :height="150" class="mt-1"/>
-            </b-card>
-
-            <!-- --------------- -->
-            <!-- Step Controller -->
-            <!-- --------------- -->
-            <b-card
-              bg-variant="secondary"
-              class="mt-1"
-              v-bind:style="playerStyle"
-              text-variant="light" no-body
-            >
-              <b-input-group size="sm">
-                <b-button-group>
-                  <b-button size="sm" variant="dark" @click="togglePlay" > {{ toggleState() }} </b-button>
-                  <b-button size="sm" variant="dark" @click="stepBackward" class="ml-1"> <b-icon icon="caret-left-fill"/> </b-button>
-                  <b-button size="sm" variant="dark" @click="stepForward" > <b-icon icon="caret-right-fill"/> </b-button>
-                </b-button-group>
-                <b-form-input
-                  variant="dark"
-                  type="range"
-                  min="0"
-                  :max="slideMax"
-                  :value="currentStep"
-                  @change="onChange"
-                  @input="onInput"
-                />
-                <b-input-group-append>
-                  <b-button size="sm" variant="dark">{{ currentStep }} </b-button>
-                </b-input-group-append>
-              </b-input-group>
-            </b-card>
-            <!--
-            <b-card class="m-1" bg-variant="dark" text-variant="light">
-              <b-btn
-                size="sm"
-                v-for="reward of rewards.labels"
-                :key="reward"
-                class="ml-1 mt-1"
-                @click="selectedEpoch = reward"
-              >
-                {{ reward }}
-              </b-btn>
-            </b-card>
-            -->
-          </b-card-body>
-        </b-card>
-      </b-col>
-    </b-row>
-  </b-container>
+    <b-sidebar title="UNIQ-VIS" v-model="sidebar" bg-variant="dark" text-variant="white" shadow right >
+      <pre class="text-light h-48">{{ JSON.stringify(simulation, false, 2)}}</pre>
+      <div class="bg-gray-800 p-1 text-white text-center">
+        기존신호
+      <!-- <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body> -->
+        <!-- <b-card-text class="m-0 p-2 text-center">
+          신호비교
+        </b-card-text> -->
+        <!-- <bar-chart
+          :chartData="phaseFixed"
+          :options="barChartOption()"
+          :height="120"
+        /> -->
+      <!-- </b-card> -->
+        <div>
+          <div class="text-center text-sm">속도분포</div>
+          <histogram-chart :chartData="chart1.histogramData" :height="120" />
+        </div>
+        <div>
+          <div class="text-center  text-sm">속도분포(스텝)</div>
+          <histogram-chart :chartData="chart1.histogramDataStep" :height="120" />
+        </div>
+      </div>
+      <div class="bg-gray-800 p-1 text-white text-center">
+        <!-- <b-card text-variant="light" bg-variant="dark" class="mt-1" no-body> -->
+          <!-- <b-card-text class="m-0 p-2 text-center">
+            신호비교
+          </b-card-text> -->
+          <!-- <bar-chart
+            :chartData="phaseTest"
+            :options="barChartOption()"
+            :height="120"
+          /> -->
+        <!-- </b-card> -->
+        <!-- <div class="text-center">속도분포</div> -->
+        <div>
+          <div class="text-center text-sm">속도분포(테스트)</div>
+          <histogram-chart :chartData="chart2.histogramData" :height="120" />
+        </div>
+        <div>
+          <div class="text-center text-sm">속도분포(스텝)(테스트)</div>
+          <histogram-chart :chartData="chart2.histogramDataStep" :height="120" class="mt-1"/>
+        </div>
+      </div>
+      <!-- Stepper -->
+      <b-input-group size="sm">
+        <b-button-group>
+          <b-button size="sm" variant="dark" @click="togglePlay" > {{ toggleState() }} </b-button>
+          <b-button size="sm" variant="dark" @click="stepBackward" class="ml-1"> <b-icon icon="caret-left-fill"/> </b-button>
+          <b-button size="sm" variant="dark" @click="stepForward" > <b-icon icon="caret-right-fill"/> </b-button>
+        </b-button-group>
+        <b-form-input
+          variant="dark"
+          type="range"
+          min="0"
+          :max="slideMax"
+          :value="currentStep"
+          @change="onChange"
+          @input="onInput"
+        />
+        <b-input-group-append>
+          <b-button size="sm" variant="dark">{{ currentStep }} </b-button>
+        </b-input-group-append>
+      </b-input-group>
+    </b-sidebar>
 
   </div>
 </template>
@@ -263,7 +293,7 @@
   }
   .card-top {
     position: absolute;
-    top: 0;
+    top: 100px;
     left: 0;
     font-weight: bold;
     z-index:100;
@@ -309,22 +339,6 @@
     top: 50%;
     -ms-transform: translateY(-50%);
     transform: translateY(-50%);
-  }
-
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #f8f9fa #343a40;
-  }
-  *::-webkit-scrollbar {
-    width: 12px;
-  }
-  *::-webkit-scrollbar-track {
-    background: #343a40;
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: #f8f9fa;
-    border-radius: 20px;
-    border: 3px solid #343a40;
   }
 
 

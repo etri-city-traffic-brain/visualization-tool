@@ -1,7 +1,7 @@
 const net = require('net')
 const chalk = require('chalk')
-const msgFactory = require('../msg-factory')
-const { Header } = require('../msg')
+const msgFactory = require('../salt-msg-factory')
+const { Header } = require('../salt-msg')
 
 const { log } = console
 const socket = net.connect({
@@ -14,7 +14,7 @@ const simulationId = 'SALT_202007_00516'
 
 socket.on('connect', () => {
   const init = msgFactory.makeInit({
-    simulationId
+    simulationId: simulationId.split('')
   })
 
   const data = msgFactory.makeData({
@@ -22,11 +22,15 @@ socket.on('connect', () => {
     roads: [
       {
         lenRoadId: 14,
-        roadId: '-572700451_1_0', // -572700451_1_0
+        roadId: '-572700451_1_0_0'.split(''), // -572700451_1_0
         speed: 32,
         numVehicles: 3,
         vehicles: [
-          1, 0, 1
+          1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+          1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+          1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+          1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+          1, 0, 1, 0, 0, 0, 0, 0
         ],
         currentSignal: 'r'
       }

@@ -5,9 +5,10 @@ class Car extends Vehicle {
     super({
       start,
       angle,
-      color: '#FF8C00',
-      length: 20,
-      width: 8
+      // color: '#FF8C00',
+      color: 'skyblue',
+      length: 16,
+      width: 6
     })
   }
 

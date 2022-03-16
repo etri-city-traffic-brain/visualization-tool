@@ -1,46 +1,46 @@
 //    Statistics service API
 //    2019
 
-import { HTTP } from '@/http-common';
+import { HTTP } from '@/http-common'
 
-const uriBase = 'salt/v1/statistics';
+const uriBase = 'salt/v1/statistics'
 
-const query = (type, sId, step) => `${uriBase}/${type}?simulationId=${sId}&step=${step}`;
+const query = (type, sId, step) => `${uriBase}/${type}?simulationId=${sId}&step=${step}`
 
 const { log } = console
 
-async function getSummaryChart(simulationId, step) {
+async function getSummaryChart (simulationId, step) {
   try {
     const res = await HTTP.get(query('summary', simulationId, step))
     return res.data
   } catch (err) {
-    log(err.message);
-    return {};
+    log(err.message)
+    return {}
   }
 }
 
-async function getHistogramChart(simulationId, step) {
+async function getHistogramChart (simulationId, step) {
   try {
-    return (await HTTP.get(query('histogram', simulationId, step))).data;
+    return (await HTTP.get(query('histogram', simulationId, step))).data
   } catch (err) {
-    return null;
+    return null
   }
 }
 
-async function getPieChart(simulationId, step) {
+async function getPieChart (simulationId, step) {
   try {
-    return (await HTTP.get(query('pie', simulationId, step))).data;
+    return (await HTTP.get(query('pie', simulationId, step))).data
   } catch (err) {
-    return null;
+    return null
   }
 }
 
-async function getSpeedsPerGrid(simulationId, step) {
+async function getSpeedsPerGrid (simulationId, step) {
   try {
-    const { data } = await HTTP.get(query('grid', simulationId, step));
-    return data;
+    const { data } = await HTTP.get(query('grid', simulationId, step))
+    return data
   } catch (err) {
-    return null;
+    return null
   }
 }
 
@@ -48,5 +48,5 @@ export default {
   getSummaryChart,
   getHistogramChart,
   getPieChart,
-  getSpeedsPerGrid,
-};
+  getSpeedsPerGrid
+}

@@ -3,60 +3,58 @@
  *
  */
 
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const axios = require('axios')
+const fs = require('fs')
+const path = require('path')
 
 const {
   scenarioService: {
     urlBaseForScenarioByRegion,
-    urlBaseForScenarioByCoordinate,
-  },
-} = require('../../config');
+    urlBaseForScenarioByCoordinate
+  }
+} = require('../../config')
 
-async function download(url, targetDir = './') {
-  const targetFilePath = path.resolve(targetDir, 'data.zip');
+async function download (url, targetDir = './') {
+  const targetFilePath = path.resolve(targetDir, 'data.zip')
   console.log(url)
   try {
     const { data } = await axios({
       url,
       method: 'GET',
-      responseType: 'stream',
-    });
+      responseType: 'stream'
+    })
 
-    data.pipe(fs.createWriteStream(targetFilePath));
+    data.pipe(fs.createWriteStream(targetFilePath))
 
     return new Promise((resolve, reject) => {
       data.on('end', () => {
-        const stats = fs.statSync(targetFilePath);
+        const stats = fs.statSync(targetFilePath)
         if (stats.size < 100) {
-          reject(new Error('scenario file is not correct'));
-          return;
+          reject(new Error('scenario file is not correct'))
+          return
         }
-        resolve(targetFilePath);
-      });
-      data.on('error', error => reject(error));
-    });
+        resolve(targetFilePath)
+      })
+      data.on('error', error => reject(error))
+    })
   } catch (error) {
-
     if (error.response) {
       // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
       // console.log(error.response.data);
-      console.log(error.response.status);
+      console.log(error.response.status)
       // console.log(error.response.headers);
-    }
-    else if (error.request) {
+    } else if (error.request) {
       // 요청이 이루어 졌으나 응답을 받지 못했습니다.
       // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
       // Node.js의 http.ClientRequest 인스턴스입니다.
-      console.log(error.request);
+      console.log(error.request)
     }
 
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
 }
 
-function makeUrlForScenarioByRegion({
+function makeUrlForScenarioByRegion ({
   include = 0,
   fromDate,
   toDate,
@@ -68,7 +66,7 @@ function makeUrlForScenarioByRegion({
   signal = 0,
   route = 0,
   event = 0,
-  weather = 0,
+  weather = 0
 }) {
   const reqestParameter = `
   ?include=${include}&
@@ -82,11 +80,11 @@ function makeUrlForScenarioByRegion({
   signal=${signal}&
   route=${route}&
   event=${event}&
-  weather=${weather}&`.replace(/\s/g, '');
-  return `${urlBaseForScenarioByRegion}${reqestParameter}`;
+  weather=${weather}&`.replace(/\s/g, '')
+  return `${urlBaseForScenarioByRegion}${reqestParameter}`
 }
 
-function makeUrlForScenarioByCoordinate({
+function makeUrlForScenarioByCoordinate ({
   include = 0,
   fromDate,
   toDate,
@@ -96,11 +94,11 @@ function makeUrlForScenarioByCoordinate({
   minY,
   maxX,
   maxY,
-  partitions = '1',
   signal = '0',
+  partitions = '1',
   route = '0',
   event = '0',
-  weather = '0',
+  weather = '0'
 }) {
   const reqestParameter = `
   ?include=${include}&
@@ -112,21 +110,18 @@ function makeUrlForScenarioByCoordinate({
   minY=${minY}&
   maxX=${maxX}&
   maxY=${maxY}&
-  partitions=${partitions}&
   signal=${signal}&
-  route=${route}&
-  event=${event}&
-  weather=${weather}&`.replace(/\s/g, '');
+  weather=${weather}`.replace(/\s/g, '')
 
-  return `${urlBaseForScenarioByCoordinate}${reqestParameter}`;
+  return `${urlBaseForScenarioByCoordinate}${reqestParameter}`
 }
 
-async function downloadScenarioByRegion(param, targetDir) {
-  return download(makeUrlForScenarioByRegion(param), targetDir);
+async function downloadScenarioByRegion (param, targetDir) {
+  return download(makeUrlForScenarioByRegion(param), targetDir)
 }
 
-async function downloadScenarioByCoordinate(param, targetDir) {
-  return download(makeUrlForScenarioByCoordinate(param), targetDir);
+async function downloadScenarioByCoordinate (param, targetDir) {
+  return download(makeUrlForScenarioByCoordinate(param), targetDir)
 }
 
 module.exports = {
@@ -134,5 +129,5 @@ module.exports = {
   makeUrlForScenarioByRegion,
   makeUrlForScenarioByCoordinate,
   downloadScenarioByRegion,
-  downloadScenarioByCoordinate,
-};
+  downloadScenarioByCoordinate
+}

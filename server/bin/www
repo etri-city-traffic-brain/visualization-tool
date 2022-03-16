@@ -11,7 +11,7 @@ const webApp = require('../web-app')
 const startMessenger = require('../salt-connector/connector')
 const startHttpServer = require('../http-server')
 
-const { server: { webPort, tcpPort }, db } = require('../config');
+const { server: { webPort, tcpPort }, db } = require('../config')
 
 connectDB(db)
 

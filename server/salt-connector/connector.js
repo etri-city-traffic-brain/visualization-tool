@@ -34,8 +34,6 @@ module.exports = (httpServer, tcpPort) => {
   // send to simulator
   webSocketServer.on(EVENT_SET, (data) => {
     tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
-    // console.log('***** SET *****')
-    // console.log(data)
   })
 
   webSocketServer.on(EVENT_STOP, (data) => {
@@ -48,18 +46,21 @@ module.exports = (httpServer, tcpPort) => {
 
   const isFinished = ({ status, progress }) =>
     status === StatusType.FINISHED &&
-    progress >= 100
+    progress >= 95
 
   const epochCounterTable = {}
 
   tcpServer.on(EVENT_STATUS, async (data) => {
     const { simulationId } = data
-    debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`)
+    // debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`)
     webSocketServer.send(data.simulationId, { ...data })
-
+    // console.log('------------------> SEND WEB Socket <----------------------')
+    // console.log(data)
     if (isFinished(data)) {
       debug('*** SIMULATION FINISHED ***')
-
+      webSocketServer.send(simulationId, {
+        event: EVENT_FINISHED
+      })
       const simulation = getSimulation(simulationId)
       if (!simulation) {
         debug('cannot find simulation', simulationId)
@@ -75,28 +76,36 @@ module.exports = (httpServer, tcpPort) => {
         if (epochCounter.count >= +simulation.configuration.epoch) {
           debug(epochCounter.count, simulation.epoch)
           debug('*** OPTIMIZATION FINISHED ***')
-          updateStatus(simulationId, 'finished')
+          // updateStatus(simulationId, 'finished', { epoch: 0 })
+          delete epochCounterTable[simulationId]
+
           webSocketServer.send(simulationId, {
             event: 'optimization:finished'
           })
         }
+
+        webSocketServer.send(simulationId, {
+          event: 'optimization:progress',
+          progress: epochCounter.count
+        })
         setTimeout(async () => {
           const data = await readReward(simulationId)
           webSocketServer.send(simulationId, {
             event: 'optimization:epoch',
-            data
+            data,
+            progress: epochCounter.count
           })
-        }, 5000)
+        }, 3000)
       } else {
         try {
-          debug('**** start cook ***', simulationId)
+          // moved to exec-simulation.js 0909
+          debug('**** connector start cook ***', simulationId)
           await cookSimulationResult({
             simulationId,
             duration: configuration.end,
             period: configuration.period
           })
-          // just for test
-          updateStatus(simulationId, 'finished')
+          // updateStatus(simulationId, 'finished')
           webSocketServer.send(simulationId, {
             event: EVENT_FINISHED
           })
@@ -109,7 +118,7 @@ module.exports = (httpServer, tcpPort) => {
 
   // send to web
   tcpServer.on(EVENT_DATA, (data) => {
-    // console.log('send client', data)
+    // console.log(data.simulationId)
     webSocketServer.send(data.simulationId, { ...data })
   })
 }

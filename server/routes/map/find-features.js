@@ -1,27 +1,29 @@
-const bboxpolygon = require('../../utils/bboxpolygon');
+const bboxpolygon = require('../../utils/bboxpolygon')
 
-const ZOOM_MIN = 14;
+const ZOOM_MIN = 13
 
 const zoomSpeed = {
-  15: 50,
-  16: 20,
-};
+  13: 30,
+  14: 40,
+  15: 30,
+  16: 20
+}
 
 module.exports = async (collection, { extent, zoom }) => {
   if (zoom < ZOOM_MIN) {
-    return [];
+    return []
   }
-  const speed = zoomSpeed[zoom] || 0;
+  const speed = zoomSpeed[zoom] || 0
   const r = await collection.find({
     geometry: {
       $geoWithin: {
         $geometry: {
           type: 'Polygon',
-          coordinates: [bboxpolygon(extent)],
-        },
-      },
+          coordinates: [bboxpolygon(extent)]
+        }
+      }
     },
-    'properties.SPEEDLH': { $gt: speed },
-  }).toArray();
-  return r;
-};
+    'properties.SPEEDLH': { $gt: speed }
+  }).toArray()
+  return r
+}

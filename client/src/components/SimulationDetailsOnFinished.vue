@@ -1,132 +1,37 @@
 <template>
-  <div>
-    <!-- <b-card
-      bg-variant="dark"
-      text-variant="light"
-      border-variant="dark"
-      :sub-title="simulationId"
-      no-body
-      class="p-1"
-      style="border-radius: 0px;"
-    >
-      <h5>
-        <b-badge variant="dark"> {{ simulation.configuration.period / 60}}분 주기 </b-badge>
-        <b-badge variant="dark"> {{ simulation.configuration.fromDate }} {{ simulation.configuration.fromTime }} </b-badge> ~
-        <b-badge variant="dark"> {{ simulation.configuration.toDate }} {{ simulation.configuration.toTime }} </b-badge>
-        <b-badge variant="dark"> {{ currentEdge ? currentEdge.id : 'NO LINK' }} </b-badge>
-        <b-badge variant="light" :style="{'background-color': congestionColor(edgeSpeed())}" > {{ edgeSpeed().toFixed(2) }} km </b-badge>
-      </h5>
-      <b-card>
-      </b-card>
-    </b-card> -->
-    <uniq-card-title title="시뮬레이션 평균속도"/>
-    <b-card
-      bg-variant="dark"
-      text-variant="light"
-      border-variant="dark"
-      :sub-title="simulationId"
-      no-body
-      class="p-1 mt-1"
-      style="border-radius: 0px;"
-    >
-        <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="150"/>
-    </b-card>
+  <div class="space-y-1">
+    <div class="bg-gray-700 p-2 space-y-1 rounded-xl mt-1" >
+      <div class="text-white text-center text-sm">평균속도</div>
+      <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption()" :height="150"/>
+    </div>
+    <div class="bg-gray-700 p-2 space-y-1 rounded-xl mt-1" >
+      <div class="text-white text-center text-sm">속도분포</div>
+      <histogram-chart :chartData="chart.histogramData" :height="150" class="mt-1"/>
+    </div>
+    <div class="bg-gray-700 p-2 space-y-1 rounded-xl mt-1" >
+      <div class="text-white text-center text-sm">스텝별 속도분포</div>
+      <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="150"/>
+    </div>
+    <div class="bg-gray-700 p-2 space-y-1 rounded-xl mt-1" >
+      <div class="text-white text-center text-sm">혼잡도 분포</div>
+       <doughnut :chartData="chart.pieData" :height="80" />
+    </div>
+    <div class="bg-gray-700 p-2 space-y-1 rounded-xl mt-1" >
+      <div class="text-white text-center text-sm">스텝별 혼잡도 분포</div>
+      <doughnut :chartData="chart.pieDataStep" :height="80"/>
+    </div>
 
-      <uniq-card-title title="속도분포"/>
-
-      <b-card
-        bg-variant="dark"
-        border-variant="dark"
-        text-variant="light"
-        no-body
-        class="p-1 mt-1"
-          style="min-width: 15rem;"
-      >
-
-        <b-card no-body
-          class="m-0 pt-0 mt-1"
-          text-variant="light"
-          bg-variant="dark"
-          border-variant="dark"
-        >
-          <!-- <h5 class="text-center"><b-badge variant="grey">속도분포</b-badge></h5> -->
-          <histogram-chart :chartData="chart.histogramData" :height="150" class="mt-1"/>
-        </b-card>
-      </b-card>
-
-      <uniq-card-title title="스텝별 속도분포"/>
-
-      <b-card
-        bg-variant="dark"
-        border-variant="dark"
-        text-variant="light"
-        no-body
-        class="p-1 mt-1"
-        style="min-width: 15rem;"
-      >
-        <b-card no-body
-          class="m-0 pt-0"
-          text-variant="light"
-          bg-variant="dark"
-          border-variant="dark">
-          <!-- <h5 class="text-center"><b-badge variant="grey">스텝별 속도 분포</b-badge></h5> -->
-          <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="150"/>
-        </b-card>
-      </b-card>
-      <uniq-card-title title="혼잡도 분포"/>
-      <b-card
-        bg-variant="dark"
-        text-variant="light"
-        border-variant="dark"
-        sub-title="혼잡도 분포"
-        no-body
-        class="p-1 mt-1"
-    >
-        <b-card
-          no-body
-          class="m-0 pt-0"
-          text-variant="light"
-          bg-variant="dark"
-          border-variant="dark"
-        >
-          <doughnut :chartData="chart.pieData" :height="110" />
-          <!-- <h5 class="mt-1 text-center"><b-badge variant="grey">혼잡도 분포</b-badge></h5> -->
-        </b-card>
-      </b-card>
-
-      <uniq-card-title title="스텝별 혼잡도 분포"/>
-
-      <b-card
-        bg-variant="dark"
-        text-variant="light"
-        border-variant="dark"
-        no-body
-        class="p-1 mt-1"
-      >
-        <b-card
-          no-body
-          class="m-0 pt-0"
-          text-variant="light"
-          bg-variant="dark"
-          border-variant="dark"
-        >
-          <doughnut :chartData="chart.pieDataStep" :height="110"/>
-          <!-- <h5 class="mt-1 text-center"><b-badge variant="grey">스텝별 혼잡도 분포</b-badge></h5> -->
-        </b-card>
-      </b-card>
   </div>
 </template>
 
-
 <script>
-import Doughnut from '@/components/charts/Doughnut';
-import congestionColor from '@/utils/colors';
-import LineChart from '@/components/charts/LineChart';
-import HistogramChart from '@/components/charts/HistogramChart';
-
-import UniqCardTitle from '@/components/func/UniqCardTitle';
-
-
+import Doughnut from '@/components/charts/Doughnut'
+import congestionColor from '@/utils/colors'
+import LineChart from '@/components/charts/LineChart'
+import HistogramChart from '@/components/charts/HistogramChart'
+import UniqCardTitle from '@/components/func/UniqCardTitle'
+import D3SpeedBar from '@/charts/d3/D3SpeedBar'
+import D3Heatmap from '@/charts/d3/D3Heatmap'
 const defaultOption  = () => ({
   responsive: true,
   title: {
@@ -148,7 +53,7 @@ const defaultOption  = () => ({
         autoSkipPadding: 50,
         maxRotation:0,
         display: true,
-        fontColor: 'grey',
+        fontColor: 'white',
       },
     }],
     yAxes: [{
@@ -157,7 +62,7 @@ const defaultOption  = () => ({
         autoSkipPadding: 10,
         maxRotation:0,
         display: true,
-        fontColor: 'grey',
+        fontColor: 'white',
       },
     }]
   },
@@ -176,7 +81,9 @@ export default {
     Doughnut,
     LineChart,
     HistogramChart,
-    UniqCardTitle
+    UniqCardTitle,
+    D3SpeedBar,
+    D3Heatmap,
   },
   props: {
     simulation: Object,
@@ -195,3 +102,25 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+  .info-card {
+    opacity: 0.8;
+    border-radius: 0px;
+  }
+
+  .uniq-top-right {
+    width: 260px;
+    /* height: 100%; */
+    height: 520px;
+    position: fixed;
+    padding: 0;
+    top: 180px;
+    right: 5px;
+    z-index:100;
+  }
+  .gridLines  {
+    display: false;
+    color: "#FFFFFF";
+  }
+</style>

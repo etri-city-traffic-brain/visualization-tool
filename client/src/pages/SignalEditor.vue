@@ -1,46 +1,103 @@
 <template>
   <div>
+    <!-- TOP MENU -->
+    <b-card
+      bg-variant="dark"
+      border-variant="dark"
+      text-variant="light"
+      style="min-width:840px; border-radius:0"
+      no-body
+    >
+      <b-card-body class="p-1 d-flex justify-content-between">
+        <span v-if="junction.id">{{junction.crossName}} ({{junction.id.substring(0, 20)}}) {{junction.policeStation}}</span>
+        <span v-else class="ml-2">
+          교차로를 선택하세요.
+        </span>
+        <div>
+        <b-btn variant="outline-secondary" size="sm"> </b-btn>
+        <b-btn size="sm" class="ml-1" @click="downloadConnectionInfo" > <b-icon icon="download"></b-icon> </b-btn>
+        <b-btn size="sm" class="ml-1" @click="editMode" > 편집 </b-btn>
+        <b-btn size="sm" class="ml-1" @click="moveMode" > <b-icon icon="arrows-move"></b-icon> </b-btn>
+        <b-btn size="sm" class="ml-1" v-if="junction.id" @click="showModal('modal-export-json')">Export(JSON)</b-btn>
+        <b-btn size="sm" class="ml-1" v-if="junction.id" @click="showModal('modal-export-xml')">Export(XML)</b-btn>
+        </div>
+      </b-card-body>
+    </b-card>
+
     <b-container fluid class="mt-0 p-0">
       <b-row class="m-0">
         <b-col cols="6" class="p-0">
+          <b-card
+            border-variant="secondary"
+            bg-variant="secondary"
+            no-body
+            class="p-1"
+            style="border-radius:0"
+          >
           <div
             :ref="mapId"
             :id="mapId"
-            :style="{height: '500px'}"
             class="map"
+            :style="{
+              height: '500px',
+              'border-radius': '30px'
+            }"
           />
+          </b-card>
         </b-col>
         <b-col cols="6" class="p-0">
+          <b-card bg-variant="secondary" no-body class="pl-0 pt-1 pb-1 pr-1" style="border-radius:0"
+          border-variant="secondary"
+          >
           <div ref="connectionEditor" class="junction" />
+          </b-card>
+
+          <div style="max-height:250px;overflow:auto;">
+          <b-card
+            v-for="(item, idx) in signalPhases"
+            :key="item.index"
+            class="mt-1 ml-1"
+            no-body
+            :bg-variant="(selectedPhase === idx) && 'dark' || 'white'"
+
+
+          >
+            <b-card-body class="p-2">
+              <div class="ml-2 d-flex justify-content-between">
+                <b-btn
+                  href="#"
+                  :variant="(selectedPhase === idx) && 'warning' || 'secondary'"
+                  @click="changePhase(idx)"
+                  size="sm"
+                >
+                  PHASE {{ item.index }}
+                </b-btn>
+
+                <transition-group name="list" class="ml-1">
+                  <b-badge
+                    v-for="(item) in item.state"
+                    :key="item.id"
+                    variant="light"
+                    v-bind:style="{color: colored(item.value), fontWeight: 'bold', fontSize: '14px'}"
+                    class="list-item p-1"
+
+                  >
+                    {{ item.value.toUpperCase() }}
+                  </b-badge>
+                </transition-group>
+              </div>
+            </b-card-body>
+          </b-card>
+          </div>
+
           <div style="background-color:black;">
-            <b-btn size="sm" class="m-2" @click="downloadConnectionInfo" > 다운로드 </b-btn>
-            <b-btn size="sm" @click="editMode" > 편집모드 </b-btn>
-            <b-btn size="sm" @click="moveMode" > 이동모드 </b-btn>
+
           </div>
         </b-col>
       </b-row>
     </b-container>
 
-    <!-- MAP //-->
-    <!-- NAVIGATION MENU -->
-    <b-navbar type="dark" variant="secondary" class="pt-0 pb-0" id="nav-bar">
-      <b-navbar-brand href="#">
-        <strong>신호편집</strong>
-      </b-navbar-brand>
-      <b-navbar-nav>
-        <b-nav-item v-if="junction.id">
-        {{junction.crossName}} ({{junction.id.substring(0, 20)}}) {{junction.policeStation}}
-        </b-nav-item>
-      </b-navbar-nav>
-      <b-navbar-nav class="ml-auto">
-        <span v-if="junction.id">
-          <!-- <b-button @click="updateSignal" id="show-btn">저장</b-button> -->
-          <b-button @click="showModal('modal-export-json')">Export(JSON)</b-button>
-          <b-button @click="showModal('modal-export-xml')">Export(XML)</b-button>
-        </span>
-      </b-navbar-nav>
-    </b-navbar>
-    <b-container
+    <!-- <b-container
       fluid
       class="p-0"
       style="height:600px"
@@ -51,9 +108,9 @@
         :variant="variant"
         class="m-0"
       >
-        <b-spinner small type="grow"/> {{ text }} <b-spinner small type="grow"/>
+        {{ text }}
       </b-alert>
-    </b-container>
+    </b-container> -->
     <b-container fluid class="mt-1 p-0">
       <b-row class="m-0">
         <!-- CONNECTION -->
@@ -64,8 +121,9 @@
                 header-bg-variant="dark"
                 header="부가정보"
                 no-body
+                 v-if="junction.id"
               >
-                <b-card-body class="wizard-menu">
+                <b-card-body class="wizard-menu p-0">
                   <div
                     v-for="(phase, idx) in signalPhaseDefault"
                     :key="idx"
@@ -88,62 +146,11 @@
               <b-card
                 header-text-variant="white"
                 header-bg-variant="dark"
-                header="현시"
-                no-body
-              >
-                <b-card
-                  v-for="(item, idx) in signalPhases"
-                  :key="item.index"
-                  class="mt-1"
-                  no-body
-                  :bg-variant="(selectedPhase === idx) && 'secondary' || 'white'"
-                >
-                <b-card-body class="p-2">
-                  <div disabled class="ml-2">
-                    <b-badge
-                      href="#"
-                      :variant="(selectedPhase === idx) && 'warning' || 'secondary'"
-                      @click="changePhase(idx)"
-                    >
-                      PHASE {{ item.index }}
-                    </b-badge>
-
-                    <transition-group name="list">
-                      <b-badge
-                        v-for="(item) in item.state"
-                        :key="item.id"
-                        variant="light"
-                        v-bind:style="{color: colored(item.value), fontWeight: 'bold', fontSize: '14px'}"
-                        class="list-item p-2"
-
-                      >
-                        {{ item.value.toUpperCase() }}
-                      </b-badge>
-                    </transition-group>
-                  </div>
-                  </b-card-body>
-                </b-card>
-          </b-card>
-            </b-col>
-          </b-row>
-        </b-col>
-      </b-row>
-    </b-container>
-
-    <transition name="fade">
-      <div v-if="junction.id">
-        <b-container fluid class="mt-2" >
-          <b-row >
-            <b-col cols="12" class="p-1">
-              <!-- 패턴(시간계획) -->
-              <b-card
-                header-text-variant="white"
-                header-bg-variant="dark"
                 header="패턴(시간계획)"
                 no-body
               >
-                <b-card-body class="p-0">
-                  <b-card
+                <div class="d-flex flex-wrap">
+                <b-card
                     no-body
                     v-for="(scenario, index) in signalScenario"
                     :key="scenario.id"
@@ -170,24 +177,53 @@
                       <b-badge>{{scenario.offset}}</b-badge>
                     </b-card-body>
                   </b-card>
+                </div>
+              </b-card>
+            </b-col>
+          </b-row>
+        </b-col>
+      </b-row>
+    </b-container>
+
+    <!-- <transition name="fade"> -->
+
+
+
+      <b-card
+        bg-variant="dark"
+        border-variant="dark"
+        class="p-0"
+        v-if="junction.id"
+        no-body
+      >
+        <!-- <b-container fluid class="mt-2" >
+          <b-row >
+            <b-col cols="12" class="p-1">
+              <b-card
+                header-text-variant="white"
+                header-bg-variant="dark"
+                header="패턴(시간계획)"
+                no-body
+              >
+                <b-card-body class="p-0">
+
                 </b-card-body>
               </b-card>
             </b-col>
           </b-row>
-        </b-container>
+        </b-container> -->
         <!--- TOD PLAN //-->
-        <b-container fluid class="mt-2 p-1">
+        <!-- <b-container fluid class="p-1"> -->
           <b-card
             header-text-variant="white"
             header-bg-variant="dark"
+            header-border-variant="dark"
             header-tag="header"
             no-body
           >
             <div slot="header" class="mb-0">
-              TOD 계획 <b-badge @click="addPlan" variant="link" href="#">
-                <!-- <icon name="plus"/> -->
-                +
-              </b-badge>
+              <span>TOD 계획</span>
+              <b-badge @click="addPlan" variant="info" href="#"> + </b-badge>
             </div>
             <b-card-body class="p-0">
               <b-card
@@ -264,17 +300,17 @@
             </b-card-body>
           </b-card>
 
-        </b-container>
-      </div>
-    </transition>
+        <!-- </b-container> -->
+      </b-card>
+    <!-- </transition> -->
 
     <!-- BOTTOM MENU -->
-    <b-container fluid class="mt-2">
+    <!-- <b-container fluid class="mt-2">
       <span v-if="junction.id">
         <b-button size="sm" @click="showModal('modal-export-json')">Export(JSON)</b-button>
         <b-button size="sm" @click="showModal('modal-export-xml')">Export(XML)</b-button>
       </span>
-    </b-container>
+    </b-container> -->
 
     <!--- SIGNAL PATTERN //-->
 
@@ -383,7 +419,7 @@
   }
 
   .junction {
-    height:453px;
+    height:250px;
     background-color: black;
   }
   .salt-tm {
@@ -484,5 +520,11 @@
     overflow-y: auto;
     overflow-x: hidden;
   }
+
+
+html {
+  background: lightgrey;
+  overflow: auto;
+}
 
 </style>

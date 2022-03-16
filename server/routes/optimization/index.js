@@ -8,7 +8,12 @@ router.post('/train', require('./api-run'))
 router.post('/test', require('./api-run'))
 router.post('/fixed', require('./api-run'))
 
+router.post('/stop', require('./api-stop'))
+
 router.get('/reward', require('./api-reward'))
+router.get('/reward/total', require('./api-reward-total'))
 router.get('/phase', require('./api-phase'))
+
+router.get('/phasereward', require('./api-phase-reward'))
 
 module.exports = router

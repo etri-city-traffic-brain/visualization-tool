@@ -1,27 +1,27 @@
-import axios from 'axios';
+import axios from 'axios'
 
-const query = ({ min, max, zoom }) => `extent=[${min.x},${min.y},${max.x},${max.y}]&zoom=${zoom}`;
-const get = async (param = '') => axios.get(`${param}`);
+const query = ({ min, max, zoom }) => `extent=[${min.x},${min.y},${max.x},${max.y}]&zoom=${zoom}`
+const get = async (param = '') => axios.get(`${param}`)
 
-const uriBase = 'salt/v1/map';
+const uriBase = 'salt/v1/map'
 
 export default {
-  async getMap(extent) {
-    return (await get(`${uriBase}?${query(extent)}`)).data;
+  async getMap (extent) {
+    return (await get(`${uriBase}?${query(extent)}`)).data
   },
-  async getLinks(extent) {
-    const { min, max } = extent;
-    min.x -= min.x * 0.00001;
-    min.y -= min.y * 0.00001;
-    max.x += max.x * 0.00001;
-    max.y += max.y * 0.00001;
-    const { data } = await get(`${uriBase}/links/?${query(extent)}`);
-    return data;
+  async getLinks (extent) {
+    const { min, max } = extent
+    min.x -= min.x * 0.00001
+    min.y -= min.y * 0.00001
+    max.x += max.x * 0.00001
+    max.y += max.y * 0.00001
+    const { data } = await get(`${uriBase}/links/?${query(extent)}`)
+    return data
   },
-  async getGrids() {
-    return (await get(`${uriBase}/grids`)).data;
+  async getGrids () {
+    return (await get(`${uriBase}/grids`)).data
   },
-  async getTrafficLights(extent) {
-    return (await get(`${uriBase}/traffic_lights/?${query(extent)}`)).data;
-  },
-};
+  async getTrafficLights (extent) {
+    return (await get(`${uriBase}/traffic_lights/?${query(extent)}`)).data
+  }
+}

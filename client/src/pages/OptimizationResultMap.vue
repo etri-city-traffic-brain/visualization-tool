@@ -1,111 +1,194 @@
 <template>
-  <b-container fluid class="m-0 p-0">
+  <div>
     <div class="uniq-top-left">
-      <div style="max-width: 230px">
-        <uniq-congestion-color-bar/>
-
+      <div class="bg-gray-700 py-1 font-bold text-center text-white">
+      {{ simulationId }}
+      </div>
+      <!-- <uniq-congestion-color-bar class="mt-1"/> -->
+      <div >
         <!-- 혼잡도 차트 -->
-        <b-card
-          text-variant="light"
-          bg-variant="dark"
-          border-variant="dark"
-          class="mt-1 p-2"
-          no-body
-        >
-          <doughnut :chartData="avgSpeedView" :height="110" class="mt-1"/>
-        </b-card>
-        <b-card
-          class="mt-1"
+        <!--
+        <div class="d-flex justify-content-around align-items-center">
+          <doughnut :chartData="avgSpeedView" :height="50" :width="100" class="mt-1"/>
+          <span
+            v-bind:style="{
+              'color':congestionColor(avgSpeed),
+              'font-size': '2rem'
+            }"
+            class="font-weight-bold"
+          >
+            {{ (avgSpeed).toFixed(2) }} km
+          </span>
+        </div>
+        -->
+        <!-- <b-card
+          class="mt-1 p-1"
           text-variant="dark"
           v-bind:style="{ 'background-color':congestionColor(avgSpeed) }"
+          no-body
         >
           <b-card-text class="text-center">
             <h2> {{ (avgSpeed).toFixed(2) }} km </h2>
           </b-card-text>
-        </b-card>
-        <!-- 최적화 진행률 -->
-        <b-card class="mt-1" text-variant="light" bg-variant="dark">
-          <div class="d-flex justify-content-between align-items-center">
-            <span>학습진행률</span>
-            <b-progress :max="100" class="w-50">
-              <b-progress-bar :value="progressOfEpoch" animated striped variant="success" >
-                <span>Epoch {{ rewards.labels.length }} / {{ simulation.configuration.epoch }}</span>
-              </b-progress-bar>
-            </b-progress>
-          </div>
+        </b-card> -->
+       </div>
 
-          <div class="d-flex justify-content-between align-items-center">
-            <span>시뮬레이션</span>
-            <b-progress class="w-50">
-              <b-progress-bar :value="progress" animated striped variant="primary">
-                <span> {{ progress }} %</span>
-              </b-progress-bar>
-            </b-progress>
-          </div>
-        </b-card>
-        <!-- 보상 그래프 -->
-        <b-card
-          text-variant="light"
-          bg-variant="dark"
-          border-variant="dark"
-          class="mt-1 p-2"
-          no-body
-        >
-        <line-chart
+      <div class="bg-gray-700 mt-1" >
+        <div class="text-white text-center p-1 text-sm">Total Reward</div>
+
+      <!-- 보상 그래프 -->
+        <!-- <line-chart
           :chartData="rewards"
           :options="defaultOption({}, chartClicked)"
           :height="220"
+        /> -->
+        <line-chart
+          :chartData="rewardTotal"
+          :options="defaultOption({}, chartClicked)"
+          :height="220"
         />
-      </b-card>
 
-      <!-- 제어버튼 -->
-      <div class="mt-1">
-        <b-btn variant="" @click="runTrain" title="신호 최적화 시작" size="sm" v-b-tooltip.hover>
-          <b-icon icon="play-fill"/>
-        </b-btn>
-        <b-btn
-          size="sm"
-          variant=""
-          v-b-tooltip.hover
-          title="신호비교"
+      </div>
+      <div class="bg-gray-700 mt-1 p-1">
+      <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="getReward" size="sm">업데이트 리워드</button>
+      </div>
+      <div class="mt-1 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded">
+      <!-- 최적화 진행률 -->
+      <div class="text-center mb-1 uppercase">
+        Epoch: {{ progressOpt }} / {{ simulation.configuration.epoch }}
+      </div>
+
+      <b-progress :max="simulation.configuration.epoch" height="8px">
+        <b-progress-bar :value="progressOpt" animated striped variant="primary" >
+          <!-- <span>Epoch {{ progressOpt }} / {{ simulation.configuration.epoch }}</span> -->
+        </b-progress-bar>
+      </b-progress>
+
+    <!-- <div class="relative pt-1">
+      <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+        <div style="width:30%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
+      </div>
+    </div> -->
+
+    </div>
+
+
+    <div class="mt-1 p-2 bg-indigo-400 font-bold text-sm opacity-90 rounded">
+      <div class="text-center mb-1">
+        시뮬레이션 진행률
+      </div>
+      <b-progress class="" height="8px">
+        <b-progress-bar :value="progress" animated striped variant="primary">
+          <span> {{ progress }} %</span>
+        </b-progress-bar>
+      </b-progress>
+    </div>
+
+    <div class="mt-1">
+      <div class="bg-gray-500 font-bold text-white text-center uppercase p-1 animate-pulse" v-if="simulation.status === 'running' || simulation.status === 'stopping'">
+        {{ simulation.status }}...
+      </div>
+      <div class="bg-gray-500 text-white text-center uppercase p-1" v-else>
+        {{ simulation.status }}...
+      </div>
+    </div>
+
+
+    <b-card
+      bg-variant="dark"
+      text-variant="light"
+      no-body
+      class="mt-1 p-2"
+    >
+      <div>
+        <div>
+        <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="runTrain"> <b-icon icon="play-fill"/> 신호최적화 시작 </button>
+        <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="stop" size="sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="inline h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+          </svg>중지
+        </button>
+
+        <!-- <button
+        class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1"
+        @click="stopVis" size="sm">가시화 중지
+        </button>
+        <button
+        class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1"
+        @click="startVis" size="sm">가시화 시작
+        </button> -->
+
+        </div>
+        <div class="mt-1">
+        <router-link
+          class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1"
           :to="{
             name: 'OptimizationResultComparisonMap',
             params: {id: simulationId}
           }"
         >
-          <b-icon icon="front"/>
-        </b-btn>
+          <b-icon icon="front"/> 신호비교
+        </router-link>
+        </div>
       </div>
-      </div>
+    </b-card>
     </div>
 
-    <!-- TOP RIGHT -->
-    <div class="uniq-top-right">
+    <div class="uniq-bottom-right">
+      <!-- 제어버튼 -->
+
+    </div>
+
+    <!-- ----------- -->
+    <!-- BOTTOM LEFT -->
+    <!-- ----------- -->
+    <div
+    class="uniq-bottom-left"
+    >
+
+    </div>
+
+    <!-- -------------------- -->
+    <!-- 교차로별 보상 그래프 -->
+    <!-- -------------------- -->
+    <div class="reward-charts flex flex-wrap">
+      <div v-for="(chart, idx) of rewardCharts" :key="idx" class="p-1">
+        <div class="text-center text-xs text-white px-2 pt-1 w-36- bg-gray-500 rounded-t-xl tracking-wide">{{ chart.label }}</div>
+        <!-- <div class="bg-white p-1"> -->
+        <div class="bg-gray-700 pb-1 pr-1">
+          <line-chart
+            :chartData="chart"
+            :options="defaultOption({}, ()=>{})"
+            :height="90"
+            :width="200"
+          />
+        </div>
+        <!-- </div> -->
+      </div>
     </div>
 
     <!------------- -->
     <!--  배경지도  -->
     <!---------------->
-    <b-card
-      bg-variant="secondary"
-      border-variant="secondary"
-      style="border-radius:0"
-      class="m-0"
-      no-body
-    >
-      <div
-        class="m-0 p-0"
-        :ref="mapId"
-        :id="mapId"
-        :style="{height: mapHeight + 'px'}"
-      />
-    </b-card>
-  </b-container>
+    <div
+      :ref="mapId"
+      :id="mapId"
+      :style="{height: mapHeight + 'px'}"
+      class="m-0 p-0"
+    />
+  </div>
 </template>
 
 <script src="./optimization-result-map.js"> </script>
 
 <style>
+
+  .info-card {
+    opacity: 0.9;
+    border-radius: 0px;
+  }
+
   .uniq-box-panel {
     border-radius: 0px;
   }
@@ -115,12 +198,43 @@
   }
 
   .uniq-top-left {
+    max-width: 260px;
+    height: 100%;
     position: fixed;
     z-index:100;
-    top: 60px;
+    top: 50px;
     padding: 0;
-    left: 15px;
+    left: 5px;
+  }
+  .reward-charts {
+    /* max-width: 260px; */
+    width: 80%;
+    /* height: 100%; */
+    position: fixed;
+    z-index:100;
+    top: 50px;
+    padding: 0;
+    left: 280px;
+  }
+
+  .uniq-bottom-left {
+    width: 260px;
+
+    position: fixed;
+    z-index:100;
+    bottom: 10px;
+    padding: 0;
+    left: 5px;
     border: 0px solid #73AD21;
+  }
+
+  .uniq-bottom-right {
+    /* width: 260px; */
+    position: fixed;
+    z-index:100;
+    bottom: 10px;
+    padding: 0;
+    right: 5px;
   }
 
   .uniq-top-right {
@@ -147,22 +261,5 @@
     transform: translateY(-50%);
   }
 
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #f8f9fa #343a40;
-  }
-  *::-webkit-scrollbar {
-    width: 12px;
-  }
-  *::-webkit-scrollbar-track {
-    background: #343a40;
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: #f8f9fa;
-    border-radius: 20px;
-    border: 3px solid #343a40;
-  }
-
-  /* @import '@/assets/images/gb1.jpg'; */
   @import '@/assets/styles/style.css';
 </style>

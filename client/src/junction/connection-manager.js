@@ -134,6 +134,7 @@ function ConnectionManager ({ junction, connectedLinks, element }) {
     if (!id) {
       return
     }
+    console.log('click', connections.get(id).angle)
     // delete mode
     if (shiftKey) {
       const selectedEdge = connections.get(id)

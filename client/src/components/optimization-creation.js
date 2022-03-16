@@ -102,7 +102,7 @@ export default {
       this.variant = 'info'
       try {
         this.status = 'running'
-        await simulationService.create(this.userId, {
+        await simulationService.createSimulation(this.userId, {
           id: this.id,
           user: this.userId,
           description: this.description,
@@ -145,6 +145,8 @@ export default {
     selectJunction (junction) {
       this.$refs['signal-map'].hide()
       this.junctionId = junction.id
+
+      console.log('select')
     }
   }
 }

@@ -14,7 +14,7 @@ export default {
         scales: {
           xAxes: [{
             display: false,
-            barPercentage: 1,
+            // barPercentage: 1,
             categoryPercentage: 1,
             ticks: {
               max: 70,
@@ -24,7 +24,7 @@ export default {
             gridLines: { display: false, },
           },
           {
-            barPercentage: 1,
+            // barPercentage: 1,
             categoryPercentage: 1,
             ticks: {
               display: true,
