@@ -196,62 +196,69 @@ function loadBuildings (map, threeLayer) {
 }
 function makeRoadTexture (url) {
   const texture = new THREE.TextureLoader().load(url)
-  console.log(texture)
   texture.anisotropy = 16
   texture.wrapS = THREE.RepeatWrapping
   texture.wrapT = THREE.RepeatWrapping
   return texture
 }
-function loadRoad (mapManager, threeLayer, geojsonURL) {
-  // fetch(geojsonURL)
 
-  const gs = mapManager.getCurrentLinks()
+// eslint-disable-next-line no-undef
+const env = process && process.env
+let mediumT, highT, lowT
+let ts = []
+if (env.NODE_ENV === 'development') {
+  mediumT = makeRoadTexture('http://localhost:8080/public/road2.png')
+  highT = makeRoadTexture('http://localhost:8080/public/road5.png')
+  lowT = makeRoadTexture('http://localhost:8080/public/road2.png')
 
-  const links = gs
-  const features = links.map(link => link.toGeoJSON())
-  const geojson = {
-    type: 'FeatureCollection',
-    features: []
+  ts = [
+    makeRoadTexture('http://localhost:8080/public/road1.png'),
+    makeRoadTexture('http://localhost:8080/public/road2.png'),
+    makeRoadTexture('http://localhost:8080/public/road3.png'),
+    makeRoadTexture('http://localhost:8080/public/road4.png'),
+    makeRoadTexture('http://localhost:8080/public/road5.png')
+    // makeRoadTexture('http://localhost:8080/public/road6.png')
+  ]
+} else {
+  mediumT = makeRoadTexture('/public/road1.png')
+  highT = makeRoadTexture('/public/road2.png')
+  lowT = makeRoadTexture('/public/road3.png')
+}
+
+const getTexture = speed => {
+  if (speed < 50) {
+    return lowT
   }
-  geojson.features = features
-  // .then(res => res.json())
-
-  // eslint-disable-next-line no-undef
-  const env = process && process.env
-  let mediumT, highT, lowT
-  if (env.NODE_ENV === 'development') {
-    mediumT = makeRoadTexture('http://localhost:8080/public/road1.png')
-    highT = makeRoadTexture('http://localhost:8080/public/road2.png')
-    lowT = makeRoadTexture('http://localhost:8080/public/road3.png')
+  if (speed >= 50 && speed <= 60) {
+    return mediumT
   } else {
-    mediumT = makeRoadTexture('/public/road1.png')
-    highT = makeRoadTexture('/public/road2.png')
-    lowT = makeRoadTexture('/public/road3.png')
+    return highT
   }
+}
+
+let lines = []
+async function loadRoad (mapManager, threeLayer, geojsonURL) {
+  threeLayer.removeMesh(lines)
+  lines = []
+  // const gs = mapManager.getCurrentLinks()
+
+  const geoJson = await axios({
+    url: '/salt/v1/dashboard/dtg/by/vehicleid'
+  }).then(res => res.data)
+
+  const gs = maptalks.GeoJSON.toGeometry(geoJson)
 
   const camera = threeLayer.getCamera()
-  const getTexture = speed => {
-    if (speed < 50) {
-      console.log(speed)
-      return lowT
-    }
-    if (speed >= 50 && speed <= 60) {
-      return mediumT
-    } else {
-      return highT
-    }
-  }
-
-  const multiLineStrings = maptalks.GeoJSON.toGeometry(geojson)
-
-  for (const multiLineString of multiLineStrings) {
+  let i = 0
+  for (const multiLineString of gs) {
     const speed = multiLineString.properties.SPEEDLH
 
-    if (speed < 30) {
-      // continue
+    if (speed < 60) {
+      continue
     }
     const material = new MeshLineMaterial({
-      map: getTexture(speed),
+      // map: getTexture(speed),
+      map: ts[i++ % ts.length],
       useMap: true,
       lineWidth: 10,
       sizeAttenuation: false,
@@ -264,16 +271,17 @@ function loadRoad (mapManager, threeLayer, geojsonURL) {
       multiLineString,
       {
         altitude: 0,
-        // speed: (1 / multiLineStrings.length) * (cnt > 100 ? 0.0 : 100)
-        speed: 5
-        // speed: (1 / multiLineStrings.length) * speed * 20 * 100
-        // speed: 10
+
+        // speed: (multiLineString.getLength() / 5000) * speed
+        speed: multiLineString.getLength() / 200
+        // speed: 100
       },
       material,
       threeLayer
     )
 
     threeLayer.addMesh(line)
+    lines.push(line)
   }
 }
 function initThree (map, mapManager) {
@@ -287,10 +295,10 @@ function initThree (map, mapManager) {
     scene.add(new THREE.AmbientLight(0xffffff, 0.6))
     camera.add(new THREE.SpotLight(0xffffff, 0.6, 0, Math.PI))
 
-    loadBuildings(map, threeLayer)
-    setTimeout(() => {
-      loadRoad(mapManager, threeLayer, './data/salt-links.geojson')
-    }, 1000)
+    // loadBuildings(map, threeLayer)
+    // setTimeout(() => {
+    // loadRoad(mapManager, threeLayer, './data/salt-links.geojson')
+    // }, 1000)
     animation()
   }
 
@@ -304,6 +312,7 @@ function initThree (map, mapManager) {
     }
     requestAnimationFrame(animation)
   }
+  return threeLayer
 }
 
 //
@@ -325,7 +334,8 @@ export default {
       videoUrl: '',
       cctv: {},
       isRunning: false,
-      chart: { vds: [] }
+      chart: { vds: [] },
+      threeLayer: {}
     }
   },
   async mounted () {
@@ -364,7 +374,7 @@ export default {
       eventBus: this
     })
 
-    initThree(this.map, this.mapManager)
+    this.threeLayer = initThree(this.map, this.mapManager)
     console.log('mounted dashboard')
 
     this.$on('cctv:selected', cctv => {
@@ -379,6 +389,8 @@ export default {
     this.$on('map:loaded', () => {
       log('map loaded')
       this.updateDtg()
+      loadBuildings(this.map, this.threeLayer)
+      loadRoad(this.mapManager, this.threeLayer)
     })
 
     axios({
