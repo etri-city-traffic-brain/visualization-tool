@@ -1,60 +1,50 @@
 import * as maptalks from 'maptalks'
-
-// import color from '@/utils/colors'
 import axios from 'axios'
 
-// import cctvImg from '@/assets/images/cctv.png'
-// console.log(cctvImg)
+const symbolOrigin = {
+  lineWidth: 2,
+  lineColor: '#90ee90',
+  textSize: 12,
+  textFill: '#90ee90',
+  polygonOpacity: 0.4
+}
+
+const symbolHighlight = {
+  lineWidth: 12,
+  lineColor: '#3399ff',
+  textSize: 20,
+  polygonFill: '#3399ff',
+  textFill: '#3399ff',
+  polygonOpacity: 0.4
+}
+
 export default (map, getEdges, eventBus) => {
   const layer = new maptalks.VectorLayer('cctvLayer', [])
-  const center = map.getCenter()
-
   axios({
     url: '/salt/v1/cctv',
     method: 'get'
   })
     .then(res => res.data)
-    .then(data => {
-      data.forEach(cctv => {
-        // const circle = new maptalks.Circle(cctv.location, 20, {
-        //   symbol: {
-        //     lineColor: '#34495e',
-        //     lineWidth: 2,
-        //     polygonFill: 'red',
-        //     polygonOpacity: 0.4
-        //   }
-        // }).addTo(layer)
-        // console.log(cctv.location)
-        const marker4 = new maptalks.Marker(cctv.location, {
+    .then(items => {
+      items.forEach(item => {
+        const circle = new maptalks.Circle(item.location, 20, {
           symbol: {
-            textFaceName: 'sans-serif',
-            textName: '📹',
-            textFill: '#ff0000',
-            textHorizontalAlignment: 'right',
-            textSize: 40
-            // markerFile: cctv.icon,
-            // markerWidth: 28,
-            // markerHeight: 40,
-            // markerDx: 0,
-            // markerDy: 0,
-            // markerOpacity: 1
+            ...symbolOrigin,
+            textName: 'CCTV(' + item.name + ')',
+            textDy: -20,
+            textDx: 0
           }
         }).addTo(layer)
-
-        // console.log('add circle', cctv.location)
-        marker4.on('click', x => {
+        circle.on('mouseover', ({ target: t }) =>
+          t.updateSymbol(symbolHighlight)
+        )
+        circle.on('mouseout', ({ target: t }) => t.updateSymbol(symbolOrigin))
+        circle.on('click', x => {
           eventBus.$emit('cctv:selected', {
-            ...cctv
+            ...item
           })
         })
-
-        // layer.addGeometry(circle)
       })
     })
-
-  map.on('zoomend moveend', event => {})
-
-  layer.updateRealtimeData = data => {}
-
   return layer
 }

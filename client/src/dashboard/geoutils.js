@@ -293,4 +293,4 @@ function _getChunkLinesPosition (chunkLines, layer) {
   }
 }
 
-export { getLinePosition, _getLinePosition }
+export { getLinePosition, _getLinePosition, lineLength }

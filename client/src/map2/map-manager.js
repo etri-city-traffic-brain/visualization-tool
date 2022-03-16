@@ -35,7 +35,7 @@ const { log } = console
  * @param {string} param.simulationId - Simulation id
  * @param {Object} param.eventBus - Vue Object as event bus
  */
-function MapManager ({ map, simulationId, eventBus }) {
+function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   let currentSpeedsPerLink = {}
   let currentStep = 0
 
@@ -113,7 +113,6 @@ function MapManager ({ map, simulationId, eventBus }) {
   }
 
   eventBus.$on('vds:selected', edge => {
-    console.log('vds clicked', edge)
     edgeClicked({ target: edge })
   })
 
@@ -166,20 +165,27 @@ function MapManager ({ map, simulationId, eventBus }) {
       }
     })
 
-    features.forEach(feature => {
-      R.compose(
-        edgeLayer.addGeometry.bind(edgeLayer),
+    const g = features.map(feature => {
+      return R.compose(
+        // edgeLayer.addGeometry.bind(edgeLayer),
         addEventHandler,
         makeGeometry
       )(feature)
+      // return feature
     })
+
+    edgeLayer.addGeometry(g)
 
     vdsLayer.updateRealtimeData()
   }
   let vdsTable = {}
 
   async function loadMapData (event) {
-    console.log('load map data')
+    if (!useSaltLink) {
+      eventBus.$emit('map:loaded')
+      return
+    }
+
     if (Object.keys(vdsTable).length < 1) {
       const res = await axios({
         url: '/salt/v1/vds',
@@ -297,7 +303,8 @@ function MapManager ({ map, simulationId, eventBus }) {
     },
     getCurrentLinks () {
       return edgeLayer.getGeometries()
-    }
+    },
+    edgeLayer
   }
 }
 

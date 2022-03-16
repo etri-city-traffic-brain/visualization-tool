@@ -31,17 +31,19 @@
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item size="sm" to>
-            <span class="bg-indigo-100 p-1 text-black text-sm rounded-md font-bold">UNIQ</span>
+            <!-- <span class="bg-indigo-100 p-1 text-black text-sm rounded-md font-bold">UNIQ</span> -->
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
 
-    <keep-alive>
+    <!-- <keep-alive>
       <router-view v-if="$route.meta.keepAlive"></router-view>
     </keep-alive>
 
-    <router-view v-if="!$route.meta.keepAlive" />
+    <router-view v-if="!$route.meta.keepAlive" />-->
+
+    <router-view />
 
     <!--
       BOTTOM COPYRIGHT
@@ -98,7 +100,7 @@ export default {
         },
         {
           path: 'Dashboard',
-          name: '대시보드',
+          name: '교통데이터 분석',
         }
       ]
     };

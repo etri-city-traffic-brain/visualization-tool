@@ -6,8 +6,9 @@ import color from '@/utils/colors'
 const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1
 
 function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
-  console.log('updateCongestion', linkSpeeds)
-  if (Object.keys(linkSpeeds).length === 0) return
+  if (Object.keys(linkSpeeds).length === 0) {
+    return
+  }
   const lineWidth = calcLineWidth(map.getZoom())
   edgeLayer.getGeometries().forEach(geometry => {
     const speeds = linkSpeeds[geometry.getId()] || []
