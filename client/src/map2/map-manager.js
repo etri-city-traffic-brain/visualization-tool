@@ -146,39 +146,24 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
       .on('mouseout', edgeMouseOut)
 
   async function updateSimulationResult () {
-    currentSpeedsPerLink = await simulationService.getSimulationResult(
-      simulationId,
-      extent(map)
-    )
-    edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
-    // gridLayer.updateGrid(simulationId, currentStep)
+    if (simulationId) {
+      currentSpeedsPerLink = await simulationService.getSimulationResult(
+        simulationId,
+        extent(map)
+      )
+      edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
+      // gridLayer.updateGrid(simulationId, currentStep)
+    }
   }
 
   function addFeatures (features) {
-    features.forEach(feature => {
-      const vdsId = vdsTable[feature.properties.LINK_ID]
-      if (vdsId) {
-        feature.properties.vdsId = vdsId.vdsId
-        feature.properties.secionId = vdsId.sectionId
-        feature.properties.sId = vdsId.sId
-        feature.properties.dId = vdsId.dId
-      }
+    const g = features.forEach(feature => {
+      const f = R.compose(addEventHandler, makeGeometry)(feature)
+      edgeLayer.addGeometry(f)
     })
 
-    const g = features.map(feature => {
-      return R.compose(
-        // edgeLayer.addGeometry.bind(edgeLayer),
-        addEventHandler,
-        makeGeometry
-      )(feature)
-      // return feature
-    })
-
-    edgeLayer.addGeometry(g)
-
-    vdsLayer.updateRealtimeData()
+    // edgeLayer.addGeometry(g)
   }
-  let vdsTable = {}
 
   async function loadMapData (event) {
     if (!useSaltLink) {
@@ -186,38 +171,32 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
       return
     }
 
-    if (Object.keys(vdsTable).length < 1) {
-      const res = await axios({
-        url: '/salt/v1/vds',
-        method: 'get'
-      })
-      vdsTable = res.data
-    }
-
-    const edgesExisted = edgeLayer
-      .getGeometries()
-      .map(geometry => geometry.getId())
     try {
+      const start = new Date().getTime()
       const { features } = await mapService.getMap(extent(map))
+      console.log('ajax loading:', new Date().getTime() - start)
       if (event === 'zoomend') {
-        // removeEdges(edgesExisted)
         removeEdges(edgeLayer.getGeometries())
         addFeatures(features)
-        // eventBus.$emit('map:loaded')
       } else if (event === 'moveend') {
-        const edgesNew = features.map(makeId)
-        const willBeRemoved = R.difference(edgesExisted, edgesNew)
-        const willBeAdded = R.difference(edgesNew, edgesExisted)
-        removeEdges(willBeRemoved)
-        addFeatures(
-          features.filter(feature => willBeAdded.includes(makeId(feature)))
+        const edgesExisted = edgeLayer
+          .getGeometries()
+          .map(geometry => geometry.getId())
+        const idsNew = features.map(makeId)
+        const idsWillBeRemoved = R.difference(edgesExisted, idsNew)
+        const idsWillBeAdded = R.difference(idsNew, edgesExisted)
+        removeEdges(idsWillBeRemoved)
+        const added = features.filter(feature =>
+          idsWillBeAdded.includes(makeId(feature))
         )
-        // eventBus.$emit('map:loaded')
+        addFeatures(added)
       } else {
         addFeatures(features)
       }
+      console.log('update UI:', new Date().getTime() - start)
       eventBus.$emit('map:loaded')
     } catch (err) {
+      log(err)
       log(err.message)
     }
     await updateSimulationResult()

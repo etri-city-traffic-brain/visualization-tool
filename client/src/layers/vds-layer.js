@@ -1,5 +1,5 @@
 import * as maptalks from 'maptalks'
-
+import axios from 'axios'
 const symbolOrigin = {
   lineWidth: 2,
   lineColor: 'orange',
@@ -17,13 +17,36 @@ const symbolHighlight = {
   polygonOpacity: 0.4
 }
 
-function VdsLayer (map, getEdges, eventBus) {
-  const layer = new maptalks.VectorLayer('vds2', [])
+let vdsTable
 
-  layer.updateRealtimeData = () => {
+function VdsLayer (map, getEdges, eventBus) {
+  if (!vdsTable) {
+    axios({
+      url: '/salt/v1/vds',
+      method: 'get'
+    })
+      .then(res => res.data)
+      .then(data => {
+        vdsTable = data
+      })
+  }
+  const layer = new maptalks.VectorLayer('vds2', [])
+  setTimeout(() => update(), 1000)
+  map.on('zoomend moveend', () => {
+    update()
+  })
+  function update () {
     layer.clear()
     const circles = getEdges()
       .map(edge => {
+        const vdsId = vdsTable[edge.properties.LINK_ID]
+        if (vdsId) {
+          edge.properties.vdsId = vdsId.vdsId
+          edge.properties.secionId = vdsId.sectionId
+          edge.properties.sId = vdsId.sId
+          edge.properties.dId = vdsId.dId
+        }
+
         let circle
         if (edge.properties.vdsId) {
           const c = edge.getCoordinates()

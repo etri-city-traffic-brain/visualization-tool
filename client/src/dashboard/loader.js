@@ -105,6 +105,7 @@ function loadBuildings (map, threeLayer, obj) {
   threeLayer.removeMesh(meshWillBeDeleted)
 
   tilesWillBeAdded.forEach(tile => {
+    console.log(tile)
     window
       .fetch(urlTemplateBuildings(tile.x, tile.y))
       .then(response => response.json())
@@ -221,7 +222,8 @@ async function loadLineTrip (obj, num = 10) {
 const { requestAnimationFrame } = window
 
 function initThree (map) {
-  const threeLayer = new ThreeLayer(maptalks.Util.GUID(), {
+  // const threeLayer = new ThreeLayer(maptalks.Util.GUID(), {
+  const threeLayer = new ThreeLayer('three', {
     forceRenderOnMoving: true,
     forceRenderOnRotating: true
     // animation: true
