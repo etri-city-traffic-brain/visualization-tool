@@ -37,7 +37,7 @@ export default function MakeMap ({
       // title of layers
       overlayTitle: 'Layers',
       // layers you don't want to manage with layer switcher
-      excludeLayers: ['c'],
+      excludeLayers: ['c', 'toolLayer'],
       // css class of container element, maptalks-layer-switcher by default
       containerClass: 'maptalks-layer-switcher'
     },

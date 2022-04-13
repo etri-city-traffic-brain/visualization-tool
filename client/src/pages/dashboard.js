@@ -160,8 +160,19 @@ export default {
         if (v > 0) {
           link.properties.altitude = v / 10
           link.updateSymbol({
-            lineWidth: v / 100,
-            lineColor: color(v / 50)
+            lineWidth: v / 200,
+            // lineWidth: v / 150,
+            lineColor: color(v / 50),
+            // textName: v,
+            // textFill: color(v / 50),
+            lineJoin: 'round', //miter, round, bevel
+            lineCap: 'round', //butt, round, square
+            lineOpacity: 0.8
+            // textDx: 120
+          })
+          link.setInfoWindow({
+            title: '차량 통행량',
+            content: '통행량: ' + v + '대'
           })
         }
       })
@@ -192,6 +203,7 @@ export default {
         .then(res => res.data)
         .then(dtgData => {
           this.dtgData = dtgData
+          console.log(dtgData)
           this.updateDtg()
         })
         .catch(err => {

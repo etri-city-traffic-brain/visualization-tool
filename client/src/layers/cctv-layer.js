@@ -19,7 +19,7 @@ const symbolHighlight = {
 }
 
 export default (map, getEdges, eventBus) => {
-  const layer = new maptalks.VectorLayer('cctvLayer', [])
+  const layer = new maptalks.VectorLayer('cctv', [])
   axios({
     url: '/salt/v1/cctv',
     method: 'get'

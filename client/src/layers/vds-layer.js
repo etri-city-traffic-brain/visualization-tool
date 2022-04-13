@@ -30,7 +30,7 @@ function VdsLayer (map, getEdges, eventBus) {
         vdsTable = data
       })
   }
-  const layer = new maptalks.VectorLayer('vds2', [])
+  const layer = new maptalks.VectorLayer('vds', [])
   setTimeout(() => update(), 1000)
   map.on('zoomend moveend', () => {
     update()
@@ -57,7 +57,8 @@ function VdsLayer (map, getEdges, eventBus) {
 
           const x = Math.cos(angle - Math.PI / 2) * 30
           const y = Math.sin(angle - Math.PI / 2) * 30
-          circle = new maptalks.Circle(edge.getCenter(), 20, {
+          // circle = new maptalks.Circle(edge.getCenter(), 20, {
+          circle = new maptalks.Circle(edge.getFirstCoordinate(), 20, {
             symbol: {
               ...symbolOrigin,
               textName: edge.properties.vdsId,

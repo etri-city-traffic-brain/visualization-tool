@@ -1,4 +1,3 @@
-
 const debug = require('debug')('salt-connector:tcp-server')
 
 const net = require('net')
@@ -18,7 +17,10 @@ module.exports = (port = 1337) => {
 
   const consumeSaltMsg = (socket, bufferManager) => {
     const buffer = bufferManager.getBuffer(socket)
-    // console.log('----------------> consume <----------------------', buffer.length)
+    console.log(
+      '----------------> consume <----------------------',
+      buffer.length
+    )
     if (buffer && buffer.length >= HEADER_LENGTH) {
       const header = Header(buffer)
       // console.log(red('************************************'))
@@ -38,7 +40,7 @@ module.exports = (port = 1337) => {
 
   const bufferManagerRegistry = {}
 
-  const handleData = socket => (buffer) => {
+  const handleData = socket => buffer => {
     const bufferManager = bufferManagerRegistry[socket.remotePort]
     bufferManager.addBuffer(socket, buffer)
     consumeSaltMsg(socket, bufferManager)
@@ -61,7 +63,7 @@ module.exports = (port = 1337) => {
     debug(green(`[socket-error] ${socket.remoteAddress}`))
   }
 
-  const server = net.createServer((socket) => {
+  const server = net.createServer(socket => {
     socket.on('data', handleData(socket))
     socket.on('close', handleClose(socket))
     socket.on('error', handleError(socket))
@@ -71,11 +73,11 @@ module.exports = (port = 1337) => {
     // consumeSaltMsg(socket, bufferManager)
   })
 
-  server.on('connection', (socket) => {
+  server.on('connection', socket => {
     debug(green(`[connection] ${socket.remoteAddress}`))
   })
 
-  server.on('error', (socket) => {
+  server.on('error', socket => {
     debug(green(`[server-error] ${socket.remoteAddress}`))
   })
 

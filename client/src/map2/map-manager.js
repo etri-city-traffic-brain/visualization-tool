@@ -21,7 +21,8 @@ import {
   makeCanvasLayer,
   makeToolLayer,
   makeVdsLayer,
-  makeCctvLayer
+  makeCctvLayer,
+  makeRseLayer
 } from '../layers'
 
 const ZOOM_MINIMUM = 13
@@ -62,12 +63,23 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     edgeLayer.getGeometries.bind(edgeLayer),
     eventBus
   )
+  const rseLayer = makeRseLayer(
+    map,
+    edgeLayer.getGeometries.bind(edgeLayer),
+    eventBus
+  )
+
   map.addLayer(edgeLayer)
-  // map.addLayer(gridLayer)
   map.addLayer(canvasLayer)
   map.addLayer(toolLayer)
-  map.addLayer(vdsLayer)
+  map.addLayer(rseLayer)
   map.addLayer(cctvLayer)
+  map.addLayer(vdsLayer)
+
+  rseLayer.hide()
+  cctvLayer.hide()
+  vdsLayer.hide()
+  toolLayer.hide() // default hide
 
   function toggleFocusTool () {
     const showHide = toolLayer.isVisible()
@@ -77,9 +89,8 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     toolLayer.toggleFocusTool()
   }
 
-  toolLayer.hide() // default hide
-
   eventBus.$on('salt:data', data => {
+    console.log('salt:data')
     if (data.simulationId !== simulationId) {
       return
     }
@@ -117,6 +128,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   })
 
   const edgeClicked = ({ target }) => {
+    console.log(target.getId())
     if (eventBus) {
       eventBus.$emit('link:selected', {
         ...target.properties,

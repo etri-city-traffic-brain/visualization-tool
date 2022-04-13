@@ -1,65 +1,57 @@
 import * as maptalks from 'maptalks'
+import axios from 'axios'
+
+function getColorCode () {
+  const makeColorCode = '0123456789ABCDEF'
+  let code = '#'
+  for (let count = 0; count < 6; count++) {
+    code = code + makeColorCode[Math.floor(Math.random() * 16)]
+  }
+  return code
+}
 
 function Layer2 (map, getEdges, eventBus) {
-  const layer = new maptalks.VectorLayer('rse-layer', [])
+  const layer = new maptalks.VectorLayer('rse', [], {
+    enableAltitude: true,
+    drawAltitude: {
+      polygonFill: '#1bbc9b',
+      polygonOpacity: 0.3,
+      lineWidth: 0
+    }
+  })
 
-  layer.updateRealtimeData = () => {
-    layer.clear()
-    getEdges()
-      .forEach(edge => {
-        if (edge.properties.vdsId) {
-          const c = edge.getCoordinates()
-          const p2 = c[0]
-          const p1 = c[c.length - 1]
-
-          const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-
-          const x = Math.cos(angle - Math.PI / 2) * 30
-          const y = Math.sin(angle - Math.PI / 2) * 30
-          const circle = new maptalks.Circle(edge.getCenter(), 10, {
-            symbol: {
-              lineColor: '#34495e',
-              lineWidth: 2,
-              polygonFill: '#1bbc9b',
-              polygonOpacity: 0.4,
-              textName: edge.properties.vdsId,
-              textPlacement: edge.properties.vdsId,
-              textSize: 20,
-              textFill: '#34495e',
-              textDy: y,
-              textDx: x
-            }
-          })
-          circle.on('mouseover', (x) => {
-
-          })
-          circle.on('mouseout', (x) => {
-          })
-          circle.on('click', (x) => {
-            const marker = x.target
-            const player = marker.animate({
-              symbol: {
-                polygonOpacity: 1,
-                textSize: 40
-              }
-            }, {
-              duration: 200
-            }, function (frame) {
-              if (frame.state.playState === 'finished') {
-                marker.updateSymbol({
-                  lineWidth: 2,
-                  polygonOpacity: 0.4,
-                  textSize: 20
-                })
-              }
-            })
-
-            eventBus.$emit('vds:selected', edge)
-          })
-          layer.addGeometry(circle)
-        }
+  axios({
+    url: '/salt/v1/rse',
+    method: 'get'
+  })
+    .then(res => res.data)
+    .then(data => {
+      // vdsTable = data
+      const geoJson = maptalks.GeoJSON.toGeometry(data)
+      geoJson.forEach(g => {
+        const c = getColorCode()
+        g.updateSymbol({
+          lineWidth: 5,
+          lineColor: c,
+          textName: g.properties.vehicleId,
+          textSize: 12,
+          textFill: c,
+          textHaloFill: '#fff',
+          textHaloRadius: 2
+        })
+        g.setInfoWindow({
+          title: 'RSE구간',
+          content: g.properties.vehicleId
+        })
+        g.on('click', ({ target }) => {
+          console.log(target)
+        })
+        g.properties.altitude = Math.random() * 200
       })
-  }
+      layer.addGeometry(geoJson)
+    })
+
+  map.on('zoomend moveend', () => {})
   return layer
 }
 
