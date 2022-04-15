@@ -11,31 +11,28 @@ import mapService from '../service/map-service'
 import signalGroups from '@/config/junction-config'
 import OptStatusLayer from './opt-status-layer'
 
-const addLayerTo = map => name => new maptalks.VectorLayer(name, [], {}).addTo(map)
+const addLayerTo = map => name =>
+  new maptalks.VectorLayer(name, [], {}).addTo(map)
 
 const { log } = console
 
 function makeGroupPolygon (group) {
-  const geometry = new maptalks.Polygon(
-    group.features.geometry.coordinates
-    , {
-      visible: true,
-      editable: true,
-      cursor: 'pointer',
-      shadowBlur: 0,
-      shadowColor: 'black',
-      draggable: false,
-      dragShadow: false, // display a shadow during dragging
-      drawOnAxis: null, // force dragging stick on a axis, can be: x, y
-      symbol: {
-        lineColor: '#34495e',
-        lineWidth: 2,
-        polygonFill: group.properties.color,
-        polygonOpacity: 0.2
-      }
+  const geometry = new maptalks.Polygon(group.features.geometry.coordinates, {
+    visible: true,
+    editable: true,
+    cursor: 'pointer',
+    shadowBlur: 0,
+    shadowColor: 'black',
+    draggable: false,
+    dragShadow: false, // display a shadow during dragging
+    drawOnAxis: null, // force dragging stick on a axis, can be: x, y
+    symbol: {
+      lineColor: '#34495e',
+      lineWidth: 2,
+      polygonFill: group.properties.color,
+      polygonOpacity: 0.2
     }
-
-  )
+  })
     .setMenu({
       items: [
         {
@@ -56,7 +53,7 @@ const [SA101, SA107, SA111, SA104] = signalGroups.map(value => {
   }
 })
 
-const groupColor = (nodeId) => {
+const groupColor = nodeId => {
   let color = 'grey'
   if (SA101.junctions.includes(nodeId)) {
     color = SA101.color
@@ -103,11 +100,11 @@ async function getLinkIds (map, { properties }) {
       feature.properties.ST_ND_ID === nodeId
   )
 
-  return filtered.map((feature) => {
+  return filtered.map(feature => {
     const { properties, geometry } = feature
     const { ST_ND_ID } = properties
 
-    properties.isForward = (ST_ND_ID === nodeId)
+    properties.isForward = ST_ND_ID === nodeId
 
     return {
       LINK_ID: properties.LINK_ID,
@@ -127,24 +124,25 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   signalGroupLayer.hide()
   new maptalks.control.Toolbar({
     position: 'top-right',
-    items: [{
-      item: '연동교차로 ',
-      click: () => toggleGroupLayer()
-    }]
-  })
-    .addTo(map)
+    items: [
+      {
+        item: '연동교차로 ',
+        click: () => toggleGroupLayer()
+      }
+    ]
+  }).addTo(map)
   const show = () => trafficLightsLayer.show()
   const hide = () => trafficLightsLayer.hide()
 
   const groups = signalGroups.map(group => {
     const area = makeGroupPolygon(group)
-    area.on('click', (e) => {
+    area.on('click', e => {
       events.$emit('signalGroup:clicked', e.target.properties)
     })
     return area
   })
 
-  map.on('zoomend', (event) => {
+  map.on('zoomend', event => {
     if (event.to < 14) {
       hide()
     } else {
@@ -154,7 +152,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
 
   signalGroupLayer.addGeometry(groups)
 
-  const selectConnection = async (target) => {
+  const selectConnection = async target => {
     const linkIds = await getLinkIds(map, target.owner)
     const lines = linkIds.map(makeLinkLine)
     linkLayer.clear()
@@ -162,7 +160,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     map.addLayer(linkLayer)
   }
 
-  const editConnection = async (target) => {
+  const editConnection = async target => {
     const { owner } = target
     const [x, y] = owner.toGeoJSONGeometry().coordinates
     const linkIds = await getLinkIds(map, target.owner)
@@ -180,7 +178,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     })
   }
 
-  const deleteConnection = (target) => {
+  const deleteConnection = target => {
     const { owner } = target
     const [x, y] = owner.toGeoJSONGeometry().coordinates
 
@@ -204,7 +202,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
         }
       ]
     })
-      .on('click', async (e) => {
+      .on('click', async e => {
         const target = e.target
         if (!target) {
           return
@@ -214,21 +212,22 @@ export default function SaltTrafficLightsLoader (map, element, events) {
           coordinates: target.toGeoJSONGeometry().coordinates
         })
       })
-      .on('mouseenter', (e) => {
-        e.target.updateSymbol({
-          textName: feature.properties.CROSS_NM,
-          textSize: 20,
-          markerFillOpacity: 1,
-          textFaceName: 'sans-serif',
-          textHaloFill: '#fff',
-          textHaloRadius: 15
-        })
-        e.target.bringToFront()
-      }).on('mouseout', (e) => {
-        e.target.updateSymbol({
-          markerFillOpacity: 0.7,
-          textName: ''
-        })
+      .on('mouseenter', e => {
+        // e.target.updateSymbol({
+        //   textName: feature.properties.CROSS_NM,
+        //   textSize: 20,
+        //   markerFillOpacity: 1,
+        //   textFaceName: 'sans-serif',
+        //   textHaloFill: '#fff',
+        //   textHaloRadius: 15
+        // })
+        // e.target.bringToFront()
+      })
+      .on('mouseout', e => {
+        // e.target.updateSymbol({
+        //   markerFillOpacity: 0.7,
+        //   textName: ''
+        // })
       })
       .setMenu({
         items: [
@@ -258,7 +257,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     }
     const { features } = await mapService.getTrafficLights(extent(map))
     trafficLightsLayer.clear()
-    const geometries = features.map((feature) => {
+    const geometries = features.map(feature => {
       const color = groupColor(feature.properties.NODE_ID)
 
       const trafficLight = makeTrafficLight(feature, color)
@@ -284,10 +283,12 @@ export default function SaltTrafficLightsLoader (map, element, events) {
       junctionIds.forEach(junctionId => {
         if (g.properties.NODE_ID === junctionId) {
           data.push({
-            coord: g.getCoordinates().add(0.00, 0.0003).toArray(),
+            coord: g
+              .getCoordinates()
+              .add(0.0, 0.0003)
+              .toArray(),
             text: '최적화 중 '
             // text: ''
-
           })
           // layer.setData([
           //   {
@@ -305,9 +306,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     layer.setData([])
   }
 
-  function setCurrentLoads (loads) {
-
-  }
+  function setCurrentLoads (loads) {}
 
   map.on('zoomend moveend', load)
 

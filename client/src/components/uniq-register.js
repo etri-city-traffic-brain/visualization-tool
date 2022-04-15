@@ -1,4 +1,3 @@
-
 import moment from 'moment'
 
 import simulationService from '@/service/simulation-service'
@@ -6,7 +5,10 @@ import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
-const generateRandomId = (prefix = 'DEFU') => `${prefix.substring(0, 4).toUpperCase()}_${moment().year()}${moment().format('MM')}_${random().padStart(5, '0')}`
+const generateRandomId = (prefix = 'DEFU') =>
+  `${prefix.substring(0, 4).toUpperCase()}_${moment().year()}${moment().format(
+    'MM'
+  )}_${random().padStart(5, '0')}`
 const format = date => moment(date).format('YYYY-MM-DD')
 const getToday = () => format(new Date())
 
@@ -21,12 +23,15 @@ const periodOptions = [
 ]
 
 const areaOptions = [
-  { value: 10, text: '테스트지역' },
-  { value: 250, text: '대전광역시' },
-  { value: 25030, text: '서구' },
-  { value: 25040, text: '유성구' },
-  { value: 290, text: '세종시' },
-  { value: 29010, text: '세종특별자치시' }
+  { value: 'doan', text: '도안' },
+  { value: 'dj_all', text: '대전전체' },
+  { value: 'sa_1_6_17', text: 'sa_1_6_17' }
+  // { value: 10, text: '테스트지역' },
+  // { value: 250, text: '대전광역시' },
+  // { value: 25030, text: '서구' },
+  // { value: 25040, text: '유성구' },
+  // { value: 290, text: '세종시' },
+  // { value: 29010, text: '세종특별자치시' }
 ]
 
 const scriptOptions = [
@@ -75,7 +80,7 @@ export default {
       areaSelected: areaOptions[0].value, //
       scriptSelected: scriptOptions[0].value, //
       intervalSelected: intervalOptions[0].value, //
-      junctionId: '',
+      junctionId: 'SA101,SA107,SA111,SA104',
       epoch: 10,
       extent: null, // current map extent
       dockerImage: 'images4uniq/optimizer:v0.1a.20211028',
@@ -130,7 +135,7 @@ export default {
       const from = moment(`${this.fromDate} ${this.fromTime}`)
       const to = moment(`${this.toDate} ${this.toTime}`)
       const begin = moment.duration(this.fromTime).asSeconds()
-      const end = (to.diff(from) / 1000 - 60) + begin
+      const end = to.diff(from) / 1000 - 60 + begin
       const days = to.diff(from, 'days') + 1
       const day = from.day()
 
