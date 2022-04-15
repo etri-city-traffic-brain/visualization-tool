@@ -25,24 +25,38 @@ const downloadScenarioTest = require('./utils/prepare-scenario-test')
 const addSimulation = require('../../main/simulation-manager/crud/create')
 
 const {
-  updateStatus, currentTimeFormatted, getSimulations, config
+  updateStatus,
+  currentTimeFormatted,
+  getSimulations,
+  config
 } = require('../../globals')
 
 const { base, server } = config
 const host = server.ip
-const existSimulation = id => getSimulations().find({ id }).value()
+const existSimulation = id =>
+  getSimulations()
+    .find({ id })
+    .value()
 const stringify = obj => JSON.stringify(obj, false, 2)
 
-const randomId = (num) => ('S-' + ((Math.random() * 10000000) + '').replace('.', '')).substring(0, 14) + '-' + num
+const randomId = num =>
+  ('S-' + (Math.random() * 10000000 + '').replace('.', '')).substring(0, 14) +
+  '-' +
+  num
 
 async function createScenarioFile (targetDir, { host, body, id }, type) {
   await writeFile(
-    `${targetDir}/salt.scenario.json`,
+    `${targetDir}/doan_${type}.scenario.json`,
     stringify(makeScenario({ host, ...body, id }, type))
   )
 }
 
-const makeOptScenario = (id, { configuration: { begin, end, period, interval = 10 } }, fileDir) => {
+const makeOptScenario = (
+  id,
+  { configuration: { region, begin, end, period, interval = 10 } },
+  fileDir
+) => {
+  console.log('make scenario:', region)
   return {
     scenario: {
       id,
@@ -55,11 +69,11 @@ const makeOptScenario = (id, { configuration: { begin, end, period, interval = 1
       },
       input: {
         fileType: 'SALT',
-        node: 'doan.nod.xml',
-        link: 'doan.edg.xml',
-        connection: 'doan.con.xml',
-        trafficLightSystem: 'doan_20210421.tss.xml',
-        route: 'dj_doan_kaist_2h.rou.xml'
+        node: `${region}.node.xml`,
+        link: `${region}.edge.xml`,
+        connection: `${region}.connection.xml`,
+        trafficLightSystem: `${region}.tss.xml`,
+        route: `${region}.rou.xml`
       },
       parameter: {
         minCellLength: 30.0,
@@ -79,10 +93,7 @@ const makeOptScenario = (id, { configuration: { begin, end, period, interval = 1
 async function createOPtScenarioFile (id, body, outDir, file) {
   const configFile = makeOptScenario(id, body, file)
   // console.log(configFile)
-  await writeFile(
-    outDir,
-    stringify(configFile)
-  )
+  await writeFile(outDir, stringify(configFile))
 }
 
 async function prepareOptimization (ids, body) {
@@ -90,14 +101,31 @@ async function prepareOptimization (ids, body) {
   const simOutputDir = `${base}/output/${ids[0]}`
   await mkdir(simOutputDir)
 
-  const path = '/home/ubuntu/uniq-sim/routes/scenario.zip'
+  const region = body.configuration.region // 'doan'
+  // console.log('prepare simulation', body)
+  const path = `/home/ubuntu/uniq-sim/routes/scenario_${region}.zip`
   await unzip(path, { dir: targetDir })
   // await mkdir(targetDir)
   // await mkdir(`${targetDir}/scenario`)
   // await mkdir(`${targetDir}/scenario/doan`)
-  createOPtScenarioFile(ids[0], body, `${targetDir}/scenario/doan/salt.scenario.train.json`, 'output/rl/')
-  createOPtScenarioFile(ids[1], body, `${targetDir}/scenario/doan/salt.scenario.test.json`, 'output/test/')
-  createOPtScenarioFile(ids[2], body, `${targetDir}/scenario/doan/salt.scenario.simulation.json`, 'output/ft/')
+  createOPtScenarioFile(
+    ids[0],
+    body,
+    `${targetDir}/scenario_${region}/${region}/${region}_train.scenario.json`,
+    'output/train/'
+  )
+  createOPtScenarioFile(
+    ids[1],
+    body,
+    `${targetDir}/scenario_${region}/${region}/${region}_test.scenario.json`,
+    'output/test/'
+  )
+  createOPtScenarioFile(
+    ids[2],
+    body,
+    `${targetDir}/scenario_${region}/${region}/${region}_simulate.scenario.json`,
+    'output/simulate/'
+  )
   updateStatus(ids[0], 'ready', {})
 }
 
@@ -112,7 +140,6 @@ async function prepareSimulation (id, body, role, slaves = [], type) {
     // await addSimulation({ ...body, id, slaves, role })
     // console.log('**** add')
     // await prepareOptimization([id, ...slaves], body)
-
     // const file1 = makeOptScenario({ id, host, body })
   } else {
     const simInputDir = `${base}/data/${id}`
@@ -161,7 +188,12 @@ module.exports = async (req, res, next) => {
       // req.body.masterId = id
       // await prepareSimulation(idTest, req.body, ROLE.TEST, [], 'optimization')
       // await prepareSimulation(idFixed, req.body, ROLE.FIXED, [], 'optimization')
-      await addSimulation({ ...req.body, id, slaves: [idTest, idFixed], role: ROLE.TRAINING })
+      await addSimulation({
+        ...req.body,
+        id,
+        slaves: [idTest, idFixed],
+        role: ROLE.TRAINING
+      })
       await prepareOptimization([id, idTest, idFixed], req.body)
     } else {
       console.log('prepare simulation data')
