@@ -1,9 +1,9 @@
-
 const fse = require('fs-extra')
 const fs = require('fs')
 const csv = require('csv-parser')
 
 async function read (simulationId, type) {
+  console.log('read', simulationId, type)
   let file
   if (type === 'ft') {
     file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/ft/ft_phase_reward_output.txt`
@@ -21,9 +21,10 @@ async function csvToObj (file) {
   const map = Object.create({})
   return new Promise((resolve, reject) => {
     try {
-      fse.createReadStream(file)
+      fse
+        .createReadStream(file)
         .pipe(csv())
-        .on('data', (row) => {
+        .on('data', row => {
           const target = map[row.tl_name] || []
           target.push({
             phase: row.phase,

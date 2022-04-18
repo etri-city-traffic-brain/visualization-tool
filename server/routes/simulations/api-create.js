@@ -105,25 +105,40 @@ async function prepareOptimization (ids, body) {
   // console.log('prepare simulation', body)
   const path = `/home/ubuntu/uniq-sim/routes/scenario_${region}.zip`
   await unzip(path, { dir: targetDir })
+
+  console.log('try to rename')
+  console.log(
+    'rename',
+    `${targetDir}/scenario_${region}`,
+    'to',
+    `${targetDir}/scenario`
+  )
+  try {
+    fs.renameSync(`${targetDir}/scenario_${region}`, `${targetDir}/scenario`)
+  } catch (err) {
+    console.log(err)
+  }
+  console.log('success')
+
   // await mkdir(targetDir)
   // await mkdir(`${targetDir}/scenario`)
   // await mkdir(`${targetDir}/scenario/doan`)
   createOPtScenarioFile(
     ids[0],
     body,
-    `${targetDir}/scenario_${region}/${region}/${region}_train.scenario.json`,
+    `${targetDir}/scenario/${region}/${region}_train.scenario.json`,
     'output/train/'
   )
   createOPtScenarioFile(
     ids[1],
     body,
-    `${targetDir}/scenario_${region}/${region}/${region}_test.scenario.json`,
+    `${targetDir}/scenario/${region}/${region}_test.scenario.json`,
     'output/test/'
   )
   createOPtScenarioFile(
     ids[2],
     body,
-    `${targetDir}/scenario_${region}/${region}/${region}_simulate.scenario.json`,
+    `${targetDir}/scenario/${region}/${region}_simulate.scenario.json`,
     'output/simulate/'
   )
   updateStatus(ids[0], 'ready', {})
