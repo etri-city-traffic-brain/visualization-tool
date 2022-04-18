@@ -6,7 +6,7 @@ async function read (simulationId, type) {
   console.log('read', simulationId, type)
   let file
   if (type === 'ft') {
-    file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/ft/ft_phase_reward_output.txt`
+    file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/simulate/ft_phase_reward_output.txt`
   } else {
     file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/test/rl_phase_reward_output.txt`
   }

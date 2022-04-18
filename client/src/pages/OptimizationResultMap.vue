@@ -50,7 +50,10 @@
 
       </div>
       <div class="bg-gray-700 mt-1 p-1">
-      <button class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="getReward" size="sm">업데이트 리워드</button>
+      <button
+        class="bg-gray-500 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="getReward" size="sm">
+        Refresh
+      </button>
       </div>
       <div class="mt-1 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded">
       <!-- 최적화 진행률 -->
@@ -154,13 +157,13 @@
     <!-- -------------------- -->
     <div class="reward-charts flex flex-wrap">
       <div v-for="(chart, idx) of rewardCharts" :key="idx" class="p-1">
-        <div class="text-center text-xs text-white px-2 pt-1 w-36- bg-gray-500 rounded-t-xl tracking-wide">{{ chart.label }}</div>
+        <div class="text-center text-xs text-white px-2 pt-1 w-36- bg-gray-600 rounded-t-xl tracking-wide">{{ chart.label }}</div>
         <!-- <div class="bg-white p-1"> -->
         <div class="bg-gray-700 pb-1 pr-1">
           <line-chart
             :chartData="chart"
             :options="defaultOption({}, ()=>{})"
-            :height="90"
+            :height="120"
             :width="200"
           />
         </div>
@@ -212,9 +215,10 @@
     /* height: 100%; */
     position: fixed;
     z-index:100;
-    top: 50px;
+    top: 100px;
     padding: 0;
     left: 280px;
+    opacity: 0.8;
   }
 
   .uniq-bottom-left {

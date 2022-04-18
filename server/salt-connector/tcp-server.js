@@ -17,10 +17,10 @@ module.exports = (port = 1337) => {
 
   const consumeSaltMsg = (socket, bufferManager) => {
     const buffer = bufferManager.getBuffer(socket)
-    console.log(
-      '----------------> consume <----------------------',
-      buffer.length
-    )
+    // console.log(
+    //   '----------------> consume <----------------------',
+    //   buffer.length
+    // )
     if (buffer && buffer.length >= HEADER_LENGTH) {
       const header = Header(buffer)
       // console.log(red('************************************'))

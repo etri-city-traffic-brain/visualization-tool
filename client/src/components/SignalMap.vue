@@ -64,6 +64,7 @@ export default {
         })
 
         this.$on('signalGroup:clicked', group => {
+          console.log('add signal group')
           this.addItem(group.groupId)
         })
 

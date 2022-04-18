@@ -148,7 +148,7 @@
             size="sm"
             variant="secondary"
             v-b-tooltip.hover
-            title="시뮬레이션을 중지합니다."
+
             @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
             v-if="row.item.status === 'running'">
               <b-icon icon="stop-fill"/>

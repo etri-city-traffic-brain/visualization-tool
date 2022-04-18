@@ -61,24 +61,25 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
   return {
     labels,
     label,
-    datasets: [{
-      label: 'reward',
-      backgroundColor: 'skyblue',
-      borderColor: 'skyblue',
-      data,
-      fill: false,
-      borderWidth: 1,
-      pointRadius: 1
-    },
-    {
-      label: '40avg',
-      backgroundColor: 'red',
-      borderColor: 'red',
-      data: data2,
-      fill: false,
-      borderWidth: 1,
-      pointRadius: 1
-    }
+    datasets: [
+      {
+        label: 'reward',
+        backgroundColor: 'skyblue',
+        borderColor: 'skyblue',
+        data,
+        fill: false,
+        borderWidth: 1,
+        pointRadius: 1
+      },
+      {
+        label: '40avg',
+        backgroundColor: 'red',
+        borderColor: 'red',
+        data: data2,
+        fill: false,
+        borderWidth: 1,
+        pointRadius: 1
+      }
     ]
   }
 }
@@ -95,15 +96,19 @@ const makeLineData = (data1 = [], data2 = []) => {
 
 const randomId = () => `map-${Math.floor(Math.random() * 100)}`
 
-const calcAvgSpeed = roads => roads
-  .map(road => road.speed)
-  .reduce((acc, cur) => (acc += cur), 0) / roads.length
+const calcAvgSpeed = roads =>
+  roads.map(road => road.speed).reduce((acc, cur) => (acc += cur), 0) /
+  roads.length
 
 const initSimulationData = async (mapId, slave, eventTarget) => {
   const map = makeMap({ mapId: mapId, zoom: 15 })
 
   const bus = new Vue({})
-  const mapManager = MapManager({ map: map, simulationId: slave, eventBus: bus })
+  const mapManager = MapManager({
+    map: map,
+    simulationId: slave,
+    eventBus: bus
+  })
 
   const wsClient = WebSocketClient({ simulationId: slave, eventBus: bus })
   const trafficLightManager = TrafficLightManager(map, null, eventTarget)
@@ -121,7 +126,7 @@ const initSimulationData = async (mapId, slave, eventTarget) => {
   }
 }
 
-const aggregate = (objs1) => {
+const aggregate = objs1 => {
   if (objs1.length < 1) {
     return []
   }
@@ -188,7 +193,6 @@ export default {
         linkSpeeds: [],
         currentSpeeds: [],
         speedsPerStep: {}
-
       },
       chart: {
         currentSpeedChart: {}, // realtime chart
@@ -219,6 +223,7 @@ export default {
       phaseRewardChartFt: null,
       phaseRewardChartRl: null,
       selectedNode: '목원대네거리',
+      // selectedNode: '미래부동산삼거리',
       showWaitingMsg: false
     }
   },
@@ -236,13 +241,14 @@ export default {
 
     window.removeEventListener('resize', this.getWindowHeight)
   },
-  computed: {
-  },
+  computed: {},
   async mounted () {
     log(`${this.$options.name} is mounted`)
     const optimizationId = this.$route.params ? this.$route.params.id : null
 
-    const { simulation, ticks } = await simulationService.getSimulationInfo(optimizationId)
+    const { simulation, ticks } = await simulationService.getSimulationInfo(
+      optimizationId
+    )
 
     this.status = simulation.status
 
@@ -265,20 +271,20 @@ export default {
     const bus2 = this.simulations[1].bus
 
     const initSaltEventHandler = (bus, chart, target) => {
-      bus.$on('salt:data', (d) => {
+      bus.$on('salt:data', d => {
         const avgSpeed = calcAvgSpeed(d.roads)
-        chart.currentSpeeds.push((avgSpeed).toFixed(2) * 1)
+        chart.currentSpeeds.push(avgSpeed.toFixed(2) * 1)
       })
-      bus.$on('salt:status', async (status) => {
+      bus.$on('salt:status', async status => {
         target.progress1 = status.progress
         this.showWaitingMsg = false
       })
       bus.$on('salt:finished', async () => {
-        log('**** SIMULATION FINISHED *****')
         this.progress1 = 100
         if (target.progress1 >= 100 && target.progress2 >= 100) {
           this.status = 'finished'
-          this.makeToast('테스트가 완료 되었습니다.', 'info')
+          this.makeToast('bus1-테스트가 완료 되었습니다.', 'info')
+          console.log('test finished')
         }
       })
     }
@@ -287,24 +293,24 @@ export default {
 
     bus2.$on('salt:data', d => {
       const avgSpeed = calcAvgSpeed(d.roads)
-      this.chart2.currentSpeeds.push((avgSpeed).toFixed(2) * 1)
+      this.chart2.currentSpeeds.push(avgSpeed.toFixed(2) * 1)
     })
 
-    bus2.$on('salt:status', async (status) => {
+    bus2.$on('salt:status', async status => {
       this.progress2 = status.progress
       this.showWaitingMsg = false
     })
 
     bus2.$on('salt:finished', async () => {
-      log('**** SIMULATION FINISHED *****')
       this.progress2 = 100
       if (this.progress1 >= 100 && this.progress2 >= 100) {
         this.status = 'finished'
-        this.makeToast('테스트가 완료 되었습니다.', 'info')
+        console.log('test finished')
+        this.makeToast('bus2 테스트가 완료 되었습니다.', 'info')
       }
     })
 
-    bus1.$on('ws:error', (error) => {
+    bus1.$on('ws:error', error => {
       this.makeToast(error.message, 'warning')
     })
 
@@ -312,26 +318,79 @@ export default {
       this.makeToast('ws connection closed', 'warning')
     })
 
-    this.$on('signalGroup:clicked', (p) => {
+    this.$on('signalGroup:clicked', p => {
       this.makeToast(p.groupId, 'info')
     })
 
-    this.$on('junction:clicked', async (p) => {
+    this.$on('junction:clicked', async p => {
       const crossName = signalService.nodeIdToName(p.nodeId)
       this.selectedNode = crossName
-      const phaseRewardFt = await optimizationService.getPhaseReward(this.simulation.id, 'ft')
-      const phaseRewardRl = await optimizationService.getPhaseReward(this.simulation.id, 'rl')
+      if (!this.dataFt) {
+        this.dataFt = await optimizationService
+          .getPhaseReward(this.simulation.id, 'ft')
+          .then(res => res.data)
+      }
 
-      const dataFt = phaseRewardFt.data
-      const dataRl = phaseRewardRl.data
-      const ft = dataFt[crossName]
-      const rl = dataRl[crossName]
+      const ft = this.dataFt[crossName]
+      if (ft) {
+        this.phaseRewardChartFt.setOption(drawChart.makeOption(ft))
+      } else {
+        this.phaseRewardChartFt.setOption(drawChart.makeOption([]))
+      }
 
-      this.phaseRewardChartFt.setOption(drawChart.makeOption(ft))
-      this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
+      if (!this.dataRl) {
+        this.dataRl = await optimizationService
+          .getPhaseReward(this.simulation.id, 'rl')
+          .then(res => res.data)
+      }
+
+      const rl = this.dataRl[crossName]
+      if (rl) {
+        this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
+      } else {
+        this.phaseRewardChartRl.setOption(drawChart.makeOption([]))
+      }
+
+      // optimizationService
+      //   .getPhaseReward(this.simulation.id, 'ft')
+      //   .then(res => res.data)
+      //   .then(dataFt => {
+      //     this.dataFt = dataFt
+      //     const ft = dataFt[crossName]
+      //     if (ft) {
+      //       this.phaseRewardChartFt.setOption(drawChart.makeOption(ft))
+      //     } else {
+      //       this.phaseRewardChartFt.setOption(drawChart.makeOption([]))
+      //     }
+      //   })
+      // optimizationService
+      //   .getPhaseReward(this.simulation.id, 'rl')
+      //   .then(res => res.data)
+      //   .then(dataRl => {
+      //     this.dataRl = dataRl
+      //     const rl = dataRl[crossName]
+      //     if (rl) {
+      //       this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
+      //     } else {
+      //       this.phaseRewardChartRl.setOption(drawChart.makeOption([]))
+      //     }
+      //   })
+
+      // // const dataFt = phaseRewardFt.data
+      // const dataRl = phaseRewardRl.data
+      // // const ft = dataFt[crossName]
+      // const rl = dataRl[crossName]
+
+      // if (rl) {
+      //   // this.phaseRewardChartFt.setOption(drawChart.makeOption(ft))
+      //   this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
+      // } else {
+      //   // this.phaseRewardChartFt.setOption(drawChart.makeOption([]))
+      //   this.phaseRewardChartRl.setOption(drawChart.makeOption([]))
+      // }
     })
 
-    this.$on('junction:selected', async (d) => {
+    this.$on('junction:selected', async d => {
       this.updateJunctionSpeed(d)
       this.updatePhaseChart()
     })
@@ -339,6 +398,7 @@ export default {
     window.addEventListener('resize', this.resize)
 
     const result = await optimizationService.getRewardTotal(this.simulation.id)
+
     const results = Object.values(result.data)
 
     const total = results[0]
@@ -358,28 +418,36 @@ export default {
     //   this.makeToast(err.message, 'warning')
     // }
 
-    optimizationService.getPhaseReward(this.simulation.id, 'ft').then(phaseRewardFt => {
-      const dataFt = phaseRewardFt.data
-      const ft = dataFt[this.selectedNode]
+    // optimizationService
+    //   .getPhaseReward(this.simulation.id, 'ft')
+    //   .then(phaseRewardFt => {
+    //     const dataFt = phaseRewardFt.data
+    //     const ft = dataFt[this.selectedNode]
+    //     if (ft) {
+    //       this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], ft)
+    //     }
+    //   })
+    //   .catch(err => {
+    //     log(err.message)
+    //     this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
+    //   })
 
-      if (ft) {
-        this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], ft)
-      }
-    }).catch(err => {
-      log(err.message)
-      this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
-    })
+    // optimizationService
+    //   .getPhaseReward(this.simulation.id, 'rl')
+    //   .then(phaseRewardRl => {
+    //     const dataRl = phaseRewardRl.data
+    //     const rl = dataRl[this.selectedNode]
+    //     if (rl) {
+    //       this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], rl)
+    //     }
+    //   })
+    //   .catch(err => {
+    //     this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
+    //     log(err.message)
+    //   })
 
-    optimizationService.getPhaseReward(this.simulation.id, 'rl').then(phaseRewardRl => {
-      const dataRl = phaseRewardRl.data
-      const rl = dataRl[this.selectedNode]
-      if (rl) {
-        this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], rl)
-      }
-    }).catch(err => {
-      this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
-      log(err.message)
-    })
+    this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
+    this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
   },
   methods: {
     ...stepperMixin,
@@ -431,15 +499,20 @@ export default {
       this.chart2.currentSpeeds = []
 
       // optimizationService.runFixed(this.simulation.id, this.fixedSlave).then(v => {})
-      optimizationService.runTest(this.simulation.id, this.testSlave, this.selectedEpoch).then(v => {})
+      optimizationService
+        .runTest(this.simulation.id, this.testSlave, this.selectedEpoch)
+        .then(v => {})
       this.progress1 = 0
       this.progress2 = 0
       this.status = 'running'
       this.updateChartRealtime()
     },
     async updatePhaseChart () {
-      const phaseFixed = (await optimizationService.getPhase(this.fixedSlave, 'fixed')).data
-      const phaseTest = (await optimizationService.getPhase(this.testSlave)).data
+      const phaseFixed = (
+        await optimizationService.getPhase(this.fixedSlave, 'fixed')
+      ).data
+      const phaseTest = (await optimizationService.getPhase(this.testSlave))
+        .data
       this.phaseFixed = makePhaseChart(phaseFixed, 'fixed')
       this.phaseTest = makePhaseChart(phaseTest)
     },
@@ -447,8 +520,12 @@ export default {
       const linkIds = junction.linkIds.map(v => v.LINK_ID)
       this.chart.junctionSpeeds = makeLineData(
         ...this.simulations.map(simulation => {
-          const speedsArray = Object.entries(simulation.mapManager.getEdgesInView())
-            .filter(entry => entry[0].includes('-') && linkIds.includes(entry[0]))
+          const speedsArray = Object.entries(
+            simulation.mapManager.getEdgesInView()
+          )
+            .filter(
+              entry => entry[0].includes('-') && linkIds.includes(entry[0])
+            )
             .map(e => e[1])
           return aggregate(speedsArray)
         })
@@ -460,15 +537,18 @@ export default {
 
       const moveHandler = (map1, map2) => {
         const moveTo = (map, target) => {
-          map.animateTo({
-            center: target.getCenter(),
-            zoom: target.getZoom()
-          }, {
-            duration: 10
-          })
+          map.animateTo(
+            {
+              center: target.getCenter(),
+              zoom: target.getZoom()
+            },
+            {
+              duration: 10
+            }
+          )
         }
 
-        return (e) => {
+        return e => {
           if (e.target.id === map1.id) {
             moveTo(map2, e.target)
           }
@@ -484,7 +564,9 @@ export default {
       map2.on('zoomend', map2ToMap1)
     },
     async checkStatus () {
-      const { simulation } = await simulationService.getSimulationInfo(this.simulation.id)
+      const { simulation } = await simulationService.getSimulationInfo(
+        this.simulation.id
+      )
       this.status = simulation.status
     }
   }

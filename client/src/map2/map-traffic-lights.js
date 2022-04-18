@@ -33,15 +33,10 @@ function makeGroupPolygon (group) {
       polygonOpacity: 0.2
     }
   })
-    .setMenu({
-      items: [
-        {
-          item: `🙂 연동 교차로 선택 - <div style="border: 1px solid gray;">${group.properties.groupId}</div>`,
-          click: () => {}
-        }
-      ]
-    })
-    .openMenu()
+  geometry.setInfoWindow({
+    title: '연동교차로',
+    content: group.properties.groupId
+  })
   geometry.properties = group.properties
   return geometry
 }
@@ -121,7 +116,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   const trafficLightsLayer = addLayer('trafficLightsLayer')
   const linkLayer = addLayer('tmpLinkLayer')
   const signalGroupLayer = addLayer('signalGroupLayer')
-  signalGroupLayer.hide()
+  // signalGroupLayer.hide()
   new maptalks.control.Toolbar({
     position: 'top-right',
     items: [
@@ -213,39 +208,30 @@ export default function SaltTrafficLightsLoader (map, element, events) {
         })
       })
       .on('mouseenter', e => {
-        // e.target.updateSymbol({
-        //   textName: feature.properties.CROSS_NM,
-        //   textSize: 20,
-        //   markerFillOpacity: 1,
-        //   textFaceName: 'sans-serif',
-        //   textHaloFill: '#fff',
-        //   textHaloRadius: 15
-        // })
-        // e.target.bringToFront()
+        e.target.updateSymbol([
+          {
+            markerFillOpacity: 1
+          }
+        ])
+        e.target.bringToFront()
       })
       .on('mouseout', e => {
-        // e.target.updateSymbol({
-        //   markerFillOpacity: 0.7,
-        //   textName: ''
-        // })
-      })
-      .setMenu({
-        items: [
+        e.target.updateSymbol([
           {
-            item: `선택(${feature.properties.NODE_ID.substring(0, 10)})`,
-            click: editConnection
+            markerFillOpacity: 0.7,
+            textName: ''
           }
-          // {
-          //   item: '삭제',
-          //   click: deleteConnection
-          // },
-          // {
-          //   item: '선택',
-          //   click: selectConnection
-          // }
-        ]
+        ])
       })
-      .openMenu()
+    // .setMenu({
+    //   items: [
+    //     {
+    //       item: `선택(${feature.properties.NODE_ID.substring(0, 10)})`,
+    //       click: editConnection
+    //     }
+    //   ]
+    // })
+    // .openMenu()
 
     trafficLight.properties = feature.properties
     return trafficLight

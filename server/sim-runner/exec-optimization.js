@@ -1,100 +1,65 @@
 const chalk = require('chalk')
 
 const {
-  saltPath: { home, volume }
+  saltPath: { volume: volumePath }
 } = require('../config')
 
 const { log } = console
-const { dockerCommand } = require('docker-cli-js')
+const { dockerCommand: docker } = require('docker-cli-js')
 
-// const img = 'images4uniq/optimizer:v0.1a.20210927'
-// const img = 'images4uniq/optimizer:v0.1a.20210929'
-// const img = 'images4uniq/optimizer:v0.1a.20210930'
-// const img = 'images4uniq/optimizer:v0.1a.20210930b'
-// const defaultImg = 'images4uniq/optimizer:v0.1a.20211028'
-const defaultImg = 'images4uniq/optimizer:v0.1a.20220404'
+const DEFAULT_DOCKER_IMAGE = 'images4uniq/optimizer:v0.1a.20220418'
 
+/**
+ * 도커 명령을 사용해서 신호 최적화 컨테이너 실행
+ *
+ * @param {Object} simulation
+ * @param {String} mode
+ * @param {Number} modelNum
+ * @returns {Promise}
+ */
 async function run (simulation, mode, modelNum) {
   if (!simulation || !mode) {
     log('check argruments: simulation or mode is missed')
     return false
   }
 
-  console.log('docker image: ', simulation.configuration.dockerImage)
   const epoch = simulation.configuration.epoch
-  // const img = simulation.configuration.dockerImage || defaultImg
-  const img = 'images4uniq/optimizer:v0.1a.20220404'
+  const dockerImage =
+    simulation.configuration.dockerImage || DEFAULT_DOCKER_IMAGE
   const begin = 0
   const end = simulation.configuration.end - simulation.configuration.begin + 60
   const modelSavePeriod = simulation.configuration.modelSavePeriod || 20
   const map = simulation.configuration.region
-  log('******************************************')
-  log('*       ID: ', simulation.id)
-  log('*     Mode: ', mode)
-  log('*    Model: ', modelNum)
-  log('*    begin: ', begin)
-  log('*      end: ', end)
-  log('*  modelSavePeriod: ', modelSavePeriod)
-  log('******************************************')
 
-  const sId = simulation.id
-  const fTrain = 'io/scenario/doan/salt.scenario.train.json'
-  const fTest = 'io/scenario/doan/salt.scenario.test.json'
-  const fSimulate = 'io/scenario/doan/salt.scenario.simulation.json'
+  const volume = `${volumePath}/${simulation.id}:/uniq/optimizer/io`
 
-  // const volume = `c/home/ubuntu/uniq-sim/data/${sId}:/uniq/optimizer/io`
-  const volume_ = `${volume}/${sId}:/uniq/optimizer/io`
+  const targetTL = 'SA 101,SA 104,SA 107,SA 111'
 
-  // prettier-ignore
-  const trainCmd = [
-    'run', '--rm',
-    '--name', sId,
-    '-v', volume_,
-    img, 'python', './run.py',
-    '--mode', 'train',
-    '--map', map,
-    '--action', 'offset',
-    // '--method', 'sappo',
-    '--start-time', begin,
-    '--end-time', end,
-    '--epoch', epoch,
-    '--io-home', 'io',
-    // '--scenario-file-path', fTrain,
-    '--scenario-file-path', 'io/scenario',
-    '--model-save-period ', modelSavePeriod,
-    '--result-comp', 'False'
-  ]
+  const makeCmd = mode =>
+    `run --rm -v ${volume} ${dockerImage} python ./run.py \
+     --mode ${mode} \
+     --map ${map} \
+     --start-time ${begin} \
+     --end-time ${end} \
+     --epoch ${epoch} \
+     --io-home io \
+     --scenario-file-path io/scenario \
+     --target-TL "${targetTL}" \
+     --model-save-period ${modelSavePeriod} \
+     --result-comp False \
+     --action offset`
 
   if (mode === 'train') {
-    console.log('*** start train ***')
-    // return dockerCommand(`run --rm -v ${volume_} ${img} python ./run.py --mode train --start-time ${begin} --end-time ${end} --epoch ${epoch} --io-home io --scenario-file-path ${fTrain}`)
-    console.log(trainCmd.join(' '))
-    return dockerCommand(trainCmd.join(' '))
+    const cmd = `${makeCmd('train')} --model-save-period ${modelSavePeriod}`
+    log(chalk.green(cmd))
+    return docker(cmd)
   } else if (mode === 'test') {
-    dockerCommand(
-      `run --rm -v ${volume_} ${img} python ./run.py --mode simulate --start-time ${begin} --end-time ${end} --epoch 5 --io-home io --scenario-file-path ${fSimulate}`
-    )
-    return dockerCommand(
-      `run --rm -v ${volume_} ${img} python ./run.py --mode test --start-time ${begin} --end-time ${end} --epoch 5 --io-home io --model-num ${modelNum} --scenario-file-path ${fTest}`
-    )
+    const cmdSimu = `${makeCmd('simulate')}`
+    const cmdTest = `${makeCmd('test')} --model-num ${modelNum}`
+    return Promise.all([docker(cmdSimu), docker(cmdTest)])
   } else {
     return Promise.reject(new Error('unknown mode'))
   }
 }
 
 module.exports = run
-
-// exec({
-//   pythonPath,
-//   script,
-//   params: [
-//     '-s', scenarioFilePath,
-//     '-n', modelNum, // model num
-//     '-m', mode,
-//     '-t', 563103625,
-//     '-o', optimizationId,
-//     '-b', simulation.configuration.begin, // 시작
-//     '-e', simulation.configuration.end, // 종료
-//     '-ep', simulation.configuration.epoch || 9 // epoch 회수
-//   ]
-// })

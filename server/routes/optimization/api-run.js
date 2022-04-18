@@ -1,9 +1,12 @@
-
 const debug = require('debug')('api')
 const createError = require('http-errors')
 
-const { updateStatus, currentTimeFormatted, getSimulation } = require('../../globals')
-const { runSignalOptimization } = require('../../sim-runner')
+const {
+  updateStatus,
+  currentTimeFormatted,
+  getSimulation
+} = require('../../globals')
+const { executeOptimizer } = require('../../sim-runner')
 
 module.exports = async (req, res, next) => {
   const { id, mode, modelNum } = req.query
@@ -22,13 +25,19 @@ module.exports = async (req, res, next) => {
 
   updateStatus(id, 'running', { started: currentTimeFormatted(), epoch: 0 })
   res.send({})
-  runSignalOptimization(simulation, mode, modelNum)
+  executeOptimizer(simulation, mode, modelNum)
     .then(() => {
-      updateStatus(id, 'finished', { started: currentTimeFormatted(), epoch: 0 })
+      updateStatus(id, 'finished', {
+        started: currentTimeFormatted(),
+        epoch: 0
+      })
     })
     .catch(err => {
       debug(err)
-      updateStatus(id, 'error', { error: err.message.slice(0, 1000), ended: currentTimeFormatted() })
+      updateStatus(id, 'error', {
+        error: err.message.slice(0, 1000),
+        ended: currentTimeFormatted()
+      })
       next(createError(500, err.message))
     })
 }

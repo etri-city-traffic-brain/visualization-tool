@@ -4,7 +4,6 @@ const csv = require('csv-parser')
 // const fs = require('fs')
 
 async function read (simulationId) {
-  console.log('** read **')
   // const file = `/home/ubuntu/uniq-sim/output/${simulationId}/train/train_epoch_tl_reward.txt`
   const file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/train/train_epoch_tl_reward.txt`
 

@@ -90,7 +90,6 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   }
 
   eventBus.$on('salt:data', data => {
-    console.log('salt:data')
     if (data.simulationId !== simulationId) {
       return
     }

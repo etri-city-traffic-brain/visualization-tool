@@ -1,7 +1,7 @@
 export default [
   {
     properties: {
-      groupId: 'SA101',
+      groupId: 'SA 101',
       color: '#D2691E',
       junctions: [
         'cluster_563109510_563109511',
@@ -44,14 +44,9 @@ export default [
   },
   {
     properties: {
-      groupId: 'SA107',
+      groupId: 'SA 107',
       color: 'red',
-      junctions: [
-        '563103431',
-        '563103625',
-        '563106861',
-        '563103631'
-      ]
+      junctions: ['563103431', '563103625', '563106861', '563103631']
     },
     features: {
       geometry: {
@@ -71,7 +66,7 @@ export default [
   },
   {
     properties: {
-      groupId: 'SA111',
+      groupId: 'SA 111',
       color: 'cyan',
       junctions: [
         '563103639',
@@ -92,7 +87,7 @@ export default [
   },
   {
     properties: {
-      groupId: 'SA104',
+      groupId: 'SA 104',
       color: 'yellow',
       junctions: [
         'cluster_553803240_553803241_553803569_553803570_553803571_553803572_553803573_553803574_553803593_553803596_553805156_553805157_553807409_553807411_553807413_553807415_553807417_553807419',

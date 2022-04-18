@@ -80,10 +80,10 @@ export default {
       areaSelected: areaOptions[0].value, //
       scriptSelected: scriptOptions[0].value, //
       intervalSelected: intervalOptions[0].value, //
-      junctionId: 'SA101,SA107,SA111,SA104',
+      junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
-      dockerImage: 'images4uniq/optimizer:v0.1a.20211028',
+      dockerImage: 'images4uniq/optimizer:v0.1a.20220418',
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],
