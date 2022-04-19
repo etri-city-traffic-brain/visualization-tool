@@ -183,9 +183,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     }
 
     try {
-      const start = new Date().getTime()
       const { features } = await mapService.getMap(extent(map))
-      console.log('ajax loading:', new Date().getTime() - start)
       if (event === 'zoomend') {
         removeEdges(edgeLayer.getGeometries())
         addFeatures(features)
@@ -204,10 +202,8 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
       } else {
         addFeatures(features)
       }
-      console.log('update UI:', new Date().getTime() - start)
       eventBus.$emit('map:loaded')
     } catch (err) {
-      log(err)
       log(err.message)
     }
     await updateSimulationResult()

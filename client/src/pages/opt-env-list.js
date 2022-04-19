@@ -30,7 +30,6 @@ export default {
   methods: {
     async reload () {
       this.envs = await optEnvService.get()
-      console.log(this.envs)
     },
     hideCreateSimulationDialog () {},
     async saveOptEnvConfig (config) {

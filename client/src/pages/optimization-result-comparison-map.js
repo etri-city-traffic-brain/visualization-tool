@@ -243,7 +243,6 @@ export default {
   },
   computed: {},
   async mounted () {
-    log(`${this.$options.name} is mounted`)
     const optimizationId = this.$route.params ? this.$route.params.id : null
 
     const { simulation, ticks } = await simulationService.getSimulationInfo(
@@ -403,8 +402,8 @@ export default {
 
     const total = results[0]
     const label = new Array(total.length).fill(0).map((v, i) => i)
-    const reward = total.map(v => Math.floor(v.reward))
-    const avg = total.map(v => Math.floor(v.rewardAvg))
+    const reward = total.map(v => Number(v.reward).toFixed(2))
+    const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
 
     this.rewards = makeRewardChart('total', label, reward, avg)
 

@@ -94,10 +94,10 @@ export default {
           path: 'OptimizationList',
           name: '신호최적화'
         },
-        {
-          path: 'SignalEditor',
-          name: '신호편집'
-        },
+        // {
+        //   path: 'SignalEditor',
+        //   name: '신호편집'
+        // },
         {
           path: 'Dashboard',
           name: '교통데이터 분석',

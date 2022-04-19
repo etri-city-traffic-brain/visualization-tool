@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-gray-500">
+  <div class="bg-gray-600 relative">
 
-    <div class="absolute z-50 inset-auto h-64 " v-if="showWaitingMsg">
+    <div class="fixed z-50 inset-auto h-full " v-if="showWaitingMsg">
       <div class="w-screen">
-        <div class="animate-pulse mx-auto text-center mt-5 w-60 bg-yellow-300 p-3 text-lg font-bold">
-          잠시후 실행 됩니다.
+        <div class="animate-pulse mx-auto text-center mt-5 bg-yellow-300 p-5 text-xl font-bold">
+          실행 준비 중입니다. 잠시후 실행 됩니다.
         </div>
       </div>
     </div>
@@ -19,26 +19,26 @@
         <div class="col-span-3">
           <div class="flex">
             <div class="flex-1">
-              <div class="text-center text-sm font-bold text-white w-36 pt-1 bg-blue-800 rounded-t-2xl ">
+              <div class="text-center text-sm font-bold text-white w-full pt-1 bg-gray-700 rounded-t-2xl ">
                 <div class="tracking-wider">기존신호</div>
               </div>
-              <div class="border-2 border-blue-800" >
+              <div class="border-2 border-gray-700" >
                 <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" />
-                <b-progress height="1rem" v-if="progress1 >= 0" class="no-border-radius">
-                  <b-progress-bar :value="progress1" animated striped variant="primary">
+                <b-progress height="1rem" v-if="progress1 > 0" class="no-border-radius">
+                  <b-progress-bar :value="progress1" variant="secondary">
                     <span> {{ progress1 }} %</span>
                   </b-progress-bar>
                 </b-progress>
               </div>
             </div>
             <div class="flex-1">
-              <div class="text-center text-sm text-black font-bold pt-1 w-36 bg-yellow-500 rounded-t-2xl">
+              <div class="text-center text-sm text-black font-bold pt-1 w-full bg-yellow-300 rounded-t-2xl">
                 <div class="tracking-wider">최적신호</div>
               </div>
-              <div class="border-2 border-yellow-500">
+              <div class="border-2 border-yellow-400">
                 <div :ref="mapIds[1]" :id="mapIds[1]" :style="{height: '600px'}" />
-                <b-progress height="1rem" v-if="progress2 >= 0" class="no-border-radius"  >
-                  <b-progress-bar :value="progress2" animated striped variant="primary">
+                <b-progress height="1rem" v-if="progress2 > 0" class="no-border-radius"  >
+                  <b-progress-bar :value="progress2" variant="secondary">
                     <span> {{ progress2 }} %</span>
                   </b-progress-bar>
                 </b-progress>
@@ -54,18 +54,18 @@
             <div class="text-center text-white mt-1 mb-1 bg-gray-800 p-1 rounded-lg">
               {{ selectedNode }}
             </div>
-            <div class="flex justify-between pr-3 items-center text-sm text-white text-center- font-bold pl-3 py-1 bg-blue-800 rounded-t-xl">
+            <div class="flex justify-between pr-3 items-center text-sm text-white text-center- font-bold pl-3 py-1 bg-gray-700 rounded-t-xl">
               기존신호
             </div>
-            <div class="border-2 border-blue-800">
+            <div class="border-2 border-gray-800">
               <div style="height:120px;width:100%;" ref="phase-reward-ft"></div>
             </div>
           </div>
           <div class="mt-1">
-            <div class="pr-3 flex justify-between items-center text-sm text-black font-bold pl-3 py-1 bg-yellow-500 rounded-t-lg">
+            <div class="pr-3 flex justify-between items-center text-sm text-black font-bold pl-3 py-1 bg-yellow-400 rounded-t-lg">
               최적신호
             </div>
-            <div class="border-2 border-yellow-500">
+            <div class="border-2 border-yellow-400">
               <div style="height:120px;width:100%" ref="phase-reward-rl"></div>
             </div>
           </div>
@@ -74,12 +74,20 @@
           <!-- </div> -->
         </div>
         <div class="ml-1">
-          <div class="bg-gray-700 w-max px-3 py-1 rounded-t-lg font-bold text-white">정보</div>
-          <div class="space-between text-white text-sm p-1 bg-gray-700">
-            <div class="text-center">{{ simulation.id }} </div>
-            <div class="border-gray-600">
-            <pre class="p-1 text-light h-48">{{ JSON.stringify(simulation.configuration, false, 2)}}</pre>
-          </div>
+          <!-- <div class="bg-gray-700 w-max- px-3 py-1 rounded-t-lg font-bold text-white"></div> -->
+          <div class="space-between text-white text-sm p-2 bg-gray-700 rounded-t-lg">
+            <!-- <div class="text-center"> 최적화 정보 </div> -->
+            <div class="border-gray-600 space-y-1">
+            <!-- <pre class="p-1 text-light h-48">{{ JSON.stringify(simulation.configuration, false, 2)}}</pre> -->
+              <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
+              <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ simulation.configuration.region }} </div>
+              <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">시간</span> <span class="text-xs">{{ simulation.configuration.fromTime }}({{ simulation.configuration.begin }}) ~
+              {{ simulation.configuration.toTime }}({{ simulation.configuration.end }})</span></div>
+              <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">주기</span> {{ simulation.configuration.period }} (초)</div>
+              <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">교차로</span> {{ simulation.configuration.junctionId }} </div>
+              <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">이미지</span> <span class="text-xs">{{ simulation.configuration.dockerImage }} </span></div>
+              <div> <span class="bg-gray-500 text-white rounded text-sm px-1 font-bold">스크립트</span> {{ simulation.configuration.script }} </div>
+            </div>
             <div class="">
               <div>
 
@@ -148,7 +156,7 @@
                 <line-chart
                   :chartData="chart.currentSpeedChart"
                   :options="lineChartOption({})"
-                  :height="120"
+                  :height="150"
                 />
               </div>
             </div>

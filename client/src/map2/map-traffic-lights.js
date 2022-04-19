@@ -113,16 +113,22 @@ async function getLinkIds (map, { properties }) {
 
 export default function SaltTrafficLightsLoader (map, element, events) {
   const addLayer = addLayerTo(map)
+  const signalGroupLayer = addLayer('signalGroupLayer')
   const trafficLightsLayer = addLayer('trafficLightsLayer')
   const linkLayer = addLayer('tmpLinkLayer')
-  const signalGroupLayer = addLayer('signalGroupLayer')
   // signalGroupLayer.hide()
   new maptalks.control.Toolbar({
     position: 'top-right',
     items: [
       {
         item: '연동교차로 ',
-        click: () => toggleGroupLayer()
+        click: () => {
+          if (signalGroupLayer.isVisible()) {
+            signalGroupLayer.hide()
+          } else {
+            signalGroupLayer.show()
+          }
+        }
       }
     ]
   }).addTo(map)
@@ -223,6 +229,10 @@ export default function SaltTrafficLightsLoader (map, element, events) {
           }
         ])
       })
+      .setInfoWindow({
+        title: '교차로',
+        content: feature.properties.NODE_ID.substring(0, 30)
+      })
     // .setMenu({
     //   items: [
     //     {
@@ -252,13 +262,13 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     trafficLightsLayer.addGeometry(geometries)
   }
 
-  const toggleGroupLayer = () => {
-    if (signalGroupLayer.isVisible()) {
-      signalGroupLayer.hide()
-    } else {
-      signalGroupLayer.show()
-    }
-  }
+  // const toggleGroupLayer = () => {
+  //   if (signalGroupLayer.isVisible()) {
+  //     signalGroupLayer.hide()
+  //   } else {
+  //     signalGroupLayer.show()
+  //   }
+  // }
 
   const layer = new OptStatusLayer('hello')
 
@@ -300,7 +310,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     load,
     show,
     hide,
-    toggleGroup: toggleGroupLayer,
+    // toggleGroup: toggleGroupLayer,
     setOptJunction,
     clearOptJunction,
     setCurrentLoads

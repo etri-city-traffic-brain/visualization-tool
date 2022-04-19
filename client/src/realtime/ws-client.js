@@ -7,15 +7,17 @@ const { WebSocket } = window
 
 // eslint-disable-next-line no-undef
 const env = process && process.env
-console.log('env:', env)
+if (env) {
+  log(`NODE_ENV is %c${env.NODE_ENV}`, 'color: red')
+}
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://101.79.1.124:8080' : 'ws://101.79.1.124:8080/'
-const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.124:8080/'
+const wsUrl =
+  env.NODE_ENV === 'development'
+    ? 'ws://127.0.0.1:8080'
+    : 'ws://101.79.1.124:8080/'
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.117:8080/'
 
-log('execution mode:', env.NODE_ENV)
-log('ws:', wsUrl)
-
-const extend = (extent) => {
+const extend = extent => {
   const { min, max } = extent
   return {
     min: {
@@ -37,7 +39,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   let status = 'ready'
   let socket = null
 
-  const send = (obj) => {
+  const send = obj => {
     try {
       socket.send(serialize(obj))
     } catch (err) {
@@ -63,11 +65,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   }
 
   function init () {
-    // log('init websocket:', simulationId, wsUrl)
-    group('init websocket')
-    log(simulationId)
-    log(wsUrl)
-    groupEnd()
+    log(`init ${simulationId} - ${wsUrl}`)
     if (status === 'open') {
       log('WebSocket is already opened!!')
       return
@@ -77,7 +75,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       send({ type: 0, simulationId })
       status = 'open'
       eventBus.$emit('ws:open')
-      log('websocket is opened')
+      // log('websocket is opened')
     })
 
     socket.addEventListener('message', ({ data }) => {
@@ -93,16 +91,17 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     socket.addEventListener('close', () => {
       eventBus.$emit('ws:close', {})
       status = 'close'
-      log('websocket is closed')
       if (killed) {
-        console.log('killed')
         return
       }
       setTimeout(() => init(), 1000)
     })
 
     socket.addEventListener('error', () => {
-      eventBus.$emit('ws:error', new Error(`WebSocket connection to ${url} failed`))
+      eventBus.$emit(
+        'ws:error',
+        new Error(`WebSocket connection to ${url} failed`)
+      )
       status = 'error'
     })
 
@@ -118,7 +117,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       })
     })
 
-    eventBus.$on('salt:stop', (sId) => {
+    eventBus.$on('salt:stop', sId => {
       if (simulationId === sId) {
         send({
           simulationId,
