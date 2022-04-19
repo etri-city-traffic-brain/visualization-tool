@@ -10,7 +10,7 @@ import mapService from '../service/map-service'
 
 import signalGroups from '@/config/junction-config'
 import OptStatusLayer from './opt-status-layer'
-
+import signalService from '@/service/signal-service'
 const addLayerTo = map => name =>
   new maptalks.VectorLayer(name, [], {}).addTo(map)
 
@@ -191,6 +191,8 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   }
 
   function makeTrafficLight (feature, color) {
+    const crossName = signalService.nodeIdToName(feature.properties.NODE_ID)
+
     const trafficLight = new maptalks.Marker(feature.geometry.coordinates, {
       symbol: [
         {
@@ -230,7 +232,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
         ])
       })
       .setInfoWindow({
-        title: '교차로',
+        title: '교차로(' + crossName + ')',
         content: feature.properties.NODE_ID.substring(0, 30)
       })
     // .setMenu({

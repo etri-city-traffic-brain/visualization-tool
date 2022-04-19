@@ -9,6 +9,14 @@ const { dockerCommand: docker } = require('docker-cli-js')
 
 const DEFAULT_DOCKER_IMAGE = 'images4uniq/optimizer:v0.1a.20220418'
 
+const options = {
+  machineName: undefined, // uses local docker
+  currentWorkingDirectory: undefined, // uses current working directory
+  echo: false, // echo command output to stdout/stderr
+  env: undefined,
+  stdin: undefined
+}
+
 /**
  * 도커 명령을 사용해서 신호 최적화 컨테이너 실행
  *
@@ -33,8 +41,8 @@ async function run (simulation, mode, modelNum) {
 
   const volume = `${volumePath}/${simulation.id}:/uniq/optimizer/io`
 
-  const targetTL = 'SA 101,SA 104,SA 107,SA 111'
-
+  // const targetTL = 'SA 101,SA 104,SA 107,SA 111'
+  const targetTL = simulation.configuration.junctionId
   const makeCmd = mode =>
     `run --rm -v ${volume} ${dockerImage} python ./run.py \
      --mode ${mode} \
@@ -52,7 +60,7 @@ async function run (simulation, mode, modelNum) {
   if (mode === 'train') {
     const cmd = `${makeCmd('train')} --model-save-period ${modelSavePeriod}`
     log(chalk.green(cmd))
-    return docker(cmd)
+    return docker(cmd, options)
   } else if (mode === 'test') {
     const cmdSimu = `${makeCmd('simulate')}`
     const cmdTest = `${makeCmd('test')} --model-num ${modelNum}`

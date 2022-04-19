@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="uniq-top-left">
-      <div class="bg-gray-700 py-2 text-white p-2 rounded-xl text-sm space-y-1">
+      <div class="bg-gray-700 py-2 text-white p-2 rounded-xl text-sm space-y-1 border">
 
         <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
         <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ simulation.configuration.region }} </div>
@@ -13,7 +13,7 @@
         <!-- <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">스크립트</span> {{ simulation.configuration.script }} </div> -->
 
         <div class="mt-1 bg-gray-700 rounded-full text-center uppercase text-white font-bold">
-          <div class="p-1 animate-pulse rounded-full " v-if="simulation.status === 'running' || simulation.status === 'stopping'">
+          <div class="bg-green-500 p-1 animate-pulse rounded-full " v-if="simulation.status === 'running' || simulation.status === 'stopping'">
             {{ simulation.status }}
           </div>
           <div class="bg-blue-500 rounded-full p-1" v-else>
@@ -50,7 +50,7 @@
         </b-card> -->
        </div>
 
-      <div class="bg-gray-700 mt-1 rounded-xl" >
+      <div class="bg-gray-700 mt-2 rounded-xl border" >
         <!-- <div class="text-white text-center p-1 text-sm">Total Reward</div> -->
 
       <!-- 보상 그래프 -->
@@ -67,30 +67,29 @@
 
       </div>
 
-      <div class="mt-1 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded-xl">
+      <div class="mt-2 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded-xl border">
       <!-- 최적화 진행률 -->
-      <div class="mb-1 uppercase inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">
-        Epoch: {{ progressOpt }} / {{ simulation.configuration.epoch }}
+        <div class="mb-1 uppercase inline-block text-center text-white rounded text-sm px-1 font-bold">
+          Epoch: {{ progressOpt }} / {{ simulation.configuration.epoch }}
+        </div>
+
+        <b-progress :max="simulation.configuration.epoch" height="12px">
+          <b-progress-bar :value="progressOpt" variant="primary" >
+            <!-- <span>Epoch {{ progressOpt }} / {{ simulation.configuration.epoch }}</span> -->
+          </b-progress-bar>
+        </b-progress>
+
+        <div class="mt-2 mb-1 inline-block text-center text-white rounded text-sm px-1 font-bold">
+          시뮬레이션 진행률
+        </div>
+        <b-progress class="" height="12px">
+          <b-progress-bar :value="progress" animated striped variant="primary">
+            <span> {{ progress }} %</span>
+          </b-progress-bar>
+        </b-progress>
       </div>
 
-      <b-progress :max="simulation.configuration.epoch" height="8px">
-        <b-progress-bar :value="progressOpt" variant="primary" >
-          <!-- <span>Epoch {{ progressOpt }} / {{ simulation.configuration.epoch }}</span> -->
-        </b-progress-bar>
-      </b-progress>
-
-       <div class="mt-2 mb-1 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">
-        시뮬레이션 진행률
-      </div>
-      <b-progress class="" height="8px">
-        <b-progress-bar :value="progress" animated striped variant="primary">
-          <span> {{ progress }} %</span>
-        </b-progress-bar>
-      </b-progress>
-
-    </div>
-
-    <div class="bg-gray-700 rounded-xl mt-1 p-2" >
+      <div class="bg-gray-700 rounded-xl mt-2 p-2 border border-orange-500" >
       <div>
         <button class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="runTrain"> <b-icon icon="play-fill"/> 시작 </button>
         <button class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="stop" size="sm">
@@ -99,17 +98,18 @@
           </svg> 중지
         </button>
         <button
-          class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-500 py-1"
+          class="bg-blue-600 text-white px-2 rounded text-sm hover:bg-gray-500 py-1"
           @click="getReward"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="inline h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
+          상태 갱신
         </button>
         </div>
         <div class="mt-1">
           <router-link
-            class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-800 py-1"
+            class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-800 py-1 "
             :to="{
               name: 'OptimizationResultComparisonMap',
               params: {id: simulationId}

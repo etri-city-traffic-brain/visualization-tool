@@ -124,7 +124,7 @@ function setupEventHandler () {
   })
 
   this.$on('optimization:epoch', e => {
-    log('*** OPTIMIZATION EPOCH ***')
+    // log('*** OPTIMIZATION EPOCH ***')
     // this.rewards = makeRewardChartData(e.data)
 
     this.$bvToast.toast('OPTIMIZATION EPOCH', {
@@ -137,7 +137,7 @@ function setupEventHandler () {
   })
 
   this.$on('optimization:finished', e => {
-    log('*** OPTIMIZATION FINISHED ***')
+    // log('*** OPTIMIZATION FINISHED ***')
     // setTimeout(() => this.$swal('신호 최적화 완료'), 2000)
     this.$bvToast.toast('OPTIMIZATION FINISHED', {
       title: 'OPTIMIZATION FINISHED',
@@ -146,6 +146,11 @@ function setupEventHandler () {
       appendToast: true,
       toaster: 'b-toaster-top-right'
     })
+    setTimeout(async () => {
+      log('** check status **')
+      // await this.updateStatus()
+      await this.getReward()
+    }, 3000)
   })
 
   this.$on('map:moved', ({ zoom, extent }) => {
@@ -329,11 +334,12 @@ export default {
           this.simulationId
         )
         this.simulation = simulation
+        log(simulation.status)
         if (simulation.status !== 'running') {
           this.trafficLightManager.setOptJunction([])
         }
       } catch (e) {
-        console.log('fail to get simulation status')
+        log('fail to get simulation status')
       }
     },
     async runTrain () {
@@ -370,6 +376,7 @@ export default {
       })
 
       await this.getRewardTotal()
+      await this.updateStatus()
     },
     async stop () {
       this.simulation.status = 'stopping'

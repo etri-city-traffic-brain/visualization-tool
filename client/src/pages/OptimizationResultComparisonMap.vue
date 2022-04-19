@@ -79,22 +79,23 @@
             <!-- <div class="text-center"> 최적화 정보 </div> -->
             <div class="border-gray-600 space-y-1">
             <!-- <pre class="p-1 text-light h-48">{{ JSON.stringify(simulation.configuration, false, 2)}}</pre> -->
-              <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
-              <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ simulation.configuration.region }} </div>
-              <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">시간</span> <span class="text-xs">{{ simulation.configuration.fromTime }}({{ simulation.configuration.begin }}) ~
+              <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
+              <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ simulation.configuration.region }} </div>
+              <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">시간</span> <span class="text-xs">{{ simulation.configuration.fromTime }}({{ simulation.configuration.begin }}) ~
               {{ simulation.configuration.toTime }}({{ simulation.configuration.end }})</span></div>
-              <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">주기</span> {{ simulation.configuration.period }} (초)</div>
-              <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">교차로</span> {{ simulation.configuration.junctionId }} </div>
-              <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">이미지</span> <span class="text-xs">{{ simulation.configuration.dockerImage }} </span></div>
-              <div> <span class="bg-gray-500 text-white rounded text-sm px-1 font-bold">스크립트</span> {{ simulation.configuration.script }} </div>
+              <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">주기</span> {{ simulation.configuration.period }} (초)</div>
+              <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">교차로</span> {{ simulation.configuration.junctionId }} </div>
+              <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">이미지</span> <span class="text-xs">{{ simulation.configuration.dockerImage }} </span></div>
+              <div> <span class="w-24 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">스크립트</span> {{ simulation.configuration.script }} </div>
+              <div> <span class="w-24 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">모델저장주기</span> {{ simulation.configuration.modelSavePeriod }} </div>
             </div>
             <div class="">
               <div>
 
                 <!-- <b-btn @click="updateChart" size="sm" variant="dark">
                   <b-icon icon="bar-chart-fill"/>
-                </b-btn>
-                <b-btn @click="sidebar = !sidebar" size="sm" variant="dark">
+                </b-btn> -->
+                <!-- <b-btn @click="sidebar = !sidebar" size="sm" variant="dark">
                   <b-icon icon="align-start"/>
                 </b-btn> -->
               </div>
@@ -129,11 +130,12 @@
               />
             </div>
 
-            <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg mt-1">모델 테스트</div>
+            <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg mt-1">모델 선택</div>
             <div class="p-2 bg-gray-700 max-h-60 overflow-y-auto ">
+
               <div class="flex flex-wrap">
                 <div
-                  v-for="reward of rewards.labels.filter((v,i)=>i % simulation.configuration.modelSavePeriod == 0)"
+                  v-for="reward of rewards.labels.filter((v,i)=> (i % simulation.configuration.modelSavePeriod) == 0)"
                   :key="reward"
                   @click="selectedEpoch = reward"
                   class="ml-1 mb-1 bg-indigo-500 text-xs rounded text-white px-1 cursor-pointer hover:bg-indigo-200"

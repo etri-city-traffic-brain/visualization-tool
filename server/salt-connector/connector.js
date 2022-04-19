@@ -12,7 +12,13 @@ const readReward = require('../main/signal-optimization/read-reward')
 
 const { StatusType } = require('./salt-msg-type')
 
-const { EVENT_SET, EVENT_STOP, EVENT_STATUS, EVENT_DATA, EVENT_FINISHED } = require('./event-types')
+const {
+  EVENT_SET,
+  EVENT_STOP,
+  EVENT_STATUS,
+  EVENT_DATA,
+  EVENT_FINISHED
+} = require('./event-types')
 
 const OPTIMIZATION = {
   TRAINING: 'training'
@@ -32,11 +38,11 @@ module.exports = (httpServer, tcpPort) => {
   const webSocketServer = startWebSocketServer(httpServer)
 
   // send to simulator
-  webSocketServer.on(EVENT_SET, (data) => {
+  webSocketServer.on(EVENT_SET, data => {
     tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
   })
 
-  webSocketServer.on(EVENT_STOP, (data) => {
+  webSocketServer.on(EVENT_STOP, data => {
     try {
       tcpServer.send(data.simulationId, saltMsgFactory.makeStop(data))
     } catch (err) {
@@ -45,12 +51,11 @@ module.exports = (httpServer, tcpPort) => {
   })
 
   const isFinished = ({ status, progress }) =>
-    status === StatusType.FINISHED &&
-    progress >= 95
+    status === StatusType.FINISHED && progress >= 95
 
   const epochCounterTable = {}
 
-  tcpServer.on(EVENT_STATUS, async (data) => {
+  tcpServer.on(EVENT_STATUS, async data => {
     const { simulationId } = data
     // debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`)
     webSocketServer.send(data.simulationId, { ...data })
@@ -79,9 +84,11 @@ module.exports = (httpServer, tcpPort) => {
           // updateStatus(simulationId, 'finished', { epoch: 0 })
           delete epochCounterTable[simulationId]
 
-          webSocketServer.send(simulationId, {
-            event: 'optimization:finished'
-          })
+          setTimeout(async () => {
+            webSocketServer.send(simulationId, {
+              event: 'optimization:finished'
+            })
+          }, 2000)
         }
 
         webSocketServer.send(simulationId, {
@@ -117,7 +124,7 @@ module.exports = (httpServer, tcpPort) => {
   })
 
   // send to web
-  tcpServer.on(EVENT_DATA, (data) => {
+  tcpServer.on(EVENT_DATA, data => {
     // console.log(data.simulationId)
     webSocketServer.send(data.simulationId, { ...data })
   })
