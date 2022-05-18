@@ -24,6 +24,7 @@ const downloadScenario = require('./utils/prepare-scenario')
 const downloadScenarioTest = require('./utils/prepare-scenario-test')
 const addSimulation = require('../../main/simulation-manager/crud/create')
 
+const { log } = console
 const {
   updateStatus,
   currentTimeFormatted,
@@ -33,6 +34,8 @@ const {
 
 const { base, server } = config
 const host = server.ip
+const tcpPort = config?.server?.tcpPort
+
 const existSimulation = id =>
   getSimulations()
     .find({ id })
@@ -56,12 +59,11 @@ const makeOptScenario = (
   { configuration: { region, begin, end, period, interval = 10 } },
   fileDir
 ) => {
-  console.log('make scenario:', region)
   return {
     scenario: {
       id,
       host,
-      port: config.server.tcpPort,
+      port: tcpPort,
       interval,
       time: {
         begin: 0,
@@ -80,7 +82,6 @@ const makeOptScenario = (
         vehLength: 5.0
       },
       output: {
-        // fileDir: `${output}/${id}/`,
         fileDir,
         period,
         level: 'cell',
@@ -90,8 +91,8 @@ const makeOptScenario = (
   }
 }
 
-async function createOPtScenarioFile (id, body, outDir, file) {
-  const configFile = makeOptScenario(id, body, file)
+async function createOPtScenarioFile (id, body, outDir, file, mode) {
+  const configFile = makeOptScenario(id, body, file, mode)
   // console.log(configFile)
   await writeFile(outDir, stringify(configFile))
 }
@@ -102,44 +103,30 @@ async function prepareOptimization (ids, body) {
   await mkdir(simOutputDir)
 
   const region = body.configuration.region // 'doan'
-  // console.log('prepare simulation', body)
   const path = `/home/ubuntu/uniq-sim/routes/scenario_${region}.zip`
   await unzip(path, { dir: targetDir })
 
-  console.log('try to rename')
-  console.log(
-    'rename',
-    `${targetDir}/scenario_${region}`,
-    'to',
-    `${targetDir}/scenario`
-  )
-  try {
-    fs.renameSync(`${targetDir}/scenario_${region}`, `${targetDir}/scenario`)
-  } catch (err) {
-    console.log(err)
-  }
-  console.log('success')
+  log(`rename ${targetDir}/scenario_${region} to ${targetDir}/scenario`)
 
-  // await mkdir(targetDir)
-  // await mkdir(`${targetDir}/scenario`)
-  // await mkdir(`${targetDir}/scenario/doan`)
+  fs.renameSync(`${targetDir}/scenario_${region}`, `${targetDir}/scenario`)
+
   createOPtScenarioFile(
     ids[0],
     body,
     `${targetDir}/scenario/${region}/${region}_train.scenario.json`,
-    'output/train/'
+    '/uniq/optimizer/output/train/'
   )
   createOPtScenarioFile(
     ids[1],
     body,
     `${targetDir}/scenario/${region}/${region}_test.scenario.json`,
-    'output/test/'
+    '/uniq/optimizer/output/test/'
   )
   createOPtScenarioFile(
     ids[2],
     body,
     `${targetDir}/scenario/${region}/${region}_simulate.scenario.json`,
-    'output/simulate/'
+    '/uniq/optimizer/output/simulate/'
   )
   updateStatus(ids[0], 'ready', {})
 }
@@ -179,7 +166,7 @@ const ROLE = {
 }
 
 /**
- * 신호최적화 시무률레이션을 위한 입력데이터를 준비한다.
+ * 요청 type 에 따른 시률레이션 설정 생성
  */
 module.exports = async (req, res, next) => {
   const { body: { id, type } = {} } = req
@@ -194,15 +181,11 @@ module.exports = async (req, res, next) => {
     next(createError(409, `simulation [${id}] already exists...`))
     return
   }
-  console.log('type:==>', type)
   try {
     if (type === 'optimization') {
       const idTest = randomId(0) // for test
       const idFixed = randomId(1) // for fixed
-      // await prepareSimulation(id, req.body, ROLE.TRAINING, [idTest, idFixed], 'optimization')
-      // req.body.masterId = id
-      // await prepareSimulation(idTest, req.body, ROLE.TEST, [], 'optimization')
-      // await prepareSimulation(idFixed, req.body, ROLE.FIXED, [], 'optimization')
+
       await addSimulation({
         ...req.body,
         id,
@@ -211,7 +194,6 @@ module.exports = async (req, res, next) => {
       })
       await prepareOptimization([id, idTest, idFixed], req.body)
     } else {
-      console.log('prepare simulation data')
       await prepareSimulation(id, req.body, ROLE.SIMULATION)
     }
     debug(`simulation ${id} is ready!`)

@@ -10,7 +10,7 @@ const { config } = require('../../globals')
 const { routePerDay } = config.simulation
 const { tcpPort } = config.server
 
-const getRouteFor = (day) => {
+const getRouteFor = day => {
   const route = routePerDay[day] || routePerDay[routePerDay.length - 1]
   // return `${routes}/${route}`
   return `../../routes/${route}`
@@ -18,8 +18,10 @@ const getRouteFor = (day) => {
 
 const output = '/uniq/simulator/salt/volume/output'
 
-module.exports = ({ id, host, configuration: { begin, end, day, period, interval = 10 } }, type) => {
-  console.log('type:', type)
+module.exports = (
+  { id, host, configuration: { begin, end, day, period, interval = 10 } },
+  type
+) => {
   if (type === 'optimization') {
     return {
       scenario: {
