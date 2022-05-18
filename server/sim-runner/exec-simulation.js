@@ -21,7 +21,6 @@ const buildConfigPath = sId =>
   `/uniq/simulator/salt/volume/data/${sId}/salt.scenario.json`
 const volumeHost = volumeSim
 
-console.log('volume:', volumeHost)
 async function run (sId) {
   const configPath = buildConfigPath(sId)
   const volumeContainer = '/uniq/simulator/salt/volume'

@@ -1,8 +1,8 @@
-
 import moment from 'moment'
 
 import SimulationCreationPanel from '@/components/SimulationCreation'
 import UniqRegister from '@/components/UniqRegister'
+import SimRegister from '@/components/SimRegister'
 
 import BarChart from '@/components/charts/BarChart'
 
@@ -30,7 +30,8 @@ export default {
   components: {
     BarChart,
     SimulationCreationPanel,
-    UniqRegister
+    UniqRegister,
+    SimRegister
   },
   mixins: [dragDropMixin, fileMgmtMixin],
   data () {
@@ -101,7 +102,9 @@ export default {
     async toggleDetails (id, status, hide) {
       if (!hide) {
         if (status === 'finished') {
-          this.barChartDataTable[id] = await statisticsService.getSummaryChart(id)
+          this.barChartDataTable[id] = await statisticsService.getSummaryChart(
+            id
+          )
           this.$forceUpdate()
         }
       } else {
@@ -173,7 +176,12 @@ export default {
     async dataProvider ({ currentPage }) {
       this.isBusy = true
       try {
-        const { data, total, perPage } = (await simulationService.getSimulations(this.userState.userId, currentPage)).data
+        const { data, total, perPage } = (
+          await simulationService.getSimulations(
+            this.userState.userId,
+            currentPage
+          )
+        ).data
         this.totalRows = total
         this.isBusy = false
         this.perPage = perPage
@@ -187,11 +195,15 @@ export default {
     status (text) {
       return variant[text]
     },
-    async saveOptEnvConfig (env) {
+    async saveSim (env) {
       try {
+        this.msg = '시뮬레이션 준비중...'
         await simulationService.createSimulation(this.userId, env)
+        this.updateTable()
       } catch (err) {
         log(err)
+      } finally {
+        this.msg = ''
       }
     },
     async removeSimulation (param) {
@@ -219,7 +231,7 @@ export default {
       }
     },
     hideCreateSimulationDialog () {
-      this.updateTable()
+      // this.updateTable()
     },
     makeToast (msg, variant = 'info') {
       this.$bvToast.toast(msg, {
@@ -229,6 +241,15 @@ export default {
         appendToast: true,
         toaster: 'b-toaster-bottom-right'
       })
+    },
+    sColor (value) {
+      const c = {
+        running: 'bg-green-500',
+        error: 'bg-red-500',
+        ready: 'bg-gray-500',
+        finished: 'bg-blue-500'
+      }
+      return c[value] || 'bg-gray-300'
     }
   }
 }
