@@ -1,16 +1,16 @@
+import * as maptalks from 'maptalks'
 import moment from 'moment'
 
-import simulationService from '@/service/simulation-service'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
-import * as maptalks from 'maptalks'
 import makeMap from '@/map2/make-map'
-const { Map, TileLayer } = maptalks
+
 const random = () => `${Math.floor(Math.random() * 1000)}`
 const generateRandomId = (prefix = 'DEFU') =>
   `${prefix.substring(0, 4).toUpperCase()}_${moment().year()}${moment().format(
     'MM'
   )}_${random().padStart(5, '0')}`
+
 const format = date => moment(date).format('YYYY-MM-DD')
 const getToday = () => format(new Date())
 
@@ -20,26 +20,6 @@ const periodOptions = [
   { value: 30 * 60, text: '30분' },
   { value: 60 * 60, text: '1시간' },
   { value: 120 * 60, text: '2시간' }
-  // { value: 240 * 60, text: '4시간' },
-  // { value: 360 * 60, text: '6시간' }
-]
-
-const areaOptions = [
-  { value: 'doan', text: '도안' },
-  { value: 'dj_all', text: '대전전체' },
-  { value: 'sa_1_6_17', text: 'sa_1_6_17' }
-  // { value: 10, text: '테스트지역' },
-  // { value: 250, text: '대전광역시' },
-  // { value: 25030, text: '서구' },
-  // { value: 25040, text: '유성구' },
-  // { value: 290, text: '세종시' },
-  // { value: 29010, text: '세종특별자치시' }
-]
-
-const scriptOptions = [
-  { value: 'run.py', text: 'run.py' }
-  // { value: 'run_1.py', text: 'run_1.py' },
-  // { value: 'run_2.py', text: 'run_2.py' }
 ]
 
 const intervalOptions = [
@@ -71,24 +51,20 @@ export default {
   },
   data () {
     return {
-      envName: generateRandomId('Exp'), //
-      id: generateRandomId(this.role), //
-      description: '...', //
-      fromDate: getToday(), //
-      toDate: getToday(), //
-      fromTime: '07:00', //
-      toTime: '08:59', //
-      periodSelected: periodOptions[0].value, //
-      areaSelected: areaOptions[0].value, //
-      scriptSelected: scriptOptions[0].value, //
-      intervalSelected: intervalOptions[0].value, //
+      envName: generateRandomId('Exp'),
+      id: generateRandomId(this.role),
+      description: '...',
+      fromDate: getToday(),
+      toDate: getToday(),
+      fromTime: '07:00',
+      toTime: '08:59',
+      periodSelected: periodOptions[0].value,
+      intervalSelected: intervalOptions[0].value,
       junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
       dockerImage: 'images4uniq/salt:v2.1a.20210915.test_BUS',
       periodOptions: [...periodOptions],
-      areaOptions: [...areaOptions],
-      scriptOptions: [...scriptOptions],
       intervalOptions: [...intervalOptions],
       loading: false,
       showMap: false,
@@ -96,7 +72,8 @@ export default {
       modelSavePeriod: 20,
       map: null,
       mapId: `map-${Math.floor(Math.random() * 100)}`,
-      region: {}
+      region: {},
+      currentConfig: {}
     }
   },
   destroyed () {
@@ -104,13 +81,10 @@ export default {
       this.map.remove()
     }
   },
-  async mounted () {
-    // console.log('simulation register ui', this.modalName)
+  mounted () {
     this.map = makeMap({ mapId: this.mapId, zoom: 15 })
+    setTimeout(() => this.selectRegion(), 1000)
 
-    if (this.modalName === 'create-simulation-modal') {
-      this.showEnv = false
-    }
     const env = this.env
     if (this.env) {
       this.envName = env.envName
@@ -128,19 +102,8 @@ export default {
       this.dockerImage = env.configuration.dockerImage
       this.modelSavePeriod = env.configuration.modelSavePeriod
     }
-    // try {
-    //   this.scriptOptions = await simulationService.getScripts()
-    // } catch (err) {
-    //   this.scriptOptions = [...scriptOptions]
-    // }
   },
   methods: {
-    checkExtent () {
-      if (this.rectangle) {
-        console.log(this.rectangle.getExtent())
-      }
-    },
-
     getExtent () {
       if (this.rectangle) {
         const e = this.rectangle.getExtent()
@@ -154,7 +117,11 @@ export default {
     },
     selectRegion () {
       const center = this.map.getCenter()
-      const rectangle = new maptalks.Rectangle(center, 800, 700, {
+      if (this.rectangle) {
+        this.rectangle.setCoordinates(center)
+        return
+      }
+      const rect = new maptalks.Rectangle(center, 800, 700, {
         symbol: {
           lineColor: '#34495e',
           lineWidth: 2,
@@ -162,43 +129,22 @@ export default {
           polygonOpacity: 0.2
         }
       })
-      if (this.rectangle) {
-        this.rectangle.setCoordinates(this.map.getCenter())
-        return
-      }
-      this.rectangle = rectangle
+      this.rectangle = rect
 
-      new maptalks.VectorLayer('vector')
-        .addGeometry([rectangle])
-        .addTo(this.map)
-      rectangle.startEdit()
-    },
-    openSignalMap () {
-      this.$refs['signal-map'].show()
-    },
-    openSelectRegion () {
-      this.$refs['select-region-map'].show()
-    },
-    hideSelectRegion () {
-      this.$refs['select-region-map'].hide()
+      new maptalks.VectorLayer('vector').addGeometry([rect]).addTo(this.map)
+      rect.startEdit()
     },
     resetForm () {
       this.id = generateRandomId(this.role)
       this.description = '...'
     },
-    async register () {
-      this.loading = true
+    getCurrentConfig () {
       const from = moment(`${this.fromDate} ${this.fromTime}`)
       const to = moment(`${this.toDate} ${this.toTime}`)
       const begin = moment.duration(this.fromTime).asSeconds()
       const end = to.diff(from) / 1000 - 60 + begin
       const days = to.diff(from, 'days') + 1
       const day = from.day()
-
-      if (!this.envName || this.envName.length < 3) {
-        this.$bvToast.toast('환경 이름이 너무 짧거나 비어 있습니다.(3글자이상)')
-        return
-      }
 
       const simulationConfig = {
         id: this.id,
@@ -228,12 +174,16 @@ export default {
           ...this.getExtent()
         }
       }
-      // console.log(simulationConfig)
-      if (this.role === 'simulation') {
-        this.$emit('simulationconfig:save', simulationConfig)
-      } else {
-        this.$emit('optenvconfig:save', simulationConfig)
+      return simulationConfig
+    },
+    save () {
+      this.loading = true
+      if (!this.envName || this.envName.length < 3) {
+        this.$bvToast.toast('환경 이름이 너무 짧거나 비어 있습니다.(3글자이상)')
+        return
       }
+      // send event to the parent
+      this.$emit('config:save', this.getCurrentConfig())
       this.hide()
       this.loading = false
     },
@@ -242,14 +192,12 @@ export default {
       this.$bvModal.hide(this.modalName)
       this.resetForm()
     },
-    selectJunction (junction) {
-      this.$refs['signal-map'].hide()
-      // this.junctionId = junction.id
+    openInfobox () {
+      this.currentConfig = this.getCurrentConfig()
+      this.$refs['config-info'].show()
     },
-    selectionFinished ({ junctions, extent }) {
-      this.junctionId = junctions.join(',')
-      this.extent = extent
-      this.showMap = false
+    hideInfobox () {
+      this.$refs['config-info'].hide()
     }
   }
 }

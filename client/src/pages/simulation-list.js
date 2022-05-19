@@ -16,13 +16,6 @@ import fileMgmtMixin from './file-mgmt-mixin'
 
 import map from '@/region-code'
 
-const variant = {
-  finished: 'primary',
-  running: 'success',
-  error: 'danger',
-  ready: 'secondary'
-}
-
 const { log } = console
 
 export default {
@@ -40,13 +33,9 @@ export default {
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
-        // { class: 'text-center', key: 'statusText', label: '상태' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         { class: 'text-center', key: 'duration', label: '기간' },
-        // { class: 'text-center', key: 'ended', label: '종료' },
         { class: 'text-center', key: 'actions', label: '제어' }
-        // { class: 'text-center', key: 'details', label: '상세' },
-        // { class: 'text-center', key: 'del', label: '삭제' }
       ],
       items: [],
       currentPage: 1,
@@ -191,9 +180,6 @@ export default {
         this.isBusy = false
         return []
       }
-    },
-    status (text) {
-      return variant[text]
     },
     async saveSim (env) {
       try {

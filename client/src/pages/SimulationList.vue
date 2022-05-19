@@ -2,46 +2,42 @@
 <div class="container p-3">
   <div class="bg-gray-500- border mt-2 rounded-xl py-2 px-2 min-w-max">
     <div class="p-2 font-bold">교통 시뮬레이션 </div>
-    <div class="p-1 flex justify-between" >
-      <div>
-        <button
-          v-b-modal.create-simulation-modal
-          class="px-2 bg-blue-400 text-sm py-1 hover:bg-blue-600 hover:text-white rounded font-bold text-white"
-        >
-          <b-icon icon="file-earmark-plus"/> 시뮬레이션 생성
-        </button>
-        <button
-          class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
-          v-b-toggle.collapse1
-          title="시뮬레이션 비교"
-        >
-          <b-icon icon="files"/>
-        </button>
-      </div>
-      <div>
-        <b-btn
-          size="sm"
-          variant="dark"
-          @click.stop="updateTable"
-        >
-            새로고침 <b-icon icon="arrow-clockwise"/>
-        </b-btn>
-        <b-btn
-          :pressed.sync="autoRefresh"
-          :variant="autoRefresh ? 'info' : 'outline-secondary'"
-          size="sm"
-          variant="info"
-          v-b-tooltip.hover
-          title="테이블을 주기적으로 업데이트합니다."
-        >
-          새로고침(Auto)
-          <b-icon v-if="!autoRefresh" icon="arrow-clockwise"/>
-          <b-iconstack v-if="autoRefresh" font-scale="1" animation="spin">
-            <b-icon stacked icon="slack" variant="info" scale="0.75" shift-v="-0.25"></b-icon>
-            <b-icon stacked icon="slash-circle" variant="light"></b-icon>
-          </b-iconstack>
-        </b-btn>
-      </div>
+    <div class="p-1 flex justify-end space-x-1" >
+      <button
+        v-b-modal.create-simulation-modal
+        class="px-2 bg-blue-400 text-sm py-1 hover:bg-blue-600 hover:text-white rounded font-bold text-white"
+      >
+        <b-icon icon="file-earmark-plus"/> 등록
+      </button>
+      <button
+        class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
+        v-b-toggle.collapse1
+        title="시뮬레이션 비교"
+      >
+        <b-icon icon="files"/> 비교
+      </button>
+      <b-btn
+        size="sm"
+        variant="dark"
+        @click.stop="updateTable"
+      >
+        <b-icon icon="arrow-clockwise"/> 새로고침
+      </b-btn>
+      <b-btn
+        :pressed.sync="autoRefresh"
+        :variant="autoRefresh ? 'info' : 'outline-secondary'"
+        size="sm"
+        variant="dark"
+        v-b-tooltip.hover
+        title="테이블 자동 업데이트"
+      >
+        자동 새로고침
+        <b-icon v-if="!autoRefresh" icon="arrow-clockwise"/>
+        <b-iconstack v-if="autoRefresh" font-scale="1" animation="spin">
+          <b-icon stacked icon="slack" variant="info" scale="0.75" shift-v="-0.25"></b-icon>
+          <b-icon stacked icon="slash-circle" variant="light"></b-icon>
+        </b-iconstack>
+      </b-btn>
     </div>
 
     <div class="">
@@ -124,78 +120,62 @@
           @click.stop="startSimulation(row.item.id, row.index, $event.target)"
           class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-500 rounded"
         >
-            시작 <b-icon icon="play-fill"/>
+          시작 <b-icon icon="play-fill"/>
         </button>
           <!-- :disabled="row.item.status !== 'running'" -->
         <button
           @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
           class="px-2 py-1 text-sm bg-yellow-500 hover:bg-yellow-500 rounded text-black"
         >
-              중지 <b-icon icon="stop-fill"/>
+            중지 <b-icon icon="stop-fill"/>
         </button>
-        <router-link
-          :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}"
-          >
-            <button
+        <router-link :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}" >
+          <button
             class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-300 rounded text-white"
             >상세보기 <b-icon icon="zoom-in"></b-icon>
-            </button>
+          </button>
         </router-link>
-        <button
-          class="px-2 bg-red-600 hover:bg-red-500 rounded text-sm py-1"
-          @click.stop="removeSimulation(row.item)">
-            삭제 <b-icon icon="trash-fill" aria-hidden="true"/>
+        <button class="px-2 bg-red-600 hover:bg-red-500 rounded text-sm py-1" @click.stop="removeSimulation(row.item)">
+          <b-icon icon="x" aria-hidden="true"/>
         </button>
       </template>
-
       <template v-slot:cell(details)="row">
       </template>
       <template v-slot:cell(del)="row">
       </template>
       <template v-slot:row-details="row">
-        <b-card bg-variant="secondary" text-variant="light">
+        <div class="p-3 bg-gray-500">
           <div style="overflow-wrap: break-word; max-width:1024px">
-              {{row.item.error }}
-          </div>
-          <!-- <b-alert
-            v-if="row.item.error && row.item.status === 'error'"
-            class="mb-1 p-2"
-            variant="danger"
-            show
-            style="overflow-wrap: break-word;"
-          >
             {{row.item.error }}
-          </b-alert> -->
-          <div>
-            <h5> <b-badge variant="dark">
-              {{ row.item.envName }}
-              </b-badge>
-            </h5>
-            <h5> <b-badge variant="dark">
-              <b-badge variant="dark">시뮬레이션 걸린시간: </b-badge>
-              <b-badge>{{ calcDuration(row.item) }} </b-badge>
-            </b-badge>
-            </h5>
-            <h5><b-badge variant="dark"> {{ row.item.started }}</b-badge> ~ <b-badge variant="dark">{{ row.item.ended }}</b-badge></h5>
           </div>
-            <b-card bg-variant="dark" border-variant="dark" text-variant="light">
-              <small>시뮬레이션 결과파일 분석</small>
-              <b-input-group class="mt-1">
-                <b-form-file
-                  accept=".csv"
-                  v-model="resultFile"
-                  placeholder="시뮬레이션 결과파일(.CSV)을 선택하세요.">
-                </b-form-file>
-                <b-input-group-append>
-                  <b-button
-                    variant="primary"
-                    @click.prevent="uploadSimulatoinResultFile(row.item)">
-                      <b-icon icon="upload"/>
-                  </b-button>
-                </b-input-group-append>
-              </b-input-group>
-            </b-card>
-        </b-card>
+          <div>
+            <div class="grid grid-cols-2 gap-1">
+              <div>
+                시뮬레이션 ID:
+              </div>
+              <div>
+                {{ row.item.envName }}
+              </div>
+              <div>
+                걸린 시간:
+              </div>
+              <div>
+                {{ row.item.started }} ~ {{ row.item.ended }} ({{ calcDuration(row.item) }}) 초
+              </div>
+              <div>
+                시뮬레이션 결과파일 분석
+              </div>
+              <div>
+                <div class="mt-1 flex space-x-1" size="sm">
+                  <b-form-file accept=".csv" v-model="resultFile" placeholder="시뮬레이션 결과파일(.CSV)을 선택하세요." size="sm"> </b-form-file>
+                    <b-btn variant="primary" @click.prevent="uploadSimulatoinResultFile(row.item)" size="sm">
+                      <b-icon icon="upload" size="sm"/>
+                    </b-btn>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </template>
     </b-table>
     <b-alert
@@ -232,7 +212,7 @@
     >
       <sim-register
         @hide="hideCreateSimulationDialog"
-        @simulationconfig:save="saveSim"
+        @config:save="saveSim"
         :userId="userState.userId"
         modalName="create-simulation-modal"
         :intersectionField="false"

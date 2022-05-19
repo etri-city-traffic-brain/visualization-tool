@@ -6,9 +6,9 @@
           <div class=""> 시뮬레이션 ID: </div>
           <input autofocus id="id" v-model="id" focus select class="border rounded px-1 text-black">
         </div>
-        <div class="">
+        <div class="flex-grow">
           <div class="">설명:</div>
-          <input id="description" v-model="description" class="border rounded px-1 text-black">
+          <input id="description" v-model="description" class="border rounded px-1 text-black w-full">
         </div>
       </div>
       <div class="flex space-x-2 text-white">
@@ -53,10 +53,17 @@
       </div>
     </div>
     <div class="mt-2 bg-gray-600 rounded-lg p-2">
-      <div class="text-white font-bold p-2">
+      <div class="text-white font-bold p-2 flex items-center space-x-1">
+        <div>
         시뮬레이션 지역 선택
-        <button @click="selectRegion" class="bg-yellow-500 rounded text-sm text-black px-1">선택도구</button>
-        <button @click="checkExtent" class="bg-yellow-500 rounded text-sm text-black px-1">확인</button>
+        </div>
+        <button @click="selectRegion" class="bg-yellow-500 rounded text-sm text-black px-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+        <!-- <button @click="checkExtent" class="bg-yellow-500 rounded text-sm text-black px-1">확인</button> -->
       </div>
       <div
         :ref="mapId"
@@ -68,7 +75,11 @@
 
     <b-card bg-variant="dark" text-variant="light" border-variant="dark" class="mt-1">
       <b-card-text class="text-right">
-        <b-button class="mr-1" @click="register" variant="primary">
+
+        <b-button class="mr-1" @click="openInfobox" variant="primary">
+          설정보기
+        </b-button>
+        <b-button class="mr-1" @click="save" variant="primary">
           저장 <b-spinner small label="Spinning" v-if="loading"></b-spinner>
         </b-button>
         <b-button class="mr-1" @click="hide" variant="secondary">
@@ -77,10 +88,8 @@
       </b-card-text>
     </b-card>
 
-    <b-modal title="최적화 등록" id="create-simulation-modal" ref="signal-map" size="xl" header-border-variant="dark"
-      header-bg-variant="dark" header-text-variant="light" body-bg-variant="dark" body-text-variant="ligth"
-      body-border-variant="dark" header-class="pt-2 pb-0" hide-footer style="border-radius:0">
-      <!-- <SignalEditor v-on:junction:select="selectJunction"/> -->
+    <b-modal title="설정정보" ref="config-info" size="xl">
+      <pre class="">{{ currentConfig }}</pre>
     </b-modal>
 
   </div>

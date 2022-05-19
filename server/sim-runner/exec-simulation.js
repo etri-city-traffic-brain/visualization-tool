@@ -12,7 +12,7 @@ const {
   saltPath: { home, volumeSim }
 } = config
 
-const imgName = 'images4uniq/salt:v2.1a.20210915.test_BUS'
+const DefaultImgName = 'images4uniq/salt:v2.1a.20210915.test_BUS'
 // const imgName = 'images4uniq/salt:v2.1a.20210902'
 
 const exeFile = '/uniq/simulator/salt/bin/salt.sh'
@@ -21,7 +21,8 @@ const buildConfigPath = sId =>
   `/uniq/simulator/salt/volume/data/${sId}/salt.scenario.json`
 const volumeHost = volumeSim
 
-async function run (sId) {
+async function run (sId, img) {
+  const imgName = img || DefaultImgName
   const configPath = buildConfigPath(sId)
   const volumeContainer = '/uniq/simulator/salt/volume'
   return dockerCommand(
@@ -32,7 +33,7 @@ async function run (sId) {
 module.exports = simulation => {
   log('*** start simulation ***')
   log('simulation', simulation.id)
-  run(simulation.id).then(r_ => {
+  run(simulation.id, simulation.configuration.dockerImage).then(r_ => {
     log('**** after run start cook ***', simulation.id)
     //   cookSimulationResult({
     //     simulationId: simulation.id,

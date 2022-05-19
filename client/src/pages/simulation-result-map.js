@@ -39,10 +39,12 @@ import region from '@/map2/region'
 import config from '@/stats/config'
 
 const pieDefault = () => ({
-  datasets: [{
-    data: [1, 1, 1],
-    backgroundColor: ['red', 'orange', 'green']
-  }],
+  datasets: [
+    {
+      data: [1, 1, 1],
+      backgroundColor: ['red', 'orange', 'green']
+    }
+  ],
   labels: ['막힘', '정체', '원활']
 })
 
@@ -61,24 +63,28 @@ const defaultOption = () => ({
     intersect: true
   },
   scales: {
-    xAxes: [{
-      ticks: {
-        autoSkip: true,
-        autoSkipPadding: 50,
-        maxRotation: 0,
-        display: true,
-        fontColor: 'white'
+    xAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 50,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
       }
-    }],
-    yAxes: [{
-      ticks: {
-        autoSkip: true,
-        autoSkipPadding: 10,
-        maxRotation: 0,
-        display: true,
-        fontColor: 'white'
+    ],
+    yAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 10,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
       }
-    }]
+    ]
   },
   legend: {
     display: true,
@@ -172,7 +178,6 @@ export default {
     UniqSimulationResultExt,
     UniqMapChanger,
     D3SpeedBar
-
   },
   data () {
     return {
@@ -209,11 +214,11 @@ export default {
       currentZoom: '',
       currentExtent: '',
       wsStatus: 'ready',
-      avgSpeed: 0.00,
+      avgSpeed: 0.0,
       linkHover: '',
       progress: 0,
       focusData: {
-        speed: 0.00
+        speed: 0.0
       },
       avgSpeedView: pieDefault(),
       avgSpeedFocus: pieDefault(),
@@ -238,8 +243,18 @@ export default {
       vdsList: {},
       rseList: {
         RSE1501RSE1504: ['-563111309', '-563105261', '-563105256', '563108468'],
-        RSE1501RSE1505: ['563105249', '-563108169', '563108170', '563108165', '-563104339', '-563105246', '-563105250', '-563104128']
-      }
+        RSE1501RSE1505: [
+          '563105249',
+          '-563108169',
+          '563108170',
+          '563108165',
+          '-563104339',
+          '-563105246',
+          '-563105250',
+          '-563104128'
+        ]
+      },
+      showWaitingMsg: false
     }
   },
   destroyed () {
@@ -286,7 +301,7 @@ export default {
     })
     this.vdsList = res.data
 
-    this.$on('link:selected', async (link) => {
+    this.$on('link:selected', async link => {
       this.currentEdge = link
       if (link.speeds) {
         if (!this.speedsPerStep.datasets) {
@@ -302,41 +317,49 @@ export default {
       await this.updateLinkChart(link.LINK_ID, link.vdsId)
     })
 
-    this.$on('link:hover', (link) => {
+    this.$on('link:hover', link => {
       this.linkHover = link.LINK_ID
     })
 
-    this.$on('salt:data', (d) => {
+    this.$on('salt:data', d => {
       // console.log('salt:data', d)
-      this.avgSpeed = d.roads.map(road => road.speed).reduce((acc, cur) => {
-        acc += cur
-        return acc
-      }, 0) / d.roads.length
+      this.avgSpeed =
+        d.roads
+          .map(road => road.speed)
+          .reduce((acc, cur) => {
+            acc += cur
+            return acc
+          }, 0) / d.roads.length
 
       this.avgSpeedView = {
-        datasets: [{
-          data: bins(d.roads).map(R.prop('length')),
-          backgroundColor: config.colorsOfSpeed2
-        }],
+        datasets: [
+          {
+            data: bins(d.roads).map(R.prop('length')),
+            backgroundColor: config.colorsOfSpeed2
+          }
+        ],
         labels: config.speeds
       }
     })
 
-    this.$on('salt:status', async (status) => {
+    this.$on('salt:status', async status => {
       this.addLog(`status: ${status.status}, progress: ${status.progress}`)
       this.progress = status.progress
-      if (status.status === 1 && status.progress === 100) {
+      if (status.progress > 95) {
         // FINISHED
+        this.showWaitingMsg = true
       }
     })
 
-    this.$on('map:focus', (data) => {
+    this.$on('map:focus', data => {
       this.focusData = data
       this.avgSpeedFocus = {
-        datasets: [{
-          data: bins(data.realTimeEdges).map(R.prop('length')),
-          backgroundColor: config.colorsOfSpeed2
-        }],
+        datasets: [
+          {
+            data: bins(data.realTimeEdges).map(R.prop('length')),
+            backgroundColor: config.colorsOfSpeed2
+          }
+        ],
         labels: config.speeds
       }
       // console.log(bins(data.realTimeEdges))
@@ -345,9 +368,16 @@ export default {
 
     this.$on('salt:finished', async () => {
       log('**** SIMULATION FINISHED *****')
-      this.simulation.status = 'finished'
-      await this.updateSimulation()
-      await this.updateChart()
+
+      try {
+        await this.updateSimulation()
+        await this.updateChart()
+      } catch (err) {
+        log(err)
+      } finally {
+        this.showWaitingMsg = false
+        this.simulation.status = 'finished'
+      }
     })
 
     this.$on('map:moved', ({ zoom, extent }) => {
@@ -406,20 +436,36 @@ export default {
       return this.playBtnToggle ? 'M' : 'A'
     },
     async updateSimulation () {
-      const { simulation, ticks } = await simulationService.getSimulationInfo(this.simulationId)
+      const { simulation, ticks } = await simulationService.getSimulationInfo(
+        this.simulationId
+      )
       this.simulation = simulation
       this.slideMax = ticks - 1
     },
     async updateChart () {
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this))
-      this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, 0)
-      this.chart.histogramData = await statisticsService.getHistogramChart(this.simulationId)
-      this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0)
-      this.chart.pieData = await statisticsService.getPieChart(this.simulationId)
-      this.speedsPerStep = await statisticsService.getSummaryChart(this.simulationId)
+      this.chart.histogramDataStep = await statisticsService.getHistogramChart(
+        this.simulationId,
+        0
+      )
+      this.chart.histogramData = await statisticsService.getHistogramChart(
+        this.simulationId
+      )
+      this.chart.pieDataStep = await statisticsService.getPieChart(
+        this.simulationId,
+        0
+      )
+      this.chart.pieData = await statisticsService.getPieChart(
+        this.simulationId
+      )
+      this.speedsPerStep = await statisticsService.getSummaryChart(
+        this.simulationId
+      )
       this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
         this.speedsPerStep.datasets[0].data,
-        new Array(this.speedsPerStep.datasets[0].data.length).fill(this.edgeSpeed()),
+        new Array(this.speedsPerStep.datasets[0].data.length).fill(
+          this.edgeSpeed()
+        ),
         []
       )
     },
@@ -435,15 +481,22 @@ export default {
       this.mapHeight = window.innerHeight - 50 // update map height to current height
     },
     togglePlay () {
-      this.playBtnToggle = !this.playBtnToggle;
-
-      (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(this)()
+      this.playBtnToggle = !this.playBtnToggle
+      ;(this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(
+        this
+      )()
     },
     async stepChanged (step) {
       if (this.simulation.status === 'finished') {
         this.mapManager.changeStep(step)
-        this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, step)
-        this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, step)
+        this.chart.pieDataStep = await statisticsService.getPieChart(
+          this.simulationId,
+          step
+        )
+        this.chart.histogramDataStep = await statisticsService.getHistogramChart(
+          this.simulationId,
+          step
+        )
       }
     },
     centerTo (locationCode) {
@@ -465,7 +518,10 @@ export default {
     async startSimulation () {
       this.simulation.status = 'running'
       try {
-        await simulationService.startSimulation(this.simulationId, this.userState.userId)
+        await simulationService.startSimulation(
+          this.simulationId,
+          this.userState.userId
+        )
       } catch (err) {
         console.log(err)
       }
@@ -478,7 +534,10 @@ export default {
       }
     },
     async updateLinkChart (linkId, vdsId) {
-      const linkData = await simulationService.getValueByLinkOrCell(this.simulationId, linkId)
+      const linkData = await simulationService.getValueByLinkOrCell(
+        this.simulationId,
+        linkId
+      )
       // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
       // this.chart.linkSpeeds = makeLinkSpeedChartData(linkData.values, [10, 20, 30, 10, 20, 30])
       const vdsSpeedData = { label: 'vds', color: 'skyblue', data: [] }

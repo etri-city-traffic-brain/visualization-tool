@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div class="fixed z-50 inset-auto h-full " v-if="showWaitingMsg">
+      <div class="w-screen">
+        <div class="animate-pulse mx-auto text-center mt-10 bg-yellow-300 p-5 text-xl font-bold">
+          실행결과 분석 중입니다. 잠시후 실행 됩니다.
+        </div>
+      </div>
+    </div>
+
     <div
       class="bg-gray-700 p-1 rounded-lg"
       v-bind:style="playerStyle"
