@@ -64,7 +64,7 @@ async function run (simulation, mode, modelNum) {
   } else if (mode === 'test') {
     const cmdSimu = `${makeCmd('simulate')}`
     const cmdTest = `${makeCmd('test')} --model-num ${modelNum}`
-    return Promise.all([docker(cmdSimu), docker(cmdTest)])
+    return Promise.all([docker(cmdTest), docker(cmdSimu)])
   } else {
     return Promise.reject(new Error('unknown mode'))
   }

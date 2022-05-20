@@ -155,6 +155,10 @@ export default function SaltTrafficLightsLoader (map, element, events) {
 
   const selectConnection = async target => {
     const linkIds = await getLinkIds(map, target.owner)
+    console.log(
+      target.owner.properties.NODE_ID,
+      linkIds.map(l => l.LINK_ID)
+    )
     const lines = linkIds.map(makeLinkLine)
     linkLayer.clear()
     linkLayer.addGeometry(lines)
@@ -235,15 +239,16 @@ export default function SaltTrafficLightsLoader (map, element, events) {
         title: '교차로(' + crossName + ')',
         content: feature.properties.NODE_ID.substring(0, 30)
       })
-    // .setMenu({
-    //   items: [
-    //     {
-    //       item: `선택(${feature.properties.NODE_ID.substring(0, 10)})`,
-    //       click: editConnection
-    //     }
-    //   ]
-    // })
-    // .openMenu()
+      .setMenu({
+        items: [
+          {
+            item: `선택(${feature.properties.NODE_ID.substring(0, 10)})`,
+            // click: editConnection
+            click: selectConnection
+          }
+        ]
+      })
+      .openMenu()
 
     trafficLight.properties = feature.properties
     return trafficLight

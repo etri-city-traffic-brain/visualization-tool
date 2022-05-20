@@ -31,7 +31,8 @@ const OPTIMIZATION = {
  * @param {Object} param
  * @param {number} param.tcpPort
  */
-
+const tmp = {}
+const tmp2 = {}
 module.exports = (httpServer, tcpPort) => {
   debug(chalk.yellow('Connector service start'))
   const tcpServer = startSlatMessageReceiver(tcpPort)
@@ -59,6 +60,13 @@ module.exports = (httpServer, tcpPort) => {
     const { simulationId } = data
     // debug(`${simulationId}: status: ${data.status}, progress: ${data.progress}`)
     webSocketServer.send(data.simulationId, { ...data })
+    // tmp2[data.simulationId] = data.progress
+    console.log(' ****************** progress:', data.progress)
+    // if (obj) {
+    //   obj.progress = data.progress
+    // }
+
+    // console.log(data)
     // console.log('------------------> SEND WEB Socket <----------------------')
     // console.log(data)
     if (isFinished(data)) {
@@ -127,5 +135,40 @@ module.exports = (httpServer, tcpPort) => {
   tcpServer.on(EVENT_DATA, data => {
     // console.log(data.simulationId)
     webSocketServer.send(data.simulationId, { ...data })
+
+    //   const arr = tmp[data.simulationId] || []
+    //   arr.push({
+    //     simulationId: data.simulationId,
+    //     data
+    //   })
+    //   tmp[data.simulationId] = arr
+    // })
+
+    // const consume = () => {
+    //   const keys = Object.keys(tmp)
+    //   for (let i = 0; i < keys.length; i++) {
+    //     const d = tmp[keys[i]]
+    //     if (d.length > 0) {
+    //       const data = d.splice(0, 1)
+    //       // console.log(data[0], d.length)
+    //       webSocketServer.send(data[0].simulationId, { ...data[0].data })
+
+    //       if (tmp2[data[0].simulationId]) {
+    //         console.log('*****')
+    //         console.log('*****')
+    //         console.log('*****')
+    //         console.log('*****')
+    //         console.log('*****', tmp2[data[0].simulationId])
+    //         webSocketServer.send(data[0].simulationId, {
+    //           event: 'salt:status',
+    //           simulationId: data[0].simulationId,
+    //           status: 1,
+    //           progress: tmp2[data[0].simulationId] || 0
+    //         })
+    //       }
+    //     }
+    //   }
+    //   setTimeout(() => consume(), 20)
   })
+  // consume()
 }

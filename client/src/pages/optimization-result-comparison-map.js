@@ -47,6 +47,107 @@ import TrafficLightManager from '@/map2/map-traffic-lights'
 
 import drawChart from '@/optsig/chart-reward-phase'
 
+const sa1 = {
+  cluster_563100866_563103911_563103912: [
+    '-563100999',
+    '563100999',
+    '-563100969',
+    '563104779',
+    '-563104778',
+    '563104777'
+  ],
+  cluster_563103599_563103904_563103905_563103906: [
+    '-563104764',
+    '563104764',
+    '563104841',
+    '563113235',
+    '-563104347',
+    '563104347',
+    '563104767',
+    '563104779'
+  ],
+  cluster_563103430_563103601_563103853_563103854_563103855_563103884_563103885_563103893_563103946_563103947_563107941_563107942: [
+    '-563109423',
+    '-563104726',
+    '-563105638',
+    '-563111309',
+    '563104785',
+    '563104839',
+    '563104841',
+    '563109425'
+  ],
+  cluster_563103437_563103890_563103913_563103914: [
+    '563104785',
+    '563104839',
+    '563104782',
+    '563104676',
+    '-563104734',
+    '563104734',
+    '-563104366',
+    '563104366'
+  ],
+  cluster_563103641_563103889_563103894_563103895: [
+    '-563104834',
+    '563104834',
+    '563104782',
+    '563104746',
+    '-563104674',
+    '563104674',
+    '563104678',
+    '563104750'
+  ],
+  cluster_563103888_563103891: [
+    '-563104735',
+    '563104731',
+    '563104736',
+    '563104746'
+  ],
+  cluster_563102154_563103845_563109514_563109515: [
+    '-563102351',
+    '563102351',
+    '-563104654',
+    '563104654',
+    '563114217',
+    '-563104663',
+    '563104666',
+    '-563114214'
+  ],
+  cluster_563100016_563103847_563109512_563109513: [
+    '-563103481',
+    '-563104660',
+    '-563113678',
+    '-563114212',
+    '563100021',
+    '563103481',
+    '563113678',
+    '563114211'
+  ],
+  cluster_563103433_563103849_563103871_563103872_563103873_563103874_563103875_563104618: [
+    '-563104706',
+    '563104700',
+    '-563104154',
+    '563104154',
+    '-563104704',
+    '-563111247',
+    '563104704',
+    '563105674'
+  ],
+  cluster_563109510_563109511: [
+    '-563114206',
+    '-563114208',
+    '563114207',
+    '563114209'
+  ]
+}
+
+const xx = Object.values(sa1).reduce((acc, cur) => {
+  // acc[cur[0]] = true
+  // cosole.log()
+  acc.push(cur[0])
+  return acc
+}, [])
+console.log(xx)
+
 const dataset = (label, color, data) => ({
   label,
   fill: false,
@@ -89,7 +190,8 @@ const makeLineData = (data1 = [], data2 = []) => {
     labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
       dataset('기존신호', 'grey', data1),
-      dataset('최적화신호', 'orange', data2)
+      dataset('최적화신호', 'orange', data2),
+      dataset('평균속도', 'red', data2.slice().fill(40))
     ]
   }
 }
@@ -100,17 +202,19 @@ const calcAvgSpeed = roads =>
   roads.map(road => road.speed).reduce((acc, cur) => (acc += cur), 0) /
   roads.length
 
-const initSimulationData = async (mapId, slave, eventTarget) => {
-  const map = makeMap({ mapId: mapId, zoom: 15 })
+const initSimulationData = async (mapId, slave, eventTarget, mapBus, wsBus) => {
+  const map = makeMap({ mapId: mapId, zoom: 17 })
 
-  const bus = new Vue({})
   const mapManager = MapManager({
     map: map,
     simulationId: slave,
-    eventBus: bus
+    eventBus: mapBus
   })
 
-  const wsClient = WebSocketClient({ simulationId: slave, eventBus: bus })
+  const wsClient = WebSocketClient({
+    simulationId: slave,
+    eventBus: wsBus
+  })
   const trafficLightManager = TrafficLightManager(map, null, eventTarget)
   await trafficLightManager.load()
 
@@ -120,7 +224,7 @@ const initSimulationData = async (mapId, slave, eventTarget) => {
     map,
     mapManager,
     wsClient,
-    bus,
+    bus: mapBus,
     trafficLightManager,
     slave
   }
@@ -224,7 +328,8 @@ export default {
       phaseRewardChartRl: null,
       selectedNode: '목원대네거리',
       // selectedNode: '미래부동산삼거리',
-      showWaitingMsg: false
+      showWaitingMsg: false,
+      avgSpeedJunction: 0
     }
   },
   destroyed () {
@@ -259,61 +364,98 @@ export default {
 
     this.resize()
 
+    const simEventBusFixed = new Vue({})
+    const simEventBusTest = new Vue({})
+    const buffer = []
+    const wsBus = new Vue({})
     this.simulations = [
-      await initSimulationData(this.mapIds[0], this.fixedSlave, this),
-      await initSimulationData(this.mapIds[1], this.testSlave, this)
+      await initSimulationData(
+        this.mapIds[0],
+        this.fixedSlave,
+        this,
+        simEventBusFixed,
+        // simEventBusFixed
+        wsBus
+      ),
+      await initSimulationData(
+        this.mapIds[1],
+        this.testSlave,
+        this,
+        simEventBusTest,
+        simEventBusTest
+      )
     ]
 
     this.initMapEventHandler()
 
-    const bus1 = this.simulations[0].bus
-    const bus2 = this.simulations[1].bus
+    const busFixed = simEventBusFixed
+    const busTest = simEventBusTest
 
-    const initSaltEventHandler = (bus, chart, target) => {
-      bus.$on('salt:data', d => {
-        const avgSpeed = calcAvgSpeed(d.roads)
-        chart.currentSpeeds.push(avgSpeed.toFixed(2) * 1)
-      })
-      bus.$on('salt:status', async status => {
-        target.progress1 = status.progress
-        this.showWaitingMsg = false
-      })
-      bus.$on('salt:finished', async () => {
-        this.progress1 = 100
-        if (target.progress1 >= 100 && target.progress2 >= 100) {
-          this.status = 'finished'
-          this.makeToast('bus1-테스트가 완료 되었습니다.', 'info')
-          console.log('test finished')
+    wsBus.$on('salt:data', d => {
+      // const avgSpeed = calcAvgSpeed(d.roads)
+      buffer.push(d)
+    })
+    wsBus.$on('salt:status', async status => {
+      // this.progress1 = status.progress
+      // this.showWaitingMsg = false
+      // wsBus.progress = status.progress
+    })
+    wsBus.$on('salt:finished', async () => {
+      // this.progress1 = 100
+      // if (this.progress1 >= 100 && this.progress2 >= 100) {
+      //   this.status = 'finished'
+      //   this.makeToast('bus1-테스트가 완료 되었습니다.', 'info')
+      // }
+    })
+
+    // 수행 속도가 느림
+    busTest.$on('salt:data', d => {
+      // console.log(d.roads)
+      const avgSpeed = calcAvgSpeed(d.roads)
+      this.chart2.currentSpeeds.push(avgSpeed.toFixed(2) * 1) // 현재 화면의 전체 평균속도
+
+      const roadsFiltered = []
+      d.roads.forEach(road => {
+        const linkId = road.roadId.slice(0, road.roadId.indexOf('_'))
+        if (xx.includes(linkId)) {
+          roadsFiltered.push(road.speed)
         }
       })
-    }
+      // console.log(roadsFiltered) // 교차로의 평균속도
+      const aaa = roadsFiltered.reduce((acc, cur) => (acc += cur), 0)
+      this.avgSpeedJunction = aaa / roadsFiltered.length
 
-    initSaltEventHandler(bus1, this.chart1, this)
-
-    bus2.$on('salt:data', d => {
-      const avgSpeed = calcAvgSpeed(d.roads)
-      this.chart2.currentSpeeds.push(avgSpeed.toFixed(2) * 1)
+      const ddd = buffer.splice(0, 1)[0]
+      if (ddd) {
+        simEventBusFixed.$emit('salt:data', ddd)
+      }
+      const avgSpeed2 = calcAvgSpeed(ddd.roads)
+      this.chart1.currentSpeeds.push(avgSpeed2.toFixed(2) * 1)
     })
 
-    bus2.$on('salt:status', async status => {
+    busTest.$on('salt:status', async status => {
       this.progress2 = status.progress
+      this.progress1 = status.progress
       this.showWaitingMsg = false
+      simEventBusFixed.$emit('salt:status', {
+        ...status
+      })
     })
 
-    bus2.$on('salt:finished', async () => {
+    busTest.$on('salt:finished', async () => {
+      this.progress1 = 100
       this.progress2 = 100
       if (this.progress1 >= 100 && this.progress2 >= 100) {
         this.status = 'finished'
-        console.log('test finished')
         this.makeToast('bus2 테스트가 완료 되었습니다.', 'info')
       }
     })
 
-    bus1.$on('ws:error', error => {
+    busFixed.$on('ws:error', error => {
       this.makeToast(error.message, 'warning')
     })
 
-    bus1.$on('ws:close', () => {
+    busFixed.$on('ws:close', () => {
       this.makeToast('ws connection closed', 'warning')
     })
 
@@ -390,6 +532,7 @@ export default {
     })
 
     this.$on('junction:selected', async d => {
+      console.log('junction:selected')
       this.updateJunctionSpeed(d)
       this.updatePhaseChart()
     })
@@ -447,6 +590,22 @@ export default {
 
     this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
     this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
+
+    // a chart on zoom -> dispatch an action
+    this.phaseRewardChartFt.on('datazoom', params => {
+      // TODO - debounce
+      const { start, end } = params
+      // // zoom the others!
+      this.phaseRewardChartRl.dispatchAction({
+        type: 'dataZoom',
+        start: start,
+        end: end
+      })
+    })
+
+    this.phaseRewardChartRl.on('datazoom', function (params) {
+      // console.log('hey, I heard that!')
+    })
   },
   methods: {
     ...stepperMixin,

@@ -5,14 +5,11 @@ function makeOption (data) {
     return {}
   }
   const dReward = data.map(v => v.reward)
+  const ppp = data.map(v => v.phase)
   const dPhase = data.map((v, idx) => {
     return {
       name: v.phase,
-      value: [
-        v.phase,
-        idx,
-        idx + 1
-      ],
+      value: [v.phase, idx, idx + 1],
       itemStyle: {
         normal: {
           color: phaseColors[Number(v.phase)] || 'cyan'
@@ -25,7 +22,7 @@ function makeOption (data) {
     backgroundColor: '#2c343c',
     grid: {
       top: '20',
-      bottom: '25',
+      bottom: '65',
       left: '90',
       right: '10'
     },
@@ -42,6 +39,7 @@ function makeOption (data) {
           color: '#ccc'
         }
       }
+      // boundary
     },
     yAxis: [
       {
@@ -96,23 +94,43 @@ function makeOption (data) {
         name: 'reward',
         type: 'line',
         yAxisIndex: 1,
-        data: dReward.slice(1),
+        // data: dReward.slice(1),
+        data: dReward,
         areaStyle: {
           opacity: 0.6
         }
       },
       {
         name: 'phase',
-        type: 'custom',
-        renderItem: renderItem,
+        // type: 'custom',
+        type: 'line',
+        clip: 'true',
+        // renderItem: renderItem,
+        data: ppp,
         itemStyle: {
-          opacity: 0.8
-        },
-        encode: {
-          x: [1, 2],
-          y: 0
-        },
-        data: dPhase
+          opacity: (0.8).toExponential,
+          normal: {
+            color: 'red'
+          }
+        }
+        // encode: {
+        //   x: [1, 2],
+        //   y: 0
+        // },
+        // data: dPhase
+      }
+    ],
+    dataZoom: [
+      {
+        show: true,
+        realtime: true,
+        start: 0,
+        end: 20
+      },
+      {
+        type: 'slider',
+        start: 0,
+        end: 20
       }
     ]
   }
@@ -137,30 +155,36 @@ function renderItem (params, api) {
   // const height = api.size([0, 1])[1] * 1.5
   const height = api.size([0, 1])[1] * 10
 
-  const rectShape = echarts.graphic.clipRectByRect({
-    x: start[0],
-    y: start[1] - height / 2,
-    width: end[0] - start[0],
-    height: height / 10
-  }, {
-    x: params.coordSys.x,
-    y: params.coordSys.y,
-    width: params.coordSys.width,
-    height: params.coordSys.height
-  })
+  const rectShape = echarts.graphic.clipRectByRect(
+    {
+      x: start[0],
+      y: start[1] - height / 2,
+      width: end[0] - start[0],
+      height: height / 10
+    },
+    {
+      x: params.coordSys.x,
+      y: params.coordSys.y,
+      width: params.coordSys.width,
+      height: params.coordSys.height
+    }
+  )
 
-  return rectShape && {
-    type: 'rect',
-    transition: ['shape'],
-    shape: rectShape,
-    style: api.style()
-  }
+  return (
+    rectShape && {
+      type: 'rect',
+      transition: ['shape'],
+      shape: rectShape,
+      style: api.style()
+    }
+  )
 }
 
 function drawChart (el, data) {
   const chart = echarts.init(el)
   const option = makeOption(data)
   chart.setOption(option)
+  chart.group = 'rewardGroup'
   return chart
 }
 drawChart.makeOption = makeOption

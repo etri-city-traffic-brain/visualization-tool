@@ -58,7 +58,7 @@
               기존신호
             </div>
             <div class="border-2 border-gray-800">
-              <div style="height:120px;width:100%;" ref="phase-reward-ft"></div>
+              <div style="height:160px;width:100%;" ref="phase-reward-ft"></div>
             </div>
           </div>
           <div class="mt-1">
@@ -66,7 +66,7 @@
               최적신호
             </div>
             <div class="border-2 border-yellow-400">
-              <div style="height:120px;width:100%" ref="phase-reward-rl"></div>
+              <div style="height:160px;width:100%" ref="phase-reward-rl"></div>
             </div>
           </div>
           </div>
@@ -161,6 +161,10 @@
                   :height="150"
                 />
               </div>
+            </div>
+
+            <div>
+              <div class="text-xl">{{avgSpeedJunction}}</div>
             </div>
 
             <!--
