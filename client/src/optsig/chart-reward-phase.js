@@ -102,22 +102,22 @@ function makeOption (data) {
       },
       {
         name: 'phase',
-        // type: 'custom',
-        type: 'line',
+        type: 'custom',
+        // type: 'bar',
         clip: 'true',
-        // renderItem: renderItem,
-        data: ppp,
+        renderItem: renderItem,
+        // data: ppp,
         itemStyle: {
           opacity: (0.8).toExponential,
           normal: {
             color: 'red'
           }
-        }
-        // encode: {
-        //   x: [1, 2],
-        //   y: 0
-        // },
-        // data: dPhase
+        },
+        encode: {
+          x: [1, 2],
+          y: 0
+        },
+        data: dPhase
       }
     ],
     dataZoom: [
@@ -132,7 +132,45 @@ function makeOption (data) {
         start: 0,
         end: 20
       }
-    ]
+    ],
+    visualMap: {
+      top: 0,
+      right: -100,
+      pieces: [
+        {
+          gt: 0,
+          lte: 2,
+          color: '#93CE07'
+        },
+        {
+          gt: 2,
+          lte: 4,
+          color: '#FBDB0F'
+        },
+        {
+          gt: 4,
+          lte: 6,
+          color: '#FC7D02'
+        },
+        {
+          gt: 6,
+          lte: 8,
+          color: '#FD0100'
+        },
+        {
+          gt: 8,
+          lte: 10,
+          color: '#AA069F'
+        },
+        {
+          gt: 10,
+          color: '#AC3B2A'
+        }
+      ],
+      outOfRange: {
+        color: '#999'
+      }
+    }
   }
 }
 

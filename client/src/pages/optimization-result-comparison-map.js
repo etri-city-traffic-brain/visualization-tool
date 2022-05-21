@@ -418,7 +418,7 @@ export default {
         this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
         this.chart2.avgSpeedJunction = avgSpeedSimJunction
         this.chart2.avgSpeedInView = avgSpeedSim
-        this.speedChart1.setOption(drawChart2.makeOption(avgSpeedSim))
+        // this.speedChart1.setOption(drawChart2.makeOption(avgSpeedSim))
       }
 
       this.chart.avgChartInView = makeLineData(
@@ -508,7 +508,7 @@ export default {
     this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
     this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
 
-    this.speedChart1 = drawChart2(this.$refs['chart-avg-speed-junction'], 20)
+    // this.speedChart1 = drawChart2(this.$refs['chart-avg-speed-junction'], 20)
     // a chart on zoom -> dispatch an action
     this.phaseRewardChartFt.on('datazoom', params => {
       // TODO - debounce

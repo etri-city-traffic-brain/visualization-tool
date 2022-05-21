@@ -130,9 +130,9 @@
                 <span class="rounded-full bg-yellow-300 text-black px-3">선택모델: <span class="bg-yellow-800 px-2 rounded-full text-white">{{ selectedEpoch }}</span></span>
                 <button class="bg-gray-400 text-black rounded px-2 hover:bg-gray-600 hover:text-white" @click.prevent="runTest" >Test <b-icon icon="play-fill"/></button>
             </div>
-            <div class="bg-gray-200">
+            <!-- <div class="bg-gray-200">
               <div style="height:120px;width:100%;" ref="chart-avg-speed-junction"></div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
