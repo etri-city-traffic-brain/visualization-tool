@@ -40,6 +40,27 @@ const scriptOptions = [
   // { value: 'run_2.py', text: 'run_2.py' }
 ]
 
+const actionOptions = [
+  { value: 'offset', text: 'offset' }, // default
+  { value: 'kc', text: 'kc' },
+  { value: 'gr', text: 'gr' },
+  { value: 'gro', text: 'gro' }
+]
+const methodOptions = [
+  { value: 'sappo', text: 'sappo' },
+  { value: 'ddqn', text: 'ddqn' },
+  { value: 'sappo_rnd', text: 'sappo_rnd' }
+]
+const rewardFuncOptions = [
+  { value: 'wt_SBV', text: 'wt_SBV' },
+  { value: 'pn', text: 'pn' },
+  { value: 'wt', text: 'wt' },
+  { value: 'wt_max', text: 'wt_max' },
+  { value: 'wq', text: 'wq' },
+  { value: 'wt_SBV_max', text: 'wt_SBV_max' },
+  { value: 'wt_ABV', text: 'wt_ABV' }
+]
+
 const intervalOptions = [
   { text: '10 Step', value: 10 },
   { text: '20 Step', value: 20 },
@@ -80,6 +101,9 @@ export default {
       areaSelected: areaOptions[0].value, //
       scriptSelected: scriptOptions[0].value, //
       intervalSelected: intervalOptions[0].value, //
+      actionOptionSelected: actionOptions[0].value, //
+      methodOptionSelected: methodOptions[0].value, //
+      rewardFuncOptionSelected: rewardFuncOptions[0].value, //
       junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
@@ -88,6 +112,9 @@ export default {
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],
       intervalOptions: [...intervalOptions],
+      actionOptions,
+      methodOptions,
+      rewardFuncOptions,
       loading: false,
       showMap: false,
       showEnv: true,
@@ -111,6 +138,11 @@ export default {
       this.areaSelected = env.configuration.region
       this.scriptSelected = env.configuration.script
       this.intervalSelected = env.configuration.interval
+
+      this.actionOptionSelected = env.configuration.action
+      this.methodOptionSelected = env.configuration.method
+      this.rewardFuncOptionSelected = env.configuration.rewardFunc
+
       this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
       this.dockerImage = env.configuration.dockerImage
@@ -165,10 +197,13 @@ export default {
           days,
           interval: this.intervalSelected,
           junctionId: this.junctionId,
-          dockerImage: this.dockerImage,
           script: this.scriptSelected,
           epoch: this.epoch,
-          modelSavePeriod: this.modelSavePeriod
+          modelSavePeriod: this.modelSavePeriod,
+          action: this.actionOptionSelected,
+          method: this.methodOptionSelected,
+          rewardFunc: this.rewardFuncOptionSelected,
+          dockerImage: this.dockerImage
         }
       }
 

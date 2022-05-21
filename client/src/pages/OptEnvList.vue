@@ -1,18 +1,5 @@
 <template>
   <div>
-    <!-- <b-card
-      bg-variant="dark"
-      border-variant="dark"
-      text-variant="light"
-      style="min-width:840px; border-radius:0"
-      no-body
-    > -->
-    <!-- <div class="p-1 d-flex bg-gray-600">
-        <b-btn variant="secondary" size="sm" v-b-modal.create-simulation-modal>
-            <b-icon icon="plus"></b-icon>
-          </b-btn>
-      </div> -->
-    <!-- </b-card> -->
     <div class="p-1 bg-gray-400 max-w-full min-h-screen">
       <div class="ml-1">
         <button class="rounded p-2 bg-gray-700 text-center mx-auto font-bold text-white hover:bg-gray-800"
@@ -68,59 +55,8 @@
           </div>
 
         </div>
-
-        <!-- <div class="text-white max-w-full w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6 mt-1">
-          <div class="bg-gray-700 hover:bg-gray-500 m-1 rounded-2xl min-h-full">
-
-          </div>
-        </div> -->
-
-        <!-- <b-card
-          style="min-width:300px;max-width:300px"
-          v-for="env of envs"
-          :key="env.envName"
-          class="m-1"
-          bg-variant="dark"
-          border-variant="dark"
-          text-variant="light"
-        >
-          <b-card-text>
-            🚦 {{ env.envName }}
-          </b-card-text>
-          <b-card-text class="m-1">
-            <h5>
-              <b-badge>
-                <b-badge>주기</b-badge>
-                <b-badge variant="warning">{{ env.configuration.period }}</b-badge>
-              </b-badge>
-            </h5>
-            <h5>
-              <b-badge>
-                <b-badge>대상시간</b-badge>
-                <b-badge variant="primary">{{ env.configuration.fromTime }}</b-badge> ~
-                <b-badge variant="primary">{{ env.configuration.toTime }}</b-badge>
-              </b-badge>
-            </h5>
-            <p class="text-truncate"  v-b-tooltip.hover :title="env.configuration.junctionId.split(',')">
-              <b-badge>신호목록</b-badge>
-              <b-badge
-                v-for="(item, idx) of env.configuration.junctionId.split(',')"
-                :key="idx"
-                class="mr-1"
-              >
-                {{ item }}
-              </b-badge>
-            </p>
-          </b-card-text>
-            <b-card-text class="text-right">
-              <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn>
-              <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn>
-              <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn>
-            </b-card-text>
-        </b-card> -->
       </div>
     </div>
-
     <b-modal title="신호 최적화 환경"
       id="create-simulation-modal" ref="modal" size="lg" header-border-variant="dark"
       header-bg-variant="dark" header-text-variant="light" body-bg-variant="dark" body-text-variant="ligth"
@@ -131,7 +67,6 @@
         :env="currentEnv">
       </uniq-register>
     </b-modal>
-
   </div>
 </template>
 
