@@ -8,7 +8,6 @@
 
 import Vue from 'vue'
 
-import stepperMixin from '@/stepper/mixin'
 import makeMap from '@/map2/make-map'
 import MapManager from '@/map2/map-manager'
 
@@ -21,7 +20,6 @@ import SimulationResult from '@/pages/SimulationResult.vue'
 import HistogramChart from '@/components/charts/HistogramChart'
 import Doughnut from '@/components/charts/Doughnut'
 
-import statisticsService from '@/service/statistics-service'
 import congestionColor from '@/utils/colors'
 import LineChart from '@/components/charts/LineChart'
 import BarChart from '@/components/charts/BarChart'
@@ -33,7 +31,6 @@ import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 
 import UniqCardTitle from '@/components/func/UniqCardTitle'
-import makePhaseChart from '@/charts/chartjs/utils/make-phase-chart'
 import { optimizationService } from '@/service'
 
 import signalService from '@/service/signal-service'
@@ -46,6 +43,7 @@ import style from '@/components/style'
 import TrafficLightManager from '@/map2/map-traffic-lights'
 
 import drawChart from '@/optsig/chart-reward-phase'
+import drawChart2 from '@/optsig/speed-gage'
 
 const sa1 = {
   cluster_563100866_563103911_563103912: [
@@ -141,12 +139,9 @@ const sa1 = {
 }
 
 const xx = Object.values(sa1).reduce((acc, cur) => {
-  // acc[cur[0]] = true
-  // cosole.log()
   acc.push(cur[0])
   return acc
 }, [])
-console.log(xx)
 
 const dataset = (label, color, data) => ({
   label,
@@ -186,12 +181,15 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
 }
 
 const makeLineData = (data1 = [], data2 = []) => {
+  const avgD1 = data1.reduce((acc, cur) => (acc += cur), 0) / data1.length
+  const avgD2 = data2.reduce((acc, cur) => (acc += cur), 0) / data1.length
   return {
     labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
       dataset('기존신호', 'grey', data1),
-      dataset('최적화신호', 'orange', data2),
-      dataset('평균속도', 'red', data2.slice().fill(40))
+      dataset('최적신호', 'orange', data2),
+      dataset('기존', 'green', data2.slice().fill(avgD1)),
+      dataset('최적', 'blue', data2.slice().fill(avgD2))
     ]
   }
 }
@@ -406,22 +404,22 @@ export default {
       const avgSpeedTest = calcAvgSpeed(dataTest.roads).toFixed(2) * 1
       const avgSpeedTestJunction =
         calcAveSpeedJunction(dataTest.roads).toFixed(2) * 1
-      this.chart1.avgSpeedJunction = avgSpeedTestJunction
-      this.chart1.avgSpeedInView = avgSpeedTest
-
       this.chart2.avgSpeedsInView.push(avgSpeedTest) // 현재 화면의 전체 평균속도
       this.chart2.avgSpeedsJunctions.push(avgSpeedTestJunction) //
+      this.chart1.avgSpeedJunction = avgSpeedTestJunction
+      this.chart1.avgSpeedInView = avgSpeedTest
       const dataSim = buffer.splice(0, 1)[0]
       if (dataSim) {
         simEventBusFixed.$emit('salt:data', dataSim)
+        const avgSpeedSim = calcAvgSpeed(dataSim.roads).toFixed(2) * 1
+        const avgSpeedSimJunction =
+          calcAveSpeedJunction(dataSim.roads).toFixed(2) * 1
+        this.chart1.avgSpeedsInView.push(avgSpeedSim)
+        this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
+        this.chart2.avgSpeedJunction = avgSpeedSimJunction
+        this.chart2.avgSpeedInView = avgSpeedSim
+        this.speedChart1.setOption(drawChart2.makeOption(avgSpeedSim))
       }
-      const avgSpeedSim = calcAvgSpeed(dataSim.roads).toFixed(2) * 1
-      const avgSpeedSimJunction =
-        calcAveSpeedJunction(dataTest.roads).toFixed(2) * 1
-      this.chart2.avgSpeedJunction = avgSpeedSimJunction
-      this.chart2.avgSpeedInView = avgSpeedSim
-      this.chart1.avgSpeedsInView.push(avgSpeedSim)
-      this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
 
       this.chart.avgChartInView = makeLineData(
         this.chart1.avgSpeedsInView,
@@ -510,6 +508,7 @@ export default {
     this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
     this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
 
+    this.speedChart1 = drawChart2(this.$refs['chart-avg-speed-junction'], 20)
     // a chart on zoom -> dispatch an action
     this.phaseRewardChartFt.on('datazoom', params => {
       // TODO - debounce
@@ -525,40 +524,6 @@ export default {
     this.phaseRewardChartRl.on('datazoom', function (params) {})
   },
   methods: {
-    ...stepperMixin,
-    chartClicked (value) {
-      this.selectedEpoch = value
-      this.showEpoch = true
-      setTimeout(() => {
-        this.showEpoch = false
-      }, 1500)
-    },
-
-    toggleState () {
-      return this.playBtnToggle ? 'M' : 'A'
-    },
-
-    updateChartRealtime () {
-      if (this.status !== 'running') {
-        if (this.updateTimer) {
-          clearTimeout(this.updateTimer)
-        }
-        return
-      }
-
-      if (this.chart2.progress >= 100 && this.chart1.progress >= 100) {
-        log('all simulations are finished')
-        this.updatePhaseChart()
-        return
-      }
-      this.updateTimer = setTimeout(() => {
-        this.chart.avgChartInView = makeLineData(
-          this.chart1.avgSpeedsInView,
-          this.chart2.avgSpeedsInView
-        )
-        this.updateChartRealtime()
-      }, 500)
-    },
     resize () {
       this.mapHeight = window.innerHeight - 50 // update map height to current height
       if (this.phaseRewardChartFt) {
@@ -572,14 +537,21 @@ export default {
       this.showWaitingMsg = true
       this.chart1.avgSpeedsInView = []
       this.chart2.avgSpeedsInView = []
+      this.chart1.avgSpeedsJunctions = []
+      this.chart2.avgSpeedsJunctions = []
 
-      optimizationService
-        .runTest(this.simulation.id, this.testSlave, this.selectedEpoch)
-        .then(v => {})
-      this.progress1 = 0
-      this.progress2 = 0
+      try {
+        await simulationService.stopSimulation(this.simulation.id)
+        await optimizationService.runTest(
+          this.simulation.id,
+          this.testSlave,
+          this.selectedEpoch
+        )
+      } catch (err) {
+        log(err.message)
+        this.status = 'error'
+      }
       this.status = 'running'
-      // this.updateChartRealtime()
     },
     initMapEventHandler () {
       const map1 = this.simulations[0].map

@@ -1,9 +1,10 @@
 <template>
-  <div class="bg-gray-600 relative">
+  <div class="bg-gray-600 relative min-h-screen">
 
     <div class="fixed z-50 inset-auto h-full " v-if="showWaitingMsg">
+    <!-- <div class="fixed top-32 z-50 inset-auto h-full " v-if="true"> -->
       <div class="w-screen">
-        <div class="animate-pulse mx-auto text-center mt-5 bg-yellow-300 p-5 text-xl font-bold">
+        <div class="animate-pulse mx-auto text-center bg-blue-300 p-5 text-xl font-bold">
           실행 준비 중입니다. 잠시후 실행 됩니다.
         </div>
       </div>
@@ -17,57 +18,56 @@
       <!-- RIGHT PANEL -->
       <div class="grid grid-cols-4 gap-0 p-1">
         <div class="col-span-3">
-          <div class="flex">
-            <div class="flex-1">
-              <div class="text-center text-sm font-bold text-white w-full pt-1 bg-gray-700 rounded-t-2xl ">
-                <div class="tracking-wider">기존신호</div>
+          <div class="grid grid-cols-2">
+            <div class="bg-gray-700">
+              <div class="grid grid-cols-3 gap-2 mt-2 text-white">
+                <div class="text-center font-bold pt-1 w-full flex flex-col justify-middle justify-center">
+                  <div class="tracking-wider text-lg">기존신호</div>
+                </div>
+                <div class="text-center text-2xl font-bold p-2">
+                  <div class="text-xs">뷰영역 평균속도</div>
+                  <div>{{chart1.avgSpeedJunction}} <span class="text-sm">km</span></div>
+                </div>
+                <div class="text-center text-2xl font-bold border- p-2">
+                  <div class="text-xs">교차로 평균속도</div>
+                  <div>{{chart1.avgSpeedInView}} <span class="text-sm">km</span></div>
+                </div>
               </div>
               <div class="border-2 border-gray-700" >
                 <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" />
-                <b-progress height="1rem" v-if="chart1.progress > 0" class="no-border-radius">
+                <b-progress height="1rem" class="no-border-radius">
                   <b-progress-bar :value="chart1.progress" variant="secondary">
                     <span> {{ chart1.progress }} %</span>
                   </b-progress-bar>
                 </b-progress>
               </div>
             </div>
-            <div class="flex-1">
-              <div class="text-center text-sm text-black font-bold pt-1 w-full bg-yellow-300 rounded-t-2xl">
-                <div class="tracking-wider">최적신호</div>
+            <div class="bg-yellow-300">
+              <div class="grid grid-cols-3 gap-2 mt-2 text-black">
+              <div class="text-center text-black font-bold pt-1 w-full flex flex-col justify-middle justify-center">
+                <div class="tracking-wider text-lg">최적신호</div>
               </div>
+                <div class="text-center text-2xl font-bold p-2">
+                  <div class="text-xs">뷰영역 평균속도</div>
+                  <div>{{chart2.avgSpeedJunction}} <span class="text-sm">km</span></div>
+                </div>
+                <div class="text-center text-2xl font-bold border- p-2">
+                  <div class="text-xs">교차로 평균속도</div>
+                  <div>{{chart2.avgSpeedInView}} <span class="text-sm">km</span></div>
+                </div>
+              </div>
+
               <div class="border-2 border-yellow-400">
                 <div :ref="mapIds[1]" :id="mapIds[1]" :style="{height: '600px'}" />
-                <b-progress height="1rem" v-if="chart2.progress > 0" class="no-border-radius"  >
+                <b-progress height="1rem" class="no-border-radius"  >
                   <b-progress-bar :value="chart2.progress" variant="secondary">
                     <span> {{ chart2.progress }} %</span>
                   </b-progress-bar>
                 </b-progress>
               </div>
+
             </div>
           </div>
-
-          <div class="mt-1">
-            <div class="">
-              <div class="text-center text-white mt-1 mb-1 bg-gray-800 p-1 rounded-lg">
-                {{ selectedNode }}
-              </div>
-              <div class="flex justify-between pr-3 items-center text-sm text-white font-bold pl-3 py-1 bg-gray-700 rounded-t-xl">
-                기존신호
-              </div>
-              <div class="border-2 border-gray-800">
-                <div style="height:160px;width:100%;" ref="phase-reward-ft"></div>
-              </div>
-            </div>
-            <div class="mt-1">
-              <div class="pr-3 flex justify-between items-center text-sm text-black font-bold pl-3 py-1 bg-yellow-400 rounded-t-lg">
-                최적신호
-              </div>
-              <div class="border-2 border-yellow-400">
-                <div style="height:160px;width:100%" ref="phase-reward-rl"></div>
-              </div>
-            </div>
-          </div>
-
           <!-- </div> -->
         </div>
         <div class="ml-1">
@@ -75,8 +75,8 @@
             <div class="border-gray-600 space-y-1">
               <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
               <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ simulation.configuration.region }} </div>
-              <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">시간</span> <span class="text-xs">{{ simulation.configuration.fromTime }}({{ simulation.configuration.begin }}) ~
-              {{ simulation.configuration.toTime }}({{ simulation.configuration.end }})</span></div>
+              <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">시간</span> <span class="text-xs">{{ simulation.configuration.fromTime }} ~
+              {{ simulation.configuration.toTime }}</span></div>
               <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">주기</span> {{ simulation.configuration.period }} (초)</div>
               <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">교차로</span> {{ simulation.configuration.junctionId }} </div>
               <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">이미지</span> <span class="text-xs">{{ simulation.configuration.dockerImage }} </span></div>
@@ -107,7 +107,7 @@
             <div class="p-2 bg-gray-700" >
               <line-chart
                 :chartData="rewards"
-                :options="lineChartOption({}, chartClicked)"
+                :options="lineChartOption({}, ()=>{})"
                 :height="180"
               />
             </div>
@@ -130,43 +130,59 @@
                 <span class="rounded-full bg-yellow-300 text-black px-3">선택모델: <span class="bg-yellow-800 px-2 rounded-full text-white">{{ selectedEpoch }}</span></span>
                 <button class="bg-gray-400 text-black rounded px-2 hover:bg-gray-600 hover:text-white" @click.prevent="runTest" >Test <b-icon icon="play-fill"/></button>
             </div>
+            <div class="bg-gray-200">
+              <div style="height:120px;width:100%;" ref="chart-avg-speed-junction"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-1 grid grid-cols-2 gap-1">
+        <div class="">
+          <div class="bg-gray-700 text-center text-white my-1">
+            신호그래프 {{ selectedNode }}
+          </div>
+          <div class="flex justify-between pr-3 items-center text-sm text-white font-bold pl-3 py-1 bg-gray-700">
+            기존신호
+          </div>
+          <div class="border-2 border-gray-700">
+            <div style="height:160px;width:100%;" ref="phase-reward-ft"></div>
+          </div>
+          <div class="mt-1">
+            <div class="pr-3 flex justify-between items-center text-sm text-black font-bold pl-3 py-1 bg-yellow-400">
+              최적신호
+            </div>
+            <div class="border-2 border-yellow-400">
+              <div style="height:160px;width:100%" ref="phase-reward-rl"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="mt-1">
+            <div class="m-0 p-0 text-center text-white bg-gray-800">
+              <small>평균속도 </small>
+              <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
+            </div>
+            <div class="bg-gray-700 border-2 border-gray-800 p-2">
+              <line-chart
+                :chartData="chart.avgChartInView"
+                :options="lineChartOption({})"
+                :height="100"
+              />
+
+            </div>
+          </div>
 
             <div class="mt-1">
-              <div class="m-0 p-0 text-center text-white bg-blue-800 rounded-t-lg">
-                <small>평균속도 </small>
-                <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
-              </div>
-              <div class="bg-gray-700 border-2 border-blue-800">
-                <line-chart
-                  :chartData="chart.avgChartInView"
-                  :options="lineChartOption({})"
-                  :height="150"
-                />
-
-              </div>
+            <div class="m-0 p-0 text-center text-white bg-blue-800">
+              <small>평균속도(교차로) </small>
+              <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
             </div>
-
-              <div class="mt-1">
-              <div class="m-0 p-0 text-center text-white bg-blue-800 rounded-t-lg">
-                <small>평균속도(교차로) </small>
-                <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
-              </div>
-              <div class="bg-gray-700 border-2 border-blue-800">
-
-                <line-chart
-                  :chartData="chart.avgChartJunctions"
-                  :options="lineChartOption({})"
-                  :height="150"
-                />
-              </div>
-            </div>
-
-
-            <div class="grid grid-cols-4 gap-2 mt-2">
-              <div class="text-center text-2xl font-bold border p-2">{{chart1.avgSpeedJunction}}</div>
-              <div class="text-center text-2xl font-bold border p-2">{{chart1.avgSpeedInView}}</div>
-              <div class="text-center text-2xl font-bold border p-2">{{chart2.avgSpeedJunction}}</div>
-              <div class="text-center text-2xl font-bold border p-2">{{chart2.avgSpeedInView}}</div>
+            <div class="bg-gray-700 border-2 border-blue-800 p-2">
+              <line-chart
+                :chartData="chart.avgChartJunctions"
+                :options="lineChartOption({})"
+                :height="100"
+              />
             </div>
           </div>
         </div>
