@@ -31,18 +31,24 @@ async function run (simulation, mode, modelNum) {
     return false
   }
 
-  const epoch = simulation.configuration.epoch
-  const dockerImage =
-    simulation.configuration.dockerImage || DEFAULT_DOCKER_IMAGE
+  const config = simulation.configuration
+
+  const epoch = config.epoch
+  const dockerImage = config.dockerImage || DEFAULT_DOCKER_IMAGE
   const begin = 0
-  const end = simulation.configuration.end - simulation.configuration.begin + 60
-  const modelSavePeriod = simulation.configuration.modelSavePeriod || 20
-  const map = simulation.configuration.region
+  const end = config.end - config.begin + 60
+  const modelSavePeriod = config.modelSavePeriod || 20
+  const map = config.region
+  const targetTL = config.junctionId // ex) "SA 101,SA 111", --> comma seperated
+
+  const action = config.action
+  const method = config.method
+  const rewardFunc = config.rewardFunc
 
   const volume = `${volumePath}/${simulation.id}:/uniq/optimizer/io`
 
   // const targetTL = 'SA 101,SA 104,SA 107,SA 111'
-  const targetTL = simulation.configuration.junctionId
+
   const makeCmd = mode =>
     `run --rm -v ${volume} ${dockerImage} python ./run.py \
      --mode ${mode} \

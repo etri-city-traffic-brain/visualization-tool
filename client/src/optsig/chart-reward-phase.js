@@ -26,12 +26,19 @@ function makeOption (data) {
       left: '90',
       right: '10'
     },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'cross'
+    toolbox: {
+      feature: {
+        dataZoom: {
+          yAxisIndex: false
+        }
       }
     },
+    // tooltip: {
+    //   trigger: 'axis',
+    //   axisPointer: {
+    //     type: 'cross'
+    //   }
+    // },
     xAxis: {
       data: new Array(data.length).fill(0).map((v, i) => data[i].step),
       axisLabel: {
@@ -122,16 +129,17 @@ function makeOption (data) {
     ],
     dataZoom: [
       {
-        show: true,
-        realtime: true,
-        start: 0,
-        end: 20
-      },
-      {
-        type: 'slider',
-        start: 0,
-        end: 20
+        type: 'inside'
+        // show: true,
+        // realtime: true,
+        // start: 0,
+        // end: 20
       }
+      // {
+      // type: 'slider'
+      //   start: 0,
+      //   end: 20
+      // }
     ],
     visualMap: {
       top: 0,

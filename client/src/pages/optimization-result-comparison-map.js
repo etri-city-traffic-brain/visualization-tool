@@ -465,31 +465,28 @@ export default {
     this.$on('junction:clicked', async p => {
       const crossName = signalService.nodeIdToName(p.nodeId)
       this.selectedNode = crossName
-      if (!this.dataFt) {
-        this.dataFt = await optimizationService
-          .getPhaseReward(this.simulation.id, 'ft')
-          .then(res => res.data)
-      }
 
-      const ft = this.dataFt[crossName]
-      if (ft) {
-        this.phaseRewardChartFt.setOption(drawChart.makeOption(ft))
-      } else {
-        this.phaseRewardChartFt.setOption(drawChart.makeOption([]))
-      }
-
-      if (!this.dataRl) {
-        this.dataRl = await optimizationService
-          .getPhaseReward(this.simulation.id, 'rl')
-          .then(res => res.data)
-      }
-
-      const rl = this.dataRl[crossName]
-      if (rl) {
-        this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
-      } else {
-        this.phaseRewardChartRl.setOption(drawChart.makeOption([]))
-      }
+      optimizationService
+        .getPhaseReward(this.simulation.id, 'rl')
+        .then(res => res.data)
+        .then(dataRl => {
+          const rl = dataRl[crossName]
+          if (!rl) {
+            return
+          }
+          this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
+          optimizationService
+            .getPhaseReward(this.simulation.id, 'ft')
+            .then(res => res.data)
+            .then(dataFt => {
+              const ft = dataFt[crossName]
+              if (ft) {
+                this.phaseRewardChartFt.setOption(
+                  drawChart.makeOption(ft.slice(0, rl.length))
+                )
+              }
+            })
+        })
     })
 
     window.addEventListener('resize', this.resize)
@@ -511,14 +508,30 @@ export default {
     // this.speedChart1 = drawChart2(this.$refs['chart-avg-speed-junction'], 20)
     // a chart on zoom -> dispatch an action
     this.phaseRewardChartFt.on('datazoom', params => {
-      // TODO - debounce
-      const { start, end } = params
+      const { start, end, batch } = params
+
+      if (batch) {
+        this.phaseRewardChartRl.dispatchAction({
+          type: 'dataZoom',
+          start: start,
+          end: end,
+          batch: [
+            {
+              startValue: batch[0].startValue,
+              endValue: batch[0].endValue,
+              start: batch[0].start,
+              end: batch[0].end
+            }
+          ]
+        })
+      } else {
+        this.phaseRewardChartRl.dispatchAction({
+          type: 'dataZoom',
+          start: start,
+          end: end
+        })
+      }
       // // zoom the others!
-      this.phaseRewardChartRl.dispatchAction({
-        type: 'dataZoom',
-        start: start,
-        end: end
-      })
     })
 
     this.phaseRewardChartRl.on('datazoom', function (params) {})
