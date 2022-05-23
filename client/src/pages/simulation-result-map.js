@@ -538,6 +538,7 @@ export default {
         this.simulationId,
         linkId
       )
+      console.log(linkData)
       // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
       // this.chart.linkSpeeds = makeLinkSpeedChartData(linkData.values, [10, 20, 30, 10, 20, 30])
       const vdsSpeedData = { label: 'vds', color: 'skyblue', data: [] }

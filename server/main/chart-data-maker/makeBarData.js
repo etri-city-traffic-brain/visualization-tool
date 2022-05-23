@@ -37,7 +37,7 @@ function makeBar (strData) {
   for (let index = 0; index < SIZE; index += 1) {
     const avgSpeed = getAvgSpeed(linkIds, index)
     if (!isNaN(avgSpeed)) {
-      console.log(index, avgSpeed)
+      // console.log(index, avgSpeed)
       dataset.backgroundColor.push(getColor(avgSpeed))
       dataset.data.push(Number(avgSpeed.toFixed(2)))
     }
@@ -62,7 +62,7 @@ const driver = (from, simulationId, jsonObj) =>
       streamUtil
         .objectToFile(fileNew, fileData)
         .then(result => {
-          console.log(result)
+          // console.log(result)
           resolve()
         })
         .catch(reject)

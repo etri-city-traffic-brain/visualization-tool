@@ -4,54 +4,31 @@
  *
  */
 
-const moment = require('moment')
-const { dockerCommand } = require('docker-cli-js')
+const { dockerCommand: docker } = require('docker-cli-js')
 
 const config = require('../config')
 const {
-  saltPath: { home, volumeSim }
+  saltPath: { volumeSim }
 } = config
 
-const DefaultImgName = 'images4uniq/salt:v2.1a.20210915.test_BUS'
-// const imgName = 'images4uniq/salt:v2.1a.20210902'
+const DOCKER_IMAGE_DEFAULT = 'images4uniq/salt:v2.1a.20210915.test_BUS'
 
-const exeFile = '/uniq/simulator/salt/bin/salt.sh'
-const { log } = console
+const VOLUME_HOST = volumeSim
+const VOLUME_CONTAINER = '/uniq/simulator/salt/volume'
+const RUN_SCRIPT = '/uniq/simulator/salt/bin/salt.sh'
+
 const buildConfigPath = sId =>
   `/uniq/simulator/salt/volume/data/${sId}/salt.scenario.json`
-const volumeHost = volumeSim
 
-async function run (sId, img) {
-  const imgName = img || DefaultImgName
+module.exports = async simulation => {
+  const sId = simulation.id
+  const img = simulation.configuration.dockerImage
+
+  const imgName = img || DOCKER_IMAGE_DEFAULT
   const configPath = buildConfigPath(sId)
-  const volumeContainer = '/uniq/simulator/salt/volume'
-  return dockerCommand(
-    `run --rm --name ${sId} -v ${volumeHost}:${volumeContainer} ${imgName} ${exeFile} ${configPath}`
+  const volume = `${VOLUME_HOST}:${VOLUME_CONTAINER}`
+  return docker(
+    `run --rm --name ${sId} -v ${volume} ${imgName} ${RUN_SCRIPT} ${configPath}`,
+    { echo: false }
   )
-}
-
-module.exports = simulation => {
-  log('*** start simulation ***')
-  log('simulation', simulation.id)
-  run(simulation.id, simulation.configuration.dockerImage).then(r_ => {
-    log('**** after run start cook ***', simulation.id)
-    //   cookSimulationResult({
-    //     simulationId: simulation.id,
-    //     duration: simulation.configuration.end,
-    //     period: simulation.configuration.period
-    //   }).then(() => {
-    //     updateStatus(simulation.id, 'finished')
-    //   }).catch(err => {
-    //     console.log(err)
-    //     updateStatus(simulation.id, 'error', {
-    //       error: `fail to start simulation ${err.message}`,
-    //       ended: currentTimeFormatted()
-    //     })
-    //   })
-    // }).catch(err => {
-    //   updateStatus(simulation.id, 'error', {
-    //     error: `fail to start simulation ${err.message}`,
-    //     ended: currentTimeFormatted()
-    //   })
-  })
 }
