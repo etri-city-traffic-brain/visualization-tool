@@ -17,12 +17,11 @@ import simulationService from '@/service/simulation-service'
 
 import SimulationResult from '@/pages/SimulationResult.vue'
 
-import HistogramChart from '@/components/charts/HistogramChart'
-import Doughnut from '@/components/charts/Doughnut'
+// import HistogramChart from '@/components/charts/HistogramChart'
+// import Doughnut from '@/components/charts/Doughnut'
 
 import congestionColor from '@/utils/colors'
 import LineChart from '@/components/charts/LineChart'
-import BarChart from '@/components/charts/BarChart'
 import UniqCongestionColorBar from '@/components/CongestionColorBar'
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
 import UniqMapChanger from '@/components/UniqMapChanger'
@@ -43,7 +42,6 @@ import style from '@/components/style'
 import TrafficLightManager from '@/map2/map-traffic-lights'
 
 import drawChart from '@/optsig/chart-reward-phase'
-import drawChart2 from '@/optsig/speed-gage'
 
 const sa1 = {
   cluster_563100866_563103911_563103912: [
@@ -246,9 +244,6 @@ export default {
     SimulationDetailsOnRunning,
     SimulationDetailsOnFinished,
     LineChart,
-    BarChart,
-    HistogramChart,
-    Doughnut,
     UniqCongestionColorBar,
     UniqSimulationResultExt,
     UniqMapChanger,
@@ -331,7 +326,15 @@ export default {
 
     window.removeEventListener('resize', this.getWindowHeight)
   },
-  computed: {},
+  computed: {
+    config () {
+      if (this.simulation) {
+        return this.simulation.configuration
+      } else {
+        return {}
+      }
+    }
+  },
   async mounted () {
     const optimizationId = this.$route.params ? this.$route.params.id : null
 

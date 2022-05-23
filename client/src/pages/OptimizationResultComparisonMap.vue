@@ -15,7 +15,6 @@
       <div class="font-bold text-sm">시뮬레이션 정보를 읽어오는데 실패하였습니다.</div>
     </div>
     <div v-else>
-      <!-- RIGHT PANEL -->
       <div class="grid grid-cols-4 gap-0 p-1">
         <div class="col-span-3">
           <div class="grid grid-cols-2">
@@ -71,16 +70,33 @@
           <!-- </div> -->
         </div>
         <div class="ml-1">
-          <div class="text-white text-sm p-2 bg-gray-700 rounded-t-lg">
-            <div class="border-gray-600 space-y-1">
-              <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
-              <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ simulation.configuration.region }} </div>
-              <div> <span class="w-24 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">시간</span> <span class="text-xs">{{ simulation.configuration.fromTime }} ~
-              {{ simulation.configuration.toTime }}</span></div>
-              <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">주기</span> {{ simulation.configuration.period }} (초)</div>
-              <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">교차로</span> {{ simulation.configuration.junctionId }} </div>
-              <div> <span class="w-24 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">이미지</span> <span class="text-xs">{{ simulation.configuration.dockerImage }} </span></div>
-              <div> <span class="w-24 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">모델저장주기</span> {{ simulation.configuration.modelSavePeriod }} </div>
+          <div class="text-white text-sm p-2 bg-gray-700 min-w-max">
+            <div class="border-blue-600 space-y-1">
+              <div class="flex space-x-1">
+                <div class="bg-blue-500 px-1 rounded">아이디</div> <div>{{ simulation.id }} </div>
+              </div>
+              <div class="flex space-x-1">
+                <div class="bg-blue-500 px-1 rounded">지역</div><div> {{ config.region }}</div>
+                <div class="bg-blue-500 px-1 rounded">주기</div> <div>{{ config.period }}초</div>
+                <div class="bg-blue-500 px-1 rounded ">모델 저장주기</div> <div>{{ config.modelSavePeriod }}</div>
+              </div>
+              <div class="flex space-x-1">
+                <div class="bg-blue-500 px-1 rounded">Method</div> <div>{{ config.method }}</div>
+                <div class="bg-blue-500 px-1 rounded">Action</div> <div>{{ config.action }}</div>
+                <div class="bg-blue-500 px-1 rounded">보상함수</div> <div>{{ config.rewardFunc }}</div>
+              </div>
+              <div class="flex space-x-1">
+                <div class="bg-blue-500 px-1 rounded">시간</div>
+                <div>{{ config.fromTime }} ~ {{ config.toTime }}</div>
+              </div>
+              <div class="space-y-1">
+                <div class="bg-blue-500 px-1 w-max rounded font-bold">대상 교차로</div>
+                <div>{{ simulation.configuration.junctionId }}</div>
+              </div>
+              <div class="space-y-1 items-center">
+                <div class="bg-blue-500 px-1 w-max rounded">실행이미지</div>
+                <div class="">{{ simulation.configuration.dockerImage }} </div>
+              </div>
             </div>
           </div>
 
@@ -95,8 +111,8 @@
               상태: {{ status }}
             </div>
             <div class="flex-shrink-0">
-              <b-btn @click="checkStatus" size="sm">상태확인</b-btn>
-              <b-btn @click="stopTest" size="sm">분석중지</b-btn>
+              <b-btn @click="checkStatus" size="sm">실행상태 확인</b-btn>
+              <b-btn @click="stopTest" size="sm">분석 중지</b-btn>
             </div>
             <div class="p-1 bg-gray-800 max-h-32 h-32 overflow-auto">
               <div v-for="(s, i) of statusMessage" :key="i" class="bg-gray-800 text-xs text-white">
@@ -107,7 +123,7 @@
           <div class="">
 
             <!----- 보상 그래프 ----->
-            <div class="px-2 pt-2 text-sm text-white bg-gray-700 rounded-t-lg">보상그래프</div>
+            <div class="px-2 pt-2 text-sm text-white bg-gray-700 rounded-t-lg">보상 그래프</div>
             <div class="p-2 bg-gray-700" >
               <line-chart
                 :chartData="rewards"
@@ -142,7 +158,7 @@
           </div>
         </div>
       </div>
-      <div class="mt-1 grid grid-cols-2 gap-1">
+      <div class="grid grid-cols-2 gap-1">
         <div class="">
           <div class="bg-gray-700 text-center text-white my-1">
             신호그래프 {{ selectedNode }}
