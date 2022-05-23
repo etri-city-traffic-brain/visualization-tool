@@ -32,7 +32,7 @@ async function run (simulation, mode, modelNum) {
   }
 
   const config = simulation.configuration
-
+  const slaves = simulation.slaves
   const epoch = config.epoch
   const dockerImage = config.dockerImage || DEFAULT_DOCKER_IMAGE
   const begin = 0
@@ -49,8 +49,8 @@ async function run (simulation, mode, modelNum) {
 
   // const targetTL = 'SA 101,SA 104,SA 107,SA 111'
 
-  const makeCmd = mode =>
-    `run --rm -v ${volume} ${dockerImage} python ./run.py \
+  const makeCmd = (mode, name) =>
+    `run --rm --name ${name} -v ${volume} ${dockerImage} python ./run.py \
      --mode ${mode} \
      --map ${map} \
      --start-time ${begin} \
@@ -64,12 +64,15 @@ async function run (simulation, mode, modelNum) {
      --action offset`
 
   if (mode === 'train') {
-    const cmd = `${makeCmd('train')} --model-save-period ${modelSavePeriod}`
+    const cmd = `${makeCmd(
+      'train',
+      simulation.id
+    )} --model-save-period ${modelSavePeriod}`
     log(chalk.green(cmd))
     return docker(cmd, options)
   } else if (mode === 'test') {
-    const cmdSimu = `${makeCmd('simulate')}`
-    const cmdTest = `${makeCmd('test')} --model-num ${modelNum}`
+    const cmdSimu = `${makeCmd('simulate', slaves[0])}`
+    const cmdTest = `${makeCmd('test', slaves[1])} --model-num ${modelNum}`
     return Promise.all([docker(cmdTest), docker(cmdSimu)])
   } else {
     return Promise.reject(new Error('unknown mode'))

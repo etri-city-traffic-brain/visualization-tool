@@ -53,7 +53,6 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   }
 
   const kill = () => {
-    console.log('kill ws client')
     killed = true
     status = 'close'
     close()
@@ -65,12 +64,17 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   }
 
   function init () {
-    log(`init ${simulationId} - ${wsUrl}`)
+    // log(`init ${simulationId} - ${wsUrl}`)
     if (status === 'open') {
       log('WebSocket is already opened!!')
       return
     }
-    socket = new WebSocket(url)
+    try {
+      socket = new WebSocket(url)
+    } catch (err) {
+      log(err.message)
+      return
+    }
     socket.addEventListener('open', () => {
       send({ type: 0, simulationId })
       status = 'open'

@@ -200,7 +200,14 @@ const calcAvgSpeed = roads =>
   roads.map(road => road.speed).reduce((acc, cur) => (acc += cur), 0) /
   roads.length
 
-const initSimulationData = async (mapId, slave, eventTarget, mapBus, wsBus) => {
+const initSimulationData = async (
+  mapId,
+  slave,
+  eventTarget,
+  mapBus,
+  wsBus,
+  jIds
+) => {
   const map = makeMap({ mapId: mapId, zoom: 17 })
 
   const mapManager = MapManager({
@@ -215,6 +222,7 @@ const initSimulationData = async (mapId, slave, eventTarget, mapBus, wsBus) => {
   })
   const trafficLightManager = TrafficLightManager(map, null, eventTarget)
   await trafficLightManager.load()
+  trafficLightManager.setTargetJunctions(jIds)
 
   mapManager.loadMapData()
   wsClient.init()
@@ -305,7 +313,8 @@ export default {
       selectedNode: '목원대네거리',
       // selectedNode: '미래부동산삼거리',
       showWaitingMsg: false,
-      avgSpeedJunction: 0
+      avgSpeedJunction: 0,
+      statusMessage: []
     }
   },
   destroyed () {
@@ -330,6 +339,9 @@ export default {
       optimizationId
     )
 
+    if (!simulation) {
+      return
+    }
     this.status = simulation.status
 
     this.simulation = simulation
@@ -351,14 +363,16 @@ export default {
         this,
         simEventBusFixed,
         // simEventBusFixed
-        wsBus
+        wsBus,
+        this.simulation.configuration.junctionId.split(',')
       ),
       await initSimulationData(
         this.mapIds[1],
         this.testSlave,
         this,
         simEventBusTest,
-        simEventBusTest
+        simEventBusTest,
+        this.simulation.configuration.junctionId.split(',')
       )
     ]
 
@@ -566,6 +580,23 @@ export default {
       }
       this.status = 'running'
     },
+    addMessage (msg) {
+      this.statusMessage.push(msg)
+      if (this.statusMessage.length > 100) {
+        this.statusMessage.shift()
+      }
+    },
+    async stopTest () {
+      this.status = 'stopping'
+      this.addMessage('stop ' + this.simulation.id)
+      await optimizationService
+        .stop(this.simulation.id, 'slave')
+        .then(r => r.data)
+        .then(data => {
+          this.addMessage(data.msg)
+        })
+      this.checkStatus()
+    },
     initMapEventHandler () {
       const map1 = this.simulations[0].map
       const map2 = this.simulations[1].map
@@ -599,10 +630,9 @@ export default {
       map2.on('zoomend', map2ToMap1)
     },
     async checkStatus () {
-      const { simulation } = await simulationService.getSimulationInfo(
-        this.simulation.id
-      )
-      this.status = simulation.status
+      simulationService.getSimulationInfo(this.simulation.id).then(data => {
+        this.status = data.simulation.status
+      })
     }
   }
 }

@@ -27,7 +27,7 @@ function makeGroupPolygon (group) {
     dragShadow: false, // display a shadow during dragging
     drawOnAxis: null, // force dragging stick on a axis, can be: x, y
     symbol: {
-      lineColor: '#34495e',
+      lineColor: '#6495ED',
       lineWidth: 2,
       polygonFill: group.properties.color,
       polygonOpacity: 0.2
@@ -309,6 +309,16 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     layer.setData([])
   }
 
+  // 대상 교차로의 그룹 강조
+  function setTargetJunctions (junctionsIds) {
+    signalGroupLayer.getGeometries().forEach(g => {
+      const groupId = g.properties.groupId
+      if (!junctionsIds.includes(groupId)) {
+        g.hide()
+      }
+    })
+  }
+
   function setCurrentLoads (loads) {}
 
   map.on('zoomend moveend', load)
@@ -320,6 +330,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     // toggleGroup: toggleGroupLayer,
     setOptJunction,
     clearOptJunction,
-    setCurrentLoads
+    setCurrentLoads,
+    setTargetJunctions
   }
 }

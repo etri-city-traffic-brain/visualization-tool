@@ -257,6 +257,12 @@ export default {
     this.mapManager.loadMapData()
 
     this.trafficLightManager = TrafficLightManager(this.map, null, this)
+    this.trafficLightManager.setTargetJunctions(
+      this.simulation.configuration.junctionId.split(',')
+    )
+    this.trafficLightManager.setOptJunction(
+      this.simulation.configuration.junctionId.split(',')
+    )
     await this.trafficLightManager.load()
 
     this.wsClient = WebSocketClient({

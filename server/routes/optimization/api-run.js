@@ -34,10 +34,9 @@ module.exports = async (req, res, next) => {
     })
     .catch(err => {
       debug(err)
-      updateStatus(id, 'error', {
-        error: err.message.slice(0, 1000),
+      console.log('----->', err)
+      updateStatus(id, 'stopped', {
         ended: currentTimeFormatted()
       })
-      next(createError(500, err.message))
     })
 }

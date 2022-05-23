@@ -1,4 +1,3 @@
-
 import { HTTP } from '@/http-common'
 
 const base = '/salt/v1/optimization'
@@ -23,10 +22,15 @@ async function runFixed (mId, optId) {
 }
 
 async function runTest (mId, optId, modelNum) {
-  return HTTP.post(`${base}/test?slaveId=${mId}&id=${mId}&modelNum=${modelNum}&mode=test`)
+  return HTTP.post(
+    `${base}/test?slaveId=${mId}&id=${mId}&modelNum=${modelNum}&mode=test`
+  )
 }
 
-async function stop (id) {
+async function stop (id, type) {
+  if (type) {
+    return HTTP.post(`${base}/stop?id=${id}&type=${type}`)
+  }
   return HTTP.post(`${base}/stop?id=${id}`)
 }
 

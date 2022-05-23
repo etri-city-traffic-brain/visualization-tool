@@ -84,26 +84,30 @@
             </div>
           </div>
 
-          <div class="mt-1 mb-1 flex items-center justify-between bg-indigo-200">
+          <div class="mt-1 mb-1 p-1 bg-gray-700 space-y-1">
             <div v-if="status === 'running'" class="animate-pulse bg-indigo-300 text-center px-3 uppercase w-full">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-
-              <!-- <b-btn variant="dark" size="sm" @click="checkStatus">상태확인</b-btn> -->
             </div>
-            <div v-else class="bg-indigo-300 text-center px-3 uppercase w-full">
-              {{ status }}
+            <div v-else class="bg-indigo-300 px-2 uppercase w-full">
+              상태: {{ status }}
             </div>
             <div class="flex-shrink-0">
-              <button class="bg-gray-800 text-sm text-white px-2" @click="checkStatus">상태확인</button>
+              <b-btn @click="checkStatus" size="sm">상태확인</b-btn>
+              <b-btn @click="stopTest" size="sm">분석중지</b-btn>
+            </div>
+            <div class="p-1 bg-gray-800 max-h-32 h-32 overflow-auto">
+              <div v-for="(s, i) of statusMessage" :key="i" class="bg-gray-800 text-xs text-white">
+                {{ s }}
+              </div>
             </div>
           </div>
           <div class="">
 
             <!----- 보상 그래프 ----->
-            <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg">보상그래프</div>
+            <div class="px-2 pt-2 text-sm text-white bg-gray-700 rounded-t-lg">보상그래프</div>
             <div class="p-2 bg-gray-700" >
               <line-chart
                 :chartData="rewards"
@@ -112,23 +116,25 @@
               />
             </div>
 
-            <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg mt-1">모델 선택</div>
-            <div class="p-2 bg-gray-700 max-h-60 overflow-y-auto ">
-
-              <div class="flex flex-wrap">
-                <div
-                  v-for="reward of rewards.labels.filter((v,i)=> (i % simulation.configuration.modelSavePeriod) == 0)"
-                  :key="reward"
-                  @click="selectedEpoch = reward"
-                  class="ml-1 mb-1 bg-indigo-500 text-xs rounded text-white px-1 cursor-pointer hover:bg-indigo-200"
-                >
-                  {{ reward }}
+            <!-- <div class="pt-1 text-center text-sm text-white w-24 bg-gray-700 rounded-t-lg mt-1">모델 선택</div> -->
+            <div class="bg-gray-700 text-white p-2 space-y-1">
+              <div class="max-h-60 overflow-y-auto ">
+                <div class="grid grid-cols-12 text-center gap">
+                  <div
+                    v-for="reward of rewards.labels.filter((v,i)=> (i % simulation.configuration.modelSavePeriod) == 0)"
+                    :key="reward"
+                    @click="selectedEpoch = reward"
+                    class="bg-indigo-700 rounded px-1 cursor-pointer hover:bg-indigo-500"
+                  >
+                    {{ reward }}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="p-2 mt-1 mb-1 bg-gray-700 rounded flex justify-between">
-                <span class="rounded-full bg-yellow-300 text-black px-3">선택모델: <span class="bg-yellow-800 px-2 rounded-full text-white">{{ selectedEpoch }}</span></span>
-                <button class="bg-gray-400 text-black rounded px-2 hover:bg-gray-600 hover:text-white" @click.prevent="runTest" >Test <b-icon icon="play-fill"/></button>
+              <div class="">
+                <b-btn @click.prevent="runTest" variant="primary" size="sm" class="w-full" >
+                모델: <span class="text-white font-bold">{{ selectedEpoch }}</span> 번 테스트 <b-icon icon="play-fill" size="sm"/>
+                </b-btn>
+              </div>
             </div>
             <!-- <div class="bg-gray-200">
               <div style="height:120px;width:100%;" ref="chart-avg-speed-junction"></div>
