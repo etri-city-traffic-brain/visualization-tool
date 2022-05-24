@@ -2,9 +2,9 @@
       디자인참고: http://lezir.vuejs.themesbrand.com/index-1
     //-->
 <template>
-<div>
+<div class="sss">
   <div class="godo">
-    <div class="min-h-screen bg-gray-500 py-6 flex flex-col justify-center sm:py-12" v-bind:style="{backgroundImage: 'url(' + introImg + ')'}" >
+    <div class="sss min-h-screen- bg-gray-500 py-6 flex flex-col justify-center sm:py-12" v-bind:style="{backgroundImage: 'url(' + introImg + ')'}" >
       <div class="relative py-3 max-w-xl sm:max-w-3xl sm:mx-auto">
         <div class="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-900 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl bg-opacity-25"></div>
         <!-- <div class="absolute inset-0 bg-blue-900 transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl bg-opacity-75"></div> -->
@@ -14,16 +14,25 @@
               <div class="pt-6 space-y-4">
               <div class="py-2 text-base leading-6 space-y-3 text-gray-700 sm:text-lg sm:leading-7">
                 <h3 class="italic font-bold">UNIQ</h3>
-                <!-- <h3 class="font-italic">Subsystem</h3> -->
-                <p class="font-bold underline text-blue-900">도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 SW</p>
-                <p>도심 교통 문제 해결을 위하여, 가능한 데이터를 광범위하게 통합⋅활용하여 트래픽 혼잡도를 예측하고 검증하는 SW적인 접근으로 도심교통문제 해결.</p>
-                <p class="text-lg font-semibold text-indigo-700">대도시의 교통소통 최적화를 위해,</p>
-                <p class="text-sm"><strong>클라우드-엣</strong>지 기반 실시간 교통상황 분석 및 대규모 교통 시뮬레이션 분산처리를 통해 교통제어 지능을 제공하는 <strong>도시교통 브레인 시스템 개발</strong> </p>
+                <p class="italic font-bold text-blue-900 text-2xl">클라우드 엣지 기반 도시교통 브레인</p>
+                <p class="text-lg font-semibold text-indigo-700 underline">대도시의 교통소통 최적화를 위해,</p>
+                <p class=""><strong>클라우드-엣지</strong> 기반 실시간 교통상황 분석 및 대규모 교통 시뮬레이션 분산처리를 통해 교통제어 지능을 제공하는
+                <strong class="text-blue-500">도시교통 브레인 시스템 개발</strong> </p>
               </div>
             </div>
             <div class="pt-4 text-base leading-6 font-bold sm:text-lg sm:leading-7">
-              <button class="bg-blue-900 px-4 py-2 rounded text-white text-sm">교통시뮬레이션</button>
-              <button class="bg-blue-900 px-4 py-2 rounded text-white text-sm">신호 최적화</button>
+              <router-link :to="{ name: 'SimulationList'}" >
+                <button
+                  class="bg-blue-900 px-4 py-2 rounded text-white text-sm hover:bg-blue-400"
+                  >교통 시뮬레이션
+                </button>
+              </router-link>
+              <router-link :to="{ name: 'OptimizationList'}" >
+                <button
+                  class="bg-green-900 px-4 py-2 rounded text-white text-sm hover:bg-green-400"
+                  >신호 최적화
+                </button>
+              </router-link>
             </div>
           </div>
           </div>
@@ -147,5 +156,9 @@ export default {
 .godo {
   font-family: 'Godo', sans-serif;
   /* font-size: 20px */
+}
+
+.sss {
+  height: calc(100vh - 50px);
 }
 </style>
