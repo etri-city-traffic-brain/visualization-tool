@@ -13,25 +13,25 @@
       </div>
       <div class="flex space-x-2 text-white">
         <div class="">
-          <div class="">시작날짜:</div>
+          <div class="text-sm text-center">시작날짜</div>
           <div class="text-black">
             <input v-model="fromDate" type="date" class="border rounded px-1"/>
           </div>
         </div>
         <div class="">
-          <div class="">시작시간:</div>
+          <div class="text-sm text-center">시작시간</div>
           <div class="text-black">
             <input v-model="fromTime" type="time" class="border rounded px-1"/>
           </div>
         </div>
         <div class="">
-          <div class="">종료날짜:</div>
+          <div class="text-sm text-center">종료날짜</div>
           <div class="text-black">
             <input v-model="toDate" type="date" class="border rounded px-1"/>
           </div>
         </div>
         <div class="">
-          <div class="">종료시간:</div>
+          <div class="text-sm text-center">종료시간</div>
           <div class="text-black">
             <input v-model="toTime" type="time" class="border rounded px-1"/>
           </div>
@@ -39,15 +39,19 @@
       </div>
       <div class="flex text-white space-x-2">
         <div class="">
-          <div class=""> 통계주기 </div>
+          <div class="text-sm text-center"> 통계주기 </div>
           <b-form-select class="" v-model="periodSelected" :options="periodOptions" size="sm"/>
         </div>
         <div class="">
-          <div class="">가시화주기</div>
+          <div class="text-sm text-center">가시화주기</div>
           <b-form-select v-model="intervalSelected" :options="intervalOptions" size="sm"/>
         </div>
+        <div class="">
+          <div class="text-sm text-center">대상지역</div>
+          <b-form-select v-model="regionSelected" :options="regionOptions" size="sm"/>
+        </div>
         <div class="flex-grow">
-          <div>이미지</div>
+          <div class="text-sm text-center">이미지</div>
           <b-form-input v-model="dockerImage" type="text" size="sm" class="w-max"/>
         </div>
       </div>

@@ -1,10 +1,10 @@
 <template>
-  <b-button-group size="sm">
-    <b-button @click="changeMap(0)"> 일반 </b-button>
+  <div class="inline">
+    <b-button @click="changeMap(0)" size="sm"> 일반 </b-button>
     <!-- <b-button @click="changeMap(1)"> 그레이</b-button> -->
-    <b-button @click="changeMap(2)"> 야간</b-button>
-    <b-button @click="changeMap(3)"> 위성 </b-button>
-  </b-button-group>
+    <b-button @click="changeMap(2)" size="sm"> 야간</b-button>
+    <b-button @click="changeMap(3)" size="sm"> 위성 </b-button>
+  </div>
 </template>
 
 <script>

@@ -187,7 +187,8 @@ export default {
       simulation: { configuration: {} },
       map: null,
       mapId: `map-${Math.floor(Math.random() * 100)}`,
-      mapHeight: 1024, // map view height
+      // mapHeight: 1024, // map view height
+      mapHeight: 600, // map view height
       mapManager: null,
       speedsPerStep: {},
       sidebar: false,
@@ -233,12 +234,12 @@ export default {
         width: '100%'
       },
       playerStyle: {
-        zIndex: 999,
-        position: 'fixed',
         // width: '300px',
-        // bottom: '150px',
-        top: '50px',
-        right: '10px'
+        // bottom: '150px'
+        // zIndex: 999,
+        // position: 'fixed',
+        // top: '50px',
+        // right: '10px'
       },
       vdsList: {},
       rseList: {
@@ -267,12 +268,18 @@ export default {
     if (this.wsClient) {
       this.wsClient.close()
     }
-    window.removeEventListener('resize', this.getWindowHeight)
+    // window.removeEventListener('resize', this.getWindowHeight)
+  },
+  computed: {
+    config () {
+      return this.simulation.configuration
+    }
   },
   async mounted () {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
-    this.resize()
+
+    // this.resize()
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
 
     await this.updateSimulation()
@@ -399,7 +406,7 @@ export default {
       this.makeToast('ws connection closed', 'warning')
     })
 
-    window.addEventListener('resize', this.resize)
+    // window.addEventListener('resize', this.resize)
   },
   methods: {
     startReplay () {

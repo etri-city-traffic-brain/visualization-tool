@@ -4,6 +4,7 @@ import moment from 'moment'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
 import makeMap from '@/map2/make-map'
+// import region from '../map2/region'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
 const generateRandomId = (prefix = 'DEFU') =>
@@ -15,7 +16,7 @@ const format = date => moment(date).format('YYYY-MM-DD')
 const getToday = () => format(new Date())
 
 const periodOptions = [
-  { value: 15, text: '15초' },
+  { value: 5 * 60, text: '5분' },
   { value: 10 * 60, text: '10분' },
   { value: 30 * 60, text: '30분' },
   { value: 60 * 60, text: '1시간' },
@@ -33,6 +34,11 @@ const intervalOptions = [
   { text: '80 Step', value: 80 },
   { text: '90 Step', value: 90 },
   { text: '100 Step', value: 100 }
+]
+
+const regionOptions = [
+  { text: '유성구', value: 'yuseonggu' },
+  { text: '도안', value: 'doan' }
 ]
 
 export default {
@@ -60,12 +66,14 @@ export default {
       toTime: '08:59',
       periodSelected: periodOptions[0].value,
       intervalSelected: intervalOptions[0].value,
+      regionSelected: regionOptions[0].value,
       junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
       dockerImage: 'images4uniq/salt:v2.1a.20210915.test_BUS',
       periodOptions: [...periodOptions],
       intervalOptions: [...intervalOptions],
+      regionOptions: [...regionOptions],
       loading: false,
       showMap: false,
       showEnv: true,
@@ -82,8 +90,10 @@ export default {
     }
   },
   mounted () {
-    this.map = makeMap({ mapId: this.mapId, zoom: 15 })
-    setTimeout(() => this.selectRegion(), 1000)
+    setTimeout(() => {
+      this.map = makeMap({ mapId: this.mapId, zoom: 13 })
+      setTimeout(() => this.selectRegion(), 200)
+    }, 200)
 
     const env = this.env
     if (this.env) {
@@ -94,9 +104,9 @@ export default {
       this.fromTime = env.configuration.fromTime.slice(0, 5)
       this.toTime = env.configuration.toTime.slice(0, 5)
       this.periodSelected = env.configuration.period
-      this.areaSelected = env.configuration.region
       this.scriptSelected = env.configuration.script
       this.intervalSelected = env.configuration.interval
+      this.regionSelected = env.configuration.region
       this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
       this.dockerImage = env.configuration.dockerImage
@@ -121,7 +131,7 @@ export default {
         this.rectangle.setCoordinates(center)
         return
       }
-      const rect = new maptalks.Rectangle(center, 800, 700, {
+      const rect = new maptalks.Rectangle(center, 5000, 5000, {
         symbol: {
           lineColor: '#34495e',
           lineWidth: 2,
@@ -154,7 +164,6 @@ export default {
         type: this.role,
         envName: this.envName,
         configuration: {
-          region: this.areaSelected,
           // extent: this.extent,
           fromDate: this.fromDate,
           toDate: this.toDate,
@@ -166,6 +175,7 @@ export default {
           day,
           days,
           interval: this.intervalSelected,
+          region: this.regionSelected,
           junctionId: this.junctionId,
           dockerImage: this.dockerImage,
           script: this.scriptSelected,

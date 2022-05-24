@@ -1,28 +1,18 @@
 <template>
-  <div class="">
+  <div class="m-1">
 
     <!-- <b-card-group> -->
 
-      <uniq-card-title title="평균속도" class="info-card"/>
-      <b-card
-        text-variant="light"
-        bg-variant="secondary"
-        border-variant="secondary"
-        no-body
-        class="info-card"
+      <!-- <uniq-card-title title="평균속도" class="info-card"/> -->
+      <div class="bg-gray-700 p-1 space-y-1"
       >
-        <!-- <b-card-body class="p-0"> -->
-          <!-- <b-form inline> -->
-            <b-progress height="2rem" max="70" class="w-100" style="border-radius:0">
-              <b-progress-bar animated striped :value="avgSpeed" v-bind:style="{'background-color':congestionColor(avgSpeed)}">
-                <span> {{ (avgSpeed).toFixed(2) }} km </span>
-              </b-progress-bar>
-              </b-progress>
-            <!-- </b-form> -->
-
-          <!-- <doughnut :chartData="avgSpeedView" :height="110" /> -->
-        <!-- </b-card-body> -->
-      </b-card>
+        <div class="text-center text-white">평균속도</div>
+        <b-progress height="2rem" max="70" class="w-100" style="border-radius:0">
+          <b-progress-bar animated striped :value="avgSpeed" v-bind:style="{'background-color':congestionColor(avgSpeed)}">
+            <span> {{ (avgSpeed).toFixed(2) }} km </span>
+          </b-progress-bar>
+          </b-progress>
+      </div>
 
       <uniq-card-title title="혼잡도 분포" class="info-card"/>
       <b-card
@@ -70,7 +60,7 @@
       </b-progress>
     </b-card>
 
-    <b-card bg-variant="dark" border-variant="dark" no-body class="p-1 mt-1 info-card" >
+    <b-card bg-variant="dark" border-variant="dark" no-body class="mt-1 info-card" >
       <b-form-textarea
         class="textarea-black"
         id="textarea-small"

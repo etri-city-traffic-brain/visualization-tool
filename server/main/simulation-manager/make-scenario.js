@@ -16,10 +16,18 @@ const getRouteFor = day => {
   return `../../routes/${route}`
 }
 
+const getRouteForSim = region => {
+  return `../../routes/${region}.rou.xml`
+}
+
 const output = '/uniq/simulator/salt/volume/output'
 
 module.exports = (
-  { id, host, configuration: { begin, end, day, period, interval = 10 } },
+  {
+    id,
+    host,
+    configuration: { begin, end, day, period, interval = 10, region }
+  },
   type
 ) => {
   if (type === 'optimization') {
@@ -71,7 +79,8 @@ module.exports = (
           link: 'edge.xml',
           connection: 'connection.xml',
           trafficLightSystem: 'tss.xml',
-          route: getRouteFor(day)
+          // route: getRouteFor(day)
+          route: getRouteForSim(region)
         },
         parameter: {
           minCellLength: 30.0,
