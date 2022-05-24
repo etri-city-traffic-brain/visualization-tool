@@ -10,7 +10,8 @@
       sticky
     >
       <b-navbar-brand href="#" to="/">
-        <strong><span class="text-blue-400">U</span><span class="">N</span><span class="">I</span><span class="">Q</span>
+        <strong class="animate__animated animate__backInUp">
+          <span class="text-blue-400">U</span><span class="">N</span><span class="">I</span><span class="">Q</span>
         </strong>
       </b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>

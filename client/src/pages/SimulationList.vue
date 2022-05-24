@@ -1,13 +1,13 @@
 <template>
 <div class="container- p-3 bg-gray-600">
   <div class="bg-gray-500- border-2 border-gray-500 mt-2 rounded-xl py-2 px-2 min-w-max">
-    <div class="text-white font-bold bg-gray-700 w-36 text-center px-2 py-1 rounded">교통 시뮬레이션 </div>
+    <div class="text-white font-bold bg-gray-700 w-40 text-center px-2 py-1 rounded"> 🚙 교통 시뮬레이션 </div>
     <div class="p-1 flex justify-end space-x-1" >
       <button
         v-b-modal.create-simulation-modal
         class="px-2 bg-blue-400 text-sm py-1 hover:bg-blue-600 hover:text-white rounded font-bold text-white"
       >
-        <b-icon icon="file-earmark-plus"/> 등록
+        <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
       </button>
       <button
         class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
@@ -23,6 +23,7 @@
       >
         <b-icon icon="arrow-clockwise"/> 새로고침
       </b-btn>
+      <!--
       <b-btn
         :pressed.sync="autoRefresh"
         :variant="autoRefresh ? 'info' : 'outline-secondary'"
@@ -38,6 +39,7 @@
           <b-icon stacked icon="slash-circle" variant="light"></b-icon>
         </b-iconstack>
       </b-btn>
+      -->
     </div>
 
     <div class="">
@@ -116,19 +118,8 @@
         </div>
       </template>
       <template v-slot:cell(actions)="row">
-        <button
-          @click.stop="startSimulation(row.item.id, row.index, $event.target)"
-          class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-500 rounded"
-        >
-          시작 <b-icon icon="play-fill"/>
-        </button>
-          <!-- :disabled="row.item.status !== 'running'" -->
-        <button
-          @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
-          class="px-2 py-1 text-sm bg-yellow-500 hover:bg-yellow-500 rounded text-black"
-        >
-            중지 <b-icon icon="stop-fill"/>
-        </button>
+        <!-- <button @click.stop="startSimulation(row.item.id, row.index, $event.target)" class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-500 rounded" > 시작 <b-icon icon="play-fill"/> </button>
+        <button @click.stop="stopSimulation(row.item.id, row.index, $event.target)" class="px-2 py-1 text-sm bg-yellow-500 hover:bg-yellow-500 rounded text-black" > 중지 <b-icon icon="stop-fill"/> </button> -->
         <router-link :to="{ name: 'SimulationResultMap', params: {id: row.item.id}}" >
           <button
             class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-300 rounded text-white"

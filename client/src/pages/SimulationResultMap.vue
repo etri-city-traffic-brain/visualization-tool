@@ -71,7 +71,7 @@
         >
         </SimulationDetailsOnFinished>
         <SimulationDetailsOnRunning
-          v-if="simulation.status !== 'running'"
+          v-if="simulation.status == 'running'"
           :simulation="simulation"
           :progress="progress"
           :wsStatus="wsStatus"
