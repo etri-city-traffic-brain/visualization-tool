@@ -33,9 +33,15 @@ export default {
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
-        { class: 'text-center', key: 'configuration.period', label: '주기' },
+        { class: 'text-center', key: 'configuration.region', label: '지역' },
+        {
+          class: 'text-center',
+          key: 'configuration.period',
+          label: '통계주기'
+        },
         { class: 'text-center', key: 'duration', label: '기간' },
-        { class: 'text-center', key: 'actions', label: '제어' }
+        { class: 'text-center', key: 'created', label: '생성일' },
+        { class: 'text-center', key: 'actions', label: '기능' }
       ],
       items: [],
       currentPage: 1,

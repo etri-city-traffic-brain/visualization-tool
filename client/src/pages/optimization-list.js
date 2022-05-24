@@ -49,7 +49,7 @@ export default {
           label: '모델저장주기'
         },
         { class: 'text-center', key: 'details', label: '최적화' },
-        { class: 'text-center', key: 'stop', label: '제어' }
+        { class: 'text-center', key: 'stop', label: '기능 ' }
       ],
       items: [],
       currentPage: 1,

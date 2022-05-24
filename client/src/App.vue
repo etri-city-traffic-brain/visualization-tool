@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="bg-gray-600">
     <b-navbar
       type="dark"
       :variant="variant"
@@ -45,17 +45,17 @@
 
     <router-view v-if="!$route.meta.keepAlive" />-->
 
-    <router-view />
+    <router-view/>
 
     <!--
       BOTTOM COPYRIGHT
     -->
     <div class="no-round-corner" v-if="showOrHide()">
-      <div fluid class="mt-2 mb-2 p-2 text-center">
-        <p class="godo">도시 교통 문제 개선을 위한 클라우드 기반 트래픽 예측 시뮬레이션 SW</p>
+      <div fluid class="mt-2 mb-3 p-3 text-center text-white">
+        <p class="godo italic">클라우드 엣지 기반 도시교통 브레인 - UNIQ</p>
         <hr class="my-2" />
         <!-- <small class="text-muted">Copyright 2021. ETRI All rights reserved.</small> -->
-        <small class="text-muted">
+        <small class="text-gray-300">
           Copyright ⓒ 2021.
           <em>Modutech</em> Inc. All rights reserved.
         </small>

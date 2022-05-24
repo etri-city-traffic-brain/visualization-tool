@@ -1,37 +1,53 @@
 <template>
-  <div class="min-w-max p-2 bg-gray-500">
+  <div class="min-w-max p-2 bg-gray-600">
     <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2">
       <div class="text-white font-bold bg-gray-700 w-32 text-center py-1 rounded">최적화 환경</div>
 
       <div class="grid grid-cols-5 gap-2 min-w-max max-w-screen-lg">
-        <div class="bg-gray-600 grid rounded-xl">
-          <button class="rounded p-2 text-center font-bold text-white hover:bg-gray-800"
+        <div class="bg-gray-700 grid rounded-xl">
+          <button class="rounded p-2 text-4xl text-center font-bold text-white hover:bg-gray-800"
             v-b-modal.create-simulation-modal>
-            등록
+            +
           </button>
         </div>
         <div v-for="env of envs" :key="env.envName" class="text-white min-w-max">
-          <div class="bg-gray-600 p-2 rounded-xl min-h-full">
-            <div class="font-bold text-md px-1 pt-1 mb-2">{{ env.envName }} </div>
+          <div class="bg-gray-700 p-2 rounded-xl min-h-full">
+            <div class="flex justify-between items-center font-bold text pt-1 mb-2">
+              <div>⚙️ {{ env.envName }} </div>
+              <div><button class="bg-red-300 px-2 py-1 rounded text-xs text-black font-bold hover:bg-yellow-700"
+                @click="remove(env.id)">X</button></div>
+            </div>
             <div class="grid grid-cols-3 text-xs gap-1">
               <div class="bg-yellow-50 text-black p-1 rounded text-center">
                 <div>저장주기</div>
-                <div class="text-center text-xl font-bold">{{ env.configuration.modelSavePeriod }}</div>
+                <div class="text-center text-lg font-bold">{{ env.configuration.modelSavePeriod }}</div>
               </div>
               <div class="bg-yellow-50 text-black p-1 rounded text-center">
                 <div> Epoch</div>
-                <div class="text-center text-xl font-bold">{{ env.configuration.epoch }}</div>
+                <div class="text-center text-lg font-bold">{{ env.configuration.epoch }}</div>
+              </div>
+              <div class="bg-green-50 text-black p-1 rounded text-center">
+                <div> Action</div>
+                <div class="text-center text-lg font-bold">{{ env.configuration.action }}</div>
+              </div>
+              <div class="bg-yellow-50 text-black p-1 rounded text-center">
+                <div> Method</div>
+                <div class="text-center text-lg font-bold">{{ env.configuration.method }}</div>
+              </div>
+              <div class="bg-yellow-50 text-black p-1 rounded text-center">
+                <div> 보상함수</div>
+                <div class="text-center text-lg font-bold">{{ env.configuration.rewardFunc }}</div>
               </div>
               <div class="bg-yellow-50 text-black p-1 rounded">
                 <div class="text-center">
                   Duration
                 </div>
-                <div class="text-center text-xl font-bold">{{ env.configuration.end - env.configuration.begin + 60 }}
+                <div class="text-center text-lg font-bold">{{ env.configuration.end - env.configuration.begin + 60 }}
                 </div>
               </div>
             </div>
 
-            <div class="bg-blue-50 mt-2 p-2 rounded text-sm font-bold">
+            <div class="bg-blue-50 mt-1 p-2 rounded text-sm font-bold">
               <div class="text-black mb-1">교차로</div>
               <div class="flex flex-wrap">
                 <div v-for="j of env.configuration.junctionId.split(',')" :key="j"
@@ -39,14 +55,14 @@
                   {{ j }}</div>
               </div>
             </div>
-            <div class="pt-2 text-right">
+            <div class="flex justify-between pt-2">
               <!-- <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn> -->
               <!-- <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn> -->
               <!-- <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn> -->
               <button class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700"
                 @click="openModify(env)">수정</button>
-              <button class="bg-yellow-400 px-2 py-1 rounded text-sm text-black font-bold hover:bg-yellow-700"
-                @click="remove(env.id)">삭제</button>
+              <!-- <button class="bg-yellow-400 px-2 py-1 rounded text-sm text-black font-bold hover:bg-yellow-700"
+                @click="remove(env.id)">삭제</button> -->
               <button class="bg-blue-400 px-2 py-1 rounded text-sm font-bold hover:bg-blue-700"
                 @click="registerSimulation(env)">실험</button>
             </div>
