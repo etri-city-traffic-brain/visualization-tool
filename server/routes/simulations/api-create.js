@@ -102,6 +102,56 @@ async function createOPtScenarioFile (id, body, outDir, file, mode) {
   await writeFile(outDir, stringify(configFile))
 }
 
+const refineDate = text => text.replace(/-/g, '')
+const refineTime = text => text.replace(/:/g, '')
+
+const refineParam = param => ({
+  include: 0,
+  fromDate: refineDate(param.fromDate),
+  toDate: refineDate(param.toDate),
+  fromTime: refineTime(param.fromTime),
+  toTime: refineTime(param.toTime),
+  region: param.region,
+  partitions: param.partitions,
+  subregion: 0,
+  signal: 1,
+  route: 1,
+  event: 1,
+  // weather: 1
+  busstop: 1
+})
+
+/**
+ * SALT 시뮬레이터를 위한 준비작업
+ *
+ */
+async function prepareSimulation (id, body, role, slaves = [], type) {
+  const simInputDir = `${base}/data/${id}`
+  const simOutputDir = `${base}/output/${id}`
+
+  try {
+    await mkdir(simInputDir)
+    await mkdir(simOutputDir)
+    await addSimulation({ ...body, id, slaves, role })
+    await createScenarioFile(simInputDir, { host, body, id }, type)
+
+    const path = `${base}/routes/scenario_dj_${body.configuration.region}.zip`
+    await unzip(path, { dir: simInputDir })
+    //
+    // const param = {
+    //   ...body.configuration,
+    //   ...refineParam(body.configuration)
+    // }
+    // await downloadScenarioByCoordinate(param, simInputDir)
+    // await unzip(simInputDir + '/data.zip', { dir: simInputDir })
+  } catch (err) {
+    log(err)
+    return err
+  }
+  updateStatus(id, 'ready', {})
+  log(`[simulation] ${id} is ready`)
+}
+
 async function prepareOptimization (ids, body) {
   const targetDir = `${base}/data/${ids[0]}`
   const simOutputDir = `${base}/output/${ids[0]}`
@@ -135,53 +185,6 @@ async function prepareOptimization (ids, body) {
   )
   updateStatus(ids[0], 'ready', {})
 }
-
-const refineDate = text => text.replace(/-/g, '')
-const refineTime = text => text.replace(/:/g, '')
-
-const refineParam = param => ({
-  include: 0,
-  fromDate: refineDate(param.fromDate),
-  toDate: refineDate(param.toDate),
-  fromTime: refineTime(param.fromTime),
-  toTime: refineTime(param.toTime),
-  region: param.region,
-  partitions: param.partitions,
-  subregion: 0,
-  signal: 1,
-  route: 1,
-  event: 1,
-  // weather: 1
-  busstop: 1
-})
-
-/**
- * SALT 시뮬레이터를 위한 준비작업
- *
- */
-async function prepareSimulation (id, body, role, slaves = [], type) {
-  const simInputDir = `${base}/data/${id}`
-  const simOutputDir = `${base}/output/${id}`
-  await mkdir(simInputDir)
-  await mkdir(simOutputDir)
-  await addSimulation({ ...body, id, slaves, role })
-  await createScenarioFile(simInputDir, { host, body, id }, type)
-  const param = {
-    ...body.configuration,
-    ...refineParam(body.configuration)
-  }
-
-  try {
-    await downloadScenarioByCoordinate(param, simInputDir)
-    await unzip(simInputDir + '/data.zip', { dir: simInputDir })
-  } catch (err) {
-    log(err)
-    return err
-  }
-  updateStatus(id, 'ready', {})
-  log(`[simulation] ${id} is ready`)
-}
-
 const ROLE = {
   TRAINING: 'training',
   TEST: 'test',

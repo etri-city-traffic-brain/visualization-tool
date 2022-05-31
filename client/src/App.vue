@@ -50,7 +50,7 @@
     <!--
       BOTTOM COPYRIGHT
     -->
-    <div class="no-round-corner" v-if="showOrHide()">
+    <div class="no-round-corner border-t border-blue-100" v-if="showOrHide()">
       <div fluid class="mt-2 mb-3 p-3 text-center text-white">
         <p class="godo italic">클라우드 엣지 기반 도시교통 브레인 - UNIQ</p>
         <hr class="my-2" />

@@ -188,7 +188,7 @@ export default {
       map: null,
       mapId: `map-${Math.floor(Math.random() * 100)}`,
       // mapHeight: 1024, // map view height
-      mapHeight: 600, // map view height
+      mapHeight: 800, // map view height
       mapManager: null,
       speedsPerStep: {},
       sidebar: false,
@@ -268,7 +268,7 @@ export default {
     if (this.wsClient) {
       this.wsClient.close()
     }
-    // window.removeEventListener('resize', this.getWindowHeight)
+    window.removeEventListener('resize', this.resize.bind(this))
   },
   computed: {
     config () {
@@ -279,7 +279,7 @@ export default {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
 
-    // this.resize()
+    this.resize()
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
 
     await this.updateSimulation()
@@ -406,7 +406,7 @@ export default {
       this.makeToast('ws connection closed', 'warning')
     })
 
-    // window.addEventListener('resize', this.resize)
+    window.addEventListener('resize', this.resize.bind(this))
   },
   methods: {
     startReplay () {
@@ -427,8 +427,23 @@ export default {
     },
     ...stepperMixin,
 
+    async startSimulation () {
+      this.simulation.status = 'running'
+      try {
+        await simulationService.startSimulation(
+          this.simulationId,
+          this.userState.userId
+        )
+      } catch (err) {
+        console.log(err)
+      }
+    },
+
     stop () {
       this.$emit('salt:stop', this.simulationId)
+      simulationService.stopSimulation(this.simulationId).then(() => {
+        this.updateSimulation()
+      })
     },
     addLog (text) {
       this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
@@ -485,7 +500,7 @@ export default {
     resize () {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
       // this.mapHeight = window.innerHeight - 160 // update map height to current height
-      this.mapHeight = window.innerHeight - 50 // update map height to current height
+      this.mapHeight = window.innerHeight - 150 // update map height to current height
     },
     togglePlay () {
       this.playBtnToggle = !this.playBtnToggle
@@ -521,17 +536,6 @@ export default {
     },
     async connectWebSocket () {
       this.wsClient.init()
-    },
-    async startSimulation () {
-      this.simulation.status = 'running'
-      try {
-        await simulationService.startSimulation(
-          this.simulationId,
-          this.userState.userId
-        )
-      } catch (err) {
-        console.log(err)
-      }
     },
 
     removeLinkChart (linkId) {

@@ -190,7 +190,7 @@
       title="시뮬레이션 생성"
       id="create-simulation-modal"
       ref="create-simulation-modal"
-      size="xl"
+      size="lg"
       header-border-variant="dark"
       header-bg-variant="dark"
       header-text-variant="light"

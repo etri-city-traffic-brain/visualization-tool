@@ -38,7 +38,8 @@ const intervalOptions = [
 
 const regionOptions = [
   { text: '유성구', value: 'yuseonggu' },
-  { text: '도안', value: 'doan' }
+  { text: '서구', value: 'seogu' }
+  // { text: '도안', value: 'doan' }
 ]
 
 export default {
@@ -85,15 +86,15 @@ export default {
     }
   },
   destroyed () {
-    if (this.map) {
-      this.map.remove()
-    }
+    // if (this.map) {
+    //   this.map.remove()
+    // }
   },
   mounted () {
-    setTimeout(() => {
-      this.map = makeMap({ mapId: this.mapId, zoom: 13 })
-      setTimeout(() => this.selectRegion(), 200)
-    }, 200)
+    // setTimeout(() => {
+    //   this.map = makeMap({ mapId: this.mapId, zoom: 13 })
+    //   setTimeout(() => this.selectRegion(), 200)
+    // }, 200)
 
     const env = this.env
     if (this.env) {
@@ -125,25 +126,25 @@ export default {
         }
       }
     },
-    selectRegion () {
-      const center = this.map.getCenter()
-      if (this.rectangle) {
-        this.rectangle.setCoordinates(center)
-        return
-      }
-      const rect = new maptalks.Rectangle(center, 5000, 5000, {
-        symbol: {
-          lineColor: '#34495e',
-          lineWidth: 2,
-          polygonFill: 'rgb(216,115,149)',
-          polygonOpacity: 0.2
-        }
-      })
-      this.rectangle = rect
+    // selectRegion () {
+    //   const center = this.map.getCenter()
+    //   if (this.rectangle) {
+    //     this.rectangle.setCoordinates(center)
+    //     return
+    //   }
+    //   const rect = new maptalks.Rectangle(center, 5000, 5000, {
+    //     symbol: {
+    //       lineColor: '#34495e',
+    //       lineWidth: 2,
+    //       polygonFill: 'rgb(216,115,149)',
+    //       polygonOpacity: 0.2
+    //     }
+    //   })
+    //   this.rectangle = rect
 
-      new maptalks.VectorLayer('vector').addGeometry([rect]).addTo(this.map)
-      rect.startEdit()
-    },
+    //   new maptalks.VectorLayer('vector').addGeometry([rect]).addTo(this.map)
+    //   rect.startEdit()
+    // },
     resetForm () {
       this.id = generateRandomId(this.role)
       this.description = '...'

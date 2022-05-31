@@ -93,40 +93,45 @@
           :style="{height: mapHeight + 'px'}"
           class="p-1"
         />
+        <div>
+          <b-form-input
+            v-if="simulation.status === 'finished'"
+            variant="dark"
+            type="range"
+            min="0"
+            :max="slideMax"
+            :value="currentStep"
+            @change="onChange"
+            @input="onInput"
+          />
+        </div>
 
-        <div class="my-2 px-2 flex space-x-1">
-          <div class="text-center flex items-center space-x-1">
+        <div class="my-2 px-2 flex justify-between space-x-1">
+          <!-- <div class="text-center flex items-center space-x-1">
             <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click.stop="startSimulation()" > 시작<b-icon icon="caret-right-fill"/> </button>
             <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click="stop" > 중지<b-icon icon="stop-fill"/> </button>
-          </div>
+          </div> -->
           <div class="text-center flex items-center space-x-1"  v-if="simulation.status === 'finished'">
-            <button class="bg-green-200 rounded px-2 py-1 font-bold hover:bg-green-400" @click.stop="startReplay" > 시작<b-icon icon="caret-right-fill"/> </button>
-            <button class="bg-green-200 rounded px-2 py-1 font-bold hover:bg-green-400" @click="stopReplay" > 중지<b-icon icon="stop-fill"/> </button>
+            <div class="bg-green-100 rounded px-2 py-1">히스토리 재생</div>
+            <button class="bg-green-300 rounded px-2 py-1 font-bold hover:bg-green-500" @click.stop="startReplay" > 시작<b-icon icon="caret-right-fill"/> </button>
+            <button class="bg-green-300 rounded px-2 py-1 font-bold hover:bg-green-500" @click="stopReplay" > 중지<b-icon icon="stop-fill"/> </button>
           </div>
           <div
           class="bg-gray-700"
           v-bind:style="playerStyle"
           no-body v-if="simulation.status === 'finished'"
         >
-          <b-button-group>
+          <div class="space-x-1">
+            <div>
             <b-btn size="sm" variant="secondary" @click="togglePlay" > {{ toggleState() }} </b-btn>
-            <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="caret-left-fill"/> </b-btn>
-            <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="caret-right-fill"/> </b-btn>
-            <b-input-group size="sm">
-              <b-form-input
-                variant="dark"
-                type="range"
-                min="0"
-                :max="slideMax"
-                :value="currentStep"
-                @change="onChange"
-                @input="onInput"
-              />
-              <b-input-group-append>
-                <b-btn size="sm" variant="">{{ currentStep }} </b-btn>
-              </b-input-group-append>
-            </b-input-group>
-          </b-button-group>
+            <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="caret-left-fill"/></b-btn>
+            <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="caret-right-fill"/></b-btn>
+            <b-btn size="sm" variant="">현재스텝: {{ currentStep }} </b-btn>
+            </div>
+            <!-- <b-input-group size="sm"> -->
+
+            <!-- </b-input-group> -->
+          </div>
         </div>
         </div>
       </div>
