@@ -64,16 +64,13 @@ async function run (simulation, mode, modelNum) {
      --action offset`
 
   if (mode === 'train') {
-    const cmd = `${makeCmd(
-      'train',
-      simulation.id
-    )} --model-save-period ${modelSavePeriod}`
+    const cmd = `${makeCmd('train', simulation.id)}`
     log(chalk.green(cmd))
     return docker(cmd, options)
   } else if (mode === 'test') {
     const cmdSimu = `${makeCmd('simulate', slaves[0])}`
     const cmdTest = `${makeCmd('test', slaves[1])} --model-num ${modelNum}`
-    return Promise.all([docker(cmdTest), docker(cmdSimu)])
+    return Promise.all([docker(cmdTest, options), docker(cmdSimu, options)])
   } else {
     return Promise.reject(new Error('unknown mode'))
   }

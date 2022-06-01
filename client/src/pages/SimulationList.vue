@@ -117,6 +117,16 @@
           <span>{{ row.item.status.toUpperCase() }}</span>
         </div>
       </template>
+
+      <template v-slot:cell(configuration.period)="row">
+        <div v-if="row.item.configuration.period >= 600" class="text-center font-bold p-1">
+          {{ row.item.configuration.period / 60 }} 분
+        </div>
+        <div v-else class="text-center font-bold p-1">
+          {{ row.item.configuration.period }} 초
+        </div>
+      </template>
+
       <template v-slot:cell(actions)="row">
         <!-- <button @click.stop="startSimulation(row.item.id, row.index, $event.target)" class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-500 rounded" > 시작 <b-icon icon="play-fill"/> </button>
         <button @click.stop="stopSimulation(row.item.id, row.index, $event.target)" class="px-2 py-1 text-sm bg-yellow-500 hover:bg-yellow-500 rounded text-black" > 중지 <b-icon icon="stop-fill"/> </button> -->

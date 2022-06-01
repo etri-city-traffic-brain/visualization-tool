@@ -63,8 +63,8 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     init()
   }
 
-  function init () {
-    // log(`init ${simulationId} - ${wsUrl}`)
+  function init (slaves) {
+    log(`init ${simulationId} - ${wsUrl}`)
     if (status === 'open') {
       log('WebSocket is already opened!!')
       return
@@ -109,9 +109,27 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       status = 'error'
     })
 
-    eventBus.$on('salt:set', ({ extent, zoom }) => {
+    eventBus.$on('salt:set', ({ extent, zoom, simulationId }) => {
       // const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
       // const roadType = zoom >= 17 ? 1 : 0 // 1: cell, 0: link
+      if (slaves) {
+        console.log(slaves)
+        const { min, max } = extend(extent)
+        send({
+          simulationId: slaves[0],
+          type: 10, // Set
+          extent: [min.x, max.y, max.x, min.y],
+          roadType: 1
+        })
+        send({
+          simulationId: slaves[1],
+          type: 10, // Set
+          extent: [min.x, max.y, max.x, min.y],
+          roadType: 1
+        })
+        return
+      }
+      console.log('---->send')
       const { min, max } = extend(extent)
       send({
         simulationId,

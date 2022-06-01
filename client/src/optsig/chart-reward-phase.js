@@ -1,10 +1,48 @@
 import * as echarts from 'echarts/dist/echarts.js'
-
+const visualMap = {
+  top: 0,
+  right: -100,
+  pieces: [
+    {
+      gt: 0,
+      lte: 2,
+      color: '#93CE07'
+    },
+    {
+      gt: 2,
+      lte: 4,
+      color: '#FBDB0F'
+    },
+    {
+      gt: 4,
+      lte: 6,
+      color: '#FC7D02'
+    },
+    {
+      gt: 6,
+      lte: 8,
+      color: '#FD0100'
+    },
+    {
+      gt: 8,
+      lte: 10,
+      color: '#AA069F'
+    },
+    {
+      gt: 10,
+      color: '#AC3B2A'
+    }
+  ],
+  outOfRange: {
+    color: '#999'
+  }
+}
 function makeOption (data) {
   if (!data) {
     return {}
   }
   const dReward = data.map(v => v.reward)
+  const dSpeed = data.map(v => v.avgSpeed)
   const ppp = data.map(v => v.phase)
   const dPhase = data.map((v, idx) => {
     return {
@@ -33,12 +71,12 @@ function makeOption (data) {
         }
       }
     },
-    // tooltip: {
-    //   trigger: 'axis',
-    //   axisPointer: {
-    //     type: 'cross'
-    //   }
-    // },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross'
+      }
+    },
     xAxis: {
       data: new Array(data.length).fill(0).map((v, i) => data[i].step),
       axisLabel: {
@@ -98,13 +136,23 @@ function makeOption (data) {
     ],
     series: [
       {
+        name: 'avgSpeed',
+        type: 'line',
+        yAxisIndex: 1,
+        // data: dReward.slice(1),
+        data: dSpeed,
+        areaStyle: {
+          opacity: 0.1
+        }
+      },
+      {
         name: 'reward',
         type: 'line',
         yAxisIndex: 1,
         // data: dReward.slice(1),
         data: dReward,
         areaStyle: {
-          opacity: 0.6
+          opacity: 0.1
         }
       },
       {
@@ -128,57 +176,20 @@ function makeOption (data) {
       }
     ],
     dataZoom: [
-      {
-        type: 'inside'
-        // show: true,
-        // realtime: true,
-        // start: 0,
-        // end: 20
-      }
       // {
-      // type: 'slider'
+      //   type: 'inside',
+      //   show: true,
+      //   realtime: true,
       //   start: 0,
       //   end: 20
       // }
-    ],
-    visualMap: {
-      top: 0,
-      right: -100,
-      pieces: [
-        {
-          gt: 0,
-          lte: 2,
-          color: '#93CE07'
-        },
-        {
-          gt: 2,
-          lte: 4,
-          color: '#FBDB0F'
-        },
-        {
-          gt: 4,
-          lte: 6,
-          color: '#FC7D02'
-        },
-        {
-          gt: 6,
-          lte: 8,
-          color: '#FD0100'
-        },
-        {
-          gt: 8,
-          lte: 10,
-          color: '#AA069F'
-        },
-        {
-          gt: 10,
-          color: '#AC3B2A'
-        }
-      ],
-      outOfRange: {
-        color: '#999'
+      {
+        type: 'slider',
+        start: 0,
+        end: 20
       }
-    }
+    ]
+    // visualMap
   }
 }
 

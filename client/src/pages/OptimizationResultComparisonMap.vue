@@ -68,33 +68,42 @@
             </div>
           </div>
           <!-- </div> -->
+
         </div>
         <div class="ml-1">
           <div class="text-white text-sm p-2 bg-gray-700 min-w-max">
             <div class="border-blue-600 space-y-1">
               <div class="flex space-x-1">
-                <div class="bg-blue-500 px-1 rounded">아이디</div> <div>{{ simulation.id }} </div>
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">아이디</div> <div>{{ simulation.id }} </div>
               </div>
               <div class="flex space-x-1">
-                <div class="bg-blue-500 px-1 rounded">지역</div><div> {{ config.region }}</div>
-                <div class="bg-blue-500 px-1 rounded">주기</div> <div>{{ config.period }}초</div>
-                <div class="bg-blue-500 px-1 rounded ">모델 저장주기</div> <div>{{ config.modelSavePeriod }}</div>
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">지역</div>
+                <div class="w-12"> {{ config.region }}</div>
+
+
               </div>
               <div class="flex space-x-1">
-                <div class="bg-blue-500 px-1 rounded">Method</div> <div>{{ config.method }}</div>
-                <div class="bg-blue-500 px-1 rounded">Action</div> <div>{{ config.action }}</div>
-                <div class="bg-blue-500 px-1 rounded">보상함수</div> <div>{{ config.rewardFunc }}</div>
+                <!-- <div class="w-24 text-center bg-blue-500 px-1 rounded ">모델 저장주기</div> <div>{{ config.modelSavePeriod }}</div> -->
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">보상함수</div> <div>{{ config.rewardFunc }}</div>
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">통계주기</div> <div>{{ config.period / 60 }}<span>분</span></div>
               </div>
               <div class="flex space-x-1">
-                <div class="bg-blue-500 px-1 rounded">시간</div>
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">Method</div>
+                <div class="w-12">{{ config.method }}</div>
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">Action</div>
+                <div>{{ config.action }}</div>
+
+              </div>
+              <div class="flex space-x-1">
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">시간</div>
                 <div>{{ config.fromTime }} ~ {{ config.toTime }}</div>
               </div>
-              <div class="space-y-1">
-                <div class="bg-blue-500 px-1 w-max rounded font-bold">대상 교차로</div>
+              <div class="flex space-x-1">
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">대상교차로</div>
                 <div>{{ simulation.configuration.junctionId }}</div>
               </div>
               <div class="space-y-1 items-center">
-                <div class="bg-blue-500 px-1 w-max rounded">실행이미지</div>
+                <div class="w-20 text-center bg-blue-500 px-1 rounded">실행이미지</div>
                 <div class="">{{ simulation.configuration.dockerImage }} </div>
               </div>
             </div>
@@ -165,13 +174,15 @@
           </div>
           <div class="flex justify-between pr-3 items-center text-sm text-white font-bold pl-3 py-1 bg-gray-700">
             기존신호
+            <div class="bg-yellow-200 rounded-xl px-2 text-black">{{ Number(chart1.avgSpeed).toFixed(2) }}km</div>
           </div>
           <div class="border-2 border-gray-700">
             <div style="height:160px;width:100%;" ref="phase-reward-ft"></div>
           </div>
           <div class="mt-1">
             <div class="pr-3 flex justify-between items-center text-sm text-black font-bold pl-3 py-1 bg-yellow-400">
-              최적신호
+              <div>최적신호 ({{ Number(improvementRate).toFixed(2) }}% 향상)</div>
+              <div class="bg-yellow-200 rounded-xl px-2">{{ Number(chart2.avgSpeed).toFixed(2) }}km </div>
             </div>
             <div class="border-2 border-yellow-400">
               <div style="height:160px;width:100%" ref="phase-reward-rl"></div>

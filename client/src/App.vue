@@ -10,9 +10,15 @@
       sticky
     >
       <b-navbar-brand href="#" to="/">
-        <strong class="animate__animated animate__backInUp">
-          <span class="text-blue-400">U</span><span class="">N</span><span class="">I</span><span class="">Q</span>
-        </strong>
+        <div class="">
+          <strong class="flex animate__animated animate__bounceInLeft animate__bounceIn">
+            <div class="text-blue-400 ">U</div>
+            <div class="">N</div>
+            <div class="">I</div>
+            <div class="">Q</div>
+          </strong>
+        </div>
+
       </b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
@@ -50,14 +56,13 @@
     <!--
       BOTTOM COPYRIGHT
     -->
-    <div class="no-round-corner border-t border-blue-100" v-if="showOrHide()">
+    <div class="no-round-corner border-t- border-blue-100" v-if="showOrHide()">
       <div fluid class="mt-2 mb-3 p-3 text-center text-white">
-        <p class="godo italic">클라우드 엣지 기반 도시교통 브레인 - UNIQ</p>
+        <p class="godo italic">클라우드 엣지 기반 도시교통 브레인</p>
         <hr class="my-2" />
         <!-- <small class="text-muted">Copyright 2021. ETRI All rights reserved.</small> -->
         <small class="text-gray-300">
-          Copyright ⓒ 2021.
-          <em>Modutech</em> Inc. All rights reserved.
+          Copyright ⓒ 2021. <em>Modutech</em> Inc. All rights reserved.
         </small>
       </div>
     </div>

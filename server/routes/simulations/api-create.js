@@ -169,19 +169,19 @@ async function prepareOptimization (ids, body) {
     ids[0],
     body,
     `${targetDir}/scenario/${region}/${region}_train.scenario.json`,
-    '/uniq/optimizer/output/train/'
+    '/uniq/optimizer/io/output/train/'
   )
   createOPtScenarioFile(
     ids[1],
     body,
     `${targetDir}/scenario/${region}/${region}_test.scenario.json`,
-    '/uniq/optimizer/output/test/'
+    '/uniq/optimizer/io/output/test/'
   )
   createOPtScenarioFile(
     ids[2],
     body,
     `${targetDir}/scenario/${region}/${region}_simulate.scenario.json`,
-    '/uniq/optimizer/output/simulate/'
+    '/uniq/optimizer/io/output/simulate/'
   )
   updateStatus(ids[0], 'ready', {})
 }

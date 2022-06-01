@@ -226,8 +226,13 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     if (eventBus) {
       const data = {
         zoom,
-        extent: extent(map)
+        extent: extent(map),
+        simulationId
       }
+
+      // console.log('salt:set', data.simulationId)
+      console.log('salt:set', data.extent.min)
+
       eventBus.$emit('map:moved', data)
       eventBus.$emit('salt:set', data)
     }

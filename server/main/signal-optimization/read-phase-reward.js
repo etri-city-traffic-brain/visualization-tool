@@ -2,13 +2,15 @@ const fse = require('fs-extra')
 const fs = require('fs')
 const csv = require('csv-parser')
 
+const baseDir = '/home/ubuntu/uniq-sim/data'
+
 async function read (simulationId, type) {
   console.log('read', simulationId, type)
   let file
   if (type === 'ft') {
-    file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/simulate/ft_phase_reward_output.txt`
+    file = `${baseDir}/${simulationId}/output/simulate/ft_phase_reward_output.txt`
   } else {
-    file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/test/rl_phase_reward_output.txt`
+    file = `${baseDir}/${simulationId}/output/test/rl_phase_reward_output.txt`
   }
 
   await fse.access(file, fs.F_OK)
@@ -29,7 +31,8 @@ async function csvToObj (file) {
           target.push({
             phase: row.phase,
             reward: row.reward,
-            step: row.step
+            step: row.step,
+            avgSpeed: Number(row.avg_speed).toFixed(3)
           })
           map[row.tl_name] = target
         })

@@ -3,7 +3,7 @@
     <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2">
       <div class="text-white font-bold bg-gray-700 w-32 text-center py-1 rounded">최적화 환경</div>
 
-      <div class="grid grid-cols-5 gap-2 min-w-max max-w-screen-lg">
+      <div class="grid grid-cols-5 flex-wrap gap-2 max-w-full">
         <div class="bg-gray-700 grid rounded-xl">
           <button class="rounded p-2 text-4xl text-center font-bold text-white hover:bg-gray-800"
             v-b-modal.create-simulation-modal>
@@ -19,12 +19,17 @@
             </div>
             <div class="grid grid-cols-3 text-xs gap-1">
               <div class="bg-yellow-50 text-black p-1 rounded text-center">
-                <div>저장주기</div>
-                <div class="text-center text-lg font-bold">{{ env.configuration.modelSavePeriod }}</div>
+                <div>통계주기</div>
+                <div v-if="env.configuration.period >= 600" class="text-center text-lg font-bold">
+                  {{ env.configuration.period / 60 }}분
+                </div>
+                <div v-else class="text-center text-lg font-bold">
+                  {{ env.configuration.period }}초
+                </div>
               </div>
               <div class="bg-yellow-50 text-black p-1 rounded text-center">
                 <div> Epoch</div>
-                <div class="text-center text-lg font-bold">{{ env.configuration.epoch }}</div>
+                <div class="text-center text-lg font-bold">{{ env.configuration.modelSavePeriod }}/{{ env.configuration.epoch }}</div>
               </div>
               <div class="bg-green-50 text-black p-1 rounded text-center">
                 <div> Action</div>
@@ -72,7 +77,7 @@
       </div>
     </div>
 
-    <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2 mt-2" >
+    <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2 mt-2 min-w-max" >
       <div class="text-white font-bold bg-gray-700 w-32 text-center py-1 rounded">최적화 실험</div>
       <div fluid class="mt-0 p-1">
         <div class="flex justify-end">
@@ -127,6 +132,15 @@
             </div>
           </template>
 
+          <template v-slot:cell(configuration.period)="row">
+            <div v-if="row.item.configuration.period >= 600" class="text-center font-bold p-1">
+              {{ row.item.configuration.period / 60 }} 분
+            </div>
+            <div v-else class="text-center font-bold p-1">
+              {{ row.item.configuration.period }} 초
+            </div>
+          </template>
+
           <template v-slot:cell(duration)="row">
             {{ row.item.configuration.fromTime.slice(0, 5) }} ~
             {{ row.item.configuration.toTime.slice(0, 5) }}
@@ -177,13 +191,13 @@
           <template v-slot:cell(details)="row">
             <b-button
               size="sm"
-              variant="secondary"
+              variant="primary"
               :to="{
                 name: 'OptimizationResultMap',
                 params: {id: row.item.id}
               }"
             >
-              🚦 최적화
+              <b-icon icon="journal-check"/> 학습
             </b-button>
             <b-button
               size="sm"
@@ -213,7 +227,16 @@
                     상태: {{ row.item.status.toUpperCase() }}
                   </li>
                   <li class="">
+                    지역: {{ row.item.configuration.region }}
+                  </li>
+                  <li class="">
                     최적화 대상 교차로: {{ row.item.configuration.junctionId }}
+                  </li>
+                  <li class="">
+                    도커이미지: {{ row.item.configuration.dockerImage }}
+                  </li>
+                  <li class="">
+                    등록일: {{ row.item.configuration.created }}
                   </li>
                 </ul>
               </div>

@@ -141,6 +141,14 @@ const xx = Object.values(sa1).reduce((acc, cur) => {
   return acc
 }, [])
 
+const calcAvg = (values = []) => {
+  const sum = values.reduce((acc, cur) => {
+    acc += cur
+    return acc
+  }, 0)
+  return sum / values.length
+}
+
 const dataset = (label, color, data) => ({
   label,
   fill: false,
@@ -204,7 +212,8 @@ const initSimulationData = async (
   eventTarget,
   mapBus,
   wsBus,
-  jIds
+  jIds,
+  slaves
 ) => {
   const map = makeMap({ mapId: mapId, zoom: 17 })
 
@@ -217,13 +226,15 @@ const initSimulationData = async (
   const wsClient = WebSocketClient({
     simulationId: slave,
     eventBus: wsBus
+
+    // eventBus: mapBus
   })
   const trafficLightManager = TrafficLightManager(map, null, eventTarget)
   await trafficLightManager.load()
   trafficLightManager.setTargetJunctions(jIds)
 
   mapManager.loadMapData()
-  wsClient.init()
+  wsClient.init(slaves)
   return {
     map,
     mapManager,
@@ -269,6 +280,7 @@ export default {
         avgSpeedsJunctions: [],
         avgSpeedInView: 0,
         avgSpeedJunction: 0,
+        avgSpeed: 0,
         progress: 0
       },
       chart2: {
@@ -276,6 +288,7 @@ export default {
         avgSpeedsJunctions: [],
         avgSpeedInView: 0,
         avgSpeedJunction: 0,
+        avgSpeed: 0,
         progress: 0
       },
       chart: {
@@ -333,6 +346,11 @@ export default {
       } else {
         return {}
       }
+    },
+    improvementRate () {
+      const v1 = this.chart1.avgSpeed
+      const v2 = this.chart2.avgSpeed
+      return 100 * ((v2 - v1) / ((v2 + v1) / 2))
     }
   },
   async mounted () {
@@ -367,7 +385,8 @@ export default {
         simEventBusFixed,
         // simEventBusFixed
         wsBus,
-        this.simulation.configuration.junctionId.split(',')
+        this.simulation.configuration.junctionId.split(','),
+        [this.fixedSlave, this.testSlave]
       ),
       await initSimulationData(
         this.mapIds[1],
@@ -375,7 +394,8 @@ export default {
         this,
         simEventBusTest,
         simEventBusTest,
-        this.simulation.configuration.junctionId.split(',')
+        this.simulation.configuration.junctionId.split(','),
+        [this.fixedSlave, this.testSlave]
       )
     ]
 
@@ -488,15 +508,22 @@ export default {
         .then(res => res.data)
         .then(dataRl => {
           const rl = dataRl[crossName]
+
           if (!rl) {
             return
           }
+          const rlAvgSpeed = calcAvg(rl.map(v => Number(v.avgSpeed)))
+          console.log(rl)
+          console.log(rlAvgSpeed)
+          this.chart2.avgSpeed = rlAvgSpeed
           this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
           optimizationService
             .getPhaseReward(this.simulation.id, 'ft')
             .then(res => res.data)
             .then(dataFt => {
               const ft = dataFt[crossName]
+              const ftAvgSpeed = calcAvg(ft.map(v => Number(v.avgSpeed)))
+              this.chart1.avgSpeed = ftAvgSpeed
               if (ft) {
                 this.phaseRewardChartFt.setOption(
                   drawChart.makeOption(ft.slice(0, rl.length))
@@ -605,6 +632,8 @@ export default {
       const map2 = this.simulations[1].map
 
       const moveHandler = (map1, map2) => {
+        console.log(map1.getCenter())
+        console.log(map2.getCenter())
         const moveTo = (map, target) => {
           map.animateTo(
             {
@@ -612,7 +641,7 @@ export default {
               zoom: target.getZoom()
             },
             {
-              duration: 10
+              duration: 0
             }
           )
         }

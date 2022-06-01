@@ -33,8 +33,9 @@ module.exports = async (req, res, next) => {
       })
     })
     .catch(err => {
-      debug(err)
-      console.log('----->', err)
+      console.log('<---- optimiztion training error start ----->')
+      console.log(err.message)
+      console.log('<---- optimiztion training error end ----->')
       updateStatus(id, 'stopped', {
         ended: currentTimeFormatted()
       })
