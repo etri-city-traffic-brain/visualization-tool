@@ -26,6 +26,8 @@ function SaltMsgHandler () {
     const socket = simulationIdToSocket[simulationId]
     if (socket) {
       socket.write(buffer)
+    } else {
+      // console.log('*** no socket ***', simulationId)
     }
   }
 
@@ -34,10 +36,11 @@ function SaltMsgHandler () {
     try {
       const initMsg = Init(buffer)
       const simulationId = initMsg.simulationId
-      if (!socketToSimulationId[socket.remotePort]) {
-        socketToSimulationId[socket.remotePort] = simulationId
-        simulationIdToSocket[simulationId] = socket
-      }
+      // if (!socketToSimulationId[socket.remotePort]) {
+      socketToSimulationId[socket.remotePort] = simulationId
+      simulationIdToSocket[simulationId] = socket
+      console.log('add socket', socket.remotePort, simulationId)
+      // }
       debug(`[INIT] ${simulationId}, ${socket.remotePort}`)
 
       if (buffer.length > 100) {

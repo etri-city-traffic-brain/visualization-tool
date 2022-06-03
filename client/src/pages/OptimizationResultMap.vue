@@ -9,18 +9,30 @@
         {{ simulation.configuration.toTime }}({{ simulation.configuration.end }})</span></div>
         <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">주기</span> {{ simulation.configuration.period }} (초)</div>
         <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">교차로</span> {{ simulation.configuration.junctionId }} </div>
-        <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">이미지</span> <span class="text-xs">{{ simulation.configuration.dockerImage }} </span></div>
-        <!-- <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">스크립트</span> {{ simulation.configuration.script }} </div> -->
+        <div>
+          <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">이미지</span>
+          <span class="text-xs">{{ simulation.configuration.dockerImage }} </span>
+        </div>
 
-        <div class="mt-1 bg-gray-700 rounded-full text-center uppercase text-white font-bold">
-          <div class="bg-green-500 p-1 animate-pulse rounded-full " v-if="simulation.status === 'running' || simulation.status === 'stopping'">
-            {{ simulation.status }}
-          </div>
-          <div class="bg-blue-500 rounded-full p-1" v-else>
-            {{ simulation.status }}
+        <div>
+          <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">상태</span>
+          <div class="mt-1 bg-gray-700 rounded-full text-center uppercase text-white font-bold flex space-x-1">
+            <div class="flex-grow bg-green-500 p-1 px-2 animate-pulse rounded" v-if="simulation.status === 'running' || simulation.status === 'stopping'">
+              {{ simulation.status }}
+            </div>
+            <div class="flex-grow bg-blue-500 rounded p-1 px-2 " v-else>
+              {{ simulation.status }}
+            </div>
+            <button class="bg-gray-600 text-white px-2 rounded text-sm hover:bg-blue-600 py-1" @click="getReward">
+              <b-icon icon="arrow-clockwise"></b-icon> 상태 갱신
+            </button>
           </div>
         </div>
+
+        <!-- <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">스크립트</span> {{ simulation.configuration.script }} </div> -->
+
       </div>
+
       <!-- <uniq-congestion-color-bar class="mt-1"/> -->
       <div >
         <!-- 혼잡도 차트 -->
@@ -52,7 +64,7 @@
 
       <div class="bg-gray-700 mt-2 rounded-xl border" >
         <!-- <div class="text-white text-center p-1 text-sm">Total Reward</div> -->
-
+        <div class="font-bold p-2 text-white text-center">보상그래프</div>
       <!-- 보상 그래프 -->
         <!-- <line-chart
           :chartData="rewards"
@@ -90,26 +102,16 @@
       </div>
 
       <div class="bg-gray-700 rounded-xl mt-2 p-2 border border-orange-500" >
-      <div>
-        <button class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="runTrain"> <b-icon icon="play-fill"/> 시작 </button>
-        <button class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-800 py-1" @click="stop" size="sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="inline h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
-          </svg> 중지
-        </button>
-        <button
-          class="bg-blue-600 text-white px-2 rounded text-sm hover:bg-gray-500 py-1"
-          @click="getReward"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="inline h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          상태 갱신
-        </button>
-        </div>
-        <div class="mt-1">
+        <div>
+          <button class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-blue-600 py-1" @click="runTrain">
+            <b-icon icon="play-fill"/> 학습 시작
+          </button>
+          <button class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-blue-600 py-1" @click="stop" size="sm">
+            <b-icon icon="stop-fill"></b-icon> 중지
+          </button>
           <router-link
             class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-800 py-1 "
+            tag="button"
             :to="{
               name: 'OptimizationResultComparisonMap',
               params: {id: simulationId}

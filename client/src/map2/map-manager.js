@@ -127,7 +127,6 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   })
 
   const edgeClicked = ({ target }) => {
-    console.log(target.getId())
     if (eventBus) {
       eventBus.$emit('link:selected', {
         ...target.properties,
@@ -231,8 +230,6 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
       }
 
       // console.log('salt:set', data.simulationId)
-      console.log('salt:set', data.extent.min)
-
       eventBus.$emit('map:moved', data)
       eventBus.$emit('salt:set', data)
     }

@@ -46,7 +46,7 @@ module.exports = (port = 1337) => {
     consumeSaltMsg(socket, bufferManager)
   }
 
-  const handleClose = socket => () => {
+  const handleCloseX = socket => () => {
     setTimeout(() => {
       saltMsgHandler.clearResource(socket)
       const bufferManager = bufferManagerRegistry[socket.remotePort]
@@ -58,6 +58,8 @@ module.exports = (port = 1337) => {
       debug(chalk.red('[close]'))
     }, 500)
   }
+
+  const handleClose = socket => () => {}
 
   const handleError = socket => () => {
     debug(green(`[socket-error] ${socket.remoteAddress}`))

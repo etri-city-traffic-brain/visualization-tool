@@ -281,7 +281,8 @@ export default {
         avgSpeedInView: 0,
         avgSpeedJunction: 0,
         avgSpeed: 0,
-        progress: 0
+        progress: 0,
+        speedsPerJunction: {}
       },
       chart2: {
         avgSpeedsInView: [],
@@ -289,7 +290,8 @@ export default {
         avgSpeedInView: 0,
         avgSpeedJunction: 0,
         avgSpeed: 0,
-        progress: 0
+        progress: 0,
+        speedsPerJunction: {}
       },
       chart: {
         avgChartInView: {}, // realtime chart
@@ -351,6 +353,19 @@ export default {
       const v1 = this.chart1.avgSpeed
       const v2 = this.chart2.avgSpeed
       return 100 * ((v2 - v1) / ((v2 + v1) / 2))
+    },
+    speedsPerJunction () {
+      const keys = Object.keys(this.chart2.speedsPerJunction)
+      const r = {}
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i]
+        const values = this.chart1.speedsPerJunction[key] || []
+        const values2 = this.chart2.speedsPerJunction[key] || []
+        const spd1 = calcAvg(values.map(v => Number(v.avgSpeed)))
+        const spd2 = calcAvg(values2.map(v => Number(v.avgSpeed)))
+        r[key] = [spd1, spd2]
+      }
+      return r
     }
   },
   async mounted () {
@@ -383,8 +398,8 @@ export default {
         this.fixedSlave,
         this,
         simEventBusFixed,
-        // simEventBusFixed
-        wsBus,
+        simEventBusFixed,
+        // wsBus,
         this.simulation.configuration.junctionId.split(','),
         [this.fixedSlave, this.testSlave]
       ),
@@ -419,6 +434,16 @@ export default {
       //   this.status = 'finished'
       //   this.makeToast('bus1-테스트가 완료 되었습니다.', 'info')
       // }
+    })
+
+    busFixed.$on('salt:data', dataSim => {
+      const avgSpeedSim = calcAvgSpeed(dataSim.roads).toFixed(2) * 1
+      const avgSpeedSimJunction =
+        calcAveSpeedJunction(dataSim.roads).toFixed(2) * 1
+      this.chart1.avgSpeedsInView.push(avgSpeedSim)
+      this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
+      this.chart2.avgSpeedJunction = avgSpeedSimJunction
+      this.chart2.avgSpeedInView = avgSpeedSim
     })
 
     const calcAveSpeedJunction = roads => {
@@ -492,7 +517,7 @@ export default {
     })
 
     busFixed.$on('ws:close', () => {
-      this.makeToast('ws connection closed', 'warning')
+      // this.makeToast('ws connection closed', 'warning')
     })
 
     this.$on('signalGroup:clicked', p => {
@@ -507,20 +532,21 @@ export default {
         .getPhaseReward(this.simulation.id, 'rl')
         .then(res => res.data)
         .then(dataRl => {
+          this.chart2.speedsPerJunction = dataRl
           const rl = dataRl[crossName]
 
           if (!rl) {
             return
           }
           const rlAvgSpeed = calcAvg(rl.map(v => Number(v.avgSpeed)))
-          console.log(rl)
-          console.log(rlAvgSpeed)
+
           this.chart2.avgSpeed = rlAvgSpeed
           this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
           optimizationService
             .getPhaseReward(this.simulation.id, 'ft')
             .then(res => res.data)
             .then(dataFt => {
+              this.chart1.speedsPerJunction = dataFt
               const ft = dataFt[crossName]
               const ftAvgSpeed = calcAvg(ft.map(v => Number(v.avgSpeed)))
               this.chart1.avgSpeed = ftAvgSpeed
@@ -632,8 +658,6 @@ export default {
       const map2 = this.simulations[1].map
 
       const moveHandler = (map1, map2) => {
-        console.log(map1.getCenter())
-        console.log(map2.getCenter())
         const moveTo = (map, target) => {
           map.animateTo(
             {

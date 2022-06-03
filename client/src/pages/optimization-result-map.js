@@ -169,7 +169,7 @@ function setupEventHandler () {
 
   this.$on('ws:close', () => {
     this.wsStatus = 'close'
-    this.makeToast('ws connection closed', 'warning')
+    // this.makeToast('ws connection closed', 'warning')
   })
 
   this.$on('junction:selected', () => {

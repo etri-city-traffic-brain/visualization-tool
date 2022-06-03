@@ -319,6 +319,14 @@ export default {
         //   this.speedsPerStep.datasets[0].data,
         //   new Array(link.speeds.length).fill(this.edgeSpeed())
         // )
+
+        this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
+          this.speedsPerStep.datasets[0].data,
+          new Array(this.speedsPerStep.datasets[0].data.length).fill(
+            this.edgeSpeed()
+          ),
+          []
+        )
       }
 
       await this.updateLinkChart(link.LINK_ID, link.vdsId)
@@ -403,7 +411,7 @@ export default {
 
     this.$on('ws:close', () => {
       this.wsStatus = 'close'
-      this.makeToast('ws connection closed', 'warning')
+      // this.makeToast('ws connection closed', 'warning')
     })
 
     window.addEventListener('resize', this.resize.bind(this))
@@ -500,7 +508,7 @@ export default {
     resize () {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
       // this.mapHeight = window.innerHeight - 160 // update map height to current height
-      this.mapHeight = window.innerHeight - 150 // update map height to current height
+      this.mapHeight = window.innerHeight - 250 // update map height to current height
     },
     togglePlay () {
       this.playBtnToggle = !this.playBtnToggle

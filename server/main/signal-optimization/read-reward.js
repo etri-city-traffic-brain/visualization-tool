@@ -19,7 +19,6 @@ async function csvToObj (file) {
       fs.createReadStream(file)
         .pipe(csv())
         .on('data', row => {
-          console.log('data', row.toString())
           const target = map[row.tl_name] || []
           target.push({
             // phase: row.phase,

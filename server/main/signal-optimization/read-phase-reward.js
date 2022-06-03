@@ -5,7 +5,6 @@ const csv = require('csv-parser')
 const baseDir = '/home/ubuntu/uniq-sim/data'
 
 async function read (simulationId, type) {
-  console.log('read', simulationId, type)
   let file
   if (type === 'ft') {
     file = `${baseDir}/${simulationId}/output/simulate/ft_phase_reward_output.txt`

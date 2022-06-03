@@ -39,8 +39,8 @@
             <div class="">시뮬레이션 정보</div>
             <div class="border-blue-600 space-y-2">
               <div class="flex space-x-1 items-center">
-                <div class="bg-blue-800 px-1 rounded">지역</div><div class="bg-gray-500 px-1 rounded"> {{ config.region }}</div>
-                <div class="bg-blue-800 px-1 rounded">통계주기</div> <div class="bg-gray-500 px-1 rounded">{{ config.period }}초</div>
+                <div class="bg-blue-500 px-1 rounded">지역</div><div class="bg-gray-500 px-1 rounded"> {{ config.region }}</div>
+                <div class="bg-blue-500 px-1 rounded">통계주기</div> <div class="bg-gray-500 px-1 rounded">{{ config.period / 60 }}분</div>
               </div>
               <div class="flex space-x-1">
                 <div class="bg-blue-500 px-1 rounded">시작</div><div class="bg-gray-500 px-1 rounded"> {{ config.fromTime }}</div>

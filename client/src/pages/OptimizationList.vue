@@ -1,7 +1,7 @@
 <template>
   <div class="min-w-max p-2 bg-gray-600">
     <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2">
-      <div class="text-white font-bold bg-gray-700 w-32 text-center py-1 rounded">최적화 환경</div>
+      <div class="text-white text-lg text-center font-bold bg-gray-700- w-32 py-1 rounded">최적화 환경</div>
 
       <div class="grid grid-cols-5 flex-wrap gap-2 max-w-full">
         <div class="bg-gray-700 grid rounded-xl">
@@ -14,8 +14,9 @@
           <div class="bg-gray-700 p-2 rounded-xl min-h-full">
             <div class="flex justify-between items-center font-bold text pt-1 mb-2">
               <div>⚙️ {{ env.envName }} </div>
-              <div><button class="bg-red-300 px-2 py-1 rounded text-xs text-black font-bold hover:bg-yellow-700"
-                @click="remove(env.id)">X</button></div>
+              <div>
+                <button class="bg-gray-600 px-2 py-1 rounded text-xs text-black font-bold hover:bg-red-300" @click="remove(env.id)">X</button>
+              </div>
             </div>
             <div class="grid grid-cols-3 text-xs gap-1">
               <div class="bg-yellow-50 text-black p-1 rounded text-center">
@@ -60,7 +61,7 @@
                   {{ j }}</div>
               </div>
             </div>
-            <div class="flex justify-between pt-2">
+            <div class="flex justify-end space-x-2 pt-2">
               <!-- <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn> -->
               <!-- <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn> -->
               <!-- <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn> -->
@@ -78,7 +79,7 @@
     </div>
 
     <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2 mt-2 min-w-max" >
-      <div class="text-white font-bold bg-gray-700 w-32 text-center py-1 rounded">최적화 실험</div>
+      <div class="text-white font-bold bg-gray-700- w-32 text-center py-1 rounded text-lg">최적화 실험</div>
       <div fluid class="mt-0 p-1">
         <div class="flex justify-end">
           <b-btn

@@ -64,7 +64,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   }
 
   function init (slaves) {
-    log(`init ${simulationId} - ${wsUrl}`)
+    // log(`init ${simulationId} - ${wsUrl}`)
     if (status === 'open') {
       log('WebSocket is already opened!!')
       return
@@ -113,7 +113,6 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       // const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
       // const roadType = zoom >= 17 ? 1 : 0 // 1: cell, 0: link
       if (slaves) {
-        console.log(slaves)
         const { min, max } = extend(extent)
         send({
           simulationId: slaves[0],
@@ -129,7 +128,6 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
         })
         return
       }
-      console.log('---->send')
       const { min, max } = extend(extent)
       send({
         simulationId,
