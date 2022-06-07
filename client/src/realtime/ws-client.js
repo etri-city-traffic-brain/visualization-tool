@@ -80,6 +80,19 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       status = 'open'
       eventBus.$emit('ws:open')
       // log('websocket is opened')
+      // just for optimization
+      send({
+        simulationId,
+        type: 10, // Set
+        // extent: [min.x, max.y, max.x, min.y],
+        extent: [
+          127.3373 - 0.0055,
+          36.34837 + 0.0055,
+          127.34303 + 0.0055,
+          36.34303 - 0.0055
+        ],
+        roadType: 1
+      })
     })
 
     socket.addEventListener('message', ({ data }) => {
@@ -113,17 +126,31 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       // const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
       // const roadType = zoom >= 17 ? 1 : 0 // 1: cell, 0: link
       if (slaves) {
+        console.log('send set')
         const { min, max } = extend(extent)
+
         send({
           simulationId: slaves[0],
           type: 10, // Set
-          extent: [min.x, max.y, max.x, min.y],
+          // extent: [min.x, max.y, max.x, min.y],
+          extent: [
+            127.3373 - 0.0055,
+            36.34837 + 0.0055,
+            127.34303 + 0.0055,
+            36.34303 - 0.0055
+          ],
           roadType: 1
         })
         send({
           simulationId: slaves[1],
           type: 10, // Set
-          extent: [min.x, max.y, max.x, min.y],
+          // extent: [min.x, max.y, max.x, min.y],
+          extent: [
+            127.3373 - 0.0055,
+            36.34837 + 0.0055,
+            127.34303 + 0.0055,
+            36.34303 - 0.0055
+          ],
           roadType: 1
         })
         return

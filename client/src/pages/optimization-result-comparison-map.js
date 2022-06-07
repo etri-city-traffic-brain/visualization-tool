@@ -187,15 +187,16 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
 }
 
 const makeLineData = (data1 = [], data2 = []) => {
-  const avgD1 = data1.reduce((acc, cur) => (acc += cur), 0) / data1.length
-  const avgD2 = data2.reduce((acc, cur) => (acc += cur), 0) / data1.length
+  const avgD1 = data1.reduce((acc, cur) => (acc += ~~cur), 0) / data1.length
+  const avgD2 = data2.reduce((acc, cur) => (acc += ~~cur), 0) / data1.length
+
   return {
     labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
       dataset('기존신호', 'grey', data1),
       dataset('최적신호', 'orange', data2),
-      dataset('기존', 'green', data2.slice().fill(avgD1)),
-      dataset('최적', 'blue', data2.slice().fill(avgD2))
+      dataset('기존신호(평균)', 'green', data2.slice().fill(avgD1)),
+      dataset('최적신호(평균)', 'skyblue', data2.slice().fill(avgD2))
     ]
   }
 }
@@ -398,8 +399,8 @@ export default {
         this.fixedSlave,
         this,
         simEventBusFixed,
-        simEventBusFixed,
-        // wsBus,
+        // simEventBusFixed,
+        wsBus,
         this.simulation.configuration.junctionId.split(','),
         [this.fixedSlave, this.testSlave]
       ),
@@ -437,13 +438,15 @@ export default {
     })
 
     busFixed.$on('salt:data', dataSim => {
-      const avgSpeedSim = calcAvgSpeed(dataSim.roads).toFixed(2) * 1
-      const avgSpeedSimJunction =
-        calcAveSpeedJunction(dataSim.roads).toFixed(2) * 1
-      this.chart1.avgSpeedsInView.push(avgSpeedSim)
-      this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
-      this.chart2.avgSpeedJunction = avgSpeedSimJunction
-      this.chart2.avgSpeedInView = avgSpeedSim
+      // const avgSpeedSim = calcAvgSpeed(dataSim.roads).toFixed(2) * 1
+      // const avgSpeedSimJunction =
+      //   calcAveSpeedJunction(dataSim.roads).toFixed(2) * 1
+      // this.chart1.avgSpeedsInView.push(avgSpeedSim)
+      // this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
+      // this.chart2.avgSpeedJunction = avgSpeedSimJunction
+      // this.chart2.avgSpeedInView = avgSpeedSim
+
+      buffer.push(dataSim)
     })
 
     const calcAveSpeedJunction = roads => {
@@ -476,6 +479,7 @@ export default {
         const avgSpeedSim = calcAvgSpeed(dataSim.roads).toFixed(2) * 1
         const avgSpeedSimJunction =
           calcAveSpeedJunction(dataSim.roads).toFixed(2) * 1
+
         this.chart1.avgSpeedsInView.push(avgSpeedSim)
         this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
         this.chart2.avgSpeedJunction = avgSpeedSimJunction
@@ -501,6 +505,11 @@ export default {
       simEventBusFixed.$emit('salt:status', {
         ...status
       })
+      if (this.chart1.progress !== 100 && status.status === 1) {
+        this.chart2.progress = 100
+        this.chart1.progress = 100
+        this.checkStatus()
+      }
     })
 
     busTest.$on('salt:finished', async () => {

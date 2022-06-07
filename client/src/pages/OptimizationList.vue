@@ -70,7 +70,7 @@
               <!-- <button class="bg-yellow-400 px-2 py-1 rounded text-sm text-black font-bold hover:bg-yellow-700"
                 @click="remove(env.id)">삭제</button> -->
               <button class="bg-blue-400 px-2 py-1 rounded text-sm font-bold hover:bg-blue-700"
-                @click="registerSimulation(env)">실험</button>
+                @click="registerSimulation(env)">실험생성</button>
             </div>
           </div>
 
@@ -198,7 +198,7 @@
                 params: {id: row.item.id}
               }"
             >
-              <b-icon icon="journal-check"/> 학습
+              <b-icon icon="journal-check"/> 신호학습
             </b-button>
             <b-button
               size="sm"
@@ -206,7 +206,7 @@
               :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
             >
               <!-- <b-icon icon="circle-square"></b-icon> -->
-              🚥 분석
+              🚥 신호적용
             </b-button>
 
 

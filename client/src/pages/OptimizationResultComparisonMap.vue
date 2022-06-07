@@ -141,7 +141,7 @@
                 <div class="border-b col-span-3">{{ v[0] }} </div>
                 <div class="border-b">{{ Number(v[1][0]).toFixed(2) }} </div>
                 <div class="border-b">{{ Number(v[1][1]).toFixed(2)}}</div>
-                <div class="border-b">{{ (100 * (v[1][1] - v[1][0]) / ((v[1][1] + v[1][0]) / 2)).toFixed(2) }}</div>
+                <div class="border-b">{{ (100 * (v[1][1] - v[1][0]) / ((v[1][1] + v[1][0]) / 2)).toFixed(2) }} <span class="text-xs">%</span></div>
                 </div>
               </div>
             </div>
