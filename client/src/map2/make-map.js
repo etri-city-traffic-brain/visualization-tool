@@ -48,7 +48,7 @@ export default function MakeMap ({
         subdomains: ['a', 'b', 'c', 'd'],
         attribution:
           '&copy; <a href="http://xdworld.vworld.kr">vworld</a> contributors, &copy;'
-      }),
+      })
       // new TileLayer('building', {
       //   urlTemplate:
       //     'https://api.mapbox.com/styles/v1/geunii/cktm93o3t9vrj17pfxngxtd6k/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZ2V1bmlpIiwiYSI6ImNrdGw3aDFwNjF0MWUyb3FuZHhsMHp2M3UifQ.LhTy9DE32CO59gxGKxwtDg',
@@ -56,14 +56,14 @@ export default function MakeMap ({
       //   attribution:
       //     '&copy; <a href="http://xdworld.vworld.kr">vworld</a> contributors, &copy;'
       // }),
-      new TileLayer('dark', {
-        urlTemplate:
-          'https://api.mapbox.com/styles/v1/yeonheon/ckmpoihi20bp917pg47jpypm1/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoieWVvbmhlb24iLCJhIjoiY2o3YTIza3YyMDl1dTJxbzFrN2tjc2tiOSJ9.vAzYQZxcOCxgTrGxE_Zq5g',
-        subdomains: ['a', 'b', 'c', 'd'],
-        attribution:
-          '&copy; <a href="http://xdworld.vworld.kr">vworld</a> contributors, &copy;',
-        renderer: 'gl'
-      })
+      // new TileLayer('dark', {
+      //   urlTemplate:
+      //     'https://api.mapbox.com/styles/v1/yeonheon/ckmpoihi20bp917pg47jpypm1/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoieWVvbmhlb24iLCJhIjoiY2o3YTIza3YyMDl1dTJxbzFrN2tjc2tiOSJ9.vAzYQZxcOCxgTrGxE_Zq5g',
+      //   subdomains: ['a', 'b', 'c', 'd'],
+      //   attribution:
+      //     '&copy; <a href="http://xdworld.vworld.kr">vworld</a> contributors, &copy;',
+      //   renderer: 'gl'
+      // })
     ])
     // baseLayer: new maptalks.TileLayer('cato', {
     //   urlTemplate:

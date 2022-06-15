@@ -14,7 +14,11 @@ const getToday = () => format(new Date())
 
 const periodOptions = [
   { value: 15, text: '15초' },
+  { value: 30, text: '30초' },
+  { value: 1 * 60, text: '1분' },
+  { value: 5 * 60, text: '5분' },
   { value: 10 * 60, text: '10분' },
+  { value: 20 * 60, text: '20분' },
   { value: 30 * 60, text: '30분' },
   { value: 60 * 60, text: '1시간' },
   { value: 120 * 60, text: '2시간' }
@@ -107,7 +111,7 @@ export default {
       junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
-      dockerImage: 'images4uniq/optimizer:v0.1a.20220418',
+      dockerImage: 'images4uniq/optimizer:v1.1a.20220531',
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],

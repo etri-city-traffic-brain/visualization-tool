@@ -91,9 +91,15 @@ function setupEventHandler () {
 
   this.$on('salt:status', async status => {
     this.progress = status.progress
-
+    console.log(status.progress)
     if (status.progress >= 99) {
       this.progress = 100
+      setTimeout(() => {
+        try {
+          this.getReward().then(() => console.log('state updated'))
+          console.log('update state')
+        } catch (err) {}
+      }, 5000)
     }
 
     if (status.status === 1 && status.progress === 100) {
@@ -102,6 +108,7 @@ function setupEventHandler () {
   })
 
   this.$on('optimization:progress', async e => {
+    console.log('opt:progress', e.progress)
     this.progressOpt = e.progress
     if (e.progress >= 99) {
       this.progressOpt = 100

@@ -49,6 +49,10 @@ async function run (simulation, mode, modelNum) {
 
   // const targetTL = 'SA 101,SA 104,SA 107,SA 111'
 
+  // --reward-func ${rewardFunc} \
+  // --method ${method} \
+  // --action ${action}`
+
   const makeCmd = (mode, name) =>
     `run --rm --name ${name} -v ${volume} ${dockerImage} python ./run.py \
      --mode ${mode} \
@@ -61,7 +65,8 @@ async function run (simulation, mode, modelNum) {
      --target-TL "${targetTL}" \
      --model-save-period ${modelSavePeriod} \
      --result-comp False \
-     --action offset`
+     --reward-func ${rewardFunc} \
+     --action ${action}`
 
   if (mode === 'train') {
     const cmd = `${makeCmd('train', simulation.id)}`

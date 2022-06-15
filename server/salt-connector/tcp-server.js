@@ -23,16 +23,19 @@ module.exports = (port = 1337) => {
     // )
     if (buffer && buffer.length >= HEADER_LENGTH) {
       const header = Header(buffer)
+      // console.log(header)
       // console.log(red('************************************'))
       // console.log(red(JSON.stringify(header)))
       // console.log(red('************************************'))
       const handler = saltMsgHandler.get(header.type)
       if (handler) {
         const bodyLength = header.length + HEADER_LENGTH
-        if (buffer.length >= bodyLength) {
-          handler(socket, buffer.slice(HEADER_LENGTH, bodyLength))
-          bufferManager.setBuffer(socket, buffer.slice(bodyLength))
+        if (buffer.length >= bodyLength + HEADER_LENGTH) {
+          handler(socket, buffer.slice(HEADER_LENGTH, bodyLength)) // body part
+          bufferManager.setBuffer(socket, buffer.slice(bodyLength)) // remains
         }
+      } else {
+        console.log('no handler')
       }
     }
     // timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 20)

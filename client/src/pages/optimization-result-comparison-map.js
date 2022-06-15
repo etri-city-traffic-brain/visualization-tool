@@ -143,7 +143,7 @@ const xx = Object.values(sa1).reduce((acc, cur) => {
 
 const calcAvg = (values = []) => {
   const sum = values.reduce((acc, cur) => {
-    acc += cur
+    acc += cur || 50
     return acc
   }, 0)
   return sum / values.length
@@ -189,14 +189,13 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
 const makeLineData = (data1 = [], data2 = []) => {
   const avgD1 = data1.reduce((acc, cur) => (acc += ~~cur), 0) / data1.length
   const avgD2 = data2.reduce((acc, cur) => (acc += ~~cur), 0) / data1.length
-
   return {
     labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
       dataset('기존신호', 'grey', data1),
       dataset('최적신호', 'orange', data2),
-      dataset('기존신호(평균)', 'green', data2.slice().fill(avgD1)),
-      dataset('최적신호(평균)', 'skyblue', data2.slice().fill(avgD2))
+      dataset('기존신호(평균)', 'green', new Array(data2.length).fill(avgD1)),
+      dataset('최적신호(평균)', 'skyblue', new Array(data2.length).fill(avgD2))
     ]
   }
 }
@@ -271,7 +270,7 @@ export default {
       mapHeight: 600, // map view height
       sidebar: false,
       currentStep: 1,
-      slideMax: 0,
+      // slideMax: 0,
       congestionColor,
       currentEdge: null,
       playBtnToggle: false,
@@ -292,7 +291,9 @@ export default {
         avgSpeedJunction: 0,
         avgSpeed: 0,
         progress: 0,
-        speedsPerJunction: {}
+        speedsPerJunction: {},
+        efficiency1: 0,
+        efficiency2: 0
       },
       chart: {
         avgChartInView: {}, // realtime chart
@@ -370,22 +371,17 @@ export default {
     }
   },
   async mounted () {
-    const optimizationId = this.$route.params ? this.$route.params.id : null
+    const optId = this.$route.params ? this.$route.params.id : null
 
-    const { simulation, ticks } = await simulationService.getSimulationInfo(
-      optimizationId
-    )
+    const { simulation } = await simulationService.getSimulationInfo(optId)
 
     if (!simulation) {
       return
     }
     this.status = simulation.status
-
     this.simulation = simulation
     this.fixedSlave = simulation.slaves[1]
-
     this.testSlave = simulation.slaves[0]
-    this.slideMax = ticks - 1
 
     this.resize()
 
@@ -450,19 +446,17 @@ export default {
     })
 
     const calcAveSpeedJunction = roads => {
-      const roadsFilteredTest = []
+      const speeds = []
       roads.forEach(road => {
+        // extract linkId from cellId
         const linkId = road.roadId.slice(0, road.roadId.indexOf('_'))
         if (xx.includes(linkId)) {
-          roadsFilteredTest.push(road.speed)
+          speeds.push(road.speed)
         }
       })
       // console.log(roadsFiltered) // 교차로의 평균속도
-      const roadSpeedSumTest = roadsFilteredTest.reduce(
-        (acc, cur) => (acc += cur),
-        0
-      )
-      return roadSpeedSumTest / roadsFilteredTest.length
+      const roadSpeedSumTest = speeds.reduce((acc, cur) => (acc += cur), 0)
+      return roadSpeedSumTest / speeds.length
     }
     // 수행 속도가 느림
     busTest.$on('salt:data', dataTest => {
@@ -485,6 +479,20 @@ export default {
         this.chart2.avgSpeedJunction = avgSpeedSimJunction
         this.chart2.avgSpeedInView = avgSpeedSim
         // this.speedChart1.setOption(drawChart2.makeOption(avgSpeedSim))
+
+        const chart1AvgSpeed = calcAvg(this.chart1.avgSpeedsInView)
+        const chart1AvgSpdJ = calcAvg(this.chart1.avgSpeedsJunctions)
+        const chart2AvgSpeed = calcAvg(this.chart2.avgSpeedsInView)
+        const chart2AvgSpdJ = calcAvg(this.chart2.avgSpeedsJunctions)
+
+        this.chart2.efficiency1 = this.calcEfficency(
+          chart1AvgSpeed,
+          chart2AvgSpeed
+        )
+        this.chart2.efficiency2 = this.calcEfficency(
+          chart1AvgSpdJ,
+          chart2AvgSpdJ
+        )
       }
 
       this.chart.avgChartInView = makeLineData(
@@ -616,6 +624,11 @@ export default {
     this.phaseRewardChartRl.on('datazoom', function (params) {})
   },
   methods: {
+    calcEfficency (v1, v2) {
+      v1 = Number(v1)
+      v2 = Number(v2)
+      return ((100 * (v2 - v1)) / ((v2 + v1) / 2)).toFixed(2)
+    },
     resize () {
       this.mapHeight = window.innerHeight - 50 // update map height to current height
       if (this.phaseRewardChartFt) {

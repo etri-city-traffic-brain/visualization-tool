@@ -21,15 +21,15 @@
             <div class="bg-gray-700">
               <div class="grid grid-cols-3 gap-2 mt-1 text-white p-1">
                 <div class="text-center font-bold w-full flex flex-col justify-middle justify-center">
-                  <div class="tracking-wider text-lg">기존신호</div>
+                  <div class="tracking-wider text-lg bg-indigo-500 h-full items-center flex justify-center">기존신호</div>
                 </div>
                 <div class="text-center text-2xl font-bold p-2 bg-indigo-500">
-                  <div class="text-xs">뷰영역 평균속도</div>
-                  <div>{{chart1.avgSpeedJunction}} <span class="text-sm">km</span></div>
+                  <div class="text-xs">평균속도</div>
+                  <div>{{chart1.avgSpeedJunction}}<span class="text-sm">km</span></div>
                 </div>
                 <div class="text-center text-2xl font-bold border- p-2 bg-indigo-500">
                   <div class="text-xs">교차로 평균속도</div>
-                  <div>{{chart1.avgSpeedInView}} <span class="text-sm">km</span></div>
+                  <div>{{chart1.avgSpeedInView}}<span class="text-sm">km</span></div>
                 </div>
               </div>
               <div class="border-2 border-gray-700" >
@@ -42,17 +42,32 @@
               </div>
             </div>
             <div class="bg-yellow-300">
-              <div class="grid grid-cols-3 gap-2 mt-1 text-black p-1">
-              <div class="text-center text-black font-bold pt-1 w-full flex flex-col justify-middle justify-center">
-                <div class="tracking-wider text-lg">최적신호</div>
-              </div>
-                <div class="text-center text-2xl font-bold p-2 bg-yellow-500">
-                  <div class="text-xs">뷰영역 평균속도</div>
-                  <div>{{chart2.avgSpeedJunction}} <span class="text-sm">km</span></div>
+              <div class="grid grid-cols-4 gap-2 mt-1 text-black p-1">
+                <div class="text-center text-black font-bold pt-1 w-full flex flex-col justify-middle justify-center">
+                  <div class="tracking-wider text-lg h-full items-center flex justify-center bg-yellow-500">최적신호</div>
+                </div>
+                <div class="text-center text-2xl font-bold p-2 bg-yellow-500 ">
+                  <div class="text-xs">평균속도</div>
+                  <div>
+                    {{chart2.avgSpeedJunction}}<span class="text-sm">km</span>
+                  <!-- {{chart2.efficiency1}}<span class="text-sm">% 향상</span> -->
+                  </div>
                 </div>
                 <div class="text-center text-2xl font-bold border- p-2 bg-yellow-500">
                   <div class="text-xs">교차로 평균속도</div>
-                  <div>{{chart2.avgSpeedInView}} <span class="text-sm">km</span></div>
+                  <div>
+                    {{chart2.avgSpeedInView}}<span class="text-sm">km</span>
+
+                  </div>
+
+                </div>
+                <div class="text-center text-2xl font-bold border- p-2 bg-yellow-500">
+                  <div class="text-xs">향상률</div>
+                  <div>
+                    {{chart2.efficiency2}}<span class="text-sm">%</span>
+
+                  </div>
+
                 </div>
               </div>
 

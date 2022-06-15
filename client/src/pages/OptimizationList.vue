@@ -147,6 +147,7 @@
             {{ row.item.configuration.toTime.slice(0, 5) }}
           </template>
 
+
           <template v-slot:cell(epoch)="row">
             <span>{{row.item.epoch || 0}}</span>
           </template>
@@ -156,7 +157,7 @@
           </template>
 
           <template v-slot:cell(actions)="row">
-            {{ row.item.configuration.junctionId.split(',').length}}
+             {{ numberOfJunctions(row.item.configuration.junctionId) }}
           </template>
 
           <template v-slot:cell(configuration.begin)="row">

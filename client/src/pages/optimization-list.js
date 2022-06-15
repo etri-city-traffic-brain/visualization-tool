@@ -80,8 +80,23 @@ export default {
     this.dataProvider({ currentPage: this.currentPage })
     this.reload().then(r => {})
   },
+  computed: {},
   destroyed () {},
   methods: {
+    numberOfJunctions (jId) {
+      const SA = {
+        'SA 101': 10,
+        'SA 107': 4,
+        'SA 111': 2,
+        'SA 104': 5
+      }
+      const jIds = jId.split(',').map(v => v.trim())
+      let sum = 0
+      jIds.forEach(id => {
+        sum += SA[id] || 0
+      })
+      return sum
+    },
     statusColor (status) {
       const colors = {
         running: 'bg-blue-400',
