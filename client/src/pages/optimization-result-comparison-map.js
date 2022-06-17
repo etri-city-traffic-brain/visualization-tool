@@ -143,10 +143,23 @@ const xx = Object.values(sa1).reduce((acc, cur) => {
 
 const calcAvg = (values = []) => {
   const sum = values.reduce((acc, cur) => {
-    acc += cur || 50
+    acc += cur || 0
     return acc
   }, 0)
-  return sum / values.length
+  return (sum / values.length).toFixed(2)
+}
+
+function getAvgSpeeds (data) {
+  const values = Object.values(data)
+  const avg = new Array(values[0].length).fill(0)
+  const len = values[0].length
+  for (let i = 0; i < values.length; i++) {
+    for (let j = 0; j < len; j++) {
+      avg[j] += Number(values[i][j].avgSpeed)
+    }
+  }
+  const rr = avg.map(a => a / values.length)
+  return rr
 }
 
 const dataset = (label, color, data) => ({
@@ -187,16 +200,30 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
 }
 
 const makeLineData = (data1 = [], data2 = []) => {
-  const avgD1 = data1.reduce((acc, cur) => (acc += ~~cur), 0) / data1.length
-  const avgD2 = data2.reduce((acc, cur) => (acc += ~~cur), 0) / data1.length
+  let avgD1 = data1.reduce((acc, cur) => (acc += ~~cur), 0) / data1.length
+  let avgD2 = data2.reduce((acc, cur) => (acc += ~~cur), 0) / data2.length
+
+  avgD1 = avgD1.toFixed(2)
+  avgD2 = avgD2.toFixed(2)
+
   return {
     labels: new Array(data2.length).fill(0).map((_, i) => i),
     datasets: [
-      dataset('기존신호', 'grey', data1),
-      dataset('최적신호', 'orange', data2),
+      dataset(
+        '기존신호',
+        'grey',
+        data1.map(v => v.toFixed(2))
+      ),
+      dataset(
+        '최적신호',
+        'orange',
+        data2.map(v => v.toFixed(2))
+      ),
       dataset('기존신호(평균)', 'green', new Array(data2.length).fill(avgD1)),
       dataset('최적신호(평균)', 'skyblue', new Array(data2.length).fill(avgD2))
-    ]
+    ],
+    avg1: avgD1,
+    avg2: avgD2
   }
 }
 
@@ -326,7 +353,8 @@ export default {
       // selectedNode: '미래부동산삼거리',
       showWaitingMsg: false,
       avgSpeedJunction: 0,
-      statusMessage: []
+      statusMessage: [],
+      timer: null
     }
   },
   destroyed () {
@@ -339,6 +367,10 @@ export default {
 
     if (this.updateTimer) {
       clearTimeout(this.updateTimer)
+    }
+
+    if (this.timer) {
+      clearInterval(this.timer)
     }
 
     window.removeEventListener('resize', this.getWindowHeight)
@@ -416,94 +448,23 @@ export default {
     const busFixed = simEventBusFixed
     const busTest = simEventBusTest
 
-    wsBus.$on('salt:data', d => {
-      // const avgSpeed = calcAvgSpeed(d.roads)
-      buffer.push(d)
+    wsBus.$on('salt:data', data => {
+      buffer.push(data)
     })
-    wsBus.$on('salt:status', async status => {
-      // this.progress1 = status.progress
-      // this.showWaitingMsg = false
-      // wsBus.progress = status.progress
-    })
-    wsBus.$on('salt:finished', async () => {
-      // this.progress1 = 100
-      // if (this.progress1 >= 100 && this.progress2 >= 100) {
-      //   this.status = 'finished'
-      //   this.makeToast('bus1-테스트가 완료 되었습니다.', 'info')
-      // }
-    })
+    wsBus.$on('salt:status', async () => {})
+    wsBus.$on('salt:finished', async () => {})
 
     busFixed.$on('salt:data', dataSim => {
-      // const avgSpeedSim = calcAvgSpeed(dataSim.roads).toFixed(2) * 1
-      // const avgSpeedSimJunction =
-      //   calcAveSpeedJunction(dataSim.roads).toFixed(2) * 1
-      // this.chart1.avgSpeedsInView.push(avgSpeedSim)
-      // this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
-      // this.chart2.avgSpeedJunction = avgSpeedSimJunction
-      // this.chart2.avgSpeedInView = avgSpeedSim
-
       buffer.push(dataSim)
     })
 
-    const calcAveSpeedJunction = roads => {
-      const speeds = []
-      roads.forEach(road => {
-        // extract linkId from cellId
-        const linkId = road.roadId.slice(0, road.roadId.indexOf('_'))
-        if (xx.includes(linkId)) {
-          speeds.push(road.speed)
-        }
-      })
-      // console.log(roadsFiltered) // 교차로의 평균속도
-      const roadSpeedSumTest = speeds.reduce((acc, cur) => (acc += cur), 0)
-      return roadSpeedSumTest / speeds.length
-    }
-    // 수행 속도가 느림
-    busTest.$on('salt:data', dataTest => {
-      const avgSpeedTest = calcAvgSpeed(dataTest.roads).toFixed(2) * 1
-      const avgSpeedTestJunction =
-        calcAveSpeedJunction(dataTest.roads).toFixed(2) * 1
-      this.chart2.avgSpeedsInView.push(avgSpeedTest) // 현재 화면의 전체 평균속도
-      this.chart2.avgSpeedsJunctions.push(avgSpeedTestJunction) //
-      this.chart1.avgSpeedJunction = avgSpeedTestJunction
-      this.chart1.avgSpeedInView = avgSpeedTest
+    // 최적화 시뮬레이션이 수행 속도가 느림
+    // 버퍼로부터 데이터 가져와 이벤트 발생
+    busTest.$on('salt:data', () => {
       const dataSim = buffer.splice(0, 1)[0]
       if (dataSim) {
         simEventBusFixed.$emit('salt:data', dataSim)
-        const avgSpeedSim = calcAvgSpeed(dataSim.roads).toFixed(2) * 1
-        const avgSpeedSimJunction =
-          calcAveSpeedJunction(dataSim.roads).toFixed(2) * 1
-
-        this.chart1.avgSpeedsInView.push(avgSpeedSim)
-        this.chart1.avgSpeedsJunctions.push(avgSpeedSimJunction) //
-        this.chart2.avgSpeedJunction = avgSpeedSimJunction
-        this.chart2.avgSpeedInView = avgSpeedSim
-        // this.speedChart1.setOption(drawChart2.makeOption(avgSpeedSim))
-
-        const chart1AvgSpeed = calcAvg(this.chart1.avgSpeedsInView)
-        const chart1AvgSpdJ = calcAvg(this.chart1.avgSpeedsJunctions)
-        const chart2AvgSpeed = calcAvg(this.chart2.avgSpeedsInView)
-        const chart2AvgSpdJ = calcAvg(this.chart2.avgSpeedsJunctions)
-
-        this.chart2.efficiency1 = this.calcEfficency(
-          chart1AvgSpeed,
-          chart2AvgSpeed
-        )
-        this.chart2.efficiency2 = this.calcEfficency(
-          chart1AvgSpdJ,
-          chart2AvgSpdJ
-        )
       }
-
-      this.chart.avgChartInView = makeLineData(
-        this.chart1.avgSpeedsInView,
-        this.chart2.avgSpeedsInView
-      )
-
-      this.chart.avgChartJunctions = makeLineData(
-        this.chart1.avgSpeedsJunctions,
-        this.chart2.avgSpeedsJunctions
-      )
     })
 
     busTest.$on('salt:status', async status => {
@@ -518,6 +479,10 @@ export default {
         this.chart1.progress = 100
         this.checkStatus()
       }
+      if (this.chart1.progress >= 99) {
+        this.chart2.progress = 100
+        this.chart1.progress = 100
+      }
     })
 
     busTest.$on('salt:finished', async () => {
@@ -525,7 +490,6 @@ export default {
       this.chart1.progress = 100
       if (this.chart1.progress >= 100 && this.chart1.progress >= 100) {
         this.status = 'finished'
-        this.makeToast('bus2 테스트가 완료 되었습니다.', 'info')
       }
     })
 
@@ -533,48 +497,72 @@ export default {
       this.makeToast(error.message, 'warning')
     })
 
-    busFixed.$on('ws:close', () => {
-      // this.makeToast('ws connection closed', 'warning')
-    })
+    busFixed.$on('ws:close', () => {})
 
-    this.$on('signalGroup:clicked', p => {
-      this.makeToast(p.groupId, 'info')
-    })
+    this.$on('signalGroup:clicked', () => {})
 
     this.$on('junction:clicked', async p => {
       const crossName = signalService.nodeIdToName(p.nodeId)
       this.selectedNode = crossName
 
+      const rl = this.chart2.speedsPerJunction[crossName]
+
+      if (!rl) {
+        return
+      }
+      this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
+      const ft = this.chart1.speedsPerJunction[crossName]
+      if (!ft) {
+        return
+      }
+      this.phaseRewardChartFt.setOption(
+        drawChart.makeOption(ft.slice(0, rl.length))
+      )
+    })
+
+    const updateReward = () => {
       optimizationService
         .getPhaseReward(this.simulation.id, 'rl')
         .then(res => res.data)
         .then(dataRl => {
           this.chart2.speedsPerJunction = dataRl
-          const rl = dataRl[crossName]
 
-          if (!rl) {
-            return
-          }
-          const rlAvgSpeed = calcAvg(rl.map(v => Number(v.avgSpeed)))
-
-          this.chart2.avgSpeed = rlAvgSpeed
-          this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
           optimizationService
             .getPhaseReward(this.simulation.id, 'ft')
             .then(res => res.data)
             .then(dataFt => {
               this.chart1.speedsPerJunction = dataFt
-              const ft = dataFt[crossName]
-              const ftAvgSpeed = calcAvg(ft.map(v => Number(v.avgSpeed)))
-              this.chart1.avgSpeed = ftAvgSpeed
-              if (ft) {
-                this.phaseRewardChartFt.setOption(
-                  drawChart.makeOption(ft.slice(0, rl.length))
-                )
-              }
+
+              const r1 = getAvgSpeeds(dataRl)
+              const r2 = getAvgSpeeds(dataFt)
+
+              const a = calcAvg(r1)
+              const b = calcAvg(r2)
+              this.chart2.efficiency2 = this.calcEfficency(b, a)
+              this.chart.avgChartInView = makeLineData(r2, r1)
+              console.log(r1.length, r2.length)
+              // this.chart1.avgSpeedJunction = r1[r1.length - 1].toFixed(2)
+              // this.chart2.avgSpeedJunction = r2[r2.length - 1].toFixed(2)
+              this.chart1.avgSpeedJunction = this.chart.avgChartInView.avg2
+              this.chart2.avgSpeedJunction = this.chart.avgChartInView.avg1
             })
         })
-    })
+        .catch(err => {
+          console.log(err.message)
+        })
+    }
+
+    this.timer = setInterval(() => {
+      if (this.chart1.progress >= 99) {
+        // || this.chart1.progress < 1)
+        setTimeout(() => {
+          updateReward()
+          // clearInterval(this.timer)
+        }, 3000)
+        return
+      }
+      updateReward()
+    }, 3000)
 
     window.addEventListener('resize', this.resize)
 

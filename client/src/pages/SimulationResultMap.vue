@@ -137,7 +137,7 @@
       </div>
     </div>
 
-    <div class="uniq-top-left2">
+    <!-- <div class="uniq-top-left2">
       <div class="bg-gray-700 rounded-xl p-2">
         <div v-for="link of chart.links" :key="link.linkId">
           <div class="flex items-center">
@@ -153,7 +153,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     <div v-if="currentEdge" class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
       <div v-if="currentEdge">
         <div class="rounded-xl text-white text-center">

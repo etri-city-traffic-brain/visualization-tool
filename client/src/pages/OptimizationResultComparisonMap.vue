@@ -19,18 +19,18 @@
         <div class="col-span-3">
           <div class="grid grid-cols-2">
             <div class="bg-gray-700">
-              <div class="grid grid-cols-3 gap-2 mt-1 text-white p-1">
+              <div class="grid grid-cols-2 gap-2 mt-1 text-white p-1">
                 <div class="text-center font-bold w-full flex flex-col justify-middle justify-center">
-                  <div class="tracking-wider text-lg bg-indigo-500 h-full items-center flex justify-center">기존신호</div>
+                  <div class="tracking-wider text-xl h-full items-center flex justify-center">기존신호</div>
                 </div>
-                <div class="text-center text-2xl font-bold p-2 bg-indigo-500">
+                <div class="text-center text-2xl font-bold p-2 bg-gray-500">
                   <div class="text-xs">평균속도</div>
-                  <div>{{chart1.avgSpeedJunction}}<span class="text-sm">km</span></div>
+                  <div>{{chart2.avgSpeedJunction}}<span class="text-sm">km</span></div>
                 </div>
-                <div class="text-center text-2xl font-bold border- p-2 bg-indigo-500">
+                <!-- <div class="text-center text-2xl font-bold border- p-2 bg-indigo-500">
                   <div class="text-xs">교차로 평균속도</div>
                   <div>{{chart1.avgSpeedInView}}<span class="text-sm">km</span></div>
-                </div>
+                </div> -->
               </div>
               <div class="border-2 border-gray-700" >
                 <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" />
@@ -42,25 +42,23 @@
               </div>
             </div>
             <div class="bg-yellow-300">
-              <div class="grid grid-cols-4 gap-2 mt-1 text-black p-1">
-                <div class="text-center text-black font-bold pt-1 w-full flex flex-col justify-middle justify-center">
-                  <div class="tracking-wider text-lg h-full items-center flex justify-center bg-yellow-500">최적신호</div>
+              <div class="grid grid-cols-3 gap-2 mt-1 text-black p-1">
+                <div class="text-center font-bold w-full flex flex-col justify-middle justify-center">
+                  <div class="tracking-wider text-xl h-full items-center flex justify-center">최적신호</div>
                 </div>
                 <div class="text-center text-2xl font-bold p-2 bg-yellow-500 ">
                   <div class="text-xs">평균속도</div>
                   <div>
-                    {{chart2.avgSpeedJunction}}<span class="text-sm">km</span>
+                    {{chart1.avgSpeedJunction}}<span class="text-sm">km</span>
                   <!-- {{chart2.efficiency1}}<span class="text-sm">% 향상</span> -->
                   </div>
                 </div>
-                <div class="text-center text-2xl font-bold border- p-2 bg-yellow-500">
+                <!-- <div class="text-center text-2xl font-bold border- p-2 bg-yellow-500">
                   <div class="text-xs">교차로 평균속도</div>
                   <div>
                     {{chart2.avgSpeedInView}}<span class="text-sm">km</span>
-
                   </div>
-
-                </div>
+                </div> -->
                 <div class="text-center text-2xl font-bold border- p-2 bg-yellow-500">
                   <div class="text-xs">향상률</div>
                   <div>
@@ -117,10 +115,10 @@
                 <div class="w-20 text-center bg-blue-500 px-1 rounded">대상교차로</div>
                 <div>{{ simulation.configuration.junctionId }}</div>
               </div>
-              <div class="space-y-1 items-center">
+              <!-- <div class="space-y-1 items-center">
                 <div class="w-20 text-center bg-blue-500 px-1 rounded">실행이미지</div>
                 <div class="">{{ simulation.configuration.dockerImage }} </div>
-              </div>
+              </div> -->
             </div>
           </div>
 
@@ -156,7 +154,7 @@
                 <div class="border-b col-span-3">{{ v[0] }} </div>
                 <div class="border-b">{{ Number(v[1][0]).toFixed(2) }} </div>
                 <div class="border-b">{{ Number(v[1][1]).toFixed(2)}}</div>
-                <div class="border-b">{{ (100 * (v[1][1] - v[1][0]) / ((v[1][1] + v[1][0]) / 2)).toFixed(2) }} <span class="text-xs">%</span></div>
+                <div class="border-b">{{ (100 * (Number(v[1][1]) - Number(v[1][0])) / ((Number(v[1][1]) + Number(v[1][0])) / 2)).toFixed(2) }} <span class="text-xs">%</span></div>
                 </div>
               </div>
             </div>
@@ -207,11 +205,11 @@
         <div class="bg-gray-800">
           <div class="text-center text-white p-2 mt-1 flex space-x-2">
             <div class="font-bold bg-blue-200 rounded-lg px-2 text-black"><b-icon icon="justify"></b-icon> {{ selectedNode }}</div>
-            <div class="font-bold bg-blue-200 rounded-lg px-2 text-black">{{ Number(improvementRate || 0).toFixed(2) }}% 향상</div>
+            <!-- <div class="font-bold bg-blue-200 rounded-lg px-2 text-black">{{ Number(improvementRate || 0).toFixed(2) }}% 향상</div> -->
           </div>
           <div class="flex justify-between pr-3 items-center text-sm text-white font-bold pl-2 py-1 bg-gray-700">
             <div><b-icon icon="justify"></b-icon> 기존신호</div>
-            <div class="bg-yellow-200 rounded px-2 text-black">평균속도: {{ Number(chart1.avgSpeed).toFixed(2) }} km</div>
+            <!-- <div class="bg-yellow-200 rounded px-2 text-black">평균속도: {{ Number(chart1.avgSpeed).toFixed(2) }} km</div> -->
           </div>
           <div class="border-2 border-gray-700">
             <div style="height:160px;width:100%;" ref="phase-reward-ft"></div>
@@ -221,7 +219,7 @@
               <div class="flex">
                 <div><b-icon icon="justify"></b-icon> 최적신호</div>
               </div>
-              <div class="bg-yellow-200 rounded px-2">평균속도: {{ Number(chart2.avgSpeed).toFixed(2) }} km </div>
+              <!-- <div class="bg-yellow-200 rounded px-2">평균속도: {{ Number(chart2.avgSpeed).toFixed(2) }} km </div> -->
             </div>
             <div class="border-2 border-yellow-400">
               <div style="height:160px;width:100%" ref="phase-reward-rl"></div>
@@ -239,16 +237,16 @@
               <line-chart
                 :chartData="chart.avgChartInView"
                 :options="lineChartOption({})"
-                :height="100"
+                :height="160"
               />
 
             </div>
           </div>
 
-            <div class="mt-1">
+          <!-- <div class="mt-1">
             <div class="text-center text-white bg-blue-800">
               평균속도(교차로)
-              <!-- <b-icon icon="three-dots" animation="cylon" font-scale="1"></b-icon> -->
+
             </div>
             <div class="bg-gray-700 border-2 border-blue-800 p-2">
               <line-chart
@@ -257,7 +255,7 @@
                 :height="100"
               />
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
