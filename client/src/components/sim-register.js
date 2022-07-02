@@ -38,8 +38,8 @@ const intervalOptions = [
 
 const regionOptions = [
   { text: '유성구', value: 'yuseonggu' },
-  { text: '서구', value: 'seogu' }
-  // { text: '도안', value: 'doan' }
+  { text: '서구', value: 'seogu' },
+  { text: '도안', value: 'doan' }
 ]
 
 export default {

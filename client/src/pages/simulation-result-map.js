@@ -37,7 +37,7 @@ import bins from '@/stats/histogram'
 import userState from '@/user-state'
 import region from '@/map2/region'
 import config from '@/stats/config'
-
+import map from '@/region-code'
 const pieDefault = () => ({
   datasets: [
     {
@@ -120,7 +120,10 @@ function makeLinkCompChart (data) {
   // console.log(data)
   const ll = data.map(d => d.data.length)
   const maxValue = Math.max(...ll)
+  const minValue = Math.min(...ll)
+
   const maxIdx = data.findIndex(d => d.data.length === maxValue)
+
   // console.log('maxIdx:', maxIdx)
   const dataset = (label, color, data) => ({
     label,
@@ -133,10 +136,10 @@ function makeLinkCompChart (data) {
   })
   const labels = new Array(data[maxIdx].data.length).fill(0).map((_, i) => i)
   const datasets = data.map(d => {
-    return dataset(d.label, d.color, d.data)
+    return dataset(d.label, d.color, d.data.slice(0, minValue))
   })
   return {
-    labels,
+    labels: labels.slice(0, minValue),
     datasets
   }
 }
@@ -360,7 +363,7 @@ export default {
     this.$on('salt:status', async status => {
       this.addLog(`status: ${status.status}, progress: ${status.progress}`)
       this.progress = status.progress
-      if (status.progress > 95) {
+      if (status.progress >= 99) {
         // FINISHED
         this.showWaitingMsg = true
       }
@@ -546,6 +549,15 @@ export default {
       this.wsClient.init()
     },
 
+    getRegionName (r) {
+      // const map = {
+      //   yuseonggu: '유성구',
+      //   seogu: '서구',
+      //   doan: '도안'
+      // }
+      return map[r] || r
+    },
+
     removeLinkChart (linkId) {
       const idx = this.chart.links.findIndex(obj => obj.linkId === linkId)
       if (idx >= 0) {
@@ -553,50 +565,74 @@ export default {
       }
     },
     async updateLinkChart (linkId, vdsId) {
-      const linkData = await simulationService.getValueByLinkOrCell(
-        this.simulationId,
-        linkId
-      )
-      console.log(linkData)
-      // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
-      // this.chart.linkSpeeds = makeLinkSpeedChartData(linkData.values, [10, 20, 30, 10, 20, 30])
-      const vdsSpeedData = { label: 'vds', color: 'skyblue', data: [] }
+      try {
+        const linkData = await simulationService.getValueByLinkOrCell(
+          this.simulationId,
+          linkId
+        )
+        // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
+        // this.chart.linkSpeeds = makeLinkSpeedChartData(linkData.values, [10, 20, 30, 10, 20, 30])
+        // const vdsSpeedData = { label: 'vds', color: 'skyblue', data: [] }
+        let vdsD = [[]]
+        if (vdsId) {
+          const res = await axios({
+            url: '/salt/v1/vds/volume/' + vdsId,
+            method: 'get'
+          })
+          // console.log(vdsId, '--', res.data)
+          vdsD = res.data
+          // vdsSpeedData.data = vdsD.map(v => v[1])
+          this.chart.linkSpeeds = makeLinkCompChart([
+            { label: 'simulation', color: '#FF8C00', data: linkData.values },
+            { label: 'vds', color: 'skyblue', data: vdsD.map(v => v[1]) }
+          ])
+        } else {
+          this.chart.linkSpeeds = makeLinkCompChart([
+            { label: 'simulation', color: '#FF8C00', data: linkData.values },
+            {
+              label: 'vds',
+              color: 'skyblue',
+              data: new Array(linkData.values.length).fill(0)
+            }
+          ])
+        }
+        console.log(linkData.values)
+        const e = this.chart.links.findIndex(v => v.linkId === linkId)
+        if (e < 0) {
+          this.chart.links.push({
+            linkId,
+            speeds: makeLineChart(linkData.values, 'simulation', 'skyblue')
+          })
+        }
 
-      if (vdsId) {
-        const res = await axios({
-          url: '/salt/v1/vds/speed/' + vdsId,
-          method: 'get'
-        })
-        const vdsD = res.data
-        vdsSpeedData.data = vdsD.map(v => v[1])
+        // const vdsVolumeData = { label: 'vds', color: '#8FBC8F', data: [] }
+        let vdsD2 = [[]]
+        if (vdsId) {
+          const res = await axios({
+            url: '/salt/v1/vds/speed/' + vdsId,
+            method: 'get'
+          })
+          vdsD2 = res.data
+          // vdsVolumeData.data = vdsD.map(v => v[1])
+          // console.log('--', res.data)
+          this.chart.linkVehPassed = makeLinkCompChart([
+            { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed },
+            { label: 'vds', color: '#8FBC8F', data: vdsD2.map(v => v[1]) }
+          ])
+        } else {
+          this.chart.linkVehPassed = makeLinkCompChart([
+            { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed },
+            {
+              label: 'vds',
+              color: '#8FBC8F',
+              data: new Array(linkData.vehPassed.length).fill(0)
+            }
+          ])
+          // data: new Array(linkData.vehPassed.length).fill(0)
+        }
+      } catch (err) {
+        console.log(err.message)
       }
-      this.chart.linkSpeeds = makeLinkCompChart([
-        { label: 'simulation', color: '#FF8C00', data: linkData.values },
-        vdsSpeedData
-      ])
-
-      const e = this.chart.links.findIndex(v => v.linkId === linkId)
-      if (e < 0) {
-        this.chart.links.push({
-          linkId,
-          speeds: makeLineChart(linkData.values, 'simulation', 'skyblue')
-        })
-      }
-
-      const vdsVolumeData = { label: 'vds', color: '#8FBC8F', data: [] }
-      if (vdsId) {
-        const res = await axios({
-          url: '/salt/v1/vds/volume/' + vdsId,
-          method: 'get'
-        })
-        const vdsD = res.data
-        vdsVolumeData.data = vdsD.map(v => v[1])
-      }
-
-      this.chart.linkVehPassed = makeLinkCompChart([
-        { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed },
-        vdsVolumeData
-      ])
 
       // this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
       // this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')

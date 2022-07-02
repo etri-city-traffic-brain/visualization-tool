@@ -33,7 +33,7 @@ export default {
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
-        { class: 'text-center', key: 'configuration.region', label: '지역' },
+        { class: 'text-center', key: 'region', label: '지역' },
         {
           class: 'text-center',
           key: 'configuration.period',

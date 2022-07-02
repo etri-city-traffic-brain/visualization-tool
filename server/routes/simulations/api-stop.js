@@ -38,7 +38,7 @@ async function stop (req, res) {
   const {
     params: { id }
   } = req
-  console.log('stop')
+  console.log('stop simulation')
   // const simulation = getSimulation(id);
   // const masterVmInfo = await cloudService.getVmInfo(simulation.user);
   // debug('stop', masterVmInfo.host, simulation.masterPort);

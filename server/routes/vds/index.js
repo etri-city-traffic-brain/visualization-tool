@@ -1,12 +1,9 @@
-
 const router = require('express').Router()
 const createError = require('http-errors')
 
 const fs = require('fs')
 const path = require('path')
-const {
-  config
-} = require('../../globals')
+const { config } = require('../../globals')
 
 const vdsFile = config.base + '/vds/vds2link.csv'
 

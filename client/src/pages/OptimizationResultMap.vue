@@ -221,14 +221,14 @@
     right: 5px;
   }
 
-  .uniq-top-right {
+  /* .uniq-top-right {
     position: fixed;
     z-index:100;
     top: 60px;
     padding: 0;
     right: 15px;
     border: 0px solid #73AD21;
-  }
+  } */
 
   .loading-container {
     position: fixed;

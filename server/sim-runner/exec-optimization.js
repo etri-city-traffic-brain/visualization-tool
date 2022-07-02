@@ -65,7 +65,7 @@ async function run (simulation, mode, modelNum) {
      --target-TL "${targetTL}" \
      --model-save-period ${modelSavePeriod} \
      --result-comp False \
-     --reward-func ${rewardFunc} \
+
      --action ${action}`
 
   if (mode === 'train') {

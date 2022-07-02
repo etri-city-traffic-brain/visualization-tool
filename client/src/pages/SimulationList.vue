@@ -106,6 +106,12 @@
         </div>
       </template>
 
+      <template v-slot:cell(region)="row" >
+
+          <b>{{ getRegionName(row.item.configuration.region) }}</b>
+
+      </template>
+
       <template v-slot:cell(duration)="row">
         <div>{{ row.item.configuration.fromTime + ' ~ ' + row.item.configuration.toTime}} </div>
       </template>
@@ -119,7 +125,7 @@
       </template>
 
       <template v-slot:cell(configuration.period)="row">
-        <div v-if="row.item.configuration.period >= 600" class="text-center font-bold p-1">
+        <div v-if="row.item.configuration.period >= 300" class="text-center font-bold p-1">
           {{ row.item.configuration.period / 60 }} 분
         </div>
         <div v-else class="text-center font-bold p-1">

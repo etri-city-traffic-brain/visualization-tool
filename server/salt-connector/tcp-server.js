@@ -30,9 +30,11 @@ module.exports = (port = 1337) => {
       const handler = saltMsgHandler.get(header.type)
       if (handler) {
         const bodyLength = header.length + HEADER_LENGTH
-        if (buffer.length >= bodyLength + HEADER_LENGTH) {
+        if (buffer.length >= bodyLength) {
           handler(socket, buffer.slice(HEADER_LENGTH, bodyLength)) // body part
           bufferManager.setBuffer(socket, buffer.slice(bodyLength)) // remains
+        } else {
+          bufferManager.setBuffer(socket, buffer) // remains
         }
       } else {
         console.log('no handler')
@@ -62,7 +64,9 @@ module.exports = (port = 1337) => {
     }, 500)
   }
 
-  const handleClose = socket => () => {}
+  const handleClose = socket => buffer => {
+    console.log('socket closed')
+  }
 
   const handleError = socket => () => {
     debug(green(`[socket-error] ${socket.remoteAddress}`))
