@@ -17,9 +17,6 @@ import simulationService from '@/service/simulation-service'
 
 import SimulationResult from '@/pages/SimulationResult.vue'
 
-// import HistogramChart from '@/components/charts/HistogramChart'
-// import Doughnut from '@/components/charts/Doughnut'
-
 import congestionColor from '@/utils/colors'
 import LineChart from '@/components/charts/LineChart'
 import UniqCongestionColorBar from '@/components/CongestionColorBar'
@@ -30,7 +27,7 @@ import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 
 import UniqCardTitle from '@/components/func/UniqCardTitle'
-import { optimizationService } from '@/service'
+import { optimizationService as optSvc } from '@/service'
 
 import signalService from '@/service/signal-service'
 
@@ -43,104 +40,6 @@ import TrafficLightManager from '@/map2/map-traffic-lights'
 
 import drawChart from '@/optsig/chart-reward-phase'
 
-const sa1 = {
-  cluster_563100866_563103911_563103912: [
-    '-563100999',
-    '563100999',
-    '-563100969',
-    '563104779',
-    '-563104778',
-    '563104777'
-  ],
-  cluster_563103599_563103904_563103905_563103906: [
-    '-563104764',
-    '563104764',
-    '563104841',
-    '563113235',
-    '-563104347',
-    '563104347',
-    '563104767',
-    '563104779'
-  ],
-  cluster_563103430_563103601_563103853_563103854_563103855_563103884_563103885_563103893_563103946_563103947_563107941_563107942: [
-    '-563109423',
-    '-563104726',
-    '-563105638',
-    '-563111309',
-    '563104785',
-    '563104839',
-    '563104841',
-    '563109425'
-  ],
-  cluster_563103437_563103890_563103913_563103914: [
-    '563104785',
-    '563104839',
-    '563104782',
-    '563104676',
-    '-563104734',
-    '563104734',
-    '-563104366',
-    '563104366'
-  ],
-  cluster_563103641_563103889_563103894_563103895: [
-    '-563104834',
-    '563104834',
-    '563104782',
-    '563104746',
-    '-563104674',
-    '563104674',
-    '563104678',
-    '563104750'
-  ],
-  cluster_563103888_563103891: [
-    '-563104735',
-    '563104731',
-    '563104736',
-    '563104746'
-  ],
-  cluster_563102154_563103845_563109514_563109515: [
-    '-563102351',
-    '563102351',
-    '-563104654',
-    '563104654',
-    '563114217',
-    '-563104663',
-    '563104666',
-    '-563114214'
-  ],
-  cluster_563100016_563103847_563109512_563109513: [
-    '-563103481',
-    '-563104660',
-    '-563113678',
-    '-563114212',
-    '563100021',
-    '563103481',
-    '563113678',
-    '563114211'
-  ],
-  cluster_563103433_563103849_563103871_563103872_563103873_563103874_563103875_563104618: [
-    '-563104706',
-    '563104700',
-    '-563104154',
-    '563104154',
-    '-563104704',
-    '-563111247',
-    '563104704',
-    '563105674'
-  ],
-  cluster_563109510_563109511: [
-    '-563114206',
-    '-563114208',
-    '563114207',
-    '563114209'
-  ]
-}
-
-const xx = Object.values(sa1).reduce((acc, cur) => {
-  acc.push(cur[0])
-  return acc
-}, [])
-
 const calcAvg = (values = []) => {
   const sum = values.reduce((acc, cur) => {
     acc += cur || 0
@@ -149,17 +48,16 @@ const calcAvg = (values = []) => {
   return (sum / values.length).toFixed(2)
 }
 
-function getAvgSpeeds (data) {
+function calcAvgs (data, property) {
   const values = Object.values(data)
   const avg = new Array(values[0].length).fill(0)
   const len = values[0].length
   for (let i = 0; i < values.length; i++) {
     for (let j = 0; j < len; j++) {
-      avg[j] += Number(values[i][j].avgSpeed)
+      avg[j] += Number(values[i][j][property])
     }
   }
-  const rr = avg.map(a => a / values.length)
-  return rr
+  return avg.map(a => a / values.length)
 }
 
 const dataset = (label, color, data) => ({
@@ -199,39 +97,35 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
   }
 }
 
-const makeLineData = (data1 = [], data2 = []) => {
-  let avgD1 = data1.reduce((acc, cur) => (acc += ~~cur), 0) / data1.length
-  let avgD2 = data2.reduce((acc, cur) => (acc += ~~cur), 0) / data2.length
+const makeSpeedLineData = (dataFt = [], dataRl = []) => {
+  let avgFt = dataFt.reduce((acc, cur) => (acc += ~~cur), 0) / dataFt.length
+  let avgRl = dataRl.reduce((acc, cur) => (acc += ~~cur), 0) / dataRl.length
 
-  avgD1 = avgD1.toFixed(2)
-  avgD2 = avgD2.toFixed(2)
+  avgFt = avgFt.toFixed(2)
+  avgRl = avgRl.toFixed(2)
 
   return {
-    labels: new Array(data2.length).fill(0).map((_, i) => i),
+    labels: new Array(dataRl.length).fill(0).map((_, i) => i),
     datasets: [
       dataset(
         '기존신호',
         'grey',
-        data1.map(v => v.toFixed(2))
+        dataFt.map(v => v.toFixed(2))
       ),
       dataset(
         '최적신호',
         'orange',
-        data2.map(v => v.toFixed(2))
+        dataRl.map(v => v.toFixed(2))
       ),
-      dataset('기존신호(평균)', 'green', new Array(data2.length).fill(avgD1)),
-      dataset('최적신호(평균)', 'skyblue', new Array(data2.length).fill(avgD2))
+      dataset('기존신호(평균)', 'blue', new Array(dataRl.length).fill(avgFt)),
+      dataset('최적신호(평균)', 'skyblue', new Array(dataRl.length).fill(avgRl))
     ],
-    avg1: avgD1,
-    avg2: avgD2
+    avgFt: avgFt,
+    avgRl: avgRl
   }
 }
 
 const randomId = () => `map-${Math.floor(Math.random() * 100)}`
-
-const calcAvgSpeed = roads =>
-  roads.map(road => road.speed).reduce((acc, cur) => (acc += cur), 0) /
-  roads.length
 
 const initSimulationData = async (
   mapId,
@@ -307,6 +201,7 @@ export default {
         avgSpeedsJunctions: [],
         avgSpeedInView: 0,
         avgSpeedJunction: 0,
+        travelTimeJunction: 0,
         avgSpeed: 0,
         progress: 0,
         speedsPerJunction: {}
@@ -316,14 +211,15 @@ export default {
         avgSpeedsJunctions: [],
         avgSpeedInView: 0,
         avgSpeedJunction: 0,
+        travelTimeJunction: 0,
         avgSpeed: 0,
         progress: 0,
         speedsPerJunction: {},
         efficiency1: 0,
-        efficiency2: 0
+        effSpeed: 0
       },
       chart: {
-        avgChartInView: {}, // realtime chart
+        avgSpeedChartInView: {}, // realtime chart
         avgChartJunctions: {},
         junctionSpeeds: {}
       },
@@ -354,7 +250,8 @@ export default {
       showWaitingMsg: false,
       avgSpeedJunction: 0,
       statusMessage: [],
-      timer: null
+      timer: null,
+      statusText: ''
     }
   },
   destroyed () {
@@ -363,14 +260,8 @@ export default {
       wsClient.close()
     })
 
-    this.stepPlayer && this.stepPlayer.stop()
-
-    if (this.updateTimer) {
-      clearTimeout(this.updateTimer)
-    }
-
     if (this.timer) {
-      clearInterval(this.timer)
+      clearTimeout(this.timer)
     }
 
     window.removeEventListener('resize', this.getWindowHeight)
@@ -390,16 +281,29 @@ export default {
     },
     speedsPerJunction () {
       const keys = Object.keys(this.chart2.speedsPerJunction)
-      const r = {}
+      const result = {}
       for (let i = 0; i < keys.length; i++) {
-        const key = keys[i]
-        const values = this.chart1.speedsPerJunction[key] || []
-        const values2 = this.chart2.speedsPerJunction[key] || []
-        const spd1 = calcAvg(values.map(v => Number(v.avgSpeed)))
-        const spd2 = calcAvg(values2.map(v => Number(v.avgSpeed)))
-        r[key] = [spd1, spd2]
+        const jId = keys[i]
+        const v1 = this.chart1.speedsPerJunction[jId] || []
+        const v2 = this.chart2.speedsPerJunction[jId] || []
+        const spd1 = calcAvg(v1.map(v => Number(v.avgSpeed)))
+        const spd2 = calcAvg(v2.map(v => Number(v.avgSpeed)))
+        result[jId] = [spd1, spd2]
       }
-      return r
+      return result
+    },
+    travelTimePerJunction () {
+      const keys = Object.keys(this.chart2.speedsPerJunction)
+      const result = {}
+      for (let i = 0; i < keys.length; i++) {
+        const jId = keys[i]
+        const v1 = this.chart1.speedsPerJunction[jId] || []
+        const v2 = this.chart2.speedsPerJunction[jId] || []
+        const spd1 = calcAvg(v1.map(v => Number(v.avgTravelTime)))
+        const spd2 = calcAvg(v2.map(v => Number(v.avgTravelTime)))
+        result[jId] = [spd1, spd2]
+      }
+      return result
     }
   },
   async mounted () {
@@ -520,53 +424,67 @@ export default {
       )
     })
 
-    const updateReward = () => {
-      optimizationService
-        .getPhaseReward(this.simulation.id, 'rl')
-        .then(res => res.data)
-        .then(dataRl => {
-          this.chart2.speedsPerJunction = dataRl
+    const updateReward = async forceUpdate => {
+      const start = new Date().getTime()
+      const progress = this.chart1.progress
+      if ((progress > 0 && progress < 100) || forceUpdate) {
+        log('loading start')
+        this.statusText = 'updating...'
+        const dataRl = await optSvc
+          .getPhaseReward(this.simulation.id, 'rl')
+          .then(res => res.data)
+        const dataFt = await optSvc
+          .getPhaseReward(this.simulation.id, 'ft')
+          .then(res => res.data)
 
-          optimizationService
-            .getPhaseReward(this.simulation.id, 'ft')
-            .then(res => res.data)
-            .then(dataFt => {
-              this.chart1.speedsPerJunction = dataFt
+        this.chart1.speedsPerJunction = dataFt // simulate
+        this.chart2.speedsPerJunction = dataRl // optimization
 
-              const r1 = getAvgSpeeds(dataRl)
-              const r2 = getAvgSpeeds(dataFt)
+        const speedsRl = calcAvgs(dataRl, 'avgSpeed')
+        const speedsFt = calcAvgs(dataFt, 'avgSpeed')
 
-              const a = calcAvg(r1)
-              const b = calcAvg(r2)
-              this.chart2.efficiency2 = this.calcEfficency(b, a)
-              this.chart.avgChartInView = makeLineData(r2, r1)
-              console.log(r1.length, r2.length)
-              // this.chart1.avgSpeedJunction = r1[r1.length - 1].toFixed(2)
-              // this.chart2.avgSpeedJunction = r2[r2.length - 1].toFixed(2)
-              this.chart1.avgSpeedJunction = this.chart.avgChartInView.avg2
-              this.chart2.avgSpeedJunction = this.chart.avgChartInView.avg1
-            })
-        })
-        .catch(err => {
-          console.log(err.message)
-        })
+        const ttsRl = calcAvgs(dataRl, 'avgTravelTime')
+        const ttsFt = calcAvgs(dataFt, 'avgTravelTime')
+
+        const avgSpeedRl = calcAvg(speedsRl)
+        const avgSpeedFt = calcAvg(speedsFt)
+
+        const ttRl = calcAvg(ttsRl)
+        const ttFt = calcAvg(ttsFt)
+
+        this.chart2.effSpeed = this.calcEfficency(avgSpeedFt, avgSpeedRl)
+        this.chart2.effTravelTime = this.calcEfficency(ttRl, ttFt)
+        log(ttFt, ttRl, this.calcEfficency(ttRl, ttFt))
+        this.chart.avgSpeedChartInView = makeSpeedLineData(speedsFt, speedsRl)
+        this.chart.travelTimeChartInView = makeSpeedLineData(ttsFt, ttsRl)
+
+        // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
+        // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
+        this.chart1.avgSpeedJunction = avgSpeedFt
+        this.chart2.avgSpeedJunction = avgSpeedRl
+
+        // this.chart1.travelTimeJunction = this.chart.travelTimeChartInView.avgFt
+        // this.chart2.travelTimeJunction = this.chart.travelTimeChartInView.avgRl
+        this.chart1.travelTimeJunction = ttFt
+        this.chart2.travelTimeJunction = ttRl
+
+        log(
+          'loading end elapsed:',
+          (new Date().getTime() - start) / 1000 + 'sec'
+        )
+        this.statusText = 'updated...'
+      }
+
+      this.timer = setTimeout(async () => {
+        await updateReward()
+      }, 4000)
     }
 
-    this.timer = setInterval(() => {
-      if (this.chart1.progress >= 99) {
-        // || this.chart1.progress < 1)
-        setTimeout(() => {
-          updateReward()
-          // clearInterval(this.timer)
-        }, 3000)
-        return
-      }
-      updateReward()
-    }, 3000)
+    updateReward(true)
 
     window.addEventListener('resize', this.resize)
 
-    const result = await optimizationService.getRewardTotal(this.simulation.id)
+    const result = await optSvc.getRewardTotal(this.simulation.id)
 
     const results = Object.values(result.data)
 
@@ -635,7 +553,7 @@ export default {
 
       try {
         await simulationService.stopSimulation(this.simulation.id)
-        await optimizationService.runTest(
+        await optSvc.runTest(
           this.simulation.id,
           this.testSlave,
           this.selectedEpoch
@@ -655,7 +573,7 @@ export default {
     async stopTest () {
       this.status = 'stopping'
       this.addMessage('stop ' + this.simulation.id)
-      await optimizationService
+      await optSvc
         .stop(this.simulation.id, 'slave')
         .then(r => r.data)
         .then(data => {

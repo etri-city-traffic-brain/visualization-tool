@@ -111,7 +111,8 @@ export default {
       junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
-      dockerImage: 'images4uniq/optimizer:v1.1a.20220531',
+      // dockerImage: 'images4uniq/optimizer:v1.1a.20220531',
+      dockerImage: 'images4uniq/optimizer:v1.1a.20220629.d',
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],

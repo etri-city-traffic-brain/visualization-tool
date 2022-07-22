@@ -157,11 +157,11 @@ function makeOption (data) {
       },
       {
         name: 'phase',
-        type: 'custom',
-        // type: 'bar',
+        // type: 'custom',
+        type: 'line',
         clip: 'true',
-        renderItem: renderItem,
-        // data: ppp,
+        // renderItem: renderItem,
+        data: ppp,
         itemStyle: {
           opacity: (0.8).toExponential,
           normal: {
@@ -171,8 +171,8 @@ function makeOption (data) {
         encode: {
           x: [1, 2],
           y: 0
-        },
-        data: dPhase
+        }
+        // data: dPhase
       }
     ],
     dataZoom: [
