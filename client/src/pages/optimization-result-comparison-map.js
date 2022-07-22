@@ -243,8 +243,8 @@ export default {
       selectedEpoch: 0,
       showEpoch: false,
       trafficLightManager: null,
-      phaseRewardChartFt: null,
-      phaseRewardChartRl: null,
+      // phaseRewardChartFt: null,
+      // phaseRewardChartRl: null,
       selectedNode: '목원대네거리',
       // selectedNode: '미래부동산삼거리',
       showWaitingMsg: false,
@@ -409,19 +409,19 @@ export default {
       const crossName = signalService.nodeIdToName(p.nodeId)
       this.selectedNode = crossName
 
-      const rl = this.chart2.speedsPerJunction[crossName]
+      // const rl = this.chart2.speedsPerJunction[crossName]
 
-      if (!rl) {
-        return
-      }
-      this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
-      const ft = this.chart1.speedsPerJunction[crossName]
-      if (!ft) {
-        return
-      }
-      this.phaseRewardChartFt.setOption(
-        drawChart.makeOption(ft.slice(0, rl.length))
-      )
+      // if (!rl) {
+      //   return
+      // }
+      // this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
+      // const ft = this.chart1.speedsPerJunction[crossName]
+      // if (!ft) {
+      //   return
+      // }
+      // this.phaseRewardChartFt.setOption(
+      //   drawChart.makeOption(ft.slice(0, rl.length))
+      // )
     })
 
     const updateReward = async forceUpdate => {
@@ -495,39 +495,39 @@ export default {
 
     this.rewards = makeRewardChart('total', label, reward, avg)
 
-    this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
-    this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
+    // this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
+    // this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
 
     // this.speedChart1 = drawChart2(this.$refs['chart-avg-speed-junction'], 20)
     // a chart on zoom -> dispatch an action
-    this.phaseRewardChartFt.on('datazoom', params => {
-      const { start, end, batch } = params
+    // this.phaseRewardChartFt.on('datazoom', params => {
+    //   const { start, end, batch } = params
 
-      if (batch) {
-        this.phaseRewardChartRl.dispatchAction({
-          type: 'dataZoom',
-          start: start,
-          end: end,
-          batch: [
-            {
-              startValue: batch[0].startValue,
-              endValue: batch[0].endValue,
-              start: batch[0].start,
-              end: batch[0].end
-            }
-          ]
-        })
-      } else {
-        this.phaseRewardChartRl.dispatchAction({
-          type: 'dataZoom',
-          start: start,
-          end: end
-        })
-      }
-      // // zoom the others!
-    })
+    //   if (batch) {
+    //     this.phaseRewardChartRl.dispatchAction({
+    //       type: 'dataZoom',
+    //       start: start,
+    //       end: end,
+    //       batch: [
+    //         {
+    //           startValue: batch[0].startValue,
+    //           endValue: batch[0].endValue,
+    //           start: batch[0].start,
+    //           end: batch[0].end
+    //         }
+    //       ]
+    //     })
+    //   } else {
+    //     this.phaseRewardChartRl.dispatchAction({
+    //       type: 'dataZoom',
+    //       start: start,
+    //       end: end
+    //     })
+    //   }
 
-    this.phaseRewardChartRl.on('datazoom', function (params) {})
+    // })
+
+    // this.phaseRewardChartRl.on('datazoom', function (params) {})
   },
   methods: {
     showModal () {
@@ -540,12 +540,12 @@ export default {
     },
     resize () {
       this.mapHeight = window.innerHeight - 50 // update map height to current height
-      if (this.phaseRewardChartFt) {
-        this.phaseRewardChartFt.resize()
-      }
-      if (this.phaseRewardChartRl) {
-        this.phaseRewardChartRl.resize()
-      }
+      // if (this.phaseRewardChartFt) {
+      //   this.phaseRewardChartFt.resize()
+      // }
+      // if (this.phaseRewardChartRl) {
+      //   this.phaseRewardChartRl.resize()
+      // }
     },
     async runTest () {
       this.showWaitingMsg = true

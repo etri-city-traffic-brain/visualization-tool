@@ -223,13 +223,14 @@
             </b-tab>
           </b-tabs>
         </div>
-        <div class="bg-red-100 w-full">
-          askdjfskadljfskal;djfl;kjaskdl;fj
+        <div class="bg-red-100 w-full items-center text-center">
+          {{ selectedNode }}
         </div>
       </div>
     </div>
 
-    <div class="flex my-1 p-1">
+    <!-- BOTTOM STATUS TEXT -->
+    <div class="flex my-1 p-1 justify-end bg-gray-700">
       <div class="flex space-x-1 items-center text-sm">
         <div class="text-center text-white">
           {{ statusText }}
