@@ -73,8 +73,8 @@
         <div class="col-span-3">
           <div class="grid grid-cols-2">
             <div class="bg-gray-700 rounded-xl">
-              <div class="text-white text-center">기존신호</div>
-              <div class="grid grid-cols-2 gap-1 m-1">
+              <div class="grid grid-cols-3 gap-1 m-1 items-center">
+                <div class="text-white text-center">기존신호</div>
                 <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-300 flex items-center justify-center space-x-2">
                   <div class="text-xs">평균속도</div>
                   <div>
@@ -103,8 +103,8 @@
               </div>
             </div>
             <div class="bg-yellow-400 rounded-xl">
-              <div class="text-black text-center">최적신호</div>
-              <div class="grid grid-cols-2 gap-1 text-black m-1">
+              <div class="grid grid-cols-3 gap-1 text-black m-1 items-center">
+                <div class="text-black text-center">최적신호</div>
                 <div class="text-center text-2xl font-bold p-2 bg-yellow-200  flex items-center justify-center space-x-2">
                   <div class="text-xs">평균속도</div>
                   <div class="flex justify-center space-x-2">
@@ -148,13 +148,13 @@
           </div>
 
           <div class="mt-1 mb-1 p-1 bg-gray-700 space-y-1">
-            <div class="p-1 bg-gray-800 overflow-auto text-sm" style="height:585px">
+            <div class="p-1 bg-gray-800 overflow-auto text-sm" style="height:555px">
               <div v-for="(s, i) of statusMessage" :key="i" class="bg-gray-800 text-xs text-white">
                 {{ s }}
               </div>
 
-              <b-tabs content-class="mt-3" align="center">
-                <b-tab title="평균통과시간">
+              <b-tabs content-class="mt-3">
+                <b-tab title="평균통과시간" title-item-class="font-bold bg-gray-500 ">
                   <div class="text-white grid grid-cols-6 gap-1 text-center mb-2">
                     <div class="py-1 bg-blue-400 col-span-3">교차로 </div>
                     <div class="py-1 bg-blue-400">기존 </div>
@@ -169,7 +169,7 @@
                     <div class="border-b" v-else>0 </div>
                   </div>
                 </b-tab>
-                <b-tab title="평균속도">
+                <b-tab title="평균속도" title-item-class="font-bold bg-gray-500 ">
                   <div class="mt-1">
                     <div class="text-white grid grid-cols-6 gap-1 text-center">
                       <div class="py-1 bg-blue-400 col-span-3">교차로 </div>
@@ -208,62 +208,32 @@
           </div> -->
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-1">
-        <div class="bg-gray-800">
-          <div class="text-center text-white p-2 mt-1 flex space-x-2">
-            <div class="font-bold bg-blue-200 rounded-lg px-2 text-black"><b-icon icon="justify"></b-icon> {{ selectedNode }}</div>
-            <!-- <div class="font-bold bg-blue-200 rounded-lg px-2 text-black">{{ Number(improvementRate || 0).toFixed(2) }}% 향상</div> -->
-          </div>
-          <div class="flex justify-between pr-3 items-center text-sm text-white font-bold pl-2 py-1 bg-gray-700">
-            <div><b-icon icon="justify"></b-icon> 기존신호</div>
-            <!-- <div class="bg-yellow-200 rounded px-2 text-black">평균속도: {{ Number(chart1.avgSpeed).toFixed(2) }} km</div> -->
-          </div>
-          <div class="border-2 border-gray-700">
-            <div style="height:160px;width:100%;" ref="phase-reward-ft"></div>
-          </div>
-          <div class="mt-1">
-            <div class="pr-3 flex justify-between items-center text-sm text-black font-bold pl-2 py-1 bg-yellow-400">
-              <div class="flex">
-                <div><b-icon icon="justify"></b-icon> 최적신호</div>
+      <div class="grid grid-cols-4 gap-1 ml-1">
+        <div class="col-span-3">
+          <b-tabs content-class="" active-nav-item-class="" end>
+            <b-tab title="평균통과시간" title-item-class="font-bold bg-gray-500 " small>
+              <div class="text-white bg-gray-800 p-1 text-sm font-bold">
+                <line-chart :chartData="chart.travelTimeChartInView" :options="lineChartOption({})" :height="100" />
               </div>
-              <!-- <div class="bg-yellow-200 rounded px-2">평균속도: {{ Number(chart2.avgSpeed).toFixed(2) }} km </div> -->
-            </div>
-            <div class="border-2 border-yellow-400">
-              <div style="height:160px;width:100%" ref="phase-reward-rl"></div>
-            </div>
-          </div>
+            </b-tab>
+            <b-tab title="평균속도" title-item-class="font-bold bg-gray-500">
+              <div class="text-white bg-gray-800 p-1 text-sm font-bold mt-1">
+                <line-chart :chartData="chart.avgSpeedChartInView" :options="lineChartOption({})" :height="100" />
+              </div>
+            </b-tab>
+          </b-tabs>
         </div>
-
-        <div>
-          <div class="">
-            <div class="bg-gray-700 border-2 border-gray-800">
-              <div class="text-center text-white bg-gray-800 p-1 text-sm font-bold">
-              Average Travel Time
-              <line-chart
-                :chartData="chart.travelTimeChartInView"
-                :options="lineChartOption({})"
-                :height="100"
-              />
-              </div>
-              <div class="text-center text-white bg-gray-800 p-1 text-sm font-bold mt-1">
-              Average Speed
-              <line-chart
-                :chartData="chart.avgSpeedChartInView"
-                :options="lineChartOption({})"
-                :height="100"
-              />
-              </div>
-            </div>
-          </div>
+        <div class="bg-red-100 w-full">
+          askdjfskadljfskal;djfl;kjaskdl;fj
         </div>
       </div>
     </div>
 
-    <div class="flex">
-      <div class="text-center text-white">
-        {{ statusText }}
-      </div>
-      <div class="flex space-x-1 items-center">
+    <div class="flex my-1 p-1">
+      <div class="flex space-x-1 items-center text-sm">
+        <div class="text-center text-white">
+          {{ statusText }}
+        </div>
         <div v-if="status === 'running'" class="text-center px-3 uppercase w-full">
           <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -280,48 +250,44 @@
     </div>
 
     <b-modal title="신호 최적화 정보" ref="optenvmodal">
-                <div class="text-white text-sm p-2 bg-gray-700 min-w-max">
-            <div class="border-blue-600 space-y-1">
-              <div class="flex space-x-1">
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">아이디</div> <div>{{ simulation.id }} </div>
-              </div>
-              <div class="flex space-x-1">
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">지역</div>
-                <div class="w-12"> {{ config.region }}</div>
-
-
-              </div>
-              <div class="flex space-x-1">
-                <!-- <div class="w-24 text-center bg-blue-500 px-1 rounded ">모델 저장주기</div> <div>{{ config.modelSavePeriod }}</div> -->
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">보상함수</div> <div>{{ config.rewardFunc }}</div>
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">통계주기</div> <div>{{ config.period / 60 }}<span>분</span></div>
-              </div>
-              <div class="flex space-x-1">
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">Method</div>
-                <div class="w-12">{{ config.method }}</div>
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">Action</div>
-                <div>{{ config.action }}</div>
-
-              </div>
-              <div class="flex space-x-1">
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">시간</div>
-                <div>{{ config.fromTime }} ~ {{ config.toTime }}</div>
-              </div>
-              <div class="flex space-x-1">
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">대상교차로</div>
-                <div>{{ simulation.configuration.junctionId }}</div>
-              </div>
-              <!-- <div class="space-y-1 items-center">
-                <div class="w-20 text-center bg-blue-500 px-1 rounded">실행이미지</div>
-                <div class="">{{ simulation.configuration.dockerImage }} </div>
-              </div> -->
-            </div>
+      <div class="text-white text-sm p-2 bg-gray-700 min-w-max">
+        <div class="border-blue-600 space-y-1">
+          <div class="flex space-x-1">
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">아이디</div> <div>{{ simulation.id }} </div>
           </div>
+          <div class="flex space-x-1">
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">지역</div>
+            <div class="w-12"> {{ config.region }}</div>
+
+
+          </div>
+          <div class="flex space-x-1">
+            <!-- <div class="w-24 text-center bg-blue-500 px-1 rounded ">모델 저장주기</div> <div>{{ config.modelSavePeriod }}</div> -->
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">보상함수</div> <div>{{ config.rewardFunc }}</div>
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">통계주기</div> <div>{{ config.period / 60 }}<span>분</span></div>
+          </div>
+          <div class="flex space-x-1">
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">Method</div>
+            <div class="w-12">{{ config.method }}</div>
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">Action</div>
+            <div>{{ config.action }}</div>
+
+          </div>
+          <div class="flex space-x-1">
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">시간</div>
+            <div>{{ config.fromTime }} ~ {{ config.toTime }}</div>
+          </div>
+          <div class="flex space-x-1">
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">대상교차로</div>
+            <div>{{ simulation.configuration.junctionId }}</div>
+          </div>
+          <!-- <div class="space-y-1 items-center">
+            <div class="w-20 text-center bg-blue-500 px-1 rounded">실행이미지</div>
+            <div class="">{{ simulation.configuration.dockerImage }} </div>
+          </div> -->
+        </div>
+      </div>
     </b-modal>
-
-    <!-- <div class="text-center text-gray-200 p-2 text-sm">
-
-    </div> -->
   </div>
 </template>
 
