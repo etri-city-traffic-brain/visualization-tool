@@ -158,8 +158,8 @@ const makeLinkSpeedChartData = (data1, data2, data3) => {
   return {
     labels: new Array(data1.length).fill(0).map((_, i) => i),
     datasets: [
-      dataset('링크속도', '#7FFFD4', data1),
-      dataset('평균속도', '#1E90FF', data2)
+      dataset('링크속도', '#7FFFD4', data1)
+      // dataset('평균속도', '#1E90FF', data2)
       // dataset('제한속도', '#FF0000', data3),
     ]
   }
@@ -191,12 +191,12 @@ export default {
       map: null,
       mapId: `map-${Math.floor(Math.random() * 100)}`,
       // mapHeight: 1024, // map view height
-      mapHeight: 800, // map view height
+      mapHeight: 600, // map view height
       mapManager: null,
       speedsPerStep: {},
       sidebar: false,
       sidebarRse: false,
-      currentStep: 1,
+      currentStep: 0,
       slideMax: 0,
       showLoading: false,
       congestionColor,
@@ -282,7 +282,7 @@ export default {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
 
-    this.resize()
+    // this.resize()
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
 
     await this.updateSimulation()
@@ -466,7 +466,7 @@ export default {
       this.mapManager.toggleFocusTool()
     },
     toggleState () {
-      return this.playBtnToggle ? 'M' : 'A'
+      return this.playBtnToggle ? '중지' : '시작'
     },
     async updateSimulation () {
       const { simulation, ticks } = await simulationService.getSimulationInfo(
@@ -511,15 +511,26 @@ export default {
     resize () {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
       // this.mapHeight = window.innerHeight - 160 // update map height to current height
-      this.mapHeight = window.innerHeight - 250 // update map height to current height
+      // this.mapHeight = window.innerHeight - 250 // update map height to current height
     },
     togglePlay () {
+      // console.log(this.currentStep, this.slid)
+      // console.log(this.currentStep, this.slideMax)
+      if (this.currentStep >= this.slideMax) {
+        this.currentStep = 0
+      }
       this.playBtnToggle = !this.playBtnToggle
       ;(this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(
         this
       )()
     },
     async stepChanged (step) {
+      setTimeout(() => {
+        if (step >= this.slideMax) {
+          this.currentStep = 0
+        }
+      }, 2000)
+
       if (this.simulation.status === 'finished') {
         this.mapManager.changeStep(step)
         this.chart.pieDataStep = await statisticsService.getPieChart(

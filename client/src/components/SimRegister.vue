@@ -8,8 +8,8 @@
         </div>
       <!-- </div> -->
       <div class="flex space-x-2 text-white">
-        <div class="w-28 text-right">설명:</div>
-        <input id="description" v-model="description" class="border rounded px-1 text-black">
+        <div class="flex-none w-28 text-right">설명:</div>
+        <input id="description" v-model="description" class="border rounded px-1 text-black w-full">
       </div>
       <div class="flex space-x-2 text-white items-center">
         <div class="text-sm w-28 text-right">시작날짜</div>

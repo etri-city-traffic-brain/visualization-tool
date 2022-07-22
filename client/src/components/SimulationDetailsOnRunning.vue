@@ -4,7 +4,7 @@
     <!-- <b-card-group> -->
 
       <!-- <uniq-card-title title="평균속도" class="info-card"/> -->
-      <div class="bg-gray-700 p-1 space-y-1"
+      <!-- <div class="bg-gray-700 p-1 space-y-1"
       >
         <div class="text-center text-white">평균속도</div>
         <b-progress height="2rem" max="70" class="w-100" style="border-radius:0">
@@ -12,10 +12,10 @@
             <span> {{ (avgSpeed).toFixed(2) }} km </span>
           </b-progress-bar>
           </b-progress>
-      </div>
+      </div> -->
 
-      <uniq-card-title title="혼잡도 분포" class="info-card"/>
-      <b-card
+      <!-- <uniq-card-title title="혼잡도 분포" class="info-card"/> -->
+      <!-- <b-card
         text-variant="light"
         bg-variant="dark"
         border-variant="dark"
@@ -23,7 +23,7 @@
         class="p-2 info-card"
       >
         <doughnut :chartData="avgSpeedView" :height="110" />
-      </b-card>
+      </b-card> -->
 
       <uniq-card-title title="시뮬레이션 진행상태" class="info-card"/>
       <b-card

@@ -24,16 +24,16 @@ const periodOptions = [
 ]
 
 const intervalOptions = [
-  { text: '10 Step', value: 10 },
-  { text: '20 Step', value: 20 },
-  { text: '30 Step', value: 30 },
-  { text: '40 Step', value: 40 },
-  { text: '50 Step', value: 50 },
-  { text: '60 Step', value: 60 },
-  { text: '70 Step', value: 70 },
-  { text: '80 Step', value: 80 },
-  { text: '90 Step', value: 90 },
-  { text: '100 Step', value: 100 }
+  { text: '10 초', value: 10 },
+  { text: '20 초', value: 20 },
+  { text: '30 초', value: 30 },
+  { text: '40 초', value: 40 },
+  { text: '50 초', value: 50 },
+  { text: '60 초', value: 60 },
+  { text: '70 초', value: 70 },
+  { text: '80 초', value: 80 },
+  { text: '90 초', value: 90 },
+  { text: '100 초', value: 100 }
 ]
 
 const regionOptions = [

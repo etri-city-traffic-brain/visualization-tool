@@ -117,7 +117,7 @@ export default {
       const hides = [
         'Intro',
         'OptimizationResultMap',
-        // 'SimulationResultMap',
+        'SimulationResultMap',
         'OptimizationResultComparisonMap'
       ]
       return !hides.includes(this.currentRouteName)

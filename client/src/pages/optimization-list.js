@@ -37,14 +37,14 @@ export default {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
-        { class: 'text-center', key: 'id', label: 'ID' },
+        { class: 'text-center', key: 'id', label: '시뮬레이션아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
         { class: 'text-center', key: 'actions', label: '교차로수' },
-        { class: 'text-center', key: 'configuration.epoch', label: 'Epoch' },
-        { class: 'text-center', key: 'configuration.method', label: 'Method' },
-        { class: 'text-center', key: 'configuration.action', label: 'Action' },
+        { class: 'text-center', key: 'configuration.epoch', label: '에포크' },
+        { class: 'text-center', key: 'configuration.method', label: '모델' },
+        { class: 'text-center', key: 'configuration.action', label: '액션' },
         {
           class: 'text-center',
           key: 'configuration.rewardFunc',

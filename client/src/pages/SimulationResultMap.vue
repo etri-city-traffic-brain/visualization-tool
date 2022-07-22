@@ -15,8 +15,18 @@
     <!-- -------------- -->
     <div class="bg-gray-700 p-1">
       <div class="my-1">
-        <div class="flex justify-between items-center px-2">
+        <div class="flex justify-between items-center p-2 border-b">
           <div class="text-white font-bold">시뮬레이션: {{ simulationId }}</div>
+          <div class="text-center flex items-center space-x-1">
+            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click.stop="startSimulation()" > 시작<b-icon icon="caret-right-fill"/> </button>
+            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click="stop" > 중지<b-icon icon="stop-fill"/> </button>
+          </div>
+        </div>
+        <div class="p-2 text-white border-b flex justify-between items-center">
+          <div>
+            지역: {{ getRegionName(config.region) }} 시간: {{ config.fromTime }} ~ {{ config.toTime }}
+          </div>
+
           <div class="flex justify-end space-x-1">
             <uniq-map-changer :map="map"/>
             <b-btn @click="centerTo(1)" class="" size="sm" variant="secondary">
@@ -29,37 +39,98 @@
               RSE
             </b-btn>
           </div>
+
+          <div>
+            <button><b-icon icon="gear-fill"></b-icon></button>
+          </div>
         </div>
       </div>
     </div>
+
+    <div
+      :ref="mapId"
+      :id="mapId"
+      :style="{height: mapHeight + 'px'}"
+      class="p-1"
+    />
+
+    <div class="bg-gray-600 p-1 pb-3" v-if="simulation.status === 'finished'">
+      <div class="py-2 bg-gray-700 rounded-xl mb-2 p-2">
+        <b-form-input
+          v-if="simulation.status === 'finished'"
+          variant="dark"
+          type="range"
+          min="0"
+          :max="slideMax"
+          :value="currentStep"
+          @change="onChange"
+          @input="onInput"
+
+        />
+
+        <div
+          class="flex justify-center space-x-1"
+          v-bind:style="playerStyle"
+          no-body v-if="simulation.status === 'finished'"
+        >
+          <b-btn size="sm" variant="primary" @click="togglePlay" >
+            <b-icon v-if="toggleState() === '시작'" icon="play-fill"></b-icon>
+            <b-icon v-else icon="stop-fill"></b-icon>
+            {{toggleState()}}
+          </b-btn>
+          <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="arrow-left"/></b-btn>
+          <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="arrow-right"/></b-btn>
+          <span class="text-white">step: {{ currentStep }}</span>
+        </div>
+
+      </div>
+
+        <!-- <div class="flex justify-between text-white text-sm">
+          <span v-for="(s, i) of new Array(slideMax)" :key="i">{{ i }}</span>
+        </div> -->
+
+        <!-- <div class="my-2 px-2 flex justify-between space-x-1"> -->
+          <!-- <div class="text-center flex items-center space-x-1">
+            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click.stop="startSimulation()" > 시작<b-icon icon="caret-right-fill"/> </button>
+            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click="stop" > 중지<b-icon icon="stop-fill"/> </button>
+          </div> -->
+          <!-- <div class="text-center flex items-center space-x-1"  v-if="simulation.status === 'finished'">
+            <div class="bg-green-100 rounded px-2 py-1">히스토리 재생</div>
+            <button class="bg-green-300 rounded px-2 py-1 font-bold hover:bg-green-500" @click.stop="startReplay" > 시작<b-icon icon="caret-right-fill"/> </button>
+            <button class="bg-green-300 rounded px-2 py-1 font-bold hover:bg-green-500" @click="stopReplay" > 중지<b-icon icon="stop-fill"/> </button>
+          </div> -->
+
+      <div class="p-1 py-2 bg-gray-700 rounded-xl ">
+        <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption()" :height="50"/>
+      </div>
+    </div>
+
+    <SimulationDetailsOnRunning
+      v-if="simulation.status == 'running'"
+      :simulation="simulation"
+      :progress="progress"
+      :wsStatus="wsStatus"
+      :focusData="focusData"
+      :simulationId="simulationId"
+      :avgSpeed="avgSpeed"
+      :avgSpeedView="avgSpeedView"
+      :avgSpeedFocus="avgSpeedFocus"
+      @connect-web-socket="connectWebSocket"
+      @toggle-focus-tool="toggleFocusTool"
+      :logs="logs"
+    >
+    </SimulationDetailsOnRunning>
+
     <div class="flex bg-gray-600">
       <div class="flex-0 w-80">
-        <div class="p-2 space-y-1 bg-gray-700 my-1 mx-1">
-          <div class="text-white min-w-max space-y-2">
-            <div class="">시뮬레이션 정보</div>
-            <div class="border-blue-600 space-y-2">
-              <div class="flex space-x-1 items-center">
-                <div class="bg-blue-500 px-1 rounded">지역</div><div class="bg-gray-500 px-1 rounded"> {{ getRegionName(config.region) }}</div>
-                <div class="bg-blue-500 px-1 rounded">통계주기</div> <div class="bg-gray-500 px-1 rounded">{{ config.period / 60 }}분</div>
-              </div>
-              <div class="flex space-x-1">
-                <div class="bg-blue-500 px-1 rounded">시작</div><div class="bg-gray-500 px-1 rounded"> {{ config.fromTime }}</div>
-                <div class="bg-blue-500 px-1 rounded">종료</div> <div class="bg-gray-500 px-1 rounded">{{ config.toTime }}</div>
-              </div>
-              <div class="flex space-x-1">
-                <div class="bg-blue-500 px-1 rounded">스텝</div>
-                <div class="bg-gray-500 px-1 rounded"> {{ Math.ceil((config.end - config.begin) / config.period) }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="p-2 space-y-1 bg-gray-700 my-1 mx-1">
+
+        <!-- <div class="p-2 space-y-1 bg-gray-700 my-1 mx-1">
           <div class="text-center flex items-center space-x-1">
             <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click.stop="startSimulation()" > 시작<b-icon icon="caret-right-fill"/> </button>
             <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click="stop" > 중지<b-icon icon="stop-fill"/> </button>
           </div>
-        </div>
-        <SimulationDetailsOnFinished
+        </div> -->
+        <!-- <SimulationDetailsOnFinished
           v-if="simulation.status === 'finished'"
           :simulation="simulation"
           :simulationId="simulationId"
@@ -69,9 +140,9 @@
           :edgeSpeed="edgeSpeed"
 
         >
-        </SimulationDetailsOnFinished>
-        <SimulationDetailsOnRunning
-          v-if="simulation.status == 'running'"
+        </SimulationDetailsOnFinished> -->
+        <!-- <SimulationDetailsOnRunning
+          v-if="simulation.status != 'running'"
           :simulation="simulation"
           :progress="progress"
           :wsStatus="wsStatus"
@@ -84,57 +155,9 @@
           @toggle-focus-tool="toggleFocusTool"
           :logs="logs"
         >
-        </SimulationDetailsOnRunning>
+        </SimulationDetailsOnRunning> -->
       </div>
-      <div class="bg-gray-700 flex-grow">
-        <div
-          :ref="mapId"
-          :id="mapId"
-          :style="{height: mapHeight + 'px'}"
-          class="p-1"
-        />
-        <div>
-          <b-form-input
-            v-if="simulation.status === 'finished'"
-            variant="dark"
-            type="range"
-            min="0"
-            :max="slideMax"
-            :value="currentStep"
-            @change="onChange"
-            @input="onInput"
-          />
-        </div>
 
-        <div class="my-2 px-2 flex justify-between space-x-1">
-          <!-- <div class="text-center flex items-center space-x-1">
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click.stop="startSimulation()" > 시작<b-icon icon="caret-right-fill"/> </button>
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click="stop" > 중지<b-icon icon="stop-fill"/> </button>
-          </div> -->
-          <div class="text-center flex items-center space-x-1"  v-if="simulation.status === 'finished'">
-            <div class="bg-green-100 rounded px-2 py-1">히스토리 재생</div>
-            <button class="bg-green-300 rounded px-2 py-1 font-bold hover:bg-green-500" @click.stop="startReplay" > 시작<b-icon icon="caret-right-fill"/> </button>
-            <button class="bg-green-300 rounded px-2 py-1 font-bold hover:bg-green-500" @click="stopReplay" > 중지<b-icon icon="stop-fill"/> </button>
-          </div>
-          <div
-          class="bg-gray-700"
-          v-bind:style="playerStyle"
-          no-body v-if="simulation.status === 'finished'"
-        >
-          <div class="space-x-1">
-            <div>
-            <b-btn size="sm" variant="secondary" @click="togglePlay" > {{ toggleState() }} </b-btn>
-            <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="caret-left-fill"/></b-btn>
-            <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="caret-right-fill"/></b-btn>
-            <b-btn size="sm" variant="">현재스텝: {{ currentStep }} </b-btn>
-            </div>
-            <!-- <b-input-group size="sm"> -->
-
-            <!-- </b-input-group> -->
-          </div>
-        </div>
-        </div>
-      </div>
     </div>
 
     <!-- <div class="uniq-top-left2">
@@ -223,7 +246,29 @@
           @click="goToRse(entry[0])">{{ entry[0] }}</b-badge>
       </div>
     </b-sidebar>
+    <b-modal title="시뮬레이션 정보" ref="simmodal">
+      <div class="p-2 space-y-1 bg-gray-700 my-1 mx-1">
+          <div class="text-white min-w-max space-y-2">
+            <div class="">시뮬레이션 정보</div>
+            <div class="border-blue-600 space-y-2">
+              <div class="flex space-x-1 items-center">
+                <div class="bg-blue-500 px-1 rounded">지역</div><div class="bg-gray-500 px-1 rounded"> {{ getRegionName(config.region) }}</div>
+                <div class="bg-blue-500 px-1 rounded">통계주기</div> <div class="bg-gray-500 px-1 rounded">{{ config.period / 60 }}분</div>
+              </div>
+              <div class="flex space-x-1">
+                <div class="bg-blue-500 px-1 rounded">시작</div><div class="bg-gray-500 px-1 rounded"> {{ config.fromTime }}</div>
+                <div class="bg-blue-500 px-1 rounded">종료</div> <div class="bg-gray-500 px-1 rounded">{{ config.toTime }}</div>
+              </div>
+              <div class="flex space-x-1">
+                <div class="bg-blue-500 px-1 rounded">스텝</div>
+                <div class="bg-gray-500 px-1 rounded"> {{ Math.ceil((config.end - config.begin) / config.period) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </b-modal>
   </div>
+
 </template>
 
 <script src="./simulation-result-map.js"> </script>
