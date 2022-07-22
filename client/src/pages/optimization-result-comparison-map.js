@@ -530,6 +530,9 @@ export default {
     this.phaseRewardChartRl.on('datazoom', function (params) {})
   },
   methods: {
+    showModal () {
+      this.$refs.optenvmodal.show()
+    },
     calcEfficency (v1, v2) {
       v1 = Number(v1)
       v2 = Number(v2)
