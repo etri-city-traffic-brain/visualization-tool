@@ -37,7 +37,7 @@ export default {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
-        { class: 'text-center', key: 'id', label: '시뮬레이션아이디' },
+        { class: 'text-center', key: 'id', label: '시뮬레이션 아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
@@ -62,6 +62,35 @@ export default {
       currentPage: 1,
       perPage: 10,
       totalRows: 0,
+      envFields: [
+        { class: 'text-center', key: 'envName', label: '최적화환경 아이디' },
+        { class: 'text-center', key: 'configuration.period', label: '주기' },
+        {
+          class: 'text-center',
+          key: 'duration',
+          label: '대상시간'
+        },
+        { class: 'text-center', key: 'junctions', label: '교차로수' },
+        { class: 'text-center', key: 'epoch', label: '에포크' },
+        { class: 'text-center', key: 'configuration.method', label: '모델' },
+        { class: 'text-center', key: 'configuration.action', label: '액션' },
+        {
+          class: 'text-center',
+          key: 'configuration.rewardFunc',
+          label: '보상함수'
+        },
+        {
+          class: 'text-center',
+          key: 'configuration.modelSavePeriod',
+          label: '모델저장주기'
+        },
+        { class: 'text-center', key: 'func', label: '기능' }
+      ],
+      envItems: [],
+      envCurrentPage: 0,
+      envPerPage: 10,
+      envTotalRows: 0,
+
       isBusy: false,
       msg: '',
       variant: 'info',
@@ -77,6 +106,7 @@ export default {
     }
   },
   mounted () {
+    console.log('mounted')
     this.dataProvider({ currentPage: this.currentPage })
     this.reload().then(r => {})
   },
@@ -142,6 +172,12 @@ export default {
         log(err)
       }
     },
+
+    async reload () {
+      this.envs = await optEnvService.get()
+      this.envItems = this.envs
+      this.envTotalRows = this.envs.length
+    },
     async dataProvider ({ currentPage }) {
       this.isBusy = true
       try {
@@ -151,6 +187,7 @@ export default {
             currentPage
           )
         ).data
+
         this.totalRows = total
         this.isBusy = false
         this.perPage = perPage
@@ -201,9 +238,6 @@ export default {
       })
     },
 
-    async reload () {
-      this.envs = await optEnvService.get()
-    },
     async saveOptEnvConfig (config) {
       const obj = this.envs.find(env => env.envName === config.envName)
       if (obj) {
