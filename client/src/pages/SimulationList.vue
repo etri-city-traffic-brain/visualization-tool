@@ -1,7 +1,8 @@
 <template>
 <div class="container- p-3 bg-gray-600">
   <div class="bg-gray-500- border-2 border-gray-500 mt-2 rounded-xl py-2 px-2 min-w-max">
-    <div class="text-white font-bold bg-gray-700 w-40 text-center px-2 py-1 rounded"> 🚙 교통 시뮬레이션 </div>
+    <!-- <div class="text-white font-bold bg-gray-700 w-40 text-center px-2 py-1 rounded"> 🚙 교통 시뮬레이션 </div> -->
+    <div class="text-white text-lg text-center font-bold bg-gray-700- w-32 py-1 rounded">교통시뮬레이션</div>
     <div class="p-1 flex justify-end space-x-1" >
       <button
         v-b-modal.create-simulation-modal

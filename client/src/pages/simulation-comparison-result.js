@@ -21,6 +21,53 @@ const color = d3.schemeCategory10 // d3 has built-in Colors
 const mapId1 = `map-${Math.floor(Math.random() * 100)}`
 const mapId2 = `map-${Math.floor(Math.random() * 100)}`
 
+const defaultOption = () => ({
+  responsive: true,
+  title: {
+    display: false,
+    text: 'Line Chart'
+  },
+  tooltips: {
+    mode: 'index',
+    intersect: false
+  },
+  hover: {
+    mode: 'nearest',
+    intersect: true
+  },
+  scales: {
+    xAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 50,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
+      }
+    ],
+    yAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 10,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
+      }
+    ]
+  },
+  legend: {
+    display: true,
+    labels: {
+      fontColor: 'white',
+      fontSize: 12
+    }
+  }
+})
+
 export default {
   name: 'SimulationComparisonResult',
   components: {
@@ -32,6 +79,7 @@ export default {
   data () {
     return {
       // mapId,
+      defaultOption,
       mapId1,
       mapId2,
       map1: null,

@@ -1,20 +1,17 @@
+import moment from 'moment'
+
 import OptimizationCreationPanel from '@/components/OptimizationCreation'
 import UniqRegister from '@/components/UniqRegister'
 import BarChart from '@/components/charts/BarChart'
 
 import { simulationService } from '@/service'
-
+import { HTTP } from '@/http-common'
 import userState from '@/user-state'
 
 import dragDropMixin from './drag-drop-mixin'
 import fileMgmtMixin from './file-mgmt-mixin'
 
-import moment from 'moment'
-
-// import userState from '@/user-state'
-// import UniqRegister from '@/components/UniqRegister'
 import optEnvService from '@/service/optenv-service'
-// import simulationService from '@/service/simulation-service'
 
 const variant = {
   finished: 'primary',
@@ -55,8 +52,7 @@ export default {
           key: 'configuration.modelSavePeriod',
           label: '모델저장주기'
         },
-        { class: 'text-center', key: 'details', label: '기능' },
-        { class: 'text-center', key: 'stop', label: '기능 ' }
+        { class: 'text-center', key: 'details', label: '기능' }
       ],
       items: [],
       currentPage: 1,
@@ -102,17 +98,38 @@ export default {
       expanded: false,
 
       envs: [],
-      currentEnv: null
+      currentEnv: null,
+      resultFile: null // upload file for model files (.zip)
     }
   },
   mounted () {
-    console.log('mounted')
     this.dataProvider({ currentPage: this.currentPage })
     this.reload().then(r => {})
   },
   computed: {},
   destroyed () {},
   methods: {
+    uploadModel (obj) {
+      const formData = new window.FormData()
+      formData.append('file', this.resultFile)
+      this.$swal.showLoading('업로딩')
+      HTTP.post(`/salt/v1/optimization/upload/model?id=${obj.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+        .then(res => console.log(res))
+        .catch(err => {
+          this.$swal({
+            type: 'error',
+            title: err.message,
+            text: err.response
+          })
+        })
+        .finally(() => {
+          setTimeout(() => this.$swal.close(), 1000)
+        })
+    },
     numberOfJunctions (jId) {
       const SA = {
         'SA 101': 10,

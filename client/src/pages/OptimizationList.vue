@@ -1,7 +1,7 @@
 <template>
   <div class="min-w-max p-2 bg-gray-600">
     <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2">
-      <div class="text-white text-lg text-center font-bold bg-gray-700- w-32 py-1 rounded">최적화 환경</div>
+      <div class="text-white text-lg text-center font-bold bg-gray-700- w-40 py-1 rounded">신호최적화 환경</div>
 
       <div class="grid grid-cols-5 flex-wrap gap-2 max-w-full" v-if="false">
         <div class="bg-gray-700 grid rounded-xl">
@@ -73,10 +73,7 @@
                 @click="registerSimulation(env)">실험생성</button>
             </div>
           </div>
-
         </div>
-
-
       </div>
 
       <div class="max-h-96 overflow-y-auto">
@@ -85,20 +82,11 @@
           <button class="bg-gray-700 rounded p-1 px-2 text-sm text-center font-bold text-white hover:bg-gray-800" @click.stop="reload" v-b-tooltip.hover title="테이블을 업데이트합니다." > <b-icon icon="arrow-clockwise"/> 새로고침 </button>
         </div>
 
-        <b-table
-          hover
-          small
-          striped
-          responsive
-          ref="envs-table"
-          table-variant="dark"
-          head-variant="dark"
-          foot-variant="dark"
+        <b-table hover small striped responsive ref="envs-table" table-variant="dark" head-variant="dark" foot-variant="dark" class="mt-1"
           :items="envItems"
           :fields="envFields"
           :current-page="envCurrentPage"
           :per-page="envPerPage"
-          class="mt-1"
         >
           <template v-slot:cell(envName)="row">
             {{ row.item.envName }}
@@ -130,38 +118,30 @@
       </div>
     </div>
     <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2 mt-2 min-w-max" >
-      <div class="text-white font-bold bg-gray-700- w-32 text-center py-1 rounded text-lg">최적화 실험</div>
+      <div class="text-white font-bold bg-gray-700- w-40 text-center py-1 rounded text-lg">신호최적화 실험</div>
       <div fluid class="mt-0 p-1">
         <div class="flex justify-end">
-          <b-btn
+          <!-- <b-btn
             variant="dark"
             size="sm"
             @click.stop="updateTable"
             v-b-tooltip.hover title="테이블을 업데이트합니다."
           >
             <b-icon icon="arrow-clockwise"/> 새로고침
-          </b-btn>
+          </b-btn> -->
+          <button class="bg-gray-700 rounded p-1 px-2 text-sm text-center font-bold text-white hover:bg-gray-800" @click.stop="updateTable" v-b-tooltip.hover title="테이블을 업데이트합니다." > <b-icon icon="arrow-clockwise"/> 새로고침 </button>
         </div>
-        <b-table
-          hover
-          small
-          striped
-          responsive
-          ref="simulations-table"
-          table-variant="dark"
-          head-variant="dark"
-          foot-variant="dark"
+
+        <b-table hover small striped responsive ref="simulations-table" table-variant="dark" head-variant="dark" foot-variant="dark" class="mt-1"
           :items="items"
           :fields="fields"
           :current-page="currentPage"
           :per-page="perPage"
-          class="mt-1"
         >
           <template v-slot:cell(num)="row">
-            <b-btn
-              variant="dark"
-              size="sm"
-              @click="row.toggleDetails(); toggleDetails(row.item.id, row.item.status, row.detailsShowing);">
+            <b-btn variant="dark" size="sm"
+              @click="row.toggleDetails(); toggleDetails(row.item.id, row.item.status, row.detailsShowing);"
+            >
               <b-icon icon="arrow-up" v-if="row.detailsShowing"></b-icon>
               <b-icon icon="arrow-down" v-else></b-icon>
             </b-btn>
@@ -198,7 +178,6 @@
             {{ row.item.configuration.toTime.slice(0, 5) }}
           </template>
 
-
           <template v-slot:cell(epoch)="row">
             <span>{{row.item.epoch || 0}}</span>
           </template>
@@ -219,30 +198,6 @@
             {{ row.item.configuration.toTime.substring(0, 5) }}
           </template>
 
-          <template v-slot:cell(stop)="row">
-            <b-btn
-              size="sm"
-              variant="secondary"
-              v-b-tooltip.hover
-
-              @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
-              v-if="row.item.status === 'running'">
-                <b-icon icon="stop-fill"/> 중지
-            </b-btn>
-            <!-- <b-btn
-              size="sm"
-              variant="danger"
-              class="mr-1"
-              @click.stop="removeSimulation(row.item)">
-                <b-icon icon="trash-fill" aria-hidden="true"/>
-            </b-btn> -->
-
-            <button class="bg-gray-600 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300" @click="removeSimulation(row.item)">X</button>
-
-          </template>
-          <template v-slot:cell(analisys)="row">
-
-          </template>
           <template v-slot:cell(details)="row">
             <b-button
               size="sm"
@@ -256,24 +211,32 @@
             </b-button>
             <b-button
               size="sm"
-              variant="info"
+              variant="warning"
               :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
             >
               <!-- <b-icon icon="circle-square"></b-icon> -->
               🚥 신호적용
             </b-button>
 
-
-          </template>
-
-          <template v-slot:cell(del)="row">
-
+            <b-btn size="sm" variant="secondary" v-b-tooltip.hover
+              @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
+              v-if="row.item.status === 'running'"
+            >
+              <b-icon icon="stop-fill"/> 중지
+            </b-btn>
+            <b-btn size="sm" @click="removeSimulation(row.item)">X</b-btn>
+            <!-- <b-btn
+              size="sm"
+              variant="danger"
+              class="mr-1"
+              @click.stop="removeSimulation(row.item)">
+                <b-icon icon="trash-fill" aria-hidden="true"/>
+            </b-btn> -->
           </template>
 
           <template v-slot:row-details="row">
-            <div class="grid bg-gray-500 rounded-xl text-black p-4">
-              <div class="">
-                <div class="font-bold bg-gray-700 text-white p-2 rounded w-40 text-center">신호 최적화 정보</div>
+            <div class="grid grid-cols-2 gap-1">
+              <div class="bg-gray-500 rounded-xl text-black p-4">
                 <ul class="list-disc space-y-1 ml-3 p-2 text-white">
                   <li class="">
                     환경: {{ row.item.envName }}
@@ -290,10 +253,14 @@
                   <li class="">
                     도커이미지: {{ row.item.configuration.dockerImage }}
                   </li>
-                  <li class="">
-                    등록일: {{ row.item.configuration.created }}
-                  </li>
                 </ul>
+              </div>
+              <div class="bg-gray-500 rounded-xl p-4 space-y-1" size="sm">
+                <b-form-file accept=".zip" v-model="resultFile" placeholder="모델파일(.zip)을 선택하세요.">
+                </b-form-file>
+                <b-btn variant="primary" @click.prevent="uploadModel(row.item)">
+                  업로드
+                </b-btn>
               </div>
             </div>
           </template>
@@ -314,17 +281,11 @@
         />
       </div>
     </div>
-    <b-modal title="신호 최적화 환경"
-      id="create-simulation-modal" ref="modal" size="lg" header-border-variant="dark"
-      header-bg-variant="dark" header-text-variant="light" body-bg-variant="dark" body-text-variant="ligth"
-      body-border-variant="dark" header-class="pt-2 pb-0 no-border-round" body-class="p-2" hide-footer
-      style="border-radius:0" @hide="modalHide">
-      <uniq-register @hide="hideCreateSimulationDialog" @optenvconfig:save="saveOptEnvConfig" :userId="userState.userId"
-        modalName="create-simulation-modal" role="optimization" :intersectionField="true" :epochField="true"
-        :env="currentEnv">
-      </uniq-register>
+
+    <b-modal title="신호 최적화 환경" id="create-simulation-modal" ref="modal" size="lg" header-border-variant="dark" header-bg-variant="dark" header-text-variant="light" body-bg-variant="dark" body-text-variant="ligth" body-border-variant="dark" header-class="pt-2 pb-0 no-border-round" body-class="p-2" hide-footer style="border-radius:0" @hide="modalHide" >
+      <uniq-register @hide="hideCreateSimulationDialog" @optenvconfig:save="saveOptEnvConfig" :userId="userState.userId" modalName="create-simulation-modal" role="optimization" :intersectionField="true" :epochField="true" :env="currentEnv"> </uniq-register>
     </b-modal>
-</div>
+  </div>
 </template>
 
 <script src="./optimization-list.js"> </script>
