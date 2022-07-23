@@ -12,9 +12,14 @@ function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
   const lineWidth = calcLineWidth(map.getZoom())
   edgeLayer.getGeometries().forEach(geometry => {
     const speeds = linkSpeeds[geometry.getId()] || []
-    const speed = speeds[step]
+    let speed = speeds[step] || 0
+    // let speed = road.speed
+    if (geometry.properties.SPEEDLH <= 30) {
+      speed = (speed / 30) * 50
+    }
+
     if (speed) {
-      const lineColor = color(speeds[step]) || '#808080'
+      const lineColor = color(speed) || '#808080'
       geometry.updateSymbol({
         lineWidth,
         lineColor,
@@ -57,9 +62,14 @@ export default map => {
     edgeLayer.getGeometries().forEach(geometry => {
       const road = speedByEdgeId[geometry.getId()]
       if (road) {
+        let speed = road.speed
+        if (geometry.properties.SPEEDLH <= 30) {
+          // speed = road.speed * 2
+          speed = (speed / 30) * 50
+        }
         geometry.updateSymbol({
           lineWidth: calcLineWidth(map.getZoom()),
-          lineColor: color(road.speed)
+          lineColor: color(speed)
         })
       }
     })

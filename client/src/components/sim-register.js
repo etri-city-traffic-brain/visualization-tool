@@ -4,6 +4,7 @@ import moment from 'moment'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
 import makeMap from '@/map2/make-map'
+import { HTTP } from '@/http-common'
 // import region from '../map2/region'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
@@ -75,6 +76,7 @@ export default {
       periodOptions: [...periodOptions],
       intervalOptions: [...intervalOptions],
       regionOptions: [...regionOptions],
+      images: [],
       loading: false,
       showMap: false,
       showEnv: true,
@@ -95,6 +97,16 @@ export default {
     //   this.map = makeMap({ mapId: this.mapId, zoom: 13 })
     //   setTimeout(() => this.selectRegion(), 200)
     // }, 200)
+
+    HTTP({
+      url: '/salt/v1/helper/docker',
+      method: 'get'
+    })
+      .then(r => r.data)
+      .then(d => {
+        console.log(d)
+        this.images = d.simulation.images
+      })
 
     const env = this.env
     if (this.env) {

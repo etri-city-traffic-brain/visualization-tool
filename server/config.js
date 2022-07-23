@@ -65,5 +65,16 @@ module.exports = {
       useUnifiedTopology: true
     },
     lowDBFile: process.env.db || './db.json'
+  },
+  docker: {
+    simulation: {
+      images: ['images4uniq/salt:v2.1a.20210915.test_BUS']
+    },
+    optimization: {
+      images: [
+        'images4uniq/optimizer:v1.1a.20220629.d',
+        'images4uniq/optimizer:v1.2a.20220720PM'
+      ]
+    }
   }
 }

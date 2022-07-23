@@ -3,6 +3,7 @@ import moment from 'moment'
 import simulationService from '@/service/simulation-service'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
+import { HTTP } from '@/http-common'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
 const generateRandomId = (prefix = 'DEFU') =>
@@ -113,6 +114,7 @@ export default {
       extent: null, // current map extent
       // dockerImage: 'images4uniq/optimizer:v1.1a.20220531',
       dockerImage: 'images4uniq/optimizer:v1.1a.20220629.d',
+      imageOptions: [],
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],
@@ -127,6 +129,15 @@ export default {
     }
   },
   async mounted () {
+    HTTP({
+      url: '/salt/v1/helper/docker',
+      method: 'get'
+    })
+      .then(r => r.data)
+      .then(d => {
+        this.imageOptions = d.optimization.images
+      })
+
     // console.log('simulation register ui', this.modalName)
     if (this.modalName === 'create-simulation-modal') {
       this.showEnv = false
@@ -153,11 +164,6 @@ export default {
       this.dockerImage = env.configuration.dockerImage
       this.modelSavePeriod = env.configuration.modelSavePeriod
     }
-    // try {
-    //   this.scriptOptions = await simulationService.getScripts()
-    // } catch (err) {
-    //   this.scriptOptions = [...scriptOptions]
-    // }
   },
   methods: {
     openSignalMap () {

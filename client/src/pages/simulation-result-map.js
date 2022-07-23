@@ -38,15 +38,15 @@ import userState from '@/user-state'
 import region from '@/map2/region'
 import config from '@/stats/config'
 import map from '@/region-code'
-const pieDefault = () => ({
-  datasets: [
-    {
-      data: [1, 1, 1],
-      backgroundColor: ['red', 'orange', 'green']
-    }
-  ],
-  labels: ['막힘', '정체', '원활']
-})
+// const pieDefault = () => ({
+//   datasets: [
+//     {
+//       data: [1, 1, 1],
+//       backgroundColor: ['red', 'orange', 'green']
+//     }
+//   ],
+//   labels: ['막힘', '정체', '원활']
+// })
 
 const defaultOption = () => ({
   responsive: true,
@@ -107,7 +107,7 @@ const makeLineChart = (data, label, color) => {
   })
 
   return {
-    labels: new Array(data.length).fill(0).map((_, i) => i),
+    labels: new Array(data.length).fill(0).map((_, i) => i + 'km'),
     datasets: [
       dataset(label, color, data)
       // dataset('평균속도', '#1E90FF', data2)
@@ -134,7 +134,9 @@ function makeLinkCompChart (data) {
     pointRadius: 1,
     data
   })
-  const labels = new Array(data[maxIdx].data.length).fill(0).map((_, i) => i)
+  const labels = new Array(data[maxIdx].data.length)
+    .fill(0)
+    .map((_, i) => i + '')
   const datasets = data.map(d => {
     return dataset(d.label, d.color, d.data.slice(0, minValue))
   })
@@ -224,8 +226,8 @@ export default {
       focusData: {
         speed: 0.0
       },
-      avgSpeedView: pieDefault(),
-      avgSpeedFocus: pieDefault(),
+      // avgSpeedView: pieDefault(),
+      // avgSpeedFocus: pieDefault(),
       logs: [],
       bottomStyle: {
         height: '220px',
@@ -312,6 +314,7 @@ export default {
     this.vdsList = res.data
 
     this.$on('link:selected', async link => {
+      console.log(link)
       this.currentEdge = link
       if (link.speeds) {
         if (!this.speedsPerStep.datasets) {
@@ -420,6 +423,12 @@ export default {
     window.addEventListener('resize', this.resize.bind(this))
   },
   methods: {
+    showModal () {
+      this.$refs.simmodal.show()
+    },
+    hideModal () {
+      this.$refs.simmodal.hide()
+    },
     startReplay () {
       this.wsClient.send({
         simulationId: this.simulationId,
@@ -590,24 +599,22 @@ export default {
             url: '/salt/v1/vds/volume/' + vdsId,
             method: 'get'
           })
-          // console.log(vdsId, '--', res.data)
           vdsD = res.data
-          // vdsSpeedData.data = vdsD.map(v => v[1])
           this.chart.linkSpeeds = makeLinkCompChart([
             { label: 'simulation', color: '#FF8C00', data: linkData.values },
             { label: 'vds', color: 'skyblue', data: vdsD.map(v => v[1]) }
           ])
         } else {
           this.chart.linkSpeeds = makeLinkCompChart([
-            { label: 'simulation', color: '#FF8C00', data: linkData.values },
-            {
-              label: 'vds',
-              color: 'skyblue',
-              data: new Array(linkData.values.length).fill(0)
-            }
+            { label: 'simulation', color: '#FF8C00', data: linkData.values }
+            // {
+            //   label: 'vds',
+            //   color: 'skyblue',
+            //   data: new Array(linkData.values.length).fill(0)
+            // }
           ])
         }
-        console.log(linkData.values)
+
         const e = this.chart.links.findIndex(v => v.linkId === linkId)
         if (e < 0) {
           this.chart.links.push({
@@ -624,22 +631,19 @@ export default {
             method: 'get'
           })
           vdsD2 = res.data
-          // vdsVolumeData.data = vdsD.map(v => v[1])
-          // console.log('--', res.data)
           this.chart.linkVehPassed = makeLinkCompChart([
-            { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed },
-            { label: 'vds', color: '#8FBC8F', data: vdsD2.map(v => v[1]) }
+            { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
+            // { label: 'vds', color: '#8FBC8F', data: vdsD2.map(v => v[1]) }
           ])
         } else {
           this.chart.linkVehPassed = makeLinkCompChart([
-            { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed },
-            {
-              label: 'vds',
-              color: '#8FBC8F',
-              data: new Array(linkData.vehPassed.length).fill(0)
-            }
+            { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
+            // {
+            //   label: 'vds',
+            //   color: '#8FBC8F',
+            //   data: new Array(linkData.vehPassed.length).fill(0)
+            // }
           ])
-          // data: new Array(linkData.vehPassed.length).fill(0)
         }
       } catch (err) {
         console.log(err.message)

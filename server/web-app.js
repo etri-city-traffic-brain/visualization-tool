@@ -44,6 +44,8 @@ app.use('/salt/v1/dashboard', require('./routes/dashboard'))
 
 app.use('/salt/v1/cctv', require('./routes/cctv'))
 
+app.use('/salt/v1/helper', require('./routes/helper'))
+
 app.use(require('./middleware/not-found'))
 app.use(require('./middleware/server-error'))
 

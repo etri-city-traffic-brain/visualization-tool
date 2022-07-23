@@ -89,7 +89,8 @@
     </div>
     <div class="bg-gray-600 flex space-x-1 mt-1 pl-5 py-3 mb-2 items-center">
       <div class="flex-shrink-0 w-36 text-right text-white">도커 이미지</div>
-      <b-form-input v-model="dockerImage" type="text" class="mx-1" size="sm"/>
+      <!-- <b-form-input v-model="dockerImage" type="text" class="mx-1" size="sm"/> -->
+      <b-form-select v-model="dockerImage" :options="imageOptions" class="" size="sm" />
     </div>
 
     <b-card bg-variant="dark" text-variant="light" border-variant="dark" class="mt-1">

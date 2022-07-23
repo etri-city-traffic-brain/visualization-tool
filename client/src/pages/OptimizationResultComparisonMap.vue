@@ -15,55 +15,53 @@
       <div class="font-bold text-sm">시뮬레이션 정보를 읽어오는데 실패하였습니다.</div>
     </div>
     <div v-else>
-      <div class="text-white p-2 border-b flex justify-between">
+      <div class="text-white p-2 border-b flex justify-between items-center">
         <div class="font-bold">
-          {{ simulation.id }}
+          신호최적화: {{ simulation.id }}
         </div>
         <div>
+
         <div class="flex items-center space-x-1">
-          <select v-model="selectedEpoch" class="text-black rounded p-1">
+          <b-select v-model="selectedEpoch" size="sm">
             <option
               v-for="(reward, idx) of rewards.labels.filter((v,i)=> (i % simulation.configuration.modelSavePeriod) == 0)" :key="reward"
               :value="reward"
             >
             모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}})
             </option>
-          </select>
+          </b-select>
+          <b-btn @click.prevent="runTest" variant="primary" size="sm" class="flex-none">
+            모델 {{selectedEpoch}} 실행 <b-icon icon="play-fill"/>
+          </b-btn>
+          <b-btn @click="stopTest" variant="secondary" size="sm" class="flex-none">
+            중지 <b-icon icon="stop-fill"></b-icon>
+          </b-btn>
 
-          <button @click.prevent="runTest" class="text-black rounded bg-indigo-200 px-2 text-lg hover:bg-indigo-400" size="sm">
-            <b-icon icon="play-fill"/>실행
-          </button>
-
-          <button class="text-black rounded bg-indigo-200 px-2 text-lg hover:bg-indigo-400" @click="stopTest" size="sm">
-            <b-icon icon="stop-fill"></b-icon>중지
-          </button>
-
-        </div>
-
-              <!-- <div class="max-h-36 h-36 overflow-y-auto ">
-                <div class="text-white font-bold">모델선택</div>
-                <div class="grid grid-cols-12 text-center gap-1">
-                  <div
-                    v-for="reward of rewards.labels.filter((v,i)=> (i % simulation.configuration.modelSavePeriod) == 0)" :key="reward"
-                    @click="selectedEpoch = reward"
-                    class="bg-blue-200 text-blue-800 font-bold rounded px-1 cursor-pointer hover:bg-blue-500 hover:text-white"
-                  >
-                    {{ reward }}
-                  </div>
-                </div>
-                <div class="mt-1 flex items-center space-x-1">
-                  <button @click.prevent="runTest" class="text-black font-bold rounded bg-indigo-200 p-2 text-2xl w-full">
-                    {{ selectedEpoch }} 번 모델 테스트 <b-icon icon="play-fill" size="sm"/>
-                  </button>
-                </div>
-              </div> -->
+          <div class="flex space-x-1 items-center text-sm text-white flex-none">
+            <div v-if="status === 'running'" class="text-center px-3 uppercase w-full">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+            <div v-else class="px-2 uppercase w-full text-white">
+              {{ status }}
+            </div>
+            <div class="flex-shrink-0">
+              <b-btn @click="checkStatus" size="sm">상태 확인</b-btn>
+            </div>
+          </div>
         </div>
       </div>
+
+
+
+      </div>
       <div class="text-white p-2 flex justify-between border-b border-gray-200">
-        <div>
-          <span class="font-bold">지역:</span> {{ config.region }}
-          <span class="font-bold">시간:</span> {{ config.fromTime }} ~ {{ config.toTime }}
-          <span class="font-bold">대상교차로:</span> {{ simulation.configuration.junctionId }}
+        <div class="space-x-2">
+          <span class="font-bold bg-gray-700 p-1 rounded">지역:</span> {{ getRegionName(config.region) }}
+          <span class="font-bold bg-gray-700 p-1 rounded">시간:</span> {{ config.fromTime }} ~ {{ config.toTime }}
+          <span class="font-bold bg-gray-700 p-1 rounded">대상교차로:</span> {{ simulation.configuration.junctionId }}
         </div>
         <div>
           <button @click="showModal"><b-icon icon="gear-fill"></b-icon></button>
@@ -153,13 +151,18 @@
                 {{ s }}
               </div>
 
-              <b-tabs content-class="mt-3">
-                <b-tab title="평균통과시간" title-item-class="font-bold bg-gray-500 ">
-                  <div class="text-white grid grid-cols-6 gap-1 text-center mb-2">
+              <div content-class="mt-3">
+                <!-- <button @click="toggleView" class="text-white">
+                  <span v-if="speedView">평균속도</span>
+                  <span v-else>통과시간</span>
+                </button> -->
+                <div title="평균통과시간" class="text-white">
+                  <div class="bg-blue-400 mb-1 p-1 text-center">평균통과시간</div>
+                  <div class="text-white grid grid-cols-6 gap-1 text-center">
                     <div class="py-1 bg-blue-400 col-span-3">교차로 </div>
                     <div class="py-1 bg-blue-400">기존 </div>
                     <div class="py-1 bg-blue-400">모델</div>
-                    <div class="py-1 bg-blue-400 text-xs">향상<span class="text-xs">(%)</span></div>
+                    <div class="py-1 bg-blue-400">향상률</div>
                   </div>
                   <div v-for="v of Object.entries(travelTimePerJunction)" class="text-white grid grid-cols-6">
                     <div class="border-b col-span-3">{{ v[0] }} </div>
@@ -168,14 +171,15 @@
                     <div class="border-b" v-if="Number(v[1][0]) !== 0">{{ (100 * (Number(v[1][0]) - Number(v[1][1])) / ((Number(v[1][1]) + Number(v[1][0])) / 2)).toFixed(2) }}</div>
                     <div class="border-b" v-else>0 </div>
                   </div>
-                </b-tab>
-                <b-tab title="평균속도" title-item-class="font-bold bg-gray-500 ">
+                </div>
+                <div title="평균속도" class="text-white mt-1">
+                  <div class="bg-blue-400 mb-1 p-1 text-center">평균속도</div>
                   <div class="mt-1">
                     <div class="text-white grid grid-cols-6 gap-1 text-center">
                       <div class="py-1 bg-blue-400 col-span-3">교차로 </div>
                       <div class="py-1 bg-blue-400">기존 </div>
                       <div class="py-1 bg-blue-400">모델</div>
-                      <div class="py-1 bg-blue-400 text-xs">향상<span class="text-xs">(%)</span></div>
+                      <div class="py-1 bg-blue-400">향상률</div>
                     </div>
                     <div v-for="v of Object.entries(speedsPerJunction)" class="text-white grid grid-cols-6">
                       <div class="border-b col-span-3">{{ v[0] }} </div>
@@ -184,8 +188,8 @@
                       <div class="border-b">{{ (100 * (Number(v[1][1]) - Number(v[1][0])) / ((Number(v[1][1]) + Number(v[1][0])) / 2)).toFixed(2) }} </div>
                     </div>
                   </div>
-                </b-tab>
-              </b-tabs>
+                </div>
+              </div>
             </div>
           </div>
           <!----- 보상 그래프 ----->
@@ -210,31 +214,35 @@
       </div>
       <div class="grid grid-cols-4 gap-1 ml-1">
         <div class="col-span-3">
-          <b-tabs content-class="" active-nav-item-class="" end>
-            <b-tab title="평균통과시간" title-item-class="font-bold bg-gray-500 " small>
+          <div content-class="" active-nav-item-class="" end>
+            <div title="평균통과시간" title-item-class="font-bold bg-gray-500 ">
+              <div class="bg-blue-400 mb-1 p-1 text-center">평균통과시간</div>
               <div class="text-white bg-gray-800 p-1 text-sm font-bold">
                 <line-chart :chartData="chart.travelTimeChartInView" :options="lineChartOption({})" :height="100" />
               </div>
-            </b-tab>
-            <b-tab title="평균속도" title-item-class="font-bold bg-gray-500">
+            </div>
+            <div title="평균속도" title-item-class="font-bold bg-gray-500">
+              <div class="bg-blue-400 mb-1 p-1 text-center">평균속도</div>
               <div class="text-white bg-gray-800 p-1 text-sm font-bold mt-1">
                 <line-chart :chartData="chart.avgSpeedChartInView" :options="lineChartOption({})" :height="100" />
               </div>
-            </b-tab>
-          </b-tabs>
+            </div>
+          </div>
         </div>
         <div class="bg-red-100 w-full items-center text-center">
           {{ selectedNode }}
+          <div>{{ actionForOpt[0].action }}</div>
+          <div>{{ actionForOpt[1].action }}</div>
         </div>
       </div>
     </div>
 
     <!-- BOTTOM STATUS TEXT -->
-    <div class="flex my-1 p-1 justify-end bg-gray-700">
-      <div class="flex space-x-1 items-center text-sm">
-        <div class="text-center text-white">
-          {{ statusText }}
-        </div>
+    <div class="flex my-1 p-1 justify-between bg-gray-700">
+      <div class="text-center text-white px-2 ">
+        {{ statusText }}
+      </div>
+      <div class="flex space-x-1 items-center text-sm text-white">
         <div v-if="status === 'running'" class="text-center px-3 uppercase w-full">
           <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -245,7 +253,7 @@
           상태: {{ status }}
         </div>
         <div class="flex-shrink-0">
-          <b-btn @click="checkStatus" size="sm">실행상태 확인</b-btn>
+          <button @click="checkStatus" class="bg-indigo-500 px-2 rounded">실행상태 확인</button>
         </div>
       </div>
     </div>

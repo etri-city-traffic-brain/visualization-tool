@@ -36,6 +36,12 @@ function SaltMsgHandler () {
     try {
       const initMsg = Init(buffer)
       const simulationId = initMsg.simulationId
+
+      if (!simulationId.startsWith('S')) {
+        console.log(simulationId)
+        console.log('--- 의심 ---')
+        return
+      }
       // if (!socketToSimulationId[socket.remotePort]) {
       socketToSimulationId[socket.remotePort] = simulationId
       simulationIdToSocket[simulationId] = socket
@@ -116,7 +122,7 @@ function SaltMsgHandler () {
   //  STATUS
   const handleSaltStatus = (socket, buffer) => {
     const status = Status(buffer)
-    // console.log('*****', status, '******')
+    console.log('*****', status, '******')
     const simulationId = socketToSimulationId[socket.remotePort]
     // console.log(simulationId)
     eventBus.emit(EVENT_STATUS, {

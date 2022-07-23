@@ -47,7 +47,8 @@
 
         <div class="flex space-x-2 items-center">
           <div class="flex-none text-white text-sm w-28 text-right">이미지</div>
-          <b-form-input v-model="dockerImage" type="text" size="sm" class="w-max"/>
+          <b-form-select v-model="dockerImage" :options="images" size="sm"/>
+          <!-- <b-form-input v-model="dockerImage" type="text" size="sm" class="w-max"/> -->
         </div>
     </div>
     <!--

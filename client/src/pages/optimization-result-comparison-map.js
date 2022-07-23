@@ -37,7 +37,7 @@ import barChartOption from '@/charts/chartjs/bar-chart-option'
 import style from '@/components/style'
 
 import TrafficLightManager from '@/map2/map-traffic-lights'
-
+import map from '@/region-code'
 import drawChart from '@/optsig/chart-reward-phase'
 
 const calcAvg = (values = []) => {
@@ -204,7 +204,8 @@ export default {
         travelTimeJunction: 0,
         avgSpeed: 0,
         progress: 0,
-        speedsPerJunction: {}
+        speedsPerJunction: {},
+        action: ''
       },
       chart2: {
         avgSpeedsInView: [],
@@ -216,7 +217,8 @@ export default {
         progress: 0,
         speedsPerJunction: {},
         efficiency1: 0,
-        effSpeed: 0
+        effSpeed: 0,
+        action: ''
       },
       chart: {
         avgSpeedChartInView: {}, // realtime chart
@@ -251,7 +253,8 @@ export default {
       avgSpeedJunction: 0,
       statusMessage: [],
       timer: null,
-      statusText: ''
+      statusText: '',
+      speedView: false
     }
   },
   destroyed () {
@@ -304,9 +307,21 @@ export default {
         result[jId] = [spd1, spd2]
       }
       return result
+    },
+    actionForOpt () {
+      const info = this.chart2.speedsPerJunction
+      const s = this.selectedNode
+      const t = info[s]
+      if (t) {
+        console.log(t[0], t.length, t[t.length - 1])
+        return [t[0], t[t.length - 1]]
+      }
+      return [{}, {}]
     }
   },
   async mounted () {
+    window.scrollTo(0, 0)
+
     const optId = this.$route.params ? this.$route.params.id : null
 
     const { simulation } = await simulationService.getSimulationInfo(optId)
@@ -386,6 +401,7 @@ export default {
       if (this.chart1.progress >= 99) {
         this.chart2.progress = 100
         this.chart1.progress = 100
+        this.checkStatus()
       }
     })
 
@@ -428,8 +444,7 @@ export default {
       const start = new Date().getTime()
       const progress = this.chart1.progress
       if ((progress > 0 && progress < 100) || forceUpdate) {
-        log('loading start')
-        this.statusText = 'updating...'
+        this.statusText = 'loading...'
         const dataRl = await optSvc
           .getPhaseReward(this.simulation.id, 'rl')
           .then(res => res.data)
@@ -467,12 +482,8 @@ export default {
         // this.chart2.travelTimeJunction = this.chart.travelTimeChartInView.avgRl
         this.chart1.travelTimeJunction = ttFt
         this.chart2.travelTimeJunction = ttRl
-
-        log(
-          'loading end elapsed:',
-          (new Date().getTime() - start) / 1000 + 'sec'
-        )
-        this.statusText = 'updated...'
+        this.statusText =
+          'updated... ' + (new Date().getTime() - start) / 1000 + 'sec'
       }
 
       this.timer = setTimeout(async () => {
@@ -530,6 +541,17 @@ export default {
     // this.phaseRewardChartRl.on('datazoom', function (params) {})
   },
   methods: {
+    getRegionName (r) {
+      // const map = {
+      //   yuseonggu: '유성구',
+      //   seogu: '서구',
+      //   doan: '도안'
+      // }
+      return map[r] || r
+    },
+    toggleView () {
+      this.speedView = !this.speedView
+    },
     showModal () {
       this.$refs.optenvmodal.show()
     },
