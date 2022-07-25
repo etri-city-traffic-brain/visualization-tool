@@ -40,6 +40,8 @@ import TrafficLightManager from '@/map2/map-traffic-lights'
 import map from '@/region-code'
 import drawChart from '@/optsig/chart-reward-phase'
 
+import SignalSystem from '@/actions/action-vis'
+import parseAction from '@/actions/action-parser'
 const calcAvg = (values = []) => {
   const sum = values.reduce((acc, cur) => {
     acc += cur || 0
@@ -59,6 +61,8 @@ function calcAvgs (data, property) {
   }
   return avg.map(a => a / values.length)
 }
+
+function calcAvgV2 (data) {}
 
 const dataset = (label, color, data) => ({
   label,
@@ -313,14 +317,37 @@ export default {
       const s = this.selectedNode
       const t = info[s]
       if (t) {
-        console.log(t[0], t.length, t[t.length - 1])
         return [t[0], t[t.length - 1]]
       }
       return [{}, {}]
     }
   },
   async mounted () {
+    const initSignaSystem = () => {
+      const str1 = this.actionForOpt[0].action
+
+      const o1 = parseAction(str1)
+      ss = SignalSystem(container, {
+        offset: o1.offset,
+        duration: o1.duration
+      })
+
+      const str2 = this.actionForOpt[1].action
+      const o2 = parseAction(str2)
+      ss.update(o2.offset, o2.duration)
+    }
+
     window.scrollTo(0, 0)
+
+    // const container = document.getElementById('mynetwork')
+    const container = this.$refs.actionvis
+    let ss = null
+    // const ss = SignalSystem(container, {
+    //   offset: 140,
+    //   duration: [29, 33, 33, 29, 26, 30]
+    // })
+
+    // ss.update(141, [1, 2, 1, 1, 1, 2])
 
     const optId = this.$route.params ? this.$route.params.id : null
 
@@ -425,6 +452,8 @@ export default {
       const crossName = signalService.nodeIdToName(p.nodeId)
       this.selectedNode = crossName
 
+      initSignaSystem()
+
       // const rl = this.chart2.speedsPerJunction[crossName]
 
       // if (!rl) {
@@ -469,6 +498,7 @@ export default {
 
         this.chart2.effSpeed = this.calcEfficency(avgSpeedFt, avgSpeedRl)
         this.chart2.effTravelTime = this.calcEfficency(ttRl, ttFt)
+
         log(ttFt, ttRl, this.calcEfficency(ttRl, ttFt))
         this.chart.avgSpeedChartInView = makeSpeedLineData(speedsFt, speedsRl)
         this.chart.travelTimeChartInView = makeSpeedLineData(ttsFt, ttsRl)
@@ -484,6 +514,15 @@ export default {
         this.chart2.travelTimeJunction = ttRl
         this.statusText =
           'updated... ' + (new Date().getTime() - start) / 1000 + 'sec'
+
+        if (ss === null) {
+          initSignaSystem()
+        } else {
+          const str2 = this.actionForOpt[1].action
+          const o2 = parseAction(str2)
+          console.log(o2)
+          ss.update(o2.offset, o2.duration)
+        }
       }
 
       this.timer = setTimeout(async () => {

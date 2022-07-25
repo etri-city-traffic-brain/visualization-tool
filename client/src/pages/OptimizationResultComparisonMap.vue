@@ -229,10 +229,15 @@
             </div>
           </div>
         </div>
-        <div class="bg-red-100 w-full items-center text-center">
+        <div class="bg-red-100 w-max- h-96 items-center">
           {{ selectedNode }}
           <div>{{ actionForOpt[0].action }}</div>
           <div>{{ actionForOpt[1].action }}</div>
+
+          <div ref="actionvis" class="w-84 h-96 bg-gray-800 p-3">
+
+          </div>
+
         </div>
       </div>
     </div>
