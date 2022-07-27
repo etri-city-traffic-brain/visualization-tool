@@ -40,7 +40,9 @@ async function csvToObj (file) {
             step: row.step,
             action: row.actions,
             avgSpeed: Number(row.avg_speed).toFixed(3),
-            avgTravelTime: avgTravelTime
+            sumPassed: Number(row.sum_passed),
+            sumTravelTime: Number(row.sum_travel_time),
+            avgTravelTime
           })
           map[row.tl_name] = target
         })

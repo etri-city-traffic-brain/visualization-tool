@@ -44,10 +44,10 @@ import SignalSystem from '@/actions/action-vis'
 import parseAction from '@/actions/action-parser'
 const calcAvg = (values = []) => {
   const sum = values.reduce((acc, cur) => {
-    acc += cur || 0
+    acc += cur
     return acc
   }, 0)
-  return (sum / values.length).toFixed(2)
+  return sum / values.length
 }
 
 function calcAvgs (data, property) {
@@ -62,7 +62,35 @@ function calcAvgs (data, property) {
   return avg.map(a => a / values.length)
 }
 
-function calcAvgV2 (data) {}
+function calcAverage (data) {
+  const values = Object.values(data)
+  const stepCount = values[0].length
+
+  const sumTravelTime = new Array(stepCount).fill(0)
+  const sumPassed = new Array(stepCount).fill(0)
+  const avgSpeeds = new Array(stepCount).fill(0)
+  for (let i = 0; i < values.length; i++) {
+    for (let j = 0; j < stepCount; j++) {
+      sumTravelTime[j] += Number(values[i][j].sumTravelTime)
+      sumPassed[j] += Number(values[i][j].sumPassed)
+      avgSpeeds[j] = Number(values[i][j].avgSpeed)
+    }
+  }
+  const avgTravelTimes = []
+  for (let i = 0; i < sumTravelTime.length; i++) {
+    if (sumTravelTime[i] !== 0) {
+      avgTravelTimes.push(sumTravelTime[i] / sumPassed[i])
+    } else {
+      avgTravelTimes.push(sumTravelTime[i])
+    }
+  }
+
+  return [avgTravelTimes, avgSpeeds]
+}
+
+function calcEff (ft, rl) {
+  return (~~ft - ~~rl) / ~~ft
+}
 
 const dataset = (label, color, data) => ({
   label,
@@ -222,7 +250,8 @@ export default {
         speedsPerJunction: {},
         efficiency1: 0,
         effSpeed: 0,
-        action: ''
+        action: '',
+        effTravelTime: 0
       },
       chart: {
         avgSpeedChartInView: {}, // realtime chart
@@ -301,14 +330,16 @@ export default {
     },
     travelTimePerJunction () {
       const keys = Object.keys(this.chart2.speedsPerJunction)
+      const ttsFt = this.chart1.speedsPerJunction
+      const ttsRl = this.chart2.speedsPerJunction
       const result = {}
       for (let i = 0; i < keys.length; i++) {
         const jId = keys[i]
-        const v1 = this.chart1.speedsPerJunction[jId] || []
-        const v2 = this.chart2.speedsPerJunction[jId] || []
-        const spd1 = calcAvg(v1.map(v => Number(v.avgTravelTime)))
-        const spd2 = calcAvg(v2.map(v => Number(v.avgTravelTime)))
-        result[jId] = [spd1, spd2]
+        const vFt = ttsFt[jId] || []
+        const vRl = ttsRl[jId] || []
+        const ttFt = calcAvg(vFt.map(v => Number(v.avgTravelTime)))
+        const ttRl = calcAvg(vRl.map(v => Number(v.avgTravelTime)))
+        result[jId] = [ttFt, ttRl]
       }
       return result
     },
@@ -474,21 +505,34 @@ export default {
       const progress = this.chart1.progress
       if ((progress > 0 && progress < 100) || forceUpdate) {
         this.statusText = 'loading...'
-        const dataRl = await optSvc
-          .getPhaseReward(this.simulation.id, 'rl')
-          .then(res => res.data)
-        const dataFt = await optSvc
-          .getPhaseReward(this.simulation.id, 'ft')
-          .then(res => res.data)
+        // const dataRl = await optSvc
+        //   .getPhaseReward(this.simulation.id, 'rl')
+        //   .then(res => res.data)
+        // const dataFt = await optSvc
+        //   .getPhaseReward(this.simulation.id, 'ft')
+        //   .then(res => res.data)
+
+        const [dataRl, dataFt] = await Promise.all([
+          optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
+          optSvc.getPhaseReward(this.simulation.id, 'ft').then(res => res.data)
+        ])
 
         this.chart1.speedsPerJunction = dataFt // simulate
         this.chart2.speedsPerJunction = dataRl // optimization
 
-        const speedsRl = calcAvgs(dataRl, 'avgSpeed')
-        const speedsFt = calcAvgs(dataFt, 'avgSpeed')
+        // const speedsRl = calcAvgs(dataRl, 'avgSpeed')
+        // const speedsFt = calcAvgs(dataFt, 'avgSpeed')
 
-        const ttsRl = calcAvgs(dataRl, 'avgTravelTime')
-        const ttsFt = calcAvgs(dataFt, 'avgTravelTime')
+        // const ttsRl = calcAvgs(dataRl, 'avgTravelTime')
+        // const ttsFt = calcAvgs(dataFt, 'avgTravelTime')
+        const avgRl = calcAverage(dataRl)
+        const avgFt = calcAverage(dataFt)
+
+        const ttsRl = avgRl[0]
+        const ttsFt = avgFt[0]
+
+        const speedsRl = avgRl[1]
+        const speedsFt = avgFt[1]
 
         const avgSpeedRl = calcAvg(speedsRl)
         const avgSpeedFt = calcAvg(speedsFt)
@@ -496,10 +540,13 @@ export default {
         const ttRl = calcAvg(ttsRl)
         const ttFt = calcAvg(ttsFt)
 
-        this.chart2.effSpeed = this.calcEfficency(avgSpeedFt, avgSpeedRl)
-        this.chart2.effTravelTime = this.calcEfficency(ttRl, ttFt)
+        // this.chart2.effSpeed = this.calcEfficency(avgSpeedFt, avgSpeedRl)
 
-        log(ttFt, ttRl, this.calcEfficency(ttRl, ttFt))
+        // this.chart2.effTravelTime = this.calcEfficency(ttRl, ttFt)
+        this.chart2.effTravelTime = calcEff(ttFt, ttRl)
+        // this.chart2.effSpeed = calcEff(avgSpeedFt, avgSpeedRl)
+
+        // log(ttFt, ttRl, this.calcEfficency(ttRl, ttFt))
         this.chart.avgSpeedChartInView = makeSpeedLineData(speedsFt, speedsRl)
         this.chart.travelTimeChartInView = makeSpeedLineData(ttsFt, ttsRl)
 

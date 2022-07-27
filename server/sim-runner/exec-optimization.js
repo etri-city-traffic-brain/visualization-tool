@@ -36,6 +36,7 @@ async function run (simulation, mode, modelNum) {
   const epoch = config.epoch
   const dockerImage = config.dockerImage || DEFAULT_DOCKER_IMAGE
   const begin = 0
+  // const begin = 25200
   const end = config.end - config.begin + 60
   const modelSavePeriod = config.modelSavePeriod || 20
   const map = config.region

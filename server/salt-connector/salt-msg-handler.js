@@ -37,7 +37,7 @@ function SaltMsgHandler () {
       const initMsg = Init(buffer)
       const simulationId = initMsg.simulationId
 
-      if (!simulationId.startsWith('S')) {
+      if (!(simulationId.startsWith('S') || simulationId.startsWith('O'))) {
         console.log(simulationId)
         console.log('--- 의심 ---')
         return

@@ -69,6 +69,14 @@ function SignalSystem (container, ns = {}) {
     edges: {
       width: 2,
       arrows: 'to'
+    },
+    nodes: {
+      fixed: true
+    },
+    interaction: {
+      dragNodes: false,
+      dragView: false,
+      zoomView: false
     }
   }
   const network = new vis.Network(container, data, options)
