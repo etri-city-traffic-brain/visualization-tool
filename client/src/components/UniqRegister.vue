@@ -5,7 +5,7 @@
         <b-form-input autofocus id="envName" v-model="envName" focus select size="sm"></b-form-input>
       </div>
       <div class="flex space-x-2 items-center">
-        <div class="w-32 text-right">ID</div>
+        <div class="w-32 text-right">아이디</div>
         <b-form-input autofocus id="id" v-model="id" size="sm"></b-form-input>
       </div>
       <div class="flex space-x-2 items-center">
@@ -53,34 +53,39 @@
 
     <div class="bg-gray-600 mt-2 text-white p-2">
       <div class="grid grid-cols-4 gap-2 p-2">
-        <div>
+        <div class="bg-gray-700 rounded text-center p-1">
           통계주기
           <b-form-select v-model="periodSelected" :options="periodOptions" class="" size="sm"/>
         </div>
 
-        <div>
+        <div class="bg-gray-700 rounded text-center p-1">
           가시화주기
           <b-form-select v-model="intervalSelected" :options="intervalOptions" class="" size="sm" />
         </div>
 
-        <div v-if="epochField">
-          Epoch(*)
+        <div v-if="epochField" class="bg-gray-700 rounded text-center p-1">
+          에포크
           <b-form-input v-model="epoch" type="number" size="sm"></b-form-input>
         </div>
-        <div v-if="epochField">
-          모델저장주기(*)
+        <div v-if="epochField" class="bg-gray-700 rounded text-center p-1">
+          모델저장주기
           <b-form-input v-model="modelSavePeriod" type="number" min="1" size="sm"></b-form-input>
         </div>
-
-        <div>
-          Action
-          <b-form-select v-model="actionOptionSelected" :options="actionOptions" class="" size="sm"/>
-        </div>
-        <div>
-          Method
+        <div class="bg-gray-700 rounded text-center p-1">
+          모델
           <b-form-select v-model="methodOptionSelected" :options="methodOptions" class="" size="sm"/>
         </div>
-        <div>
+        <div class="bg-gray-700 rounded text-center p-1">
+          모델
+          <b-form-select v-model="stateOptionSelected" :options="stateOptions" class="" size="sm"/>
+        </div>
+
+        <div class="bg-gray-700 rounded text-center p-1">
+          액션
+          <b-form-select v-model="actionOptionSelected" :options="actionOptions" class="" size="sm"/>
+        </div>
+
+        <div class="bg-gray-700 rounded text-center p-1">
           보상함수
           <b-form-select v-model="rewardFuncOptionSelected" :options="rewardFuncOptions" class="" size="sm" />
         </div>

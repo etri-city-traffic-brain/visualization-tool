@@ -152,12 +152,12 @@
               </div>
 
               <div content-class="mt-3" v-if="Object.keys(travelTimePerJunction).length > 0">
-                <div class="text-right">
+                <!-- <div class="text-right">
                   <button @click="toggleView" class="bg-indigo-200 rounded text-black px-1 mb-1">
                     <span v-if="speedView">통과시간 보기</span>
                     <span v-else>평균속도 보기</span>
                   </button>
-                </div>
+                </div> -->
                 <div title="평균통과시간" class="text-white" v-if="!speedView">
                   <div class="bg-blue-400 mb-1 p-1 text-center">평균통과시간</div>
                   <div class="text-white grid grid-cols-6 gap-1 text-center">
@@ -171,11 +171,13 @@
                     <div class="border-b text-right">{{ Number(v[1][0]).toFixed(2) }} </div>
                     <div class="border-b text-right">{{ Number(v[1][1]).toFixed(2)}}</div>
                     <!-- <div class="border-b" v-if="Number(v[1][0]) !== 0">{{ (100 * (Number(v[1][0]) - Number(v[1][1])) / ((Number(v[1][1]) + Number(v[1][0])) / 2)).toFixed(2) }}</div> -->
-                    <div class="border-b text-right" v-if="Number(v[1][0]) !== 0">{{ ((Number(v[1][0]) - Number(v[1][1])) / Number(v[1][0])).toFixed(2) }}</div>
+                    <div class="border-b text-right" v-if="Number(v[1][0]) !== 0">
+                    {{ (((Number(v[1][0]) - Number(v[1][1])) / Number(v[1][0])) * 100).toFixed(2) }}
+                    </div>
                     <div class="border-b" v-else>0 </div>
                   </div>
                 </div>
-                <div title="평균속도" class="text-white mt-1" v-else>
+                <!-- <div title="평균속도" class="text-white mt-1" v-else>
                   <div class="bg-blue-400 mb-1 p-1 text-center">평균속도</div>
                   <div class="mt-1">
                     <div class="text-white grid grid-cols-6 gap-1 text-center">
@@ -191,11 +193,11 @@
                       <div class="border-b text-right">{{ (100 * (Number(v[1][1]) - Number(v[1][0])) / ((Number(v[1][1]) + Number(v[1][0])) / 2)).toFixed(2) }} </div>
                     </div>
                   </div>
-                </div>
+                </div> -->
               </div>
               <div v-else class=" p-5">
-                <div class="text-4xl text-white animate-pulse">Loading...</div>
-                <div class="text-md text-white pl-3">로딩중입니다.</div>
+                <div class="text-4xl text-white animate-pulse">Waiting...</div>
+                <div class="text-md text-white pl-3">데이터가 확인중...</div>
               </div>
             </div>
           </div>
@@ -221,26 +223,26 @@
       </div>
       <div class="grid grid-cols-4 gap-1 ml-1">
         <div class="col-span-3">
-          <div content-class="" active-nav-item-class="" end>
-            <div title="평균통과시간" title-item-class="font-bold bg-gray-500 ">
+          <div content-class="" active-nav-item-class="" >
+            <div title="평균통과시간" title-item-class="font-bold bg-gray-500 " v-if="!speedView">
               <div class="bg-blue-400 mb-1 p-1 text-center">평균통과시간</div>
               <div class="text-white bg-gray-800 p-1 text-sm font-bold">
-                <line-chart :chartData="chart.travelTimeChartInView" :options="lineChartOption({})" :height="100" />
+                <line-chart :chartData="chart.travelTimeChartInView" :options="lineChartOption({})" :height="165" />
               </div>
             </div>
-            <div title="평균속도" title-item-class="font-bold bg-gray-500">
+            <!-- <div title="평균속도" title-item-class="font-bold bg-gray-500" v-else>
               <div class="bg-blue-400 mb-1 p-1 text-center">평균속도</div>
               <div class="text-white bg-gray-800 p-1 text-sm font-bold mt-1">
-                <line-chart :chartData="chart.avgSpeedChartInView" :options="lineChartOption({})" :height="100" />
+                <line-chart :chartData="chart.avgSpeedChartInView" :options="lineChartOption({})" :height="165" />
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
         <div class="text-white items-center">
           <div class="bg-blue-400 mb-1 p-1 text-center">신호시스템</div>
           <div class="text-center">대상교차로: {{ selectedNode }}</div>
-          <div>{{ actionForOpt[0].action }}</div>
-          <div>{{ actionForOpt[1].action }}</div>
+          <!-- <div>{{ actionForOpt[0].action }}</div> -->
+          <!-- <div>{{ actionForOpt[1].action }}</div> -->
 
           <div ref="actionvis" class="w-84 h-96 bg-gray-800 p-3">
 

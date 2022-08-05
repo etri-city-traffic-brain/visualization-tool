@@ -71,8 +71,10 @@ const makeOptScenario = (
       port: tcpPort,
       interval,
       time: {
-        begin: 0,
-        end: end - begin + 60
+        // begin: 0,
+        // end: end - begin + 60
+        begin: 0 + 25200,
+        end: end - begin + 60 + 25200
       },
       input: {
         fileType: 'SALT',

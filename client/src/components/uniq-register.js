@@ -46,24 +46,29 @@ const scriptOptions = [
 ]
 
 const actionOptions = [
-  { value: 'offset', text: 'offset' }, // default
-  { value: 'kc', text: 'kc' },
-  { value: 'gr', text: 'gr' },
-  { value: 'gro', text: 'gro' }
+  { value: 'offset', text: 'offset - 옵셋 조정' }, // default
+  { value: 'kc', text: 'kc - 즉시 신호 변경' },
+  { value: 'gr', text: 'gr - 녹색시간 조정' },
+  { value: 'gro', text: 'gro - 녹색시간과 옵셋 조정' }
 ]
 const methodOptions = [
-  { value: 'sappo', text: 'sappo' },
-  { value: 'ddqn', text: 'ddqn' },
-  { value: 'sappo_rnd', text: 'sappo_rnd' }
+  { value: 'sappo', text: 'SAPPO' },
+  { value: 'ddqn', text: 'DDQN' },
+  { value: 'sappo_rnd', text: 'SAPPO_RND' }
 ]
 const rewardFuncOptions = [
-  { value: 'wt_SBV', text: 'wt_SBV' },
-  { value: 'pn', text: 'pn' },
-  { value: 'wt', text: 'wt' },
-  { value: 'wt_max', text: 'wt_max' },
-  { value: 'wq', text: 'wq' },
-  { value: 'wt_SBV_max', text: 'wt_SBV_max' },
-  { value: 'wt_ABV', text: 'wt_ABV' }
+  { value: 'pn', text: 'pn - 통과 차량 수' },
+  { value: 'wt', text: 'wt - 대기 시간' },
+  { value: 'tt', text: 'tt - 통과 소요 시간' },
+  { value: 'wq', text: 'wq - 대기 큐 길이' },
+  { value: 'cwq', text: 'cwq - 축적된 대기 큐 길이' }
+]
+
+const stateOptions = [
+  { value: 'v', text: 'v - 차량 수' },
+  { value: 'd', text: 'd - 차량 밀도' },
+  { value: 'vd', text: 'vd - 차량 수와 밀도' },
+  { value: 'vdd', text: 'vdd - 차량 수를 밀도로 나눈 값' }
 ]
 
 const intervalOptions = [
@@ -109,6 +114,7 @@ export default {
       actionOptionSelected: actionOptions[0].value, //
       methodOptionSelected: methodOptions[0].value, //
       rewardFuncOptionSelected: rewardFuncOptions[0].value, //
+      stateOptionSelected: stateOptions[0].value,
       junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
@@ -119,6 +125,7 @@ export default {
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],
       intervalOptions: [...intervalOptions],
+      stateOptions: [...stateOptions],
       actionOptions,
       methodOptions,
       rewardFuncOptions,

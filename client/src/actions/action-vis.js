@@ -122,9 +122,9 @@ function SignalSystem (container, ns = {}) {
 
   return {
     update (off, nis) {
-      console.log('updateed')
       durUpdated = nis
       offsetUpdated = off
+      network.redraw()
     }
   }
 }

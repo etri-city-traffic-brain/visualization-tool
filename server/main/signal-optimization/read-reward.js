@@ -7,9 +7,12 @@ async function read (simulationId) {
   // const file = `/home/ubuntu/uniq-sim/output/${simulationId}/train/train_epoch_tl_reward.txt`
   const file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/train/train_epoch_tl_reward.txt`
 
-  await fs.access(file, fs.F_OK)
-
-  return csvToObj(file)
+  try {
+    await fs.access(file, fs.F_OK)
+    return csvToObj(file)
+  } catch (err) {
+    return {}
+  }
 }
 
 async function csvToObj (file) {

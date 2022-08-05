@@ -34,7 +34,7 @@ export default {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
-        { class: 'text-center', key: 'id', label: '시뮬레이션 아이디' },
+        { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
@@ -59,7 +59,7 @@ export default {
       perPage: 10,
       totalRows: 0,
       envFields: [
-        { class: 'text-center', key: 'envName', label: '최적화환경 아이디' },
+        { class: 'text-center', key: 'envName', label: '아이디' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         {
           class: 'text-center',
@@ -109,6 +109,25 @@ export default {
   computed: {},
   destroyed () {},
   methods: {
+    getActionName (v) {
+      const o = {
+        offset: '옵셋 조정',
+        kc: '즉시 신호 변경',
+        gr: '녹색시간 조정',
+        gro: '녹색시간과 옵셋 조정'
+      }
+      return o[v] || '모름'
+    },
+    getRewardFunctionName (v) {
+      const o = {
+        pn: '통과 차량 수',
+        wt: '대기 시간',
+        tt: '통과 소요 시간',
+        wq: '대기 큐 길이',
+        cwq: '축적된 대기 큐 길이'
+      }
+      return o[v] || '모름'
+    },
     uploadModel (obj) {
       const formData = new window.FormData()
       formData.append('file', this.resultFile)

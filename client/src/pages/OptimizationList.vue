@@ -78,8 +78,12 @@
 
       <div class="max-h-96 overflow-y-auto">
         <div class="flex justify-between">
-          <button class="bg-gray-700 rounded p-1 px-2 text-sm text-center font-bold text-white hover:bg-gray-800" v-b-modal.create-simulation-modal> 환경등록 </button>
-          <button class="bg-gray-700 rounded p-1 px-2 text-sm text-center font-bold text-white hover:bg-gray-800" @click.stop="reload" v-b-tooltip.hover title="테이블을 업데이트합니다." > <b-icon icon="arrow-clockwise"/> 새로고침 </button>
+          <button class="items-center bg-blue-300 rounded p-1 px-2 text-sm text-center font-bold hover:bg-blue-700 hover:text-white" v-b-modal.create-simulation-modal>
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>환경등록
+          </button>
+          <button class="bg-gray-700 rounded p-1 px-2 text-sm text-center font-bold text-white hover:bg-gray-800" @click.stop="reload" v-b-tooltip.hover> <b-icon icon="arrow-clockwise"/> 새로고침 </button>
         </div>
 
         <b-table hover small striped responsive ref="envs-table" table-variant="dark" head-variant="dark" foot-variant="dark" class="mt-1"
@@ -100,6 +104,15 @@
           </template>
           <template v-slot:cell(junctions)="row">
             {{ numberOfJunctions(row.item.configuration.junctionId) }}
+          </template>
+          <template v-slot:cell(configuration.method)="row">
+            {{ row.item.configuration.method.toUpperCase() }}
+          </template>
+          <template v-slot:cell(configuration.action)="row">
+            {{ getActionName(row.item.configuration.action) }}
+          </template>
+          <template v-slot:cell(configuration.rewardFunc)="row">
+            {{ getRewardFunctionName(row.item.configuration.rewardFunc) }}
           </template>
           <template v-slot:cell(configuration.period)="row">
             <div v-if="row.item.configuration.period >= 600" class="text-center font-bold p-1">
@@ -198,33 +211,47 @@
             {{ row.item.configuration.toTime.substring(0, 5) }}
           </template>
 
+          <template v-slot:cell(configuration.method)="row">
+            {{ row.item.configuration.method.toUpperCase() }}
+          </template>
+          <template v-slot:cell(configuration.action)="row">
+            {{ getActionName(row.item.configuration.action) }}
+          </template>
+          <template v-slot:cell(configuration.rewardFunc)="row">
+            {{ getRewardFunctionName(row.item.configuration.rewardFunc) }}
+          </template>
+
           <template v-slot:cell(details)="row">
-            <b-button
-              size="sm"
-              variant="primary"
+            <button
+              class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700"
               :to="{
                 name: 'OptimizationResultMap',
                 params: {id: row.item.id}
               }"
             >
               <b-icon icon="journal-check"/> 신호학습
-            </b-button>
-            <b-button
-              size="sm"
-              variant="warning"
+            </button>
+            <button
+            class="bg-blue-400 px-2 py-1 rounded text-sm font-bold hover:bg-blue-700"
               :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
             >
               <!-- <b-icon icon="circle-square"></b-icon> -->
               🚥 신호적용
-            </b-button>
+            </button>
 
-            <b-btn size="sm" variant="secondary" v-b-tooltip.hover
+            <button class="bg-gray-600 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300" v-b-tooltip.hover
               @click.stop="stopSimulation(row.item.id, row.index, $event.target)"
               v-if="row.item.status === 'running'"
             >
               <b-icon icon="stop-fill"/> 중지
-            </b-btn>
-            <b-btn size="sm" @click="removeSimulation(row.item)">X</b-btn>
+            </button>
+            <button class="bg-gray-600 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300" @click="removeSimulation(row.item)">X</button>
+
+
+            <!-- <button class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700" @click="openModify(row.item)">수정</button>
+            <button class="bg-blue-400 px-2 py-1 rounded text-sm font-bold hover:bg-blue-700" @click="registerSimulation(row.item)">실험생성</button>
+            <button class="bg-gray-600 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300" @click="remove(row.item.id)">X</button> -->
+
             <!-- <b-btn
               size="sm"
               variant="danger"

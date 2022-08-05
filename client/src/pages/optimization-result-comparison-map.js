@@ -42,7 +42,13 @@ import drawChart from '@/optsig/chart-reward-phase'
 
 import SignalSystem from '@/actions/action-vis'
 import parseAction from '@/actions/action-parser'
+
+const { log } = window.console
+
 const calcAvg = (values = []) => {
+  if (!Array.isArray(values)) {
+    return 0
+  }
   const sum = values.reduce((acc, cur) => {
     acc += cur
     return acc
@@ -64,31 +70,46 @@ function calcAvgs (data, property) {
 
 function calcAverage (data) {
   const values = Object.values(data)
+  if (values.length < 1) {
+    return [[], []]
+  }
   const stepCount = values[0].length
 
   const sumTravelTime = new Array(stepCount).fill(0)
   const sumPassed = new Array(stepCount).fill(0)
   const avgSpeeds = new Array(stepCount).fill(0)
+  let sumP = 0
+  let sumT = 0
+  let cnt = 0
   for (let i = 0; i < values.length; i++) {
     for (let j = 0; j < stepCount; j++) {
       sumTravelTime[j] += Number(values[i][j].sumTravelTime)
       sumPassed[j] += Number(values[i][j].sumPassed)
       avgSpeeds[j] = Number(values[i][j].avgSpeed)
+
+      sumP = sumP + Number(values[i][j].sumPassed)
+      sumT = sumT + Number(values[i][j].sumTravelTime)
+      cnt += 1
     }
   }
   const avgTravelTimes = []
   for (let i = 0; i < sumTravelTime.length; i++) {
-    if (sumTravelTime[i] !== 0) {
+    if (sumPassed[i] !== 0) {
       avgTravelTimes.push(sumTravelTime[i] / sumPassed[i])
     } else {
-      avgTravelTimes.push(sumTravelTime[i])
+      // avgTravelTimes.push(sumTravelTime[i])
     }
   }
-
-  return [avgTravelTimes, avgSpeeds]
+  // console.log(sumP, sumT, cnt)
+  return [avgTravelTimes, avgSpeeds, sumT / sumP]
 }
 
 function calcEff (ft, rl) {
+  // console.log('향상률계산:', (~~ft - ~~rl) / ~~ft)
+  if (!ft || !rl) {
+    return 0
+  }
+
   return (~~ft - ~~rl) / ~~ft
 }
 
@@ -198,8 +219,6 @@ const initSimulationData = async (
   }
 }
 
-const { log } = console
-
 export default {
   name: 'OptimizationResultComparisonMap',
   mixins: [toastMixin],
@@ -280,7 +299,7 @@ export default {
       trafficLightManager: null,
       // phaseRewardChartFt: null,
       // phaseRewardChartRl: null,
-      selectedNode: '목원대네거리',
+      selectedNode: '도안5단지네거리',
       // selectedNode: '미래부동산삼거리',
       showWaitingMsg: false,
       avgSpeedJunction: 0,
@@ -347,6 +366,7 @@ export default {
       const info = this.chart2.speedsPerJunction
       const s = this.selectedNode
       const t = info[s]
+
       if (t) {
         return [t[0], t[t.length - 1]]
       }
@@ -355,17 +375,27 @@ export default {
   },
   async mounted () {
     const initSignaSystem = () => {
-      const str1 = this.actionForOpt[0].action
+      if (this.actionForOpt.length < 1) {
+        return
+      }
+      const actionFt = this.actionForOpt[0].action
 
-      const o1 = parseAction(str1)
+      const rFt = parseAction(actionFt)
+      if (!rFt) {
+        log('parse action failed:', actionFt)
+        return
+      }
       ss = SignalSystem(container, {
-        offset: o1.offset,
-        duration: o1.duration
+        offset: rFt.offset,
+        duration: rFt.duration
       })
+      const actionRl = this.actionForOpt[1].action
+      const rRl = parseAction(actionRl)
+      ss.update(rRl.offset, rRl.duration)
 
-      const str2 = this.actionForOpt[1].action
-      const o2 = parseAction(str2)
-      ss.update(o2.offset, o2.duration)
+      log('대상교차로:', this.selectedNode)
+      log('기존신호:', this.actionForOpt[0].action)
+      log('최적신호:', this.actionForOpt[1].action)
     }
 
     window.scrollTo(0, 0)
@@ -505,12 +535,6 @@ export default {
       const progress = this.chart1.progress
       if ((progress > 0 && progress < 100) || forceUpdate) {
         this.statusText = 'loading...'
-        // const dataRl = await optSvc
-        //   .getPhaseReward(this.simulation.id, 'rl')
-        //   .then(res => res.data)
-        // const dataFt = await optSvc
-        //   .getPhaseReward(this.simulation.id, 'ft')
-        //   .then(res => res.data)
 
         const [dataRl, dataFt] = await Promise.all([
           optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
@@ -529,10 +553,14 @@ export default {
         const avgFt = calcAverage(dataFt)
 
         const ttsRl = avgRl[0]
+        // console.log(ttsRl)
         const ttsFt = avgFt[0]
 
         const speedsRl = avgRl[1]
         const speedsFt = avgFt[1]
+
+        const avgTTSRL = avgRl[2]
+        const avgTTSFT = avgFt[2]
 
         const avgSpeedRl = calcAvg(speedsRl)
         const avgSpeedFt = calcAvg(speedsFt)
@@ -543,7 +571,8 @@ export default {
         // this.chart2.effSpeed = this.calcEfficency(avgSpeedFt, avgSpeedRl)
 
         // this.chart2.effTravelTime = this.calcEfficency(ttRl, ttFt)
-        this.chart2.effTravelTime = calcEff(ttFt, ttRl)
+        // this.chart2.effTravelTime = calcEff(ttFt, ttRl) * 100
+        this.chart2.effTravelTime = ((avgTTSFT - avgTTSRL) / avgTTSFT) * 100
         // this.chart2.effSpeed = calcEff(avgSpeedFt, avgSpeedRl)
 
         // log(ttFt, ttRl, this.calcEfficency(ttRl, ttFt))
@@ -552,8 +581,9 @@ export default {
 
         // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
         // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
-        this.chart1.avgSpeedJunction = avgSpeedFt
-        this.chart2.avgSpeedJunction = avgSpeedRl
+
+        // this.chart1.avgSpeedJunction = avgSpeedFt
+        // this.chart2.avgSpeedJunction = avgSpeedRl
 
         // this.chart1.travelTimeJunction = this.chart.travelTimeChartInView.avgFt
         // this.chart2.travelTimeJunction = this.chart.travelTimeChartInView.avgRl
@@ -563,17 +593,22 @@ export default {
           'updated... ' + (new Date().getTime() - start) / 1000 + 'sec'
 
         if (ss === null) {
-          initSignaSystem()
+          setTimeout(() => {
+            initSignaSystem()
+          }, 2000)
         } else {
           const str2 = this.actionForOpt[1].action
           const o2 = parseAction(str2)
-          console.log(o2)
           ss.update(o2.offset, o2.duration)
         }
       }
 
       this.timer = setTimeout(async () => {
-        await updateReward()
+        try {
+          await updateReward()
+        } catch (err) {
+          console.log(err.message)
+        }
       }, 4000)
     }
 

@@ -5,7 +5,7 @@ const csv = require('csv-parser')
 const baseDir = '/home/ubuntu/uniq-sim/data'
 
 async function read (simulationId, type) {
-  console.log()
+  console.log('xxxxx')
   let file
   if (type === 'ft') {
     file = `${baseDir}/${simulationId}/output/simulate/ft_phase_reward_output.txt`
@@ -13,10 +13,15 @@ async function read (simulationId, type) {
     file = `${baseDir}/${simulationId}/output/test/rl_phase_reward_output.txt`
   }
 
-  await fse.access(file, fs.F_OK)
+  try {
+    await fse.access(file, fs.F_OK)
 
-  const r = await csvToObj(file)
-  return r
+    const r = await csvToObj(file)
+    return r
+  } catch (err) {
+    console.log(err.message)
+    return {}
+  }
 }
 
 async function csvToObj (file) {
