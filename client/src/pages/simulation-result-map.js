@@ -203,6 +203,7 @@ export default {
       showLoading: false,
       congestionColor,
       currentEdge: null,
+      currentEdgeSpeed: 0,
       playBtnToggle: false,
       player: null,
       wsClient: null,
@@ -260,7 +261,8 @@ export default {
           '-563104128'
         ]
       },
-      showWaitingMsg: false
+      showWaitingMsg: false,
+      speedsByEdgeId: {}
     }
   },
   destroyed () {
@@ -314,7 +316,6 @@ export default {
     this.vdsList = res.data
 
     this.$on('link:selected', async link => {
-      console.log(link)
       this.currentEdge = link
       if (link.speeds) {
         if (!this.speedsPerStep.datasets) {
@@ -343,7 +344,6 @@ export default {
     })
 
     this.$on('salt:data', d => {
-      // console.log('salt:data', d)
       this.avgSpeed =
         d.roads
           .map(road => road.speed)
@@ -351,16 +351,20 @@ export default {
             acc += cur
             return acc
           }, 0) / d.roads.length
+      this.speedsByEdgeId = d.roads.reduce((acc, road) => {
+        acc[road.roadId.trim()] = road
+        return acc
+      }, {})
 
-      this.avgSpeedView = {
-        datasets: [
-          {
-            data: bins(d.roads).map(R.prop('length')),
-            backgroundColor: config.colorsOfSpeed2
-          }
-        ],
-        labels: config.speeds
-      }
+      // this.avgSpeedView = {
+      //   datasets: [
+      //     {
+      //       data: bins(d.roads).map(R.prop('length')),
+      //       backgroundColor: config.colorsOfSpeed2
+      //     }
+      //   ],
+      //   labels: config.speeds
+      // }
     })
 
     this.$on('salt:status', async status => {
@@ -374,17 +378,15 @@ export default {
 
     this.$on('map:focus', data => {
       this.focusData = data
-      this.avgSpeedFocus = {
-        datasets: [
-          {
-            data: bins(data.realTimeEdges).map(R.prop('length')),
-            backgroundColor: config.colorsOfSpeed2
-          }
-        ],
-        labels: config.speeds
-      }
-      // console.log(bins(data.realTimeEdges))
-      // console.log(data.realTimeEdges)
+      // this.avgSpeedFocus = {
+      //   datasets: [
+      //     {
+      //       data: bins(data.realTimeEdges).map(R.prop('length')),
+      //       backgroundColor: config.colorsOfSpeed2
+      //     }
+      //   ],
+      //   labels: config.speeds
+      // }
     })
 
     this.$on('salt:finished', async () => {

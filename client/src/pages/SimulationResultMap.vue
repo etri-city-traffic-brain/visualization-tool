@@ -76,8 +76,6 @@
       :focusData="focusData"
       :simulationId="simulationId"
       :avgSpeed="avgSpeed"
-      :avgSpeedView="avgSpeedView"
-      :avgSpeedFocus="avgSpeedFocus"
       @connect-web-socket="connectWebSocket"
       @toggle-focus-tool="toggleFocusTool"
       :logs="logs"
@@ -86,6 +84,7 @@
 
     <div v-if="currentEdge" class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
       <div v-if="currentEdge">
+      -{{ speedsByEdgeId[currentEdge.LINK_ID] || speedsByEdgeId[currentEdge.LINK_ID + '_0_0'] }}-
         <div class="rounded-xl text-white text-center">
           <h5>
             <b-badge>{{ currentEdge.LINK_ID }}</b-badge>

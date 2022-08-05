@@ -60,7 +60,11 @@ export default map => {
 
   function updateRealtimeSpeed (speedByEdgeId = {}) {
     edgeLayer.getGeometries().forEach(geometry => {
-      const road = speedByEdgeId[geometry.getId()]
+      let edgeId = geometry.getId()
+      if (!edgeId.includes('_')) {
+        edgeId = edgeId + '_0_0'
+      }
+      const road = speedByEdgeId[edgeId]
       if (road) {
         let speed = road.speed
         if (geometry.properties.SPEEDLH <= 30) {

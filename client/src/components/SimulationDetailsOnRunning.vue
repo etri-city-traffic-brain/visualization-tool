@@ -111,8 +111,8 @@ export default {
     focusData: Object,
     simulationId: String,
     avgSpeed: Number,
-    avgSpeedView: Object,
-    avgSpeedFocus: Object,
+    // avgSpeedView: Object,
+    // avgSpeedFocus: Object,
     logs: Array
   },
   methods: {
