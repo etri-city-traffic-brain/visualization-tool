@@ -1,41 +1,54 @@
-export default ({ title, displayLegend = true, fontColor = 'white' } = {}, callback) => ({
+export default (
+  { title, displayLegend = true, fontColor = 'white' } = {},
+  callback
+) => ({
+  animation: false,
+  spanGaps: true, // enable for all datasets
   responsive: true,
+  showLine: false, // disable for a single dataset
   title: {
     display: !!title,
     text: title
+  },
+  interaction: {
+    mode: 'index'
   },
   tooltips: {
     mode: 'index',
     intersect: false
   },
-  hover: {
-    mode: 'nearest',
-    intersect: true,
-    onHover: function (e) {
-      const point = this.getElementAtEvent(e)
-      if (point.length) e.target.style.cursor = 'pointer'
-      else e.target.style.cursor = 'default'
-    }
-  },
+  // hover: {
+  //   mode: 'nearest',
+  //   intersect: false,
+  //   onHover: function (e) {
+  //     const point = this.getElementAtEvent(e)
+  //     if (point.length) e.target.style.cursor = 'pointer'
+  //     else e.target.style.cursor = 'default'
+  //   }
+  // },
   scales: {
-    xAxes: [{
-      ticks: {
-        autoSkip: true,
-        autoSkipPadding: 50,
-        maxRotation: 0,
-        display: true,
-        fontColor
+    xAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 50,
+          maxRotation: 0,
+          display: true,
+          fontColor
+        }
       }
-    }],
-    yAxes: [{
-      ticks: {
-        autoSkip: true,
-        autoSkipPadding: 10,
-        maxRotation: 0,
-        display: true,
-        fontColor
+    ],
+    yAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 10,
+          maxRotation: 0,
+          display: true,
+          fontColor
+        }
       }
-    }]
+    ]
   },
   legend: {
     display: displayLegend,

@@ -38,7 +38,6 @@ import style from '@/components/style'
 
 import TrafficLightManager from '@/map2/map-traffic-lights'
 import map from '@/region-code'
-import drawChart from '@/optsig/chart-reward-phase'
 
 import SignalSystem from '@/actions/action-vis'
 import parseAction from '@/actions/action-parser'
@@ -56,61 +55,39 @@ const calcAvg = (values = []) => {
   return sum / values.length
 }
 
-function calcAvgs (data, property) {
-  const values = Object.values(data)
-  const avg = new Array(values[0].length).fill(0)
-  const len = values[0].length
-  for (let i = 0; i < values.length; i++) {
-    for (let j = 0; j < len; j++) {
-      avg[j] += Number(values[i][j][property])
-    }
-  }
-  return avg.map(a => a / values.length)
-}
-
 function calcAverage (data) {
   const values = Object.values(data)
   if (values.length < 1) {
-    return [[], []]
+    return [0, [], []]
   }
   const stepCount = values[0].length
 
-  const sumTravelTime = new Array(stepCount).fill(0)
-  const sumPassed = new Array(stepCount).fill(0)
+  const sumTravelTimes = new Array(stepCount).fill(0)
+  const sumPasseds = new Array(stepCount).fill(0)
   const avgSpeeds = new Array(stepCount).fill(0)
-  let sumP = 0
-  let sumT = 0
-  let cnt = 0
+  let sumPassed = 0
+  let sumTravelTime = 0
   for (let i = 0; i < values.length; i++) {
     for (let j = 0; j < stepCount; j++) {
-      sumTravelTime[j] += Number(values[i][j].sumTravelTime)
-      sumPassed[j] += Number(values[i][j].sumPassed)
-      avgSpeeds[j] = Number(values[i][j].avgSpeed)
+      const target = values[i][j]
+      sumTravelTimes[j] += Number(target.sumTravelTime)
+      sumPasseds[j] += Number(target.sumPassed)
+      avgSpeeds[j] = Number(target.avgSpeed)
 
-      sumP = sumP + Number(values[i][j].sumPassed)
-      sumT = sumT + Number(values[i][j].sumTravelTime)
-      cnt += 1
+      sumPassed = sumPassed + Number(target.sumPassed)
+      sumTravelTime = sumTravelTime + Number(target.sumTravelTime)
     }
   }
   const avgTravelTimes = []
-  for (let i = 0; i < sumTravelTime.length; i++) {
-    if (sumPassed[i] !== 0) {
-      avgTravelTimes.push(sumTravelTime[i] / sumPassed[i])
+  for (let i = 0; i < sumTravelTimes.length; i++) {
+    if (sumPasseds[i] !== 0) {
+      avgTravelTimes.push(sumTravelTimes[i] / sumPasseds[i])
     } else {
       // avgTravelTimes.push(sumTravelTime[i])
     }
   }
   // console.log(sumP, sumT, cnt)
-  return [avgTravelTimes, avgSpeeds, sumT / sumP]
-}
-
-function calcEff (ft, rl) {
-  // console.log('향상률계산:', (~~ft - ~~rl) / ~~ft)
-  if (!ft || !rl) {
-    return 0
-  }
-
-  return (~~ft - ~~rl) / ~~ft
+  return [sumTravelTime / sumPassed, avgTravelTimes, avgSpeeds]
 }
 
 const dataset = (label, color, data) => ({
@@ -150,7 +127,12 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
   }
 }
 
-const makeSpeedLineData = (dataFt = [], dataRl = []) => {
+const makeSpeedLineData = (
+  dataFt = [],
+  dataRl = [],
+  avgTTRL = 0,
+  avgTTFT = 0
+) => {
   let avgFt = dataFt.reduce((acc, cur) => (acc += ~~cur), 0) / dataFt.length
   let avgRl = dataRl.reduce((acc, cur) => (acc += ~~cur), 0) / dataRl.length
 
@@ -159,19 +141,17 @@ const makeSpeedLineData = (dataFt = [], dataRl = []) => {
 
   return {
     labels: new Array(dataRl.length).fill(0).map((_, i) => i),
+    normalized: true,
+
     datasets: [
+      dataset('기존신호', 'grey', dataFt),
+      dataset('최적신호', 'orange', dataRl),
+      dataset('기존신호(평균)', 'blue', new Array(dataRl.length).fill(avgTTFT)),
       dataset(
-        '기존신호',
-        'grey',
-        dataFt.map(v => v.toFixed(2))
-      ),
-      dataset(
-        '최적신호',
-        'orange',
-        dataRl.map(v => v.toFixed(2))
-      ),
-      dataset('기존신호(평균)', 'blue', new Array(dataRl.length).fill(avgFt)),
-      dataset('최적신호(평균)', 'skyblue', new Array(dataRl.length).fill(avgRl))
+        '최적신호(평균)',
+        '#7FFFD4',
+        new Array(dataRl.length).fill(avgTTRL)
+      )
     ],
     avgFt: avgFt,
     avgRl: avgRl
@@ -544,51 +524,32 @@ export default {
         this.chart1.speedsPerJunction = dataFt // simulate
         this.chart2.speedsPerJunction = dataRl // optimization
 
-        // const speedsRl = calcAvgs(dataRl, 'avgSpeed')
-        // const speedsFt = calcAvgs(dataFt, 'avgSpeed')
-
-        // const ttsRl = calcAvgs(dataRl, 'avgTravelTime')
-        // const ttsFt = calcAvgs(dataFt, 'avgTravelTime')
         const avgRl = calcAverage(dataRl)
         const avgFt = calcAverage(dataFt)
 
-        const ttsRl = avgRl[0]
-        // console.log(ttsRl)
-        const ttsFt = avgFt[0]
+        const [avgTTRL, avgTTRLs, avgSpeedsRL] = avgRl
+        const [avgTTFT, avgTTFTs, avgSpeedsFT] = avgFt
 
-        const speedsRl = avgRl[1]
-        const speedsFt = avgFt[1]
-
-        const avgTTSRL = avgRl[2]
-        const avgTTSFT = avgFt[2]
-
-        const avgSpeedRl = calcAvg(speedsRl)
-        const avgSpeedFt = calcAvg(speedsFt)
-
-        const ttRl = calcAvg(ttsRl)
-        const ttFt = calcAvg(ttsFt)
-
-        // this.chart2.effSpeed = this.calcEfficency(avgSpeedFt, avgSpeedRl)
-
-        // this.chart2.effTravelTime = this.calcEfficency(ttRl, ttFt)
-        // this.chart2.effTravelTime = calcEff(ttFt, ttRl) * 100
-        this.chart2.effTravelTime = ((avgTTSFT - avgTTSRL) / avgTTSFT) * 100
+        this.chart2.effTravelTime = ((avgTTFT - avgTTRL) / avgTTFT) * 100
         // this.chart2.effSpeed = calcEff(avgSpeedFt, avgSpeedRl)
 
-        // log(ttFt, ttRl, this.calcEfficency(ttRl, ttFt))
-        this.chart.avgSpeedChartInView = makeSpeedLineData(speedsFt, speedsRl)
-        this.chart.travelTimeChartInView = makeSpeedLineData(ttsFt, ttsRl)
+        this.chart.avgSpeedChartInView = makeSpeedLineData(
+          avgSpeedsFT,
+          avgSpeedsRL
+        )
 
-        // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
-        // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
+        this.chart.travelTimeChartInView = makeSpeedLineData(
+          avgTTFTs,
+          avgTTRLs,
+          avgTTRL,
+          avgTTFT
+        )
 
-        // this.chart1.avgSpeedJunction = avgSpeedFt
-        // this.chart2.avgSpeedJunction = avgSpeedRl
+        this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
+        this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
 
-        // this.chart1.travelTimeJunction = this.chart.travelTimeChartInView.avgFt
-        // this.chart2.travelTimeJunction = this.chart.travelTimeChartInView.avgRl
-        this.chart1.travelTimeJunction = ttFt
-        this.chart2.travelTimeJunction = ttRl
+        this.chart1.travelTimeJunction = avgTTFT
+        this.chart2.travelTimeJunction = avgTTRL
         this.statusText =
           'updated... ' + (new Date().getTime() - start) / 1000 + 'sec'
 

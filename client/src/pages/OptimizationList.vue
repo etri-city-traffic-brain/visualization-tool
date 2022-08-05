@@ -222,22 +222,24 @@
           </template>
 
           <template v-slot:cell(details)="row">
-            <button
-              class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700"
+            <b-button
+              size="sm"
+              variant="primary"
               :to="{
                 name: 'OptimizationResultMap',
                 params: {id: row.item.id}
               }"
             >
               <b-icon icon="journal-check"/> 신호학습
-            </button>
-            <button
-            class="bg-blue-400 px-2 py-1 rounded text-sm font-bold hover:bg-blue-700"
+            </b-button>
+            <b-button
+              size="sm"
+              variant="info"
               :to="{ name: 'OptimizationResultComparisonMap', params: {id: row.item.id}}"
             >
               <!-- <b-icon icon="circle-square"></b-icon> -->
               🚥 신호적용
-            </button>
+            </b-button>
 
             <button class="bg-gray-600 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300" v-b-tooltip.hover
               @click.stop="stopSimulation(row.item.id, row.index, $event.target)"

@@ -76,7 +76,7 @@
                 <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-300 flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">평균속도</div>
                   <div>
-                    {{chart1.avgSpeedJunction.toFixed(2) }}<span class="text-sm">km</span>
+                    {{chart1.avgSpeedJunction }}<span class="text-sm">km</span>
                   </div>
                 </div>
                 <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-300  flex items-center justify-center space-x-2 rounded-lg">
@@ -106,7 +106,7 @@
                 <div class="text-center text-2xl font-bold p-2 bg-yellow-200  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">평균속도</div>
                   <div class="flex justify-center space-x-2">
-                    <div>{{chart2.avgSpeedJunction.toFixed(2) }}<span class="text-sm">km</span> </div>
+                    <div>{{chart2.avgSpeedJunction }}<span class="text-sm">km</span> </div>
                     <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effSpeed}}<span class="text-xs">%</span></div> -->
                   </div>
                 </div>
