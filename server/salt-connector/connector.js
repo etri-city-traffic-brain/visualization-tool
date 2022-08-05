@@ -39,8 +39,8 @@ module.exports = (httpServer, tcpPort) => {
   // send to simulator
   webSocketServer.on(EVENT_SET, data => {
     tcpServer.send(data.simulationId, saltMsgFactory.makeSet(data))
-    // console.log('**** send set to', data.simulationId)
-    // console.log('**** send set to', data)
+    console.log('**** send set to', data.simulationId)
+    console.log('**** send set to', data)
   })
 
   webSocketServer.on(EVENT_STOP, data => {
