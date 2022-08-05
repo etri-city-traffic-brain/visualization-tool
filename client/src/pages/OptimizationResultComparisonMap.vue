@@ -72,7 +72,7 @@
           <div class="grid grid-cols-2">
             <div class="bg-gray-700 rounded-lg">
               <div class="grid grid-cols-3 gap-1 m-1 items-center">
-                <div class="text-white text-center">기존신호</div>
+                <div class="text-white text-center p-2 text-xl font-bold">기존신호</div>
                 <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-300 flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">평균속도</div>
                   <div>
@@ -102,7 +102,7 @@
             </div>
             <div class="bg-yellow-400 rounded-lg">
               <div class="grid grid-cols-3 gap-1 text-black m-1 items-center">
-                <div class="text-black text-center">최적신호</div>
+                <div class="text-black text-center bg-yellow-300 p-2 text-xl font-bold">최적신호</div>
                 <div class="text-center text-2xl font-bold p-2 bg-yellow-200  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">평균속도</div>
                   <div class="flex justify-center space-x-2">
@@ -198,6 +198,7 @@
               <div v-else class=" p-5">
                 <div class="text-4xl text-white animate-pulse">Waiting...</div>
                 <div class="text-md text-white pl-3">데이터가 확인중...</div>
+                <div class="text-md text-white pl-3"> {{ statusText }}</div>
               </div>
             </div>
           </div>
@@ -225,9 +226,9 @@
         <div class="col-span-3">
           <div content-class="" active-nav-item-class="" >
             <div title="평균통과시간" title-item-class="font-bold bg-gray-500 " v-if="!speedView">
-              <div class="bg-blue-400 mb-1 p-1 text-center">평균통과시간</div>
+              <div class="bg-blue-400 mb-1 p-1 text-center text-white">평균통과시간</div>
               <div class="text-white bg-gray-800 p-1 text-sm font-bold">
-                <line-chart :chartData="chart.travelTimeChartInView" :options="lineChartOption({})" :height="165" />
+                <line-chart :chartData="chart.travelTimeChartInView" :options="lineChartOption({})" :height="150" />
               </div>
             </div>
             <!-- <div title="평균속도" title-item-class="font-bold bg-gray-500" v-else>
@@ -240,7 +241,7 @@
         </div>
         <div class="text-white items-center">
           <div class="bg-blue-400 mb-1 p-1 text-center">신호시스템</div>
-          <div class="text-center">대상교차로: {{ selectedNode }}</div>
+          <div class="text-center bg-gray-800">{{ selectedNode }}</div>
           <!-- <div>{{ actionForOpt[0].action }}</div> -->
           <!-- <div>{{ actionForOpt[1].action }}</div> -->
 

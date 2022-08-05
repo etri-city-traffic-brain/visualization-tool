@@ -112,9 +112,10 @@ function SignalSystem (container, ns = {}) {
     ctx.font = '30px Verdana'
     const offset = offsetUpdated - ns.offset
     const osffsetStr = offset > 0 ? '+' + offset : offset
-    ctx.fillText(ns.offset, 0, -15)
+    ctx.fillText('Offset', 0, -40)
+    ctx.fillText(ns.offset, 0, -5)
     ctx.fillStyle = 'yellow'
-    ctx.fillText(osffsetStr, 0, 15)
+    ctx.fillText(osffsetStr, 0, 25)
 
     ctx.fill()
     ctx.stroke()

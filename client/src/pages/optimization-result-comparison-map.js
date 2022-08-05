@@ -520,12 +520,15 @@ export default {
           optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
           optSvc.getPhaseReward(this.simulation.id, 'ft').then(res => res.data)
         ])
+        this.statusText = '데이터 로드 완료'
 
         this.chart1.speedsPerJunction = dataFt // simulate
         this.chart2.speedsPerJunction = dataRl // optimization
 
         const avgRl = calcAverage(dataRl)
         const avgFt = calcAverage(dataFt)
+
+        this.statusText = '...'
 
         const [avgTTRL, avgTTRLs, avgSpeedsRL] = avgRl
         const [avgTTFT, avgTTFTs, avgSpeedsFT] = avgFt
@@ -537,13 +540,15 @@ export default {
           avgSpeedsFT,
           avgSpeedsRL
         )
-
+        this.statusText = '평균속도 계산완료'
         this.chart.travelTimeChartInView = makeSpeedLineData(
           avgTTFTs,
           avgTTRLs,
           avgTTRL,
           avgTTFT
         )
+
+        this.statusText = '평균통과시간 계산완료'
 
         this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
         this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
@@ -560,6 +565,7 @@ export default {
         } else {
           const str2 = this.actionForOpt[1].action
           const o2 = parseAction(str2)
+          this.statusText = '신호정보 업데이트'
           ss.update(o2.offset, o2.duration)
         }
       }
