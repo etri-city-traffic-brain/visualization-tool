@@ -65,17 +65,20 @@ function calcAverage (data) {
   const sumTravelTimes = new Array(stepCount).fill(0)
   const sumPasseds = new Array(stepCount).fill(0)
   const avgSpeeds = new Array(stepCount).fill(0)
+  let sumAvgSpeed = 0
   let sumPassed = 0
   let sumTravelTime = 0
+  let cnt = 0
   for (let i = 0; i < values.length; i++) {
     for (let j = 0; j < stepCount; j++) {
       const target = values[i][j]
       sumTravelTimes[j] += Number(target.sumTravelTime)
       sumPasseds[j] += Number(target.sumPassed)
-      avgSpeeds[j] = Number(target.avgSpeed)
-
+      avgSpeeds[j] += Number(target.avgSpeed)
+      sumAvgSpeed = sumAvgSpeed + Number(target.avgSpeed)
       sumPassed = sumPassed + Number(target.sumPassed)
       sumTravelTime = sumTravelTime + Number(target.sumTravelTime)
+      cnt += 1
     }
   }
   const avgTravelTimes = []
@@ -87,7 +90,12 @@ function calcAverage (data) {
     }
   }
   // console.log(sumP, sumT, cnt)
-  return [sumTravelTime / sumPassed, avgTravelTimes, avgSpeeds]
+  return [
+    sumTravelTime / sumPassed,
+    avgTravelTimes,
+    avgSpeeds,
+    sumAvgSpeed / cnt
+  ]
 }
 
 const dataset = (label, color, data) => ({
@@ -528,19 +536,17 @@ export default {
         const avgRl = calcAverage(dataRl)
         const avgFt = calcAverage(dataFt)
 
-        this.statusText = '...'
-
-        const [avgTTRL, avgTTRLs, avgSpeedsRL] = avgRl
-        const [avgTTFT, avgTTFTs, avgSpeedsFT] = avgFt
+        const [avgTTRL, avgTTRLs, avgSpeedsRL, avgSpdRl] = avgRl
+        const [avgTTFT, avgTTFTs, avgSpeedsFT, avgSpdFt] = avgFt
 
         this.chart2.effTravelTime = ((avgTTFT - avgTTRL) / avgTTFT) * 100
         // this.chart2.effSpeed = calcEff(avgSpeedFt, avgSpeedRl)
 
-        this.chart.avgSpeedChartInView = makeSpeedLineData(
-          avgSpeedsFT,
-          avgSpeedsRL
-        )
-        this.statusText = '평균속도 계산완료'
+        // this.chart.avgSpeedChartInView = makeSpeedLineData(
+        //   avgSpeedsFT,
+        //   avgSpeedsRL
+        // )
+
         this.chart.travelTimeChartInView = makeSpeedLineData(
           avgTTFTs,
           avgTTRLs,
@@ -550,8 +556,10 @@ export default {
 
         this.statusText = '평균통과시간 계산완료'
 
-        this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
-        this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
+        // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
+        // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
+        this.chart1.avgSpeedJunction = avgSpdFt.toFixed(2)
+        this.chart2.avgSpeedJunction = avgSpdRl.toFixed(2)
 
         this.chart1.travelTimeJunction = avgTTFT
         this.chart2.travelTimeJunction = avgTTRL
