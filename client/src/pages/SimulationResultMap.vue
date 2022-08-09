@@ -12,8 +12,8 @@
         <div class="flex justify-between items-center p-2 border-b">
           <div class="text-white font-bold">시뮬레이션: {{ simulationId }}</div>
           <div class="text-center flex items-center space-x-1">
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click.stop="startSimulation()" > 시작<b-icon icon="caret-right-fill"/> </button>
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click="stop" > 중지<b-icon icon="stop-fill"/> </button>
+            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click.stop="startSimulation()"> 시작<b-icon icon="caret-right-fill"/> </button>
+            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click="stop"> 중지<b-icon icon="stop-fill"/> </button>
           </div>
         </div>
         <div class="p-2 text-white border-b flex justify-between items-center">
@@ -68,7 +68,7 @@
         </div>
       </div>
       <div class="p-1 py-2 bg-gray-700 rounded-xl ">
-        <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption()" :height="50"/>
+        <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption('시각', '')" :height="50"/>
       </div>
     </div>
 
@@ -103,7 +103,7 @@
         </div>
         <div class="bg-gray-800 p-2 rounded-xl mt-1" >
           <div class="text-white text-sm text-center">VOLUME</div>
-          <line-chart :chartData="chart.linkVehPassed" :options="defaultOption('통행량')" :height="200"/>
+          <line-chart :chartData="chart.linkVehPassed" :options="defaultOption('', '통행량')" :height="200"/>
         </div>
       </div>
       <div v-else>
@@ -154,7 +154,7 @@
     position: absolute;
     padding: 0;
     top: 180px;
-    right: 5px;
+    right: 10px;
     z-index:100;
   }
 </style>
