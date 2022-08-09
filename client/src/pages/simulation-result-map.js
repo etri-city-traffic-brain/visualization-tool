@@ -7,15 +7,12 @@
  */
 import StepPlayer from '@/stepper/step-runner'
 import stepperMixin from '@/stepper/mixin'
-// import * as d3 from 'd3'
-import * as R from 'ramda'
+
 import makeMap from '@/map2/make-map'
 import MapManager from '@/map2/map-manager'
 
 import WebSocketClient from '@/realtime/ws-client'
-
 import simulationService from '@/service/simulation-service'
-
 import SimulationResult from '@/pages/SimulationResult.vue'
 
 import HistogramChart from '@/components/charts/HistogramChart'
@@ -32,23 +29,18 @@ import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 import D3SpeedBar from '@/charts/d3/D3SpeedBar'
 import axios from 'axios'
-// import D3SpeedBar from '../charts/d3/D3SpeedBar.vue';
-import bins from '@/stats/histogram'
 import userState from '@/user-state'
 import region from '@/map2/region'
-import config from '@/stats/config'
 import map from '@/region-code'
-// const pieDefault = () => ({
-//   datasets: [
-//     {
-//       data: [1, 1, 1],
-//       backgroundColor: ['red', 'orange', 'green']
-//     }
-//   ],
-//   labels: ['막힘', '정체', '원활']
-// })
 
-const defaultOption = () => ({
+// import * as d3 from 'd3'
+// import * as R from 'ramda'
+// import D3SpeedBar from '../charts/d3/D3SpeedBar.vue';
+// import bins from '@/stats/histogram'
+// import config from '@/stats/config'
+// import { labels } from '../utils/color-of-congestion'
+
+const defaultOption = yTitle => ({
   responsive: true,
   title: {
     display: false,
@@ -65,6 +57,11 @@ const defaultOption = () => ({
   scales: {
     xAxes: [
       {
+        scaleLabel: {
+          display: true,
+          labelString: '시각',
+          fontColor: 'white'
+        },
         ticks: {
           autoSkip: true,
           autoSkipPadding: 50,
@@ -76,12 +73,21 @@ const defaultOption = () => ({
     ],
     yAxes: [
       {
+        scaleLabel: {
+          display: true,
+          labelString: yTitle || '속도(km/h)',
+          fontColor: 'white'
+        },
         ticks: {
           autoSkip: true,
-          autoSkipPadding: 10,
+          autoSkipPadding: 20,
           maxRotation: 0,
           display: true,
-          fontColor: 'white'
+          fontColor: 'white',
+          callback: function (value, index, ticks) {
+            return value
+            // return value + ' km/h'
+          }
         }
       }
     ]
@@ -108,11 +114,7 @@ const makeLineChart = (data, label, color) => {
 
   return {
     labels: new Array(data.length).fill(0).map((_, i) => i + 'km'),
-    datasets: [
-      dataset(label, color, data)
-      // dataset('평균속도', '#1E90FF', data2)
-      // dataset('제한속도', '#FF0000', data3),
-    ]
+    datasets: [dataset(label, color, data)]
   }
 }
 
@@ -146,7 +148,7 @@ function makeLinkCompChart (data) {
   }
 }
 
-const makeLinkSpeedChartData = (data1, data2, data3) => {
+const makeLinkSpeedChartData = (data1, startTime, period) => {
   const dataset = (label, color, data) => ({
     label,
     fill: false,
@@ -157,8 +159,23 @@ const makeLinkSpeedChartData = (data1, data2, data3) => {
     data
   })
 
+  const st = startTime.substring(0, 2)
+  const pe = period / 60
+
+  let h = Number(st) - 1
+  const labels = []
+  for (let i = 0, j = 0; i < data1.length; i++, j += pe) {
+    if (j % 60 === 0) {
+      h += 1
+    }
+    labels.push(
+      (h + '').padStart(2, '0') + ':' + ((j % 60) + '').padStart(2, '0')
+    )
+  }
+
   return {
-    labels: new Array(data1.length).fill(0).map((_, i) => i),
+    // labels: new Array(data1.length).fill(0).map((_, i) => st + ':' + pe * i),
+    labels: labels,
     datasets: [
       dataset('링크속도', '#7FFFD4', data1)
       // dataset('평균속도', '#1E90FF', data2)
@@ -227,40 +244,38 @@ export default {
       focusData: {
         speed: 0.0
       },
-      // avgSpeedView: pieDefault(),
-      // avgSpeedFocus: pieDefault(),
       logs: [],
-      bottomStyle: {
-        height: '220px',
-        borderRadius: '0px',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        position: 'fixed',
-        bottom: 0,
-        width: '100%'
-      },
-      playerStyle: {
-        // width: '300px',
-        // bottom: '150px'
-        // zIndex: 999,
-        // position: 'fixed',
-        // top: '50px',
-        // right: '10px'
-      },
-      vdsList: {},
-      rseList: {
-        RSE1501RSE1504: ['-563111309', '-563105261', '-563105256', '563108468'],
-        RSE1501RSE1505: [
-          '563105249',
-          '-563108169',
-          '563108170',
-          '563108165',
-          '-563104339',
-          '-563105246',
-          '-563105250',
-          '-563104128'
-        ]
-      },
+      // bottomStyle: {
+      //   height: '220px',
+      //   borderRadius: '0px',
+      //   overflowY: 'auto',
+      //   overflowX: 'hidden',
+      //   position: 'fixed',
+      //   bottom: 0,
+      //   width: '100%'
+      // },
+      // playerStyle: {
+      // width: '300px',
+      // bottom: '150px'
+      // zIndex: 999,
+      // position: 'fixed',
+      // top: '50px',
+      // right: '10px'
+      // },
+      // vdsList: {},
+      // rseList: {
+      //   RSE1501RSE1504: ['-563111309', '-563105261', '-563105256', '563108468'],
+      //   RSE1501RSE1505: [
+      //     '563105249',
+      //     '-563108169',
+      //     '563108170',
+      //     '563108165',
+      //     '-563104339',
+      //     '-563105246',
+      //     '-563105250',
+      //     '-563104128'
+      //   ]
+      // },
       showWaitingMsg: false,
       speedsByEdgeId: {}
     }
@@ -286,9 +301,10 @@ export default {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
 
-    // this.resize()
+    this.resize()
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
 
+    setTimeout(() => this.centerTo(), 1000)
     await this.updateSimulation()
 
     this.mapManager = MapManager({
@@ -329,10 +345,8 @@ export default {
 
         this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
           this.speedsPerStep.datasets[0].data,
-          new Array(this.speedsPerStep.datasets[0].data.length).fill(
-            this.edgeSpeed()
-          ),
-          []
+          this.simulation.configuration.fromTime,
+          this.simulation.configuration.period
         )
       }
 
@@ -505,12 +519,11 @@ export default {
       this.speedsPerStep = await statisticsService.getSummaryChart(
         this.simulationId
       )
+
       this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
         this.speedsPerStep.datasets[0].data,
-        new Array(this.speedsPerStep.datasets[0].data.length).fill(
-          this.edgeSpeed()
-        ),
-        []
+        this.simulation.configuration.fromTime,
+        this.simulation.configuration.period
       )
     },
     edgeSpeed () {
@@ -521,7 +534,7 @@ export default {
     },
     resize () {
       // this.mapHeight = window.innerHeight - 220; // update map height to current height
-      // this.mapHeight = window.innerHeight - 160 // update map height to current height
+      this.mapHeight = window.innerHeight - 200 // update map height to current height
       // this.mapHeight = window.innerHeight - 250 // update map height to current height
     },
     togglePlay () {
@@ -555,8 +568,9 @@ export default {
       }
     },
     centerTo (locationCode) {
-      const center = region[locationCode] || region[1]
-      this.map.animateTo({ center }, { duration: 2000 })
+      const center = region[this.config.region] || region['doan']
+      this.map.animateTo({ center }, { duration: 1000 })
+      console.log(this.config.region, ', center:', center)
     },
     makeToast (msg, variant = 'info') {
       this.$bvToast.toast(msg, {
@@ -595,27 +609,19 @@ export default {
         // this.chart.linkSpeeds = makeLineChart(linkData.values, '링크속도', 'skyblue')
         // this.chart.linkSpeeds = makeLinkSpeedChartData(linkData.values, [10, 20, 30, 10, 20, 30])
         // const vdsSpeedData = { label: 'vds', color: 'skyblue', data: [] }
-        let vdsD = [[]]
-        if (vdsId) {
-          const res = await axios({
-            url: '/salt/v1/vds/volume/' + vdsId,
-            method: 'get'
-          })
-          vdsD = res.data
-          this.chart.linkSpeeds = makeLinkCompChart([
-            { label: 'simulation', color: '#FF8C00', data: linkData.values },
-            { label: 'vds', color: 'skyblue', data: vdsD.map(v => v[1]) }
-          ])
-        } else {
-          this.chart.linkSpeeds = makeLinkCompChart([
-            { label: 'simulation', color: '#FF8C00', data: linkData.values }
-            // {
-            //   label: 'vds',
-            //   color: 'skyblue',
-            //   data: new Array(linkData.values.length).fill(0)
-            // }
-          ])
-        }
+        // let vdsD = [[]]
+        // if (vdsId) {
+        // const res = await axios({ url: '/salt/v1/vds/volume/' + vdsId, method: 'get' })
+        // vdsD = res.data
+        // this.chart.linkSpeeds = makeLinkCompChart([
+        //   { label: 'simulation', color: '#FF8C00', data: linkData.values },
+        //   { label: 'vds', color: 'skyblue', data: vdsD.map(v => v[1]) }
+        // ])
+        // } else {
+        // }
+        this.chart.linkSpeeds = makeLinkCompChart([
+          { label: 'simulation', color: '#FF8C00', data: linkData.values }
+        ])
 
         const e = this.chart.links.findIndex(v => v.linkId === linkId)
         if (e < 0) {
@@ -626,55 +632,46 @@ export default {
         }
 
         // const vdsVolumeData = { label: 'vds', color: '#8FBC8F', data: [] }
-        let vdsD2 = [[]]
-        if (vdsId) {
-          const res = await axios({
-            url: '/salt/v1/vds/speed/' + vdsId,
-            method: 'get'
-          })
-          vdsD2 = res.data
-          this.chart.linkVehPassed = makeLinkCompChart([
-            { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
-            // { label: 'vds', color: '#8FBC8F', data: vdsD2.map(v => v[1]) }
-          ])
-        } else {
-          this.chart.linkVehPassed = makeLinkCompChart([
-            { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
-            // {
-            //   label: 'vds',
-            //   color: '#8FBC8F',
-            //   data: new Array(linkData.vehPassed.length).fill(0)
-            // }
-          ])
-        }
+        // let vdsD2 = [[]]
+        // if (vdsId) {
+        // const res = await axios({ url: '/salt/v1/vds/speed/' + vdsId, method: 'get' })
+        // vdsD2 = res.data
+        // this.chart.linkVehPassed = makeLinkCompChart([
+        //   { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
+        // ])
+        // } else {
+        // }
+        this.chart.linkVehPassed = makeLinkCompChart([
+          { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
+        ])
       } catch (err) {
         console.log(err.message)
       }
 
       // this.chart.linkVehPassed = makeLineChart(linkData.vehPassed, '통과차량', 'blue')
       // this.chart.linkWaitingTime = makeLineChart(linkData.waitingTime, '대기시간', 'red')
-    },
-    async goToLink (linkId) {
-      const res = await axios({
-        method: 'get',
-        url: `/salt/v1/map/links/${linkId}`
-      })
-      const link = res.data
-      this.map.animateTo({
-        center: link.geometry.coordinates[0]
-      })
-    },
-    async goToRse (rseId) {
-      const link0 = this.rseList[rseId][0]
-      const res = await axios({
-        method: 'get',
-        url: `/salt/v1/map/links/${link0}`
-      })
-      const link = res.data
-      this.map.animateTo({
-        center: link.geometry.coordinates[0]
-      })
-      this.mapManager.showRse(rseId, this.rseList[rseId])
     }
+    // async goToLink (linkId) {
+    //   const res = await axios({
+    //     method: 'get',
+    //     url: `/salt/v1/map/links/${linkId}`
+    //   })
+    //   const link = res.data
+    //   this.map.animateTo({
+    //     center: link.geometry.coordinates[0]
+    //   })
+    // },
+    // async goToRse (rseId) {
+    //   const link0 = this.rseList[rseId][0]
+    //   const res = await axios({
+    //     method: 'get',
+    //     url: `/salt/v1/map/links/${link0}`
+    //   })
+    //   const link = res.data
+    //   this.map.animateTo({
+    //     center: link.geometry.coordinates[0]
+    //   })
+    //   this.mapManager.showRse(rseId, this.rseList[rseId])
+    // }
   }
 }

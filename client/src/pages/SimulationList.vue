@@ -3,27 +3,29 @@
   <div class="bg-gray-500- border-2 border-gray-500 mt-2 rounded-xl py-2 px-2 min-w-max">
     <!-- <div class="text-white font-bold bg-gray-700 w-40 text-center px-2 py-1 rounded"> 🚙 교통 시뮬레이션 </div> -->
     <div class="text-white text-lg text-center font-bold bg-gray-700- w-32 py-1 rounded">교통시뮬레이션</div>
-    <div class="p-1 flex justify-end space-x-1" >
+    <div class="p-1 flex justify-between space-x-1" >
       <button
         v-b-modal.create-simulation-modal
         class="px-2 bg-blue-400 text-sm py-1 hover:bg-blue-600 hover:text-white rounded font-bold text-white"
       >
         <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
       </button>
-      <button
-        class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
-        v-b-toggle.collapse1
-        title="시뮬레이션 비교"
-      >
-        <b-icon icon="files"/> 비교
-      </button>
-      <b-btn
-        size="sm"
-        variant="dark"
-        @click.stop="updateTable"
-      >
-        <b-icon icon="arrow-clockwise"/> 새로고침
-      </b-btn>
+      <div>
+        <button
+          class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
+          v-b-toggle.collapse1
+          title="시뮬레이션 비교"
+        >
+          <b-icon icon="files"/> 비교
+        </button>
+        <b-btn
+          size="sm"
+          variant="dark"
+          @click.stop="updateTable"
+        >
+          <b-icon icon="arrow-clockwise"/> 새로고침
+        </b-btn>
+      </div>
       <!--
       <b-btn
         :pressed.sync="autoRefresh"

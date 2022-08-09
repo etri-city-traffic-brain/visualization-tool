@@ -76,7 +76,7 @@
           <b-form-select v-model="methodOptionSelected" :options="methodOptions" class="" size="sm"/>
         </div>
         <div class="bg-gray-700 rounded text-center p-1">
-          모델
+          상태
           <b-form-select v-model="stateOptionSelected" :options="stateOptions" class="" size="sm"/>
         </div>
 

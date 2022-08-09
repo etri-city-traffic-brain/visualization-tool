@@ -12,13 +12,15 @@
         <div class="flex justify-between items-center p-2 border-b">
           <div class="text-white font-bold">시뮬레이션: {{ simulationId }}</div>
           <div class="text-center flex items-center space-x-1">
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click.stop="startSimulation()" > 시작<b-icon icon="caret-right-fill"/> </button>
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400" @click="stop" > 중지<b-icon icon="stop-fill"/> </button>
+            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click.stop="startSimulation()" > 시작<b-icon icon="caret-right-fill"/> </button>
+            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click="stop" > 중지<b-icon icon="stop-fill"/> </button>
           </div>
         </div>
         <div class="p-2 text-white border-b flex justify-between items-center">
           <div>
-            지역: {{ getRegionName(config.region) }} 시간: {{ config.fromTime }} ~ {{ config.toTime }}
+            <span class="font-bold bg-gray-500 p-1 rounded"> 지역</span>
+             {{ getRegionName(config.region) }}
+             <span class="font-bold bg-gray-500 p-1 rounded"> 시간</span> {{ config.fromTime }} ~ {{ config.toTime }}
           </div>
           <div>
             <button @click="showModal"><b-icon icon="gear-fill"></b-icon></button>
@@ -26,13 +28,15 @@
         </div>
       </div>
     </div>
+
     <div class="relative">
       <div :ref="mapId" :id="mapId" :style="{height: mapHeight + 'px'}" class="p-1"/>
       <div class="w-40 p-1 absolute bottom-2 right-24">
         <UniqCongestionColorBar/>
       </div>
-      <div class="w-40 p-1 absolute bottom-2 left-2">
+      <div class="w-80 p-1 absolute bottom-2 left-2 flex items-center">
         <uniq-map-changer :map="map"/>
+        <b-button variant="dark" size="sm" class="ml-1" @click="centerTo">중앙</b-button>
       </div>
     </div>
 
@@ -49,8 +53,8 @@
           @input="onInput"
         />
         <div
-          class="flex justify-center space-x-1"
-          v-bind:style="playerStyle"
+          class="flex justify-center space-x-1 items-center"
+
           no-body v-if="simulation.status === 'finished'"
         >
           <b-btn size="sm" variant="primary" @click="togglePlay" >
@@ -58,8 +62,8 @@
             <b-icon v-else icon="stop-fill"></b-icon>
             {{toggleState()}}
           </b-btn>
-          <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="arrow-left"/></b-btn>
-          <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="arrow-right"/></b-btn>
+          <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="chevron-compact-left"/></b-btn>
+          <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="chevron-compact-right"/></b-btn>
           <span class="text-white">step: {{ currentStep }}</span>
         </div>
       </div>
@@ -82,9 +86,11 @@
     >
     </SimulationDetailsOnRunning>
 
+    <div class="bg-gray-600 p-2"></div>
+
     <div v-if="currentEdge" class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
       <div v-if="currentEdge">
-      -{{ speedsByEdgeId[currentEdge.LINK_ID] || speedsByEdgeId[currentEdge.LINK_ID + '_0_0'] }}-
+      {{ speedsByEdgeId[currentEdge.LINK_ID] || speedsByEdgeId[currentEdge.LINK_ID + '_0_0'] }}
         <div class="rounded-xl text-white text-center">
           <h5>
             <b-badge>{{ currentEdge.LINK_ID }}</b-badge>
@@ -93,56 +99,17 @@
         </div>
         <div class="bg-gray-800 p-2 rounded-xl mt-1" >
           <div class="text-white text-sm text-center">SPEED</div>
-          <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="150"/>
+          <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="200"/>
         </div>
         <div class="bg-gray-800 p-2 rounded-xl mt-1" >
           <div class="text-white text-sm text-center">VOLUME</div>
-          <line-chart :chartData="chart.linkVehPassed" :options="defaultOption()" :height="150"/>
+          <line-chart :chartData="chart.linkVehPassed" :options="defaultOption('통행량')" :height="200"/>
         </div>
       </div>
       <div v-else>
         <!-- <div class="bg-gray-800 p-2 rounded-xl text-white text-center">링크를 선택하세요.</div> -->
       </div>
     </div>
-
-
-    <!--
-      <b-sidebar
-      title="UNIQ-VIS"
-      v-model="sidebar"
-      bg-variant="dark"
-      text-variant="white"
-      right
-    >
-      <uniq-simulation-result-ext :simulation="simulation" />
-      <div
-        v-for="(entry, idx) of Object.entries(vdsList)"
-        :key="idx"
-        class="bg-gray-400 rounded m-1 px-2"
-      >
-        <b-badge class="cursor-pointer" @click="goToLink(entry[0])">{{ entry[0] }}</b-badge> {{ entry[1].vdsId }} {{ entry[1].sectionId }}
-      </div>
-    </b-sidebar>
-    -->
-
-    <!--
-    <b-sidebar
-      title="UNIQ-VIS"
-      v-model="sidebarRse"
-      bg-variant="dark"
-      text-variant="white"
-      right
-    >
-      <div
-        v-for="(entry, idx) of Object.entries(rseList)"
-        :key="idx"
-        class="bg-gray-400 rounded m-1 px-2"
-      >
-        <b-badge class="cursor-pointer"
-          @click="goToRse(entry[0])">{{ entry[0] }}</b-badge>
-      </div>
-    </b-sidebar>
-    -->
 
     <b-modal title="시뮬레이션 정보" ref="simmodal" header-border-variant="dark"
       header-bg-variant="dark"
@@ -173,100 +140,21 @@
       </div>
     </b-modal>
   </div>
-
 </template>
 
 <script src="./simulation-result-map.js"> </script>
 
-
 <style>
-  .uniq-box-panel {
-    min-height:220px;
-    max-height: 500px;
-    min-width: 860px;
-    border-radius: 0px;
-  }
-
   .map {
     /* max-height: 1024px; */
     /* max-height: calc(100%); */
   }
-
-  .uniq-top-menu {
-    position: fixed;
-    z-index:100;
-    top: 50px;
-    padding: 0;
-    left: 5px;
-    border: 0px solid #73AD21;
-  }
-
-  .uniq-top-left {
-    position: fixed;
-    top: 55px;
-    max-width: 300px;
-    overflow: auto;
-    height: 100%;
-    z-index:100;
-    padding: 0;
-    left: 5px;
-    /* max-height: 490px; */
-  }
-
-  .uniq-bottom-left {
-    position: fixed;
-    bottom: 10px;
-
-    padding: 0;
-    left: 5px;
-    z-index:100;
-  }
-
-  .uniq-top-left2 {
-   position: fixed;
-    top: 55px;
-    max-width: 300px;
-    z-index:100;
-    padding: 0;
-    left: 330px;
-  }
-
-
-
-  .loading-container {
-    position: fixed;
-    top:0;
-    left:50%;
-    height: 600px;
-  }
-
-  .loading-vertical-center {
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    -ms-transform: translateY(-50%);
-    transform: translateY(-50%);
-  }
-
-  .uniq-bottom {
-    position: fixed;
-    bottom: 10px;
-    padding: 0;
-    left: 5px;
-    z-index:100;
-  }
-
-
   .uniq-top-right {
     width: 300px;
-    /* height: 100%; */
-    /* height: 520px; */
-    position: fixed;
+    position: absolute;
     padding: 0;
     top: 180px;
     right: 5px;
     z-index:100;
   }
-  /* @import '@/assets/images/gb1.jpg'; */
-  /* @import '@/assets/styles/style.css'; */
 </style>
