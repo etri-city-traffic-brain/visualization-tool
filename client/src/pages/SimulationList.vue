@@ -161,7 +161,7 @@
           <div>
             <div class="grid grid-cols-2 gap-1">
               <div>
-                시뮬레이션 ID:
+                아이디:
               </div>
               <div>
                 {{ row.item.envName }}

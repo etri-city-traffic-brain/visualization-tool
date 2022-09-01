@@ -3,7 +3,7 @@
     <div class="space-y-2 bg-gray-600 p-3 rounded-lg mb-1">
       <!-- <div class="flex space-x-2 text-white"> -->
         <div class="flex space-x-2 text-white">
-          <div class="w-28 text-right"> 시뮬레이션 ID: </div>
+          <div class="w-28 text-right"> 아이디: </div>
           <input autofocus id="id" v-model="id" focus select class="border rounded px-1 text-black">
         </div>
       <!-- </div> -->
@@ -12,7 +12,7 @@
         <input id="description" v-model="description" class="border rounded px-1 text-black w-full">
       </div>
       <div class="flex space-x-2 text-white items-center">
-        <div class="text-sm w-28 text-right">시작날짜</div>
+        <div class="text-sm w-28 text-right">시작 날짜</div>
         <div class="flex space-x-2">
           <div class="text-black">
             <input v-model="fromDate" type="date" class="border rounded px-1"/>
@@ -23,7 +23,7 @@
         </div>
       </div>
       <div class="flex space-x-2 text-white items-center">
-        <div class="text-sm w-28 text-right">종료날짜</div>
+        <div class="text-sm w-28 text-right">종료 날짜</div>
         <div class="text-black">
           <input v-model="toDate" type="date" class="border rounded px-1"/>
         </div>
