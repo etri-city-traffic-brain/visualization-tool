@@ -14,7 +14,7 @@
       </select>
       <input v-model="nodeId" class="px-2" style="height:34px">
       <select type="select" v-model="color" class="p-1" style="height:34px">
-        <option v-for="c of colors" :key="c">{{c}}</option>
+        <option v-for="c of colorOptions" :key="c" :value="c.value">{{c.text}}</option>
       </select>
 
       <button @click="addNode(nodeId)" class="px-1 bg-indigo-100 text-black" style="height:34px">add</button>

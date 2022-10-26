@@ -59,7 +59,13 @@ export default {
       selected: [],
       nodeId: '',
       geometries: [],
-      colors: ['red', 'yellow', 'blue', 'green', 'purple'],
+      colorOptions: [
+        { text: '빨강', value: 'red' },
+        { text: '노랑', value: 'yellow' },
+        { text: '파랑', value: 'blue' },
+        { text: '녹색', value: 'green' },
+        { text: '보라', value: 'purple' }
+      ],
       color: 'yellow',
       typeOptions: [
         { text: '교차로 그룹', value: 'group' },
@@ -176,7 +182,7 @@ export default {
             markerHeight: 5,
             textSize: 20,
             textFill: 'white',
-            textHaloFill: 'gray',
+            textHaloFill: 'blue',
             textHaloRadius: 2
           }
         ]
