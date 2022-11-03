@@ -7,18 +7,20 @@ import signalService from '@/service/signal-service'
 import signalGroups from '@/config/junction-config'
 import Vue from 'vue'
 
-const groupMap = signalGroups
-  .map(value => {
-    return {
-      groupId: value.properties.groupId,
-      nodeIds: value.properties.junctions
-      // color: value.properties.color
-    }
-  })
-  .reduce((acc, cur) => {
-    acc[cur.groupId] = cur.nodeIds
-    return acc
-  }, {})
+import groupMap from '@/config/signal-group'
+
+// const groupMap = signalGroups
+//   .map(value => {
+//     return {
+//       groupId: value.properties.groupId,
+//       nodeIds: value.properties.junctions
+//       // color: value.properties.color
+//     }
+//   })
+//   .reduce((acc, cur) => {
+//     acc[cur.groupId] = cur.nodeIds
+//     return acc
+//   }, {})
 
 const addLayerTo = map => name =>
   new maptalks.VectorLayer(name, [], {}).addTo(map)
@@ -72,6 +74,7 @@ export default {
         { text: '교차로 아이디', value: 'id' },
         { text: '교차로 이름', value: 'name' }
       ],
+      groupOptions: [],
       type: 'id'
     }
   },
@@ -166,6 +169,7 @@ export default {
   },
 
   async mounted () {
+    this.groupOptions = Object.keys(groupMap).sort()
     this.map = makeMap({ mapId: this.mapId, zoom: 12 })
     const { features } = await mapService.getTrafficLights(extent(this.map))
 
