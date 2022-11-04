@@ -36,6 +36,7 @@ export default {
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
+        { class: 'text-center', key: 'region', label: '지역' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
         { class: 'text-center', key: 'actions', label: '교차로수' },
@@ -60,6 +61,7 @@ export default {
       totalRows: 0,
       envFields: [
         { class: 'text-center', key: 'envName', label: '아이디' },
+        { class: 'text-center', key: 'region', label: '지역' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         {
           class: 'text-center',
@@ -109,6 +111,13 @@ export default {
   computed: {},
   destroyed () {},
   methods: {
+    getRegionName (v) {
+      const m = {
+        doan: '도안',
+        cdd3: '연구단지'
+      }
+      return m[v] || ''
+    },
     getActionName (v) {
       const o = {
         offset: '옵셋 조정',
@@ -154,7 +163,9 @@ export default {
         'SA 101': 10,
         'SA 107': 4,
         'SA 111': 2,
-        'SA 104': 5
+        'SA 104': 5,
+        'SA 1701': 11,
+        'SA 1702': 8
       }
       const jIds = jId.split(',').map(v => v.trim())
       let sum = 0
