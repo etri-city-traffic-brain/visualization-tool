@@ -29,6 +29,7 @@ const periodOptions = [
 
 const areaOptions = [
   { value: 'doan', text: '도안' },
+  { value: 'cdd3', text: '대전(연구단지)' },
   { value: 'dj_all', text: '대전전체' },
   { value: 'sa_1_6_17', text: 'sa_1_6_17' }
   // { value: 10, text: '테스트지역' },
@@ -39,11 +40,7 @@ const areaOptions = [
   // { value: 29010, text: '세종특별자치시' }
 ]
 
-const scriptOptions = [
-  { value: 'run.py', text: 'run.py' }
-  // { value: 'run_1.py', text: 'run_1.py' },
-  // { value: 'run_2.py', text: 'run_2.py' }
-]
+const scriptOptions = [{ value: 'run.py', text: 'run.py' }]
 
 const actionOptions = [
   { value: 'offset', text: 'offset - 옵셋 조정' }, // default
