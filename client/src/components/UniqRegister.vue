@@ -51,6 +51,7 @@
             v-model="areaSelected"
             :options="areaOptions"
             size="sm"
+            @change="regionChanged(areaSelected)"
           />
         </b-input-group>
       </div>

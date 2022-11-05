@@ -261,6 +261,22 @@ export default {
       simulationId: this.simulationId,
       eventBus: this
     })
+    const v = this.simulation.configuration.region
+    console.log(v, this.simulation.configuration.region)
+    if (v === 'doan') {
+      this.map.animateTo({
+        center: [127.3396677, 36.3423342],
+        zoom: 14
+      })
+    } else if (v === 'cdd3') {
+      setTimeout(() => {
+        this.map.animateTo({
+          center: [127.35375270822743, 36.383148078460906],
+          zoom: 14
+        })
+      }, 1000)
+    }
+
     this.mapManager.loadMapData()
 
     this.trafficLightManager = TrafficLightManager(this.map, null, this)

@@ -365,7 +365,8 @@
           </template>
 
           <template v-slot:cell(details)="row">
-            <button
+            <router-link
+              tag="button"
               class="bg-yellow-400 px-2 py-1 rounded text-black text-sm font-bold hover:bg-yellow-700"
               :to="{
                 name: 'OptimizationResultMap',
@@ -373,8 +374,9 @@
               }"
             >
               신호학습
-            </button>
-            <button
+            </router-link>
+            <router-link
+              tag="button"
               class="bg-blue-400 px-2 py-1 rounded text-sm font-bold hover:bg-blue-700"
               :to="{
                 name: 'OptimizationResultComparisonMap',
@@ -383,7 +385,7 @@
             >
               <!-- <b-icon icon="circle-square"></b-icon> -->
               신호적용
-            </button>
+            </router-link>
 
             <button
               class="bg-gray-600 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300"

@@ -108,6 +108,7 @@ export default {
     this.dataProvider({ currentPage: this.currentPage })
     this.reload().then(r => {})
   },
+  watch: {},
   computed: {},
   destroyed () {},
   methods: {
@@ -328,7 +329,8 @@ export default {
     },
     async remove (id) {
       await optEnvService.remove(id)
-      this.envs = await optEnvService.get()
+      // this.envs = await optEnvService.get()
+      await this.reload()
     }
   }
 }

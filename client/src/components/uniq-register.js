@@ -169,7 +169,15 @@ export default {
       this.modelSavePeriod = env.configuration.modelSavePeriod
     }
   },
+
   methods: {
+    regionChanged (v) {
+      if (v === 'doan') {
+        this.junctionId = 'SA 101,SA 107,SA 111,SA 104'
+      } else if (v === 'cdd3') {
+        this.junctionId = 'SA 1701,SA 1702'
+      }
+    },
     openSignalMap () {
       this.$refs['signal-map'].show()
     },
