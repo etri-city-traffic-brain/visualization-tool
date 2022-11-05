@@ -11,14 +11,15 @@
     >
       <b-navbar-brand href="#" to="/">
         <div class="">
-          <strong class="flex animate__animated animate__bounceInLeft animate__bounceIn">
+          <strong
+            class="flex animate__animated animate__bounceInLeft animate__bounceIn"
+          >
             <div class="text-blue-400 ">U</div>
             <div class="">N</div>
             <div class="">I</div>
             <div class="">Q</div>
           </strong>
         </div>
-
       </b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
@@ -33,8 +34,13 @@
             :to="'/' + path"
           >
             <span
-              :class="currentRouteName === path ? 'border-b-2 border-blue-400 pb-1' : ''"
-            >{{ name }}</span>
+              :class="
+                currentRouteName === path
+                  ? 'border-b-2 border-blue-400 pb-1'
+                  : ''
+              "
+              >{{ name }}</span
+            >
           </b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
@@ -51,7 +57,7 @@
 
     <router-view v-if="!$route.meta.keepAlive" />-->
 
-    <router-view/>
+    <router-view />
 
     <!--
       BOTTOM COPYRIGHT
@@ -70,13 +76,11 @@
 </template>
 
 <script>
-import userState from '@/user-state';
+import userState from "@/user-state";
 
 export default {
-  name: 'App',
-  mounted() {
-
-  },
+  name: "App",
+  mounted() {},
   computed: {
     currentRouteName() {
       return this.$route.name;
@@ -85,46 +89,48 @@ export default {
   data() {
     return {
       userState,
-      variant: 'dark',
-      variantLogo: 'dark',
-      currentRoute: '',
+      variant: "dark",
+      variantLogo: "dark",
+      currentRoute: "",
       menus: [
         {
-          path: 'SimulationList',
-          name: '교통 시뮬레이션'
+          path: "SimulationList",
+          name: "교통 시뮬레이션"
         },
         // {
         //   path: 'OptEnvList',
         //   name: '최적화환경'
         // },
         {
-          path: 'OptimizationList',
-          name: '신호 최적화'
+          path: "OptimizationList",
+          name: "신호 최적화"
         },
         // {
         //   path: 'SignalEditor',
         //   name: '신호편집'
         // },
         {
-          path: 'Dashboard',
-          name: '교통데이터 분석',
+          path: "Dashboard",
+          name: "교통데이터 분석"
         },
         {
-          path: 'Junction',
-          name: '교차로 조회'
+          path: "Junction",
+          name: "교차로 조회"
         }
       ]
     };
   },
   methods: {
     showOrHide() {
+      console.log(this.currentRouteName);
       const hides = [
-        'Intro',
-        'OptimizationResultMap',
-        'SimulationResultMap',
-        'OptimizationResultComparisonMap'
-      ]
-      return !hides.includes(this.currentRouteName)
+        "Intro",
+        "OptimizationResultMap",
+        "SimulationResultMap",
+        "OptimizationResultComparisonMap",
+        "Junction"
+      ];
+      return !hides.includes(this.currentRouteName);
     }
   }
 };

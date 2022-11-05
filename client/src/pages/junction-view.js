@@ -50,7 +50,7 @@ function setDefault (g) {
 // 전체 교차로 목록을 조회 후
 // 사용자가 입력한 값에 따라 해당 노드를 보여지도록
 export default {
-  name: 'junction-view',
+  name: 'Junction',
   data () {
     return {
       map: null,
@@ -59,7 +59,7 @@ export default {
       trafficLightManager: null,
       trafficLightsLayer: null,
       selected: [],
-      nodeId: '',
+      nodeId: 'SA 103',
       geometries: [],
       colorOptions: [
         { text: '빨강', value: 'red' },
@@ -75,7 +75,9 @@ export default {
         { text: '교차로 이름', value: 'name' }
       ],
       groupOptions: [],
-      type: 'id'
+      type: 'group',
+      mapHeight: 640,
+      hide: false
     }
   },
   methods: {
@@ -165,6 +167,9 @@ export default {
           g.bringToFront()
         }
       })
+    },
+    resize () {
+      this.mapHeight = window.innerHeight - 50 // update map height to current height
     }
   },
 
@@ -217,6 +222,9 @@ export default {
     this.trafficLightsLayer = addLayer('trafficLightsLayer')
     this.trafficLightsLayer.addGeometry(this.geometries)
     this.update()
+
+    window.addEventListener('resize', this.resize.bind(this))
+    this.resize()
   },
   destroyed () {
     if (this.map) {
