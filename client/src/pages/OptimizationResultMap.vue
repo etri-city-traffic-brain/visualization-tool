@@ -1,32 +1,33 @@
 <template>
   <div>
     <div class="uniq-top-left">
-      <div class="bg-gray-700 py-2 text-white p-2 rounded-xl text-sm space-y-1 border">
+      <div class="bg-gray-700 py-2 text-white p-2 rounded-lg text-sm space-y-1 border">
 
-        <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
-        <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ simulation.configuration.region }} </div>
-        <div> <span class="w-14 inline-block text-center bg-blue-500 text-white rounded text-sm px-1 font-bold">시간</span> <span class="text-xs">{{ simulation.configuration.fromTime }}({{ simulation.configuration.begin }}) ~
+        <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
+        <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ getRegionName(simulation.configuration.region) }} </div>
+        <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">시간</span> <span class="text-xs">{{ simulation.configuration.fromTime }}({{ simulation.configuration.begin }}) ~
         {{ simulation.configuration.toTime }}({{ simulation.configuration.end }})</span></div>
-        <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">주기</span> {{ simulation.configuration.period }} (초)</div>
-        <div> <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">교차로</span> {{ simulation.configuration.junctionId }} </div>
+        <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">주기</span> {{ simulation.configuration.period }} (초)</div>
+        <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">교차로</span> {{ simulation.configuration.junctionId }} </div>
         <div>
-          <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">이미지</span>
+          <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">이미지</span>
           <span class="text-xs">{{ simulation.configuration.dockerImage }} </span>
         </div>
 
         <div>
-          <span class="w-14 inline-block text-center bg-green-500 text-white rounded text-sm px-1 font-bold">상태</span>
-          <div class="mt-1 bg-gray-700 rounded-full text-center uppercase text-white font-bold flex space-x-1">
-            <div class="flex-grow bg-green-500 p-1 px-2 animate-pulse rounded" v-if="simulation.status === 'running' || simulation.status === 'stopping'">
+          <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">상태</span>
+          <span class="bg-gray-700 rounded-full text-center uppercase text-white font-bold space-x-1">
+            <span class="inline-block bg-green-500 px-1 animate-pulse rounded" v-if="simulation.status === 'running' || simulation.status === 'stopping'">
               {{ simulation.status }}
-            </div>
-            <div class="flex-grow bg-blue-500 rounded p-1 px-2 " v-else>
+            </span>
+            <span class="inline-block bg-yellow-500 rounded px-1 " v-else>
               {{ simulation.status }}
-            </div>
-            <button class="bg-gray-600 text-white px-2 rounded text-sm hover:bg-blue-600 py-1" @click="getReward">
+            </span>
+
+            <button class="bg-gray-600 text-white px-2 rounded text-sm hover:bg-blue-600" @click="getReward">
               <b-icon icon="arrow-clockwise"></b-icon> 상태 갱신
             </button>
-          </div>
+          </span>
         </div>
 
         <!-- <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">스크립트</span> {{ simulation.configuration.script }} </div> -->
@@ -62,7 +63,7 @@
         </b-card> -->
        </div>
 
-      <div class="bg-gray-700 mt-2 rounded-xl border" >
+      <div class="bg-gray-700 mt-2 rounded-lg border" >
         <!-- <div class="text-white text-center p-1 text-sm">Total Reward</div> -->
         <div class="font-bold p-2 text-white text-center">보상그래프</div>
       <!-- 보상 그래프 -->
@@ -79,38 +80,31 @@
 
       </div>
 
-      <div class="mt-2 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded-xl border">
+      <div class="mt-2 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded-lg">
       <!-- 최적화 진행률 -->
         <div class="mb-1 uppercase inline-block text-center text-white rounded text-sm px-1 font-bold">
           Epoch: {{ progressOpt }} / {{ simulation.configuration.epoch }}
         </div>
 
-        <b-progress :max="simulation.configuration.epoch" height="12px">
+        <b-progress :max="simulation.configuration.epoch" height="14px">
           <b-progress-bar :value="progressOpt" variant="primary" >
             <!-- <span>Epoch {{ progressOpt }} / {{ simulation.configuration.epoch }}</span> -->
           </b-progress-bar>
         </b-progress>
-
-        <div class="mt-2 mb-1 inline-block text-center text-white rounded text-sm px-1 font-bold">
-          시뮬레이션 진행률
-        </div>
-        <b-progress class="" height="12px">
-          <b-progress-bar :value="progress" animated striped variant="primary">
-            <span> {{ progress }} %</span>
-          </b-progress-bar>
-        </b-progress>
       </div>
 
-      <div class="bg-gray-700 rounded-xl mt-2 p-2 border border-orange-500" >
+      <div class="bg-gray-600 opacity-90 rounded-lg mt-2 p-2">
         <div>
-          <button class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-blue-600 py-1" @click="runTrain">
+          <button class="font-bold bg-blue-300 px-2 rounded text-sm hover:bg-blue-600 hover:text-white py-1" @click="runTrain">
             <b-icon icon="play-fill"/> 학습 시작
           </button>
-          <button class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-blue-600 py-1" @click="stop" size="sm">
-            <b-icon icon="stop-fill"></b-icon> 중지
+          <button class="font-bold bg-yellow-300 px-2 rounded text-sm hover:bg-yellow-600 hover:text-white py-1" @click="stop" size="sm">
+            <b-icon icon="stop-fill"></b-icon> 학습 중지
           </button>
+        </div>
+        <div class="mt-1">
           <router-link
-            class="bg-gray-800 text-white px-2 rounded text-sm hover:bg-gray-800 py-1 "
+            class="bg-gray-400 px-2 rounded text-sm hover:bg-gray-800 hover:text-white py-1 "
             tag="button"
             :to="{
               name: 'OptimizationResultComparisonMap',
@@ -137,11 +131,13 @@
     <!-- -------------------- -->
     <!-- 교차로별 보상 그래프 -->
     <!-- -------------------- -->
-    <div class="reward-charts flex flex-col flex-wrap max-h-max bg-gray-500 opacity-90 rounded-xl">
-      <div class="text-white text-center mt-1">교차로별 보상 그래프</div>
+    <div class="reward-charts flex flex-col flex-wrap max-h-max rounded-lg">
+      <!-- <div class="text-white text-center mt-1">교차로별 보상 그래프</div> -->
       <div v-for="(chart, idx) of rewardCharts" :key="idx" class="p-1">
-        <div class="w-80 text-center text-xs text-white px-2 pt-1 bg-gray-600 rounded-t-xl tracking-wide">{{ chart.label }}</div>
-        <div class="bg-gray-700 pb-1 pr-1 w-80 h-40">
+        <div class="w-80 text-center text-xs text-white px-2 pt-2 py-1 bg-gray-600 rounded-t-lg tracking-wide">
+          {{ chart.label }}
+        </div>
+        <div class="bg-gray-700 pb-1 pr-1 w-80 h-40 rounded-b-lg">
           <line-chart
             :chartData="chart"
             :options="defaultOption({}, ()=>{})"
@@ -149,6 +145,22 @@
             :width="200"
           />
         </div>
+      </div>
+    </div>
+
+    <!-- 시뮬레이션 진행률 표시 -->
+    <div class="uniq-bottom w-screen">
+      <!--
+        <div class="mt-2 mb-1 inline-block text-center text-white rounded text-sm px-1 font-bold">
+          시뮬레이션: {{progres || 0}} / 100
+        </div>
+      -->
+      <div class="mx-1">
+        <b-progress height="14px">
+          <b-progress-bar :value="progress" animated striped variant="primary">
+            <span> {{ progress }} %</span>
+          </b-progress-bar>
+        </b-progress>
       </div>
     </div>
 
@@ -191,6 +203,16 @@
     padding: 0;
   }
 
+  .uniq-bottom {
+    position: fixed;
+    bottom: 5px;
+    /* left: 10px; */
+    /* max-width: 280px; */
+    /* height: 100%; */
+    z-index:100;
+    /* padding: 0; */
+  }
+
   .reward-charts {
     position: fixed;
     top: 100px;
@@ -198,7 +220,7 @@
     /* width: 80%; */
     z-index:100;
     padding: 0;
-    opacity: 0.8;
+    /* opacity: 0.8; */
   }
 
   .uniq-bottom-left {

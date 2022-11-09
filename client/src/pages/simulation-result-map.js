@@ -416,7 +416,7 @@ export default {
       return 0
     },
     resize () {
-      this.mapHeight = window.innerHeight - 200 // update map height to current height
+      this.mapHeight = window.innerHeight - 150 // update map height to current height
     },
     togglePlay () {
       if (this.currentStep >= this.slideMax) {

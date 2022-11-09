@@ -2,30 +2,29 @@
 <div class="container- p-3 bg-gray-600">
   <div class="bg-gray-500- border-2 border-gray-500 mt-2 rounded-xl py-2 px-2 min-w-max">
     <!-- <div class="text-white font-bold bg-gray-700 w-40 text-center px-2 py-1 rounded"> 🚙 교통 시뮬레이션 </div> -->
-    <div class="text-white text-lg text-center font-bold bg-gray-700- w-32 py-1 rounded">교통시뮬레이션</div>
-    <div class="p-1 flex justify-between space-x-1" >
-      <button
-        v-b-modal.create-simulation-modal
-        class="px-2 bg-blue-400 text-sm py-1 hover:bg-blue-600 hover:text-white rounded font-bold text-white"
-      >
-        <b-icon icon="file-earmark-plus"/> 시뮬레이션 등록
-      </button>
-      <div>
+    <!-- <div class="text-white text-lg text-center font-bold bg-gray-700- w-32 py-1 rounded">교통시뮬레이션</div> -->
+    <div class="p-1 flex justify-end space-x-1" >
+      <!-- <div> -->
         <button
-          class="px-2 bg-indigo-400 text-sm py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
+          v-b-modal.create-simulation-modal
+          class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
+        >
+          <b-icon icon="plus-square"/> 시뮬레이션 등록
+        </button>
+        <button
+          class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
           v-b-toggle.collapse1
           title="시뮬레이션 비교"
         >
-          <b-icon icon="files"/> 비교
+          <b-icon icon="files"/> 시뮬레이션 비교
         </button>
-        <b-btn
-          size="sm"
-          variant="dark"
+        <button
+          class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
           @click.stop="updateTable"
         >
           <b-icon icon="arrow-clockwise"/> 새로고침
-        </b-btn>
-      </div>
+        </button>
+      <!-- </div> -->
       <!--
       <b-btn
         :pressed.sync="autoRefresh"
@@ -145,7 +144,7 @@
             >상세보기 <b-icon icon="zoom-in"></b-icon>
           </button>
         </router-link>
-        <button class="px-2 bg-red-600 hover:bg-red-500 rounded text-sm py-1" @click.stop="removeSimulation(row.item)">
+        <button class="px-2 text-black bg-yellow-400 hover:bg-yellow-500 rounded text-sm py-1" @click.stop="removeSimulation(row.item)">
           <b-icon icon="x" aria-hidden="true"/>
         </button>
       </template>
@@ -159,28 +158,34 @@
             {{row.item.error }}
           </div>
           <div>
-            <div class="grid grid-cols-2 gap-1">
-              <div>
-                아이디:
+            <div class="space-y-1">
+              <div class="flex items-center space-x-1">
+                <div class="font-bold bg-gray-600 p-1 rounded">
+                  아이디
+                </div>
+                <div>
+                  {{ row.item.id }}
+                </div>
+                </div>
+                <div class="flex items-center space-x-1">
+                <div class="font-bold bg-gray-600 p-1 rounded">
+                  걸린 시간
+                </div>
+                <div>
+                  {{ row.item.started }} ~ {{ row.item.ended }} ({{ calcDuration(row.item) }}) 초
+                </div>
               </div>
-              <div>
-                {{ row.item.envName }}
-              </div>
-              <div>
-                걸린 시간:
-              </div>
-              <div>
-                {{ row.item.started }} ~ {{ row.item.ended }} ({{ calcDuration(row.item) }}) 초
-              </div>
-              <div>
-                시뮬레이션 결과파일 분석
-              </div>
-              <div>
-                <div class="mt-1 flex space-x-1" size="sm">
-                  <b-form-file accept=".csv" v-model="resultFile" placeholder="시뮬레이션 결과파일(.CSV)을 선택하세요." size="sm"> </b-form-file>
-                    <b-btn variant="primary" @click.prevent="uploadSimulatoinResultFile(row.item)" size="sm">
-                      <b-icon icon="upload" size="sm"/>
-                    </b-btn>
+              <div class="flex items-center space-x-1">
+                <div class="font-bold bg-gray-600 p-1 rounded">
+                  시뮬레이션 결과파일 분석
+                </div>
+                <div>
+                  <div class="flex space-x-1 items-center">
+                    <b-form-file accept=".csv" v-model="resultFile" placeholder="시뮬레이션 결과파일(.CSV)을 선택" size="sm"> </b-form-file>
+                      <b-btn variant="primary" @click.prevent="uploadSimulatoinResultFile(row.item)" size="sm">
+                        <b-icon icon="upload" size="sm"/>
+                      </b-btn>
+                  </div>
                 </div>
               </div>
             </div>

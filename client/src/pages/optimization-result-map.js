@@ -265,14 +265,14 @@ export default {
     console.log(v, this.simulation.configuration.region)
     if (v === 'doan') {
       this.map.animateTo({
-        center: [127.3396677, 36.3423342],
-        zoom: 14
+        center: [127.3396677, 36.3423342]
+        // zoom: 14
       })
     } else if (v === 'cdd3') {
       setTimeout(() => {
         this.map.animateTo({
-          center: [127.35375270822743, 36.383148078460906],
-          zoom: 14
+          center: [127.35375270822743, 36.383148078460906]
+          // zoom: 14
         })
       }, 1000)
     }
@@ -316,6 +316,13 @@ export default {
     console.log(this.simulation.configuration.junctionId)
   },
   methods: {
+    getRegionName (v) {
+      const m = {
+        doan: '도안',
+        cdd3: '연구단지'
+      }
+      return m[v] || ''
+    },
     stopVis () {
       this.wsClient.kill()
     },

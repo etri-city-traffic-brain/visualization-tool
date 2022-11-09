@@ -1,51 +1,41 @@
 <template>
   <div class="">
-    <div class="grid grid-cols-2 gap-2 p-3 bg-gray-600 text-white font-bold">
-      <div
-        v-if="showEnv"
-        label-cols-sm="3"
-        label="환경명"
-        label-class="text-sm-right"
-        label-for="envName"
-      >
-        <b-form-input
-          autofocus
-          id="envName"
-          v-model="envName"
-          focus
-          select
-          size="sm"
-        ></b-form-input>
+    <div class="grid- grid-cols-2 gap-2 p-3 bg-gray-600 text-white font-bold space-y-1">
+      <div v-if="showEnv" label-cols-sm="3" label="환경명" label-class="text-sm-right" label-for="envName" >
+        <b-form-input autofocus id="envName" v-model="envName" focus select size="sm" ></b-form-input>
       </div>
       <div class="flex space-x-2 items-center">
-        <div class="w-32 text-right">아이디</div>
+        <div class="flex-none w-40 text-right">아이디</div>
         <b-form-input autofocus id="id" v-model="id" size="sm"></b-form-input>
       </div>
       <div class="flex space-x-2 items-center">
-        <div class="w-32 text-right">설명</div>
+        <div class="flex-none w-40 text-right">설명</div>
         <b-form-input
           id="description"
           v-model="description"
           size="sm"
         ></b-form-input>
       </div>
-      <div class="flex items-center space-x-2">
-        <div class="w-32 text-right text-white font-bold">시작</div>
-        <b-input-group>
-          <b-form-input v-model="fromDate" type="date" size="sm" />
-          <b-form-input v-model="fromTime" type="time" size="sm" />
-        </b-input-group>
-      </div>
-      <div class="flex items-center space-x-2">
-        <div class="w-32 text-right text-white font-bold">종료</div>
-        <b-input-group>
-          <b-form-input v-model="toDate" type="date" size="sm" />
-          <b-form-input v-model="toTime" type="time" size="sm" />
-        </b-input-group>
+      <div class="flex space-x-2">
+        <div class="flex-none w-40 text-right">시뮬레이션 시간</div>
+        <!-- <div class="flex items-center space-x-2"> -->
+          <!-- <div class="flex-none text-white font-bold">시작</div> -->
+          <b-input-group>
+            <b-form-input v-model="fromDate" type="date" size="sm" />
+            <b-form-input v-model="fromTime" type="time" size="sm" />
+          </b-input-group>
+        <!-- </div> -->
+        <!-- <div class="flex items-center space-x-2"> -->
+          <!-- <div class="flex-none text-white font-bold">종료</div> -->
+          <b-input-group>
+            <b-form-input v-model="toDate" type="date" size="sm" />
+            <b-form-input v-model="toTime" type="time" size="sm" />
+          </b-input-group>
+        <!-- </div> -->
       </div>
 
       <div class="flex space-x-2 items-center">
-        <div class="w-32 text-right">지역</div>
+        <div class="flex-none w-40 text-right">지역</div>
         <b-input-group>
           <b-form-select
             v-model="areaSelected"
@@ -56,26 +46,20 @@
         </b-input-group>
       </div>
       <div class="flex space-x-2 items-center" v-if="intersectionField">
-        <div class="w-32 text-right">대상 교차로</div>
+        <div class="flex-none w-40 text-right">대상 교차로</div>
         <b-input-group>
-          <b-form-input
-            id="junctionId"
-            v-model="junctionId"
-            size="sm"
-          ></b-form-input>
+          <b-form-input id="junctionId" v-model="junctionId" size="sm" ></b-form-input>
           <b-input-group-append>
-            <!-- <b-btn variant="dark" class="ml-1" @click="openSignalMap">선택</b-btn> -->
-            <b-btn
-              :pressed="showMap"
-              variant="primary"
-              class="ml-1"
-              @click="showMap = !showMap"
-              size="sm"
-              >선택</b-btn
-            >
+            <b-btn :pressed="showMap" variant="primary" class="ml-1" @click="showMap = !showMap" size="sm" >선택</b-btn >
           </b-input-group-append>
         </b-input-group>
       </div>
+
+      <div class="flex space-x-2 items-center">
+        <div class="flex-none w-40 text-right">도커 이미지</div>
+        <b-form-select v-model="dockerImage" :options="imageOptions"/>
+      </div>
+
     </div>
     <transition name="slide-fade">
       <div v-if="showMap">
@@ -162,16 +146,6 @@
           />
         </div>
       </div>
-    </div>
-    <div class="bg-gray-600 flex space-x-1 mt-1 pl-5 py-3 mb-2 items-center">
-      <div class="flex-shrink-0 w-36 text-right text-white">도커 이미지</div>
-      <!-- <b-form-input v-model="dockerImage" type="text" class="mx-1" size="sm"/> -->
-      <b-form-select
-        v-model="dockerImage"
-        :options="imageOptions"
-        class=""
-        size="sm"
-      />
     </div>
 
     <b-card

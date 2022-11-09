@@ -1,9 +1,7 @@
 <template>
-  <div class="min-w-max p-2 bg-gray-600">
-    <div class="p-2 border-2 border-gray-400 rounded-xl space-y-2">
-      <div
-        class="text-white text-lg text-center font-bold bg-gray-700- w-40 py-1 rounded"
-      >
+  <div class="min-w-max p-2">
+    <div class="p-2 border-2 border-gray-500 rounded-lg space-y-2">
+      <div class="text-white text-lg font-bold py-1" >
         신호최적화 환경
       </div>
 
@@ -120,28 +118,15 @@
       </div>
 
       <div class="max-h-96 overflow-y-auto">
-        <div class="flex justify-between">
+        <div class="flex justify-end space-x-1">
           <button
-            class="items-center bg-blue-300 rounded p-1 px-2 text-sm text-center font-bold hover:bg-blue-700 hover:text-white"
+            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
             v-b-modal.create-simulation-modal
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="inline-block h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              /></svg
-            >환경등록
+            환경등록
           </button>
           <button
-            class="bg-gray-700 rounded p-1 px-2 text-sm text-center font-bold text-white hover:bg-gray-800"
+            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
             @click.stop="reload"
             v-b-tooltip.hover
           >
@@ -227,12 +212,8 @@
         </b-table>
       </div>
     </div>
-    <div
-      class="p-2 border-2 border-gray-400 rounded-xl space-y-2 mt-2 min-w-max"
-    >
-      <div
-        class="text-white font-bold bg-gray-700- w-40 text-center py-1 rounded text-lg"
-      >
+    <div class="p-2 border-2 border-gray-500 rounded-lg space-y-2 mt-2 min-w-max" >
+      <div class="text-white font-bold py-1 rounded text-lg" >
         신호최적화 실험
       </div>
       <div fluid class="mt-0 p-1">
@@ -246,7 +227,7 @@
             <b-icon icon="arrow-clockwise"/> 새로고침
           </b-btn> -->
           <button
-            class="bg-gray-700 rounded p-1 px-2 text-sm text-center font-bold text-white hover:bg-gray-800"
+            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
             @click.stop="updateTable"
             v-b-tooltip.hover
             title="테이블을 업데이트합니다."

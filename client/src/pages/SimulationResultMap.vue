@@ -7,7 +7,7 @@
         </div>
       </div>
     </div>
-    <div class="bg-gray-700 p-1">
+    <div class="bg-gray-600">
       <div class="my-1">
         <div class="flex justify-between items-center p-2 border-b">
           <div class="text-white font-bold">시뮬레이션: {{ simulationId }}</div>
@@ -16,11 +16,12 @@
             <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click="stop"> 중지<b-icon icon="stop-fill"/> </button>
           </div>
         </div>
-        <div class="p-2 text-white border-b flex justify-between items-center">
+        <div class="p-2 text-white flex justify-between items-center">
           <div>
             <span class="font-bold bg-gray-500 p-1 rounded"> 지역</span>
-             {{ getRegionName(config.region) }}
-             <span class="font-bold bg-gray-500 p-1 rounded"> 시간</span> {{ config.fromTime }} ~ {{ config.toTime }}
+            <span>{{ getRegionName(config.region) }}</span>
+            <span class="font-bold bg-gray-500 p-1 rounded"> 시간</span>
+            <span>{{ config.fromTime }} ~ {{ config.toTime }}</span>
           </div>
           <div>
             <button @click="showModal"><b-icon icon="gear-fill"></b-icon></button>
@@ -30,63 +31,63 @@
     </div>
 
     <div class="relative">
-      <div :ref="mapId" :id="mapId" :style="{height: mapHeight + 'px'}" class="p-1"/>
+      <div :ref="mapId" :id="mapId" :style="{height: mapHeight + 'px'}" class=""/>
       <div class="w-40 p-1 absolute bottom-2 right-24">
         <UniqCongestionColorBar/>
       </div>
-      <div class="w-80 p-1 absolute bottom-2 left-2 flex items-center">
+      <div class="w-screen- p-1 absolute bottom-2 left-2 flex items-center">
         <uniq-map-changer :map="map"/>
         <b-button variant="dark" size="sm" class="ml-1" @click="centerTo">중앙</b-button>
-      </div>
-    </div>
-
-    <div class="bg-gray-600 p-1 pb-3" v-if="simulation.status === 'finished'">
-      <div class="py-2 bg-gray-700 rounded-xl mb-2 p-2">
-        <b-form-input
-          v-if="simulation.status === 'finished'"
-          variant="dark"
-          type="range"
-          min="0"
-          :max="slideMax"
-          :value="currentStep"
-          @change="onChange"
-          @input="onInput"
-        />
-        <div
-          class="flex justify-center space-x-1 items-center"
-
-          no-body v-if="simulation.status === 'finished'"
-        >
-          <b-btn size="sm" variant="primary" @click="togglePlay" >
-            <b-icon v-if="toggleState() === '시작'" icon="play-fill"></b-icon>
-            <b-icon v-else icon="stop-fill"></b-icon>
-            {{toggleState()}}
-          </b-btn>
-          <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="chevron-compact-left"/></b-btn>
-          <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="chevron-compact-right"/></b-btn>
-          <span class="text-white">step: {{ currentStep }}</span>
+        <div class="mx-1">
+          <div class="px-1" v-if="simulation.status === 'finished'">
+            <div class="px-1 bg-gray-700 rounded-lg flex items-center">
+              <div class="w-64 flex items-center px-2">
+                <b-form-input
+                  v-if="simulation.status === 'finished'"
+                  variant="dark"
+                  type="range"
+                  min="0"
+                  szie="sm"
+                  :max="slideMax"
+                  :value="currentStep"
+                  @change="onChange"
+                  @input="onInput"
+                />
+              </div>
+              <div
+                class="flex justify-center space-x-1 items-center flex-none" v-if="simulation.status === 'finished'"
+              >
+                <b-btn size="sm" variant="primary" @click="togglePlay" >
+                  <b-icon v-if="toggleState() === '시작'" icon="play-fill"></b-icon>
+                  <b-icon v-else icon="stop-fill"></b-icon>
+                  {{toggleState()}}
+                </b-btn>
+                <b-btn size="sm" variant="secondary" @click="stepBackward"> <b-icon icon="chevron-compact-left"/></b-btn>
+                <b-btn size="sm" variant="secondary" @click="stepForward" > <b-icon icon="chevron-compact-right"/></b-btn>
+                <span class="text-white">스텝: {{ currentStep }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="p-1 py-2 bg-gray-700 rounded-xl ">
-        <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption('시각', '')" :height="50"/>
-      </div>
+    </div>
+    <div class="uniq-bottom-left w-96">
+      <SimulationDetailsOnRunning
+        v-if="simulation.status === 'running'"
+        :simulation="simulation"
+        :progress="progress"
+        :wsStatus="wsStatus"
+        :focusData="focusData"
+        :simulationId="simulationId"
+        :avgSpeed="avgSpeed"
+        @connect-web-socket="connectWebSocket"
+        @toggle-focus-tool="toggleFocusTool"
+        :logs="logs"
+      >
+      </SimulationDetailsOnRunning>
     </div>
 
-    <SimulationDetailsOnRunning
-      v-if="simulation.status == 'running'"
-      :simulation="simulation"
-      :progress="progress"
-      :wsStatus="wsStatus"
-      :focusData="focusData"
-      :simulationId="simulationId"
-      :avgSpeed="avgSpeed"
-      @connect-web-socket="connectWebSocket"
-      @toggle-focus-tool="toggleFocusTool"
-      :logs="logs"
-    >
-    </SimulationDetailsOnRunning>
-
-    <div class="bg-gray-600 p-2"></div>
+    <!-- <div class="bg-gray-600 p-2"></div> -->
 
     <div v-if="currentEdge" class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
       <div v-if="currentEdge">
@@ -118,24 +119,38 @@
       body-text-variant="ligth"
       body-border-variant="dark"
       header-class="pt-2 pb-0 no-border-round"
+      size="xl"
       hide-footer
     >
-      <div class="p-2 space-y-1 bg-gray-700 my-1 mx-1">
+      <div class="p-2 space-y-1 bg-gray-700 mx-1">
         <div class="text-white min-w-max space-y-2">
           <div class="border-blue-600 space-y-2">
             <div class="flex space-x-1 items-center">
-              <div class="bg-blue-500 px-1 rounded">지역</div><div class="bg-gray-500 px-1 rounded"> {{ getRegionName(config.region) }}</div>
-              <div class="bg-blue-500 px-1 rounded">통계주기</div> <div class="bg-gray-500 px-1 rounded">{{ config.period / 60 }}분</div>
+              <div class="bg-gray-500 px-1 rounded">지역</div><div class="px-1 rounded"> {{ getRegionName(config.region) }}</div>
+            </div>
+            <div class="flex space-x-1 items-center">
+            <div class="bg-gray-500 px-1 rounded">통계주기</div> <div class="px-1 rounded">{{ config.period / 60 }}분</div>
             </div>
             <div class="flex space-x-1">
-              <div class="bg-blue-500 px-1 rounded">시작</div><div class="bg-gray-500 px-1 rounded"> {{ config.fromTime }}</div>
-              <div class="bg-blue-500 px-1 rounded">종료</div> <div class="bg-gray-500 px-1 rounded">{{ config.toTime }}</div>
+              <div class="bg-gray-500 px-1 rounded">시간</div><div class="px-1 rounded"> {{ config.fromTime }} ~
+              {{ config.toTime }}</div>
             </div>
             <div class="flex space-x-1">
-              <div class="bg-blue-500 px-1 rounded">스텝</div>
-              <div class="bg-gray-500 px-1 rounded"> {{ Math.ceil((config.end - config.begin) / config.period) }}</div>
+              <div class="bg-gray-500 px-1 rounded">스텝</div>
+              <div class="px-1 rounded"> {{ Math.ceil((config.end - config.begin) / config.period) }}</div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="bg-gray-500 px-1 rounded">대상교차로</div>
+              <div class="px-1 rounded"> {{ config.junctionId }}</div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="bg-gray-500 px-1 rounded">이미지</div>
+              <div class="px-1 rounded"> {{ config.dockerImage }}</div>
             </div>
           </div>
+        </div>
+        <div class="mt-2 p-1 py-2 bg-gray-600 rounded-xl ">
+          <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption('시각', '')" :height="50"/>
         </div>
       </div>
     </b-modal>
@@ -155,6 +170,15 @@
     padding: 0;
     top: 180px;
     right: 10px;
+    z-index:100;
+  }
+  .uniq-bottom-left {
+    /* width: 300px; */
+    position: absolute;
+    padding: 0;
+    bottom: 70px;
+    left: 10px;
+    /* right: 10px; */
     z-index:100;
   }
 </style>
