@@ -131,6 +131,19 @@ function makeLinkCompChart (data) {
   }
 }
 
+// function stepToTime (step, startTime, periodSec) {
+//   const hourStart = startTime.substring(0, 2)
+//   const periodMin = periodSec / 60
+//   let hour = Number(hourStart) - 1
+//   if (step % 60 === 0) {
+//     hour += 1
+//   }
+//   const hh = (hour + '').padStart(2, '0')
+//   const mm = ((step % 60) + '').padStart(2, '0')
+//   const r = hh + ':' + mm
+//   return
+// }
+
 const makeLinkSpeedChartData = (data1, startTime, periodSec) => {
   const dataset = (label, color, data) => ({
     label,
@@ -153,7 +166,9 @@ const makeLinkSpeedChartData = (data1, startTime, periodSec) => {
     }
     const hh = (hour + '').padStart(2, '0')
     const mm = ((j % 60) + '').padStart(2, '0')
-    labels.push(hh + ':' + mm)
+    const r = hh + ':' + mm
+
+    labels.push(r)
   }
 
   return {
@@ -215,7 +230,8 @@ export default {
       logs: [],
 
       showWaitingMsg: false,
-      speedsByEdgeId: {}
+      speedsByEdgeId: {},
+      statusText: ''
     }
   },
   destroyed () {
@@ -314,6 +330,7 @@ export default {
       } finally {
         this.showWaitingMsg = false
         this.simulation.status = 'finished'
+        this.showModal()
       }
     })
 
@@ -350,12 +367,16 @@ export default {
     ...stepperMixin,
 
     async startSimulation () {
+      log('start simulation')
       this.simulation.status = 'running'
       try {
         await simSvc.startSimulation(this.simulationId, this.userState.userId)
+        log('end')
       } catch (err) {
         log(err)
+        this.statusText = err.message
       }
+      setTimeout(() => this.updateSimulation(), 5000)
     },
 
     stop () {
@@ -448,7 +469,7 @@ export default {
     },
     centerTo () {
       const center = region[this.config.region] || region.doan
-      this.map.animateTo({ center }, { duration: 1000 })
+      this.map.animateTo({ center, zoom: 17 }, { duration: 1000 })
     },
     makeToast (msg, variant = 'info') {
       this.$bvToast.toast(msg, {

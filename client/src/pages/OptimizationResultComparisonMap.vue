@@ -27,27 +27,28 @@
             중지 <b-icon icon="stop-fill"></b-icon>
           </b-btn>
           <div class="flex space-x-1 items-center text-sm text-white flex-none">
+            <div class="flex-shrink-0">
+              <b-btn @click="checkStatus" size="sm">상태 확인</b-btn>
+            </div>
             <div v-if="status === 'running'" class="text-center px-3 uppercase w-full">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
-            <div v-else class="px-2 uppercase w-full text-white">
+            <div v-else class="px-2 uppercase w-full text-white ">
               {{ status }}
-            </div>
-            <div class="flex-shrink-0">
-              <b-btn @click="checkStatus" size="sm">상태 확인</b-btn>
             </div>
           </div>
         </div>
       </div>
       </div>
       <div class="text-white p-2 flex justify-between border-b- border-gray-200">
-        <div class="space-x-2">
-          <span class="font-bold bg-gray-700 p-1 rounded">지역</span> {{ getRegionName(config.region) }}
-          <span class="font-bold bg-gray-700 p-1 rounded">시간</span> {{ config.fromTime }} ~ {{ config.toTime }}
-          <span class="font-bold bg-gray-700 p-1 rounded">대상교차로</span> {{ simulation.configuration.junctionId }}
+        <div class="space-x-1">
+          <span class="font-bold bg-indigo-500 px-1 p-1 rounded">{{ getRegionName(config.region) }}</span>
+          <span class="font-bold bg-indigo-500 px-1 p-1 rounded">{{ config.fromTime }} ~ {{ config.toTime }}</span>
+          <span>대상교차로</span>
+          <span class="font-bold bg-indigo-500 px-1 p-1 rounded">{{ simulation.configuration.junctionId }}</span>
         </div>
         <div>
           <button @click="showModal"><b-icon icon="gear-fill"></b-icon></button>
@@ -64,13 +65,13 @@
             <div class="bg-gray-700 rounded-lg">
               <div class="grid grid-cols-3 gap-1 m-1 items-center">
                 <div class="text-white text-center p-2 text-xl font-bold">기존신호</div>
-                <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-300 flex items-center justify-center space-x-2 rounded-lg">
+                <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-100 flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">평균속도</div>
                   <div>
                     {{chart1.avgSpeedJunction }}<span class="text-sm">km</span>
                   </div>
                 </div>
-                <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-300  flex items-center justify-center space-x-2 rounded-lg">
+                <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-100  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">통과시간</div>
                   <div>
                     {{chart1.travelTimeJunction.toFixed(2) }}<span class="text-sm"></span>

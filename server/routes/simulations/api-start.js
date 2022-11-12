@@ -29,7 +29,7 @@ async function start (req, res) {
   }
   try {
     res.json({ id, status: 'running', result: '' })
-    updateStatus(id, 'running', { started: currentTimeFormatted() })
+    updateStatus(id, 'running', { started: currentTimeFormatted(), error: '' })
     executeSimulation(simulation).catch(err => {
       console.log(err.message)
       updateStatus(id, 'error', {

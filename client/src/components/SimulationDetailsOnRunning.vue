@@ -77,7 +77,7 @@
       <div>
         <b-button
           @click="$emit('connect-web-socket')"
-          v-if="wsStatus !=='open'"
+
           size="sm"
           variant="dark"
         >
@@ -108,7 +108,7 @@ export default {
   props: {
     simulation: Object,
     progress: Number,
-    wsStatus: String,
+
     focusData: Object,
     simulationId: String,
     avgSpeed: Number,

@@ -10,9 +10,9 @@
       class="fixed left-2 top-16 bg-gray-50 text-black "
       style="max-width:600px"
     >
-      <div class="bg-indigo-100 text-right px-1 font-bold">
+      <div class="bg-indigo-100 text-right px-1 p-2 font-bold">
         <button
-          class="bg-indigo-200 rounded px-1 hover:bg-indigo-500 hover:text-white"
+          class="bg-indigo-200 rounded px-1 hover:bg-indigo-500 hover:text-white font-bold"
           @click="hide = !hide"
           v-if="!hide"
         >

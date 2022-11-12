@@ -1,18 +1,23 @@
 <template>
   <div>
-    <div class="text-sm text-white bg-gray-700 items-center p-1 py-2 space-x-1">
-      <input class="text-black rounded" v-model="dtgDate" type="date" />
-      <button class="px-2 py-1 bg-gray-500 rounded" @click="analizeDtg">통행량 보기</button>
-      <button class="px-2 py-1 bg-gray-500 rounded" @click="hideDtg">통행량 숨김</button>
-      <button class="px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(5)">개별차량 궤적(5)</button>
-      <button class="px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(10)">10</button>
-      <button class="px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(30)">30</button>
-      <button class="px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(50)">50</button>
-      <button class="text-white px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(100)">100</button>
-      <!-- <button class="text-white px-2 py-1 bg-gray-500 rounded" @click="loadLinks">링크 애니메이션</button> -->
-      <input type="checkbox" class="text-white px-2 py-1 bg-gray-500 rounded mx-2" v-model="useTrip">개별차량 궤적 </button>
-      <input type="checkbox" class="text-white px-2 py-1 bg-gray-500 rounded mx-2" v-model="useBuilding">빌딩</button>
-      <input type="checkbox" class="text-white px-2 py-1 bg-gray-500 rounded mx-2" v-model="useLinks">도로</button>
+    <div class="text-sm text-white bg-gray-700 items-center p-1 py-2 space-x-1 flex justify-between">
+      <div>
+        <input class="px-2 py-1 text-black rounded" v-model="dtgDate" type="date" style="height:26px"/>
+        <button class="px-2 py-1 bg-gray-500 rounded" @click="analizeDtg">통행량 보기</button>
+        <button class="px-2 py-1 bg-gray-500 rounded" @click="hideDtg">통행량 숨김</button>
+      </div>
+      <div>
+        <button class="px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(5)">개별차량 궤적(5)</button>
+        <button class="px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(10)">10</button>
+        <button class="px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(30)">30</button>
+        <button class="px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(50)">50</button>
+        <button class="text-white px-2 py-1 bg-gray-500 rounded" @click="loadLineTrail(100)">100</button>
+        <!-- <button class="text-white px-2 py-1 bg-gray-500 rounded" @click="loadLinks">링크 애니메이션</button> -->
+        <input type="checkbox" class="text-white px-2 py-1 bg-gray-500 rounded mx-2" v-model="useTrip"/>보이기/숨기기
+        <!-- <input type="checkbox" class="text-white px-2 py-1 bg-gray-500 rounded mx-2" v-model="useBuilding">빌딩</button> -->
+        <!-- <input type="checkbox" class="text-white px-2 py-1 bg-gray-500 rounded mx-2" v-model="useLinks"/>도로 -->
+
+      </div>
     </div>
     <!-- VDS 통계 -->
     <transition name="slice-fade">

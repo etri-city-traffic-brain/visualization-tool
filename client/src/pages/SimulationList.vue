@@ -3,27 +3,32 @@
   <div class="bg-gray-500- border-2 border-gray-500 mt-2 rounded-xl py-2 px-2 min-w-max">
     <!-- <div class="text-white font-bold bg-gray-700 w-40 text-center px-2 py-1 rounded"> 🚙 교통 시뮬레이션 </div> -->
     <!-- <div class="text-white text-lg text-center font-bold bg-gray-700- w-32 py-1 rounded">교통시뮬레이션</div> -->
-    <div class="p-1 flex justify-end space-x-1" >
+    <div class="text-white font-bold py-1 rounded text-lg" >
+      교통 시뮬레이션
+    </div>
+    <div class="p-1 flex justify-between space-x-1" >
       <!-- <div> -->
         <button
           v-b-modal.create-simulation-modal
-          class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
+          class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold text-gray-100"
         >
           <b-icon icon="plus-square"/> 시뮬레이션 등록
         </button>
-        <button
-          class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
-          v-b-toggle.collapse1
-          title="시뮬레이션 비교"
-        >
-          <b-icon icon="files"/> 시뮬레이션 비교
-        </button>
-        <button
-          class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
-          @click.stop="updateTable"
-        >
-          <b-icon icon="arrow-clockwise"/> 새로고침
-        </button>
+        <div>
+          <button
+            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold text-gray-100"
+            v-b-toggle.collapse1
+            title="시뮬레이션 비교"
+          >
+            <b-icon icon="files"/> 시뮬레이션 비교
+          </button>
+          <button
+            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold text-gray-100"
+            @click.stop="updateTable"
+          >
+            <b-icon icon="arrow-clockwise"/> 새로고침
+          </button>
+        </div>
       <!-- </div> -->
       <!--
       <b-btn
@@ -114,9 +119,10 @@
 
       </template>
 
-      <template v-slot:cell(duration)="row">
+      <!-- <template v-slot:cell(duration)="row">
         <div>{{ row.item.configuration.fromTime + ' ~ ' + row.item.configuration.toTime}} </div>
-      </template>
+      </template> -->
+
       <template v-slot:cell(status)="row">
         <div :class="sColor(row.item.status)" class="rounded py-1">
           <b-icon v-if="row.item.status === 'running'" icon="gear-fill" variant="light" animation="spin" font-scale="1"></b-icon>
@@ -144,8 +150,11 @@
             >상세보기 <b-icon icon="zoom-in"></b-icon>
           </button>
         </router-link>
-        <button class="px-2 text-black bg-yellow-400 hover:bg-yellow-500 rounded text-sm py-1" @click.stop="removeSimulation(row.item)">
-          <b-icon icon="x" aria-hidden="true"/>
+        <button
+          class="bg-gray-600 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300 text-gray-200"
+          @click.stop="removeSimulation(row.item)"
+        >
+          X
         </button>
       </template>
       <template v-slot:cell(details)="row">
@@ -153,36 +162,35 @@
       <template v-slot:cell(del)="row">
       </template>
       <template v-slot:row-details="row">
-        <div class="p-3 bg-gray-500">
-          <div style="overflow-wrap: break-word; max-width:1024px">
-            {{row.item.error }}
+        <div class="p-3 bg-gray-500 space-y-2">
+          <div class="flex items-center space-x-1" v-if="row.item.error">
+            <div class="max-w-5xl break-normal bg-red-200 rounded text-black p-2">
+              {{row.item.error }}
+            </div>
           </div>
-          <div>
+          <div class="">
             <div class="space-y-1">
               <div class="flex items-center space-x-1">
-                <div class="font-bold bg-gray-600 p-1 rounded">
-                  아이디
+                <div class="w-40 text-center font-bold bg-gray-600 p-1 rounded"> 아이디 </div>
+                <div> {{ row.item.id }} </div>
                 </div>
-                <div>
-                  {{ row.item.id }}
-                </div>
-                </div>
-                <div class="flex items-center space-x-1">
-                <div class="font-bold bg-gray-600 p-1 rounded">
-                  걸린 시간
-                </div>
-                <div>
-                  {{ row.item.started }} ~ {{ row.item.ended }} ({{ calcDuration(row.item) }}) 초
-                </div>
+              <div class="flex items-center space-x-1">
+                <div class="w-40 text-center font-bold bg-gray-600 p-1 rounded"> 걸린 시간 </div>
+                <div> {{ row.item.started }} ~ {{ row.item.ended }} ({{ calcDuration(row.item) }}) 초 </div>
               </div>
               <div class="flex items-center space-x-1">
-                <div class="font-bold bg-gray-600 p-1 rounded">
-                  시뮬레이션 결과파일 분석
+                <div class="w-40 text-center font-bold bg-gray-600 p-1 rounded"> 실행 이미지 </div>
+                <div> {{ row.item.configuration.dockerImage }}</div>
+              </div>
+              <div class="flex items-center space-x-1">
+                <div class="w-40 text-center font-bold bg-gray-600 p-1 rounded">
+                  결과파일 분석
                 </div>
-                <div>
-                  <div class="flex space-x-1 items-center">
-                    <b-form-file accept=".csv" v-model="resultFile" placeholder="시뮬레이션 결과파일(.CSV)을 선택" size="sm"> </b-form-file>
-                      <b-btn variant="primary" @click.prevent="uploadSimulatoinResultFile(row.item)" size="sm">
+                <div class="">
+                  <div class="flex space-x-1 items-center w-max">
+                    <b-form-file accept=".csv" v-model="resultFile" placeholder="결과파일(.CSV) 선택" size="sm">
+                    </b-form-file>
+                      <b-btn variant="dark" @click.prevent="uploadSimulatoinResultFile(row.item)" size="sm">
                         <b-icon icon="upload" size="sm"/>
                       </b-btn>
                   </div>

@@ -39,7 +39,16 @@ export default {
           key: 'configuration.period',
           label: '통계주기'
         },
-        { class: 'text-center', key: 'duration', label: '기간' },
+        {
+          class: 'text-center',
+          key: 'configuration.fromTime',
+          label: '시작시간'
+        },
+        {
+          class: 'text-center',
+          key: 'configuration.toTime',
+          label: '종료시간'
+        },
         { class: 'text-center', key: 'created', label: '생성일' },
         { class: 'text-center', key: 'actions', label: '기능' }
       ],

@@ -83,6 +83,12 @@ export default {
       eventBus: this,
       useSaltLink: true
     })
+    this.map.on('zoomEnd', () => {
+      this.analizeDtg()
+    })
+    this.map.on('moveEnd', () => {
+      this.analizeDtg()
+    })
 
     this.threeLayer = initThree(this.map)
 
@@ -96,12 +102,12 @@ export default {
     })
     this.mapManager.loadMapData()
     this.$on('map:loaded', () => {
-      if (this.useBuilding) {
-        loadBuildings(this.map, this.threeLayer, this)
-      }
-      if (this.useLinks) {
-        loadLinks(this.mapManager, this.threeLayer, this)
-      }
+      // if (this.useBuilding) {
+      //   loadBuildings(this.map, this.threeLayer, this)
+      // }
+      // if (this.useLinks) {
+      //   loadLinks(this.mapManager, this.threeLayer, this)
+      // }
     })
 
     axios({

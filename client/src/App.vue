@@ -14,10 +14,10 @@
           <strong
             class="flex animate__animated animate__bounceInLeft animate__bounceIn"
           >
-            <div class="text-blue-400 ">U</div>
-            <div class="">N</div>
-            <div class="">I</div>
-            <div class="">Q</div>
+            <div class="text-blue-400 animate-bounce duration-300">U</div>
+            <div class="animate-bounce-">N</div>
+            <div class="animate-bounce-">I</div>
+            <div class="animate-bounce-">Q</div>
           </strong>
         </div>
       </b-navbar-brand>
