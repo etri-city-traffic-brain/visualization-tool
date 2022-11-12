@@ -1,15 +1,5 @@
 <template>
   <div class="bg-gray-600 relative min-h-screen">
-
-    <div class="fixed z-50 inset-auto h-full " v-if="showWaitingMsg">
-    <!-- <div class="fixed top-32 z-50 inset-auto h-full " v-if="true"> -->
-      <div class="w-screen">
-        <div class="animate-pulse mx-auto text-center bg-blue-300 p-5 text-xl font-bold">
-          실행 준비 중입니다. 잠시후 실행 됩니다.
-        </div>
-      </div>
-    </div>
-
     <div v-if="!simulation" class="w-80 mx-auto text-center">
       <div class="font-bold text-lg">We're sorry!!</div>
       <div class="font-bold text-sm">시뮬레이션 정보를 읽어오는데 실패하였습니다.</div>
@@ -36,7 +26,6 @@
           <b-btn @click="stopTest" variant="secondary" size="sm" class="flex-none">
             중지 <b-icon icon="stop-fill"></b-icon>
           </b-btn>
-
           <div class="flex space-x-1 items-center text-sm text-white flex-none">
             <div v-if="status === 'running'" class="text-center px-3 uppercase w-full">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -53,18 +42,20 @@
           </div>
         </div>
       </div>
-
-
-
       </div>
-      <div class="text-white p-2 flex justify-between border-b border-gray-200">
+      <div class="text-white p-2 flex justify-between border-b- border-gray-200">
         <div class="space-x-2">
-          <span class="font-bold bg-gray-700 p-1 rounded">지역:</span> {{ getRegionName(config.region) }}
-          <span class="font-bold bg-gray-700 p-1 rounded">시간:</span> {{ config.fromTime }} ~ {{ config.toTime }}
-          <span class="font-bold bg-gray-700 p-1 rounded">대상교차로:</span> {{ simulation.configuration.junctionId }}
+          <span class="font-bold bg-gray-700 p-1 rounded">지역</span> {{ getRegionName(config.region) }}
+          <span class="font-bold bg-gray-700 p-1 rounded">시간</span> {{ config.fromTime }} ~ {{ config.toTime }}
+          <span class="font-bold bg-gray-700 p-1 rounded">대상교차로</span> {{ simulation.configuration.junctionId }}
         </div>
         <div>
           <button @click="showModal"><b-icon icon="gear-fill"></b-icon></button>
+        </div>
+      </div>
+      <div v-if="showWaitingMsg">
+        <div class="animate-pulse mx-auto text-center bg-blue-300 p-5 text-xl font-bold">
+          실행 준비 중입니다. 잠시후 실행 됩니다.
         </div>
       </div>
       <div class="grid grid-cols-4 gap-0 p-1">
@@ -102,7 +93,7 @@
             </div>
             <div class="bg-yellow-400 rounded-lg">
               <div class="grid grid-cols-3 gap-1 text-black m-1 items-center">
-                <div class="text-black text-center bg-yellow-300 p-2 text-xl font-bold">최적신호</div>
+                <div class="text-black text-center bg-yellow-400 p-2 text-xl font-bold">최적신호</div>
                 <div class="text-center text-2xl font-bold p-2 bg-yellow-200  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">평균속도</div>
                   <div class="flex justify-center space-x-2">
@@ -133,20 +124,20 @@
           <!-- </div> -->
 
         </div>
-        <div class="ml-1">
-          <div class="m-1">
-            <div class="p-3 bg-yellow-100 text-center font-bold rounded-xl">
+        <div class="">
+          <div class="mx-1">
+            <div class="p-3 bg-yellow-200 text-center font-bold rounded-lg">
               <div class="">
                 통과시간 향상률
               </div>
               <div class="text-5xl">
-                {{chart2.effTravelTime.toFixed(2)}}<span class="text-xs">%</span>
+                {{chart2.effTravelTime.toFixed(2)}}<span class="text-lg">%</span>
               </div>
             </div>
           </div>
 
-          <div class="mt-1 mb-1 p-1 bg-gray-700 space-y-1">
-            <div class="p-1 bg-gray-800 overflow-auto text-sm" style="height:555px">
+          <div class="mb-1 space-y-1">
+            <div class="p-1 bg-gray-700 overflow-auto text-sm" style="height:555px">
               <div v-for="(s, i) of statusMessage" :key="i" class="bg-gray-800 text-xs text-white">
                 {{ s }}
               </div>
@@ -159,14 +150,14 @@
                   </button>
                 </div> -->
                 <div title="평균통과시간" class="text-white" v-if="!speedView">
-                  <div class="bg-blue-400 mb-1 p-1 text-center">평균통과시간</div>
+                  <div class="bg-blue-400 mb-1 p-1 text-center font-bold">평균통과시간</div>
                   <div class="text-white grid grid-cols-6 gap-1 text-center">
                     <div class="py-1 bg-blue-400 col-span-3">교차로 </div>
                     <div class="py-1 bg-blue-400">기존 </div>
                     <div class="py-1 bg-blue-400">모델</div>
                     <div class="py-1 bg-blue-400">향상률</div>
                   </div>
-                  <div v-for="v of Object.entries(travelTimePerJunction)" class="text-white grid grid-cols-6">
+                  <div v-for="v of Object.entries(travelTimePerJunction)" class="text-white grid grid-cols-6 px-1">
                     <div class="border-b col-span-3">{{ v[0] }} </div>
                     <div class="border-b text-right">{{ Number(v[1][0]).toFixed(2) }} </div>
                     <div class="border-b text-right">{{ Number(v[1][1]).toFixed(2)}}</div>
@@ -228,7 +219,11 @@
             <div title="평균통과시간" title-item-class="font-bold bg-gray-500 " v-if="!speedView">
               <div class="bg-blue-400 mb-1 p-1 text-center text-white">평균통과시간</div>
               <div class="text-white bg-gray-800 p-1 text-sm font-bold">
-                <line-chart :chartData="chart.travelTimeChartInView" :options="lineChartOption({})" :height="150" />
+                <line-chart
+                  :chartData="chart.travelTimeChartInView"
+                  :options="lineChartOption({})"
+                  :height="142"
+                />
               </div>
             </div>
             <!-- <div title="평균속도" title-item-class="font-bold bg-gray-500" v-else>
@@ -241,7 +236,7 @@
         </div>
         <div class="text-white items-center">
           <div class="bg-blue-400 mb-1 p-1 text-center">신호시스템</div>
-          <div class="text-center bg-gray-800">{{ selectedNode }}</div>
+          <div class="text-center bg-gray-800">{{ selectedNode || '교차로를 선택하세요' }}</div>
           <!-- <div>{{ actionForOpt[0].action }}</div> -->
           <!-- <div>{{ actionForOpt[1].action }}</div> -->
 
@@ -255,8 +250,8 @@
 
     <!-- BOTTOM STATUS TEXT -->
     <div class="flex my-1 p-1 justify-between bg-gray-700">
-      <div class="text-center text-white px-2 ">
-        {{ statusText }}
+      <div class="text-center text-white px-2 text-sm">
+        {{ simulation.id }} {{ statusText }}
       </div>
       <div class="flex space-x-1 items-center text-sm text-white">
         <div v-if="status === 'running'" class="text-center px-3 uppercase w-full">
@@ -273,44 +268,67 @@
         </div>
       </div>
     </div>
+    <!-- BOTTOM STATUS TEXT END -->
 
-    <b-modal title="신호 최적화 정보" ref="optenvmodal">
-      <div class="text-white text-sm p-2 bg-gray-700 min-w-max">
+    <b-modal size="xl" title="신호 최적화 정보" ref="optenvmodal"
+      header-border-variant="dark"
+      header-bg-variant="dark"
+      header-text-variant="light"
+      body-bg-variant="dark"
+      body-text-variant="ligth"
+      body-border-variant="dark"
+      footer-bg-variant="dark"
+      hide-footer
+      header-class="pt-2 pb-0 no-border-round"
+    >
+      <div class="text-white text-sm p-2 min-w-max">
         <div class="border-blue-600 space-y-1">
           <div class="flex space-x-1">
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">아이디</div> <div>{{ simulation.id }} </div>
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">아이디</div>
+            <div>{{ simulation.id }} </div>
           </div>
           <div class="flex space-x-1">
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">지역</div>
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">지역</div>
             <div class="w-12"> {{ config.region }}</div>
-
-
           </div>
           <div class="flex space-x-1">
             <!-- <div class="w-24 text-center bg-blue-500 px-1 rounded ">모델 저장주기</div> <div>{{ config.modelSavePeriod }}</div> -->
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">보상함수</div> <div>{{ config.rewardFunc }}</div>
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">통계주기</div> <div>{{ config.period / 60 }}<span>분</span></div>
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">보상함수</div> <div>{{ config.rewardFunc }}</div>
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">통계주기</div> <div>{{ config.period / 60 }}<span>분</span></div>
           </div>
           <div class="flex space-x-1">
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">Method</div>
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">Method</div>
             <div class="w-12">{{ config.method }}</div>
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">Action</div>
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">Action</div>
             <div>{{ config.action }}</div>
 
           </div>
           <div class="flex space-x-1">
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">시간</div>
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">시간</div>
             <div>{{ config.fromTime }} ~ {{ config.toTime }}</div>
           </div>
           <div class="flex space-x-1">
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">대상교차로</div>
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">대상교차로</div>
             <div>{{ simulation.configuration.junctionId }}</div>
           </div>
-          <!-- <div class="space-y-1 items-center">
-            <div class="w-20 text-center bg-blue-500 px-1 rounded">실행이미지</div>
+          <div class="flex space-x-1 items-center">
+            <div class="w-20 text-center bg-gray-500 px-1 rounded">실행이미지</div>
             <div class="">{{ simulation.configuration.dockerImage }} </div>
-          </div> -->
+          </div>
         </div>
+        <div class="p-3 bg-yellow-200 text-black text-center font-bold rounded-xl mt-2 ">
+              <div class="">
+                통과시간 향상률
+              </div>
+              <div class="text-5xl">
+                {{chart2.effTravelTime.toFixed(2)}}<span class="text-xs">%</span>
+              </div>
+            </div>
+        <line-chart
+            :chartData="chart.travelTimeChartInView"
+            :options="lineChartOption({})"
+            :height="142"
+          />
       </div>
     </b-modal>
   </div>

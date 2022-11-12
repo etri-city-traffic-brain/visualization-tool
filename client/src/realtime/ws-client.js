@@ -2,7 +2,7 @@
 
 const serialize = obj => JSON.stringify(obj)
 
-const { log, group, groupEnd } = console
+const { log } = console
 const { WebSocket } = window
 
 // eslint-disable-next-line no-undef
@@ -51,18 +51,15 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       socket.close()
     }
   }
-
   const kill = () => {
     killed = true
     status = 'close'
     close()
   }
-
   const restart = () => {
     killed = false
     init()
   }
-
   function init (slaves) {
     // log(`init ${simulationId} - ${wsUrl}`)
     if (status === 'open') {
@@ -79,20 +76,6 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       send({ type: 0, simulationId })
       status = 'open'
       eventBus.$emit('ws:open')
-      // log('websocket is opened')
-      // just for optimization
-      send({
-        simulationId,
-        type: 10, // Set
-        // extent: [min.x, max.y, max.x, min.y],
-        extent: [
-          127.3373 - 0.0055,
-          36.34837 + 0.0055,
-          127.34303 + 0.0055,
-          36.34303 - 0.0055
-        ],
-        roadType: 1
-      })
     })
 
     socket.addEventListener('message', ({ data }) => {
@@ -122,53 +105,31 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       status = 'error'
     })
 
-    eventBus.$on('salt:set', ({ extent, zoom, simulationId }) => {
-      // const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
-      // const roadType = zoom >= 17 ? 1 : 0 // 1: cell, 0: link
-      if (slaves) {
-        console.log('send set')
-        const { min, max } = extend(extent)
-
-        send({
-          simulationId: slaves[0],
-          type: 10, // Set
-          // extent: [min.x, max.y, max.x, min.y],
-          extent: [
-            127.3373 - 0.0055,
-            36.34837 + 0.0055,
-            127.34303 + 0.0055,
-            36.34303 - 0.0055
-          ],
-          roadType: 1
-        })
-        send({
-          simulationId: slaves[1],
-          type: 10, // Set
-          // extent: [min.x, max.y, max.x, min.y],
-          extent: [
-            127.3373 - 0.0055,
-            36.34837 + 0.0055,
-            127.34303 + 0.0055,
-            36.34303 - 0.0055
-          ],
-          roadType: 1
-        })
-        return
-      }
+    // 시뮬레이터로 BBox 설정을 요청한다.
+    function setBoundingBox (simulationId, extent) {
       const { min, max } = extend(extent)
       send({
         simulationId,
-        type: 10, // Set
+        type: 10, // Set(10)
         extent: [min.x, max.y, max.x, min.y],
-        roadType: 1
+        roadType: 1 // Cell(1), Link(0)
       })
+    }
+
+    eventBus.$on('salt:set', ({ simulationId, extent }) => {
+      if (slaves) {
+        setBoundingBox(slaves[0], extent)
+        setBoundingBox(slaves[1], extent)
+        return
+      }
+      setBoundingBox(simulationId, extent)
     })
 
     eventBus.$on('salt:stop', sId => {
       if (simulationId === sId) {
         send({
           simulationId,
-          type: 11 // Set
+          type: 11 // Stop
         })
       }
     })

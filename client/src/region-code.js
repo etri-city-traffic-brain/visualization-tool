@@ -5,5 +5,6 @@ export default {
   seogu: '서구',
   dg: '동구',
   ddg: '대덕구',
-  jg: '중구'
+  jg: '중구',
+  cdd3: '연구단지'
 }

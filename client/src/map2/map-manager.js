@@ -25,7 +25,7 @@ import {
   makeRseLayer
 } from '../layers'
 
-const ZOOM_MINIMUM = 13
+const ZOOM_MINIMUM = 14
 
 const { log } = console
 

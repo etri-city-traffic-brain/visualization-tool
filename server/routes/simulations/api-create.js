@@ -73,8 +73,8 @@ const makeOptScenario = (
       time: {
         // begin: 0,
         // end: end - begin + 60
-        begin: 0 + 25200,
-        end: end - begin + 60 + 25200
+        begin,
+        end: end + 60
       },
       input: {
         fileType: 'SALT',

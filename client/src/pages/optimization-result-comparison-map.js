@@ -152,14 +152,18 @@ const makeSpeedLineData = (
     normalized: true,
 
     datasets: [
-      dataset('기존신호', 'grey', dataFt),
-      dataset('최적신호', 'orange', dataRl),
-      dataset('기존신호(평균)', 'blue', new Array(dataRl.length).fill(avgTTFT)),
+      dataset(
+        '기존신호(평균)',
+        'skyblue',
+        new Array(dataRl.length).fill(avgTTFT)
+      ),
       dataset(
         '최적신호(평균)',
-        '#7FFFD4',
+        'yellow',
         new Array(dataRl.length).fill(avgTTRL)
-      )
+      ),
+      dataset('기존신호', 'grey', dataFt),
+      dataset('최적신호', 'orange', dataRl)
     ],
     avgFt: avgFt,
     avgRl: avgRl
@@ -169,6 +173,7 @@ const makeSpeedLineData = (
 const randomId = () => `map-${Math.floor(Math.random() * 100)}`
 
 const initSimulationData = async (
+  region,
   mapId,
   slave,
   eventTarget,
@@ -177,7 +182,10 @@ const initSimulationData = async (
   jIds,
   slaves
 ) => {
-  const map = makeMap({ mapId: mapId, zoom: 17 })
+  const center =
+    region === 'cdd3' ? [127.3549527, 36.385148] : [127.3396677, 36.3423342]
+
+  const map = makeMap({ mapId: mapId, zoom: 17, center })
 
   const mapManager = MapManager({
     map: map,
@@ -187,8 +195,9 @@ const initSimulationData = async (
 
   const wsClient = WebSocketClient({
     simulationId: slave,
-    eventBus: wsBus
-
+    eventBus: wsBus,
+    // region: [127.3449, 36.3873, 127.3807, 36.3694]
+    region: map.getExtent()
     // eventBus: mapBus
   })
   const trafficLightManager = TrafficLightManager(map, null, eventTarget)
@@ -287,7 +296,7 @@ export default {
       trafficLightManager: null,
       // phaseRewardChartFt: null,
       // phaseRewardChartRl: null,
-      selectedNode: '도안5단지네거리',
+      selectedNode: '',
       // selectedNode: '미래부동산삼거리',
       showWaitingMsg: false,
       avgSpeedJunction: 0,
@@ -388,15 +397,8 @@ export default {
 
     window.scrollTo(0, 0)
 
-    // const container = document.getElementById('mynetwork')
     const container = this.$refs.actionvis
     let ss = null
-    // const ss = SignalSystem(container, {
-    //   offset: 140,
-    //   duration: [29, 33, 33, 29, 26, 30]
-    // })
-
-    // ss.update(141, [1, 2, 1, 1, 1, 2])
 
     const optId = this.$route.params ? this.$route.params.id : null
 
@@ -418,6 +420,7 @@ export default {
     const wsBus = new Vue({})
     this.simulations = [
       await initSimulationData(
+        this.simulation.configuration.region,
         this.mapIds[0],
         this.fixedSlave,
         this,
@@ -428,6 +431,7 @@ export default {
         [this.fixedSlave, this.testSlave]
       ),
       await initSimulationData(
+        this.simulation.configuration.region,
         this.mapIds[1],
         this.testSlave,
         this,
@@ -438,19 +442,13 @@ export default {
       )
     ]
 
-    this.initMapEventHandler()
+    this.initMapEventHandler(this)
 
     const busFixed = simEventBusFixed
     const busTest = simEventBusTest
 
     wsBus.$on('salt:data', data => {
       buffer.push(data)
-    })
-    wsBus.$on('salt:status', async () => {})
-    wsBus.$on('salt:finished', async () => {})
-
-    busFixed.$on('salt:data', dataSim => {
-      buffer.push(dataSim)
     })
 
     // 최적화 시뮬레이션이 수행 속도가 느림
@@ -466,36 +464,23 @@ export default {
       this.chart2.progress = status.progress
       this.chart1.progress = status.progress
       this.showWaitingMsg = false
-      simEventBusFixed.$emit('salt:status', {
-        ...status
-      })
-      if (this.chart1.progress !== 100 && status.status === 1) {
+
+      if (status.progress >= 99) {
         this.chart2.progress = 100
         this.chart1.progress = 100
-        this.checkStatus()
-      }
-      if (this.chart1.progress >= 99) {
-        this.chart2.progress = 100
-        this.chart1.progress = 100
-        this.checkStatus()
       }
     })
 
-    busTest.$on('salt:finished', async () => {
-      this.chart1.progress = 100
-      this.chart1.progress = 100
-      if (this.chart1.progress >= 100 && this.chart1.progress >= 100) {
-        this.status = 'finished'
-      }
-    })
+    // wsBus.$on('salt:status', async () => {})
+    // wsBus.$on('salt:finished', async () => {})
+    // busFixed.$on('salt:data', () => {})
+    // busTest.$on('salt:finished', () => {})
+    // busFixed.$on('ws:close', () => {})
+    // this.$on('signalGroup:clicked', () => {})
 
     busFixed.$on('ws:error', error => {
       this.makeToast(error.message, 'warning')
     })
-
-    busFixed.$on('ws:close', () => {})
-
-    this.$on('signalGroup:clicked', () => {})
 
     this.$on('junction:clicked', async p => {
       const crossName = signalService.nodeIdToName(p.nodeId)
@@ -558,13 +543,13 @@ export default {
 
         // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
         // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
-        this.chart1.avgSpeedJunction = avgSpdFt.toFixed(2)
-        this.chart2.avgSpeedJunction = avgSpdRl.toFixed(2)
+        this.chart1.avgSpeedJunction = avgSpdFt ? avgSpdFt.toFixed(2) : ''
+        this.chart2.avgSpeedJunction = avgSpdRl ? avgSpdRl.toFixed(2) : ''
 
         this.chart1.travelTimeJunction = avgTTFT
         this.chart2.travelTimeJunction = avgTTRL
         this.statusText =
-          'updated... ' + (new Date().getTime() - start) / 1000 + 'sec'
+          'updated... ' + (new Date().getTime() - start) / 1000 + ' sec'
 
         if (ss === null) {
           setTimeout(() => {
@@ -582,7 +567,7 @@ export default {
         try {
           await updateReward()
         } catch (err) {
-          console.log(err.message)
+          log(err.message)
         }
       }, 4000)
     }
@@ -596,6 +581,10 @@ export default {
     const results = Object.values(result.data)
 
     const total = results[0]
+    if (!total) {
+      this.statusText = '모델파일 없음'
+      return
+    }
     const label = new Array(total.length).fill(0).map((v, i) => i)
     const reward = total.map(v => Number(v.reward).toFixed(2))
     const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
@@ -637,13 +626,8 @@ export default {
     // this.phaseRewardChartRl.on('datazoom', function (params) {})
   },
   methods: {
-    getRegionName (r) {
-      // const map = {
-      //   yuseonggu: '유성구',
-      //   seogu: '서구',
-      //   doan: '도안'
-      // }
-      return map[r] || r
+    getRegionName (region) {
+      return map[region] || region
     },
     toggleView () {
       this.speedView = !this.speedView
@@ -658,12 +642,6 @@ export default {
     },
     resize () {
       this.mapHeight = window.innerHeight - 50 // update map height to current height
-      // if (this.phaseRewardChartFt) {
-      //   this.phaseRewardChartFt.resize()
-      // }
-      // if (this.phaseRewardChartRl) {
-      //   this.phaseRewardChartRl.resize()
-      // }
     },
     async runTest () {
       this.showWaitingMsg = true
@@ -702,12 +680,16 @@ export default {
         })
       this.checkStatus()
     },
-    initMapEventHandler () {
+    initMapEventHandler (obj) {
       const map1 = this.simulations[0].map
       const map2 = this.simulations[1].map
 
       const moveHandler = (map1, map2) => {
         const moveTo = (map, target) => {
+          if (map1.isZooming() || map2.isZooming()) {
+            return
+          }
+          obj.buffer = [] // init buffer
           map.animateTo(
             {
               center: target.getCenter(),

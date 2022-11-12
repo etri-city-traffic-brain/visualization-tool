@@ -22,7 +22,7 @@ module.exports = {
 
         tableSimulation = database.get(TABLE_SIMULATION)
         tableOptEnv = database.get(TABLE_OPTENV)
-        console.log(tableOptEnv)
+        // console.log(tableOptEnv)
       })
       .catch(err => debug('LowDB connection failed...', err.message))
   },

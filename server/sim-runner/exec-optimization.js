@@ -35,39 +35,37 @@ async function run (simulation, mode, modelNum) {
   const slaves = simulation.slaves
   const epoch = config.epoch
   const dockerImage = config.dockerImage || DEFAULT_DOCKER_IMAGE
-  // const begin = 0
-  const begin = 25200
-  const end = config.end - config.begin + 60 + 25200
+  const begin = config.begin
+  const end = config.end + 60
   const modelSavePeriod = config.modelSavePeriod || 20
   const map = config.region
-  const targetTL = config.junctionId // ex) "SA 101,SA 111", --> comma seperated
-
+  const targetTL = config.junctionId // ex) comma seperated string ex) "SA 101,SA 111",
+  // const targetTL = 'SA 1701' // ex) comma seperated string ex) "SA 101,SA 111",
   const action = config.action
   const method = config.method
   const rewardFunc = config.rewardFunc
-  console.log('action:', action)
   const volume = `${volumePath}/${simulation.id}:/uniq/optimizer/io`
 
-  // const targetTL = 'SA 101,SA 104,SA 107,SA 111'
-
-  // --reward-func ${rewardFunc} \
-  // --method ${method} \
-  // --action ${action}`
-
-  const makeCmd = (mode, name) =>
-    `run --rm --name ${name} -v ${volume} ${dockerImage} python ./run.py \
-     --mode ${mode} \
-     --map ${map} \
-     --start-time ${begin} \
-     --end-time ${end} \
-     --epoch ${epoch} \
-     --io-home io \
-     --scenario-file-path io/scenario \
-     --target-TL "${targetTL}" \
-     --model-save-period ${modelSavePeriod} \
-     --result-comp False \
-     --reward-func ${'cwq'} \
-     --action ${action}`
+  const makeCmd = (mode, name) => {
+    const args = [
+      `run --rm --name ${name} -v ${volume} ${dockerImage}`,
+      'python ./run.py',
+      `--mode ${mode}`,
+      `--map ${map}`,
+      `--start-time ${begin} --end-time ${end}`,
+      `--epoch ${epoch}`,
+      '--io-home io',
+      '--scenario-file-path io/scenario',
+      `--target-TL "${targetTL}"`,
+      `--model-save-period ${modelSavePeriod}`,
+      '--result-comp False',
+      `--reward-func ${rewardFunc}`,
+      `--method ${method}`,
+      `--action ${action}`
+    ]
+    return args.join(' ')
+    // return `run --rm --name ${name} -v ${volume} ${dockerImage} python ./run.py --mode ${mode} --map ${map} --start-time ${begin} --end-time ${end} --epoch ${epoch} --io-home io --scenario-file-path io/scenario --target-TL "${targetTL}" --model-save-period ${modelSavePeriod} --result-comp False --reward-func ${rewardFunc} --action ${action}`
+  }
 
   if (mode === 'train') {
     const cmd = `${makeCmd('train', simulation.id)}`
@@ -76,6 +74,8 @@ async function run (simulation, mode, modelNum) {
   } else if (mode === 'test') {
     const cmdSimu = `${makeCmd('simulate', slaves[0])}`
     const cmdTest = `${makeCmd('test', slaves[1])} --model-num ${modelNum}`
+    log(chalk.green(cmdSimu))
+    log(chalk.green(cmdTest))
     return Promise.all([docker(cmdTest, options), docker(cmdSimu, options)])
   } else {
     return Promise.reject(new Error('unknown mode'))

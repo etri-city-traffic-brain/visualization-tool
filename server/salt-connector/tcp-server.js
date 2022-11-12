@@ -1,3 +1,8 @@
+/**
+ * tcp-server.js
+ * author: beanpole
+ * last modified: 2022-11-10
+ */
 const debug = require('debug')('salt-connector:tcp-server')
 
 const net = require('net')
@@ -17,16 +22,8 @@ module.exports = (port = 1337) => {
 
   const consumeSaltMsg = (socket, bufferManager) => {
     const buffer = bufferManager.getBuffer(socket)
-    // console.log(
-    //   '----------------> consume <----------------------',
-    //   buffer.length
-    // )
     if (buffer && buffer.length >= HEADER_LENGTH) {
       const header = Header(buffer)
-      // console.log(header)
-      // console.log(red('************************************'))
-      // console.log(red(JSON.stringify(header)))
-      // console.log(red('************************************'))
       const handler = saltMsgHandler.get(header.type)
       if (handler) {
         const bodyLength = header.length + HEADER_LENGTH
@@ -40,7 +37,6 @@ module.exports = (port = 1337) => {
         console.log('no handler')
       }
     }
-    // timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 20)
   }
 
   const bufferManagerRegistry = {}
@@ -65,7 +61,7 @@ module.exports = (port = 1337) => {
   }
 
   const handleClose = socket => buffer => {
-    console.log('socket closed')
+    console.log('socket closed', socket.remoteAddress)
   }
 
   const handleError = socket => () => {
@@ -79,7 +75,6 @@ module.exports = (port = 1337) => {
 
     const bufferManager = BufferManager()
     bufferManagerRegistry[socket.remotePort] = bufferManager
-    // consumeSaltMsg(socket, bufferManager)
   })
 
   server.on('connection', socket => {
