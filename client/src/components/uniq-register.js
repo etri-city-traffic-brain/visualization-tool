@@ -1,18 +1,25 @@
-
 import moment from 'moment'
 
 import simulationService from '@/service/simulation-service'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
+import { HTTP } from '@/http-common'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
-const generateRandomId = (prefix = 'DEFU') => `${prefix.substring(0, 4).toUpperCase()}_${moment().year()}${moment().format('MM')}_${random().padStart(5, '0')}`
+const generateRandomId = (prefix = 'DEFU') =>
+  `${prefix.substring(0, 4).toUpperCase()}_${moment().year()}${moment().format(
+    'MM'
+  )}_${random().padStart(5, '0')}`
 const format = date => moment(date).format('YYYY-MM-DD')
 const getToday = () => format(new Date())
 
 const periodOptions = [
   { value: 15, text: '15초' },
+  { value: 30, text: '30초' },
+  { value: 1 * 60, text: '1분' },
+  { value: 5 * 60, text: '5분' },
   { value: 10 * 60, text: '10분' },
+  { value: 20 * 60, text: '20분' },
   { value: 30 * 60, text: '30분' },
   { value: 60 * 60, text: '1시간' },
   { value: 120 * 60, text: '2시간' }
@@ -21,18 +28,44 @@ const periodOptions = [
 ]
 
 const areaOptions = [
-  { value: 10, text: '테스트지역' },
-  { value: 250, text: '대전광역시' },
-  { value: 25030, text: '서구' },
-  { value: 25040, text: '유성구' },
-  { value: 290, text: '세종시' },
-  { value: 29010, text: '세종특별자치시' }
+  { value: 'doan', text: '도안' },
+  { value: 'cdd3', text: '대전(연구단지)' },
+  { value: 'dj_all', text: '대전전체' },
+  { value: 'sa_1_6_17', text: 'sa_1_6_17' }
+  // { value: 10, text: '테스트지역' },
+  // { value: 250, text: '대전광역시' },
+  // { value: 25030, text: '서구' },
+  // { value: 25040, text: '유성구' },
+  // { value: 290, text: '세종시' },
+  // { value: 29010, text: '세종특별자치시' }
 ]
 
-const scriptOptions = [
-  { value: 'run.py', text: 'run.py' }
-  // { value: 'run_1.py', text: 'run_1.py' },
-  // { value: 'run_2.py', text: 'run_2.py' }
+const scriptOptions = [{ value: 'run.py', text: 'run.py' }]
+
+const actionOptions = [
+  { value: 'offset', text: 'offset - 옵셋 조정' }, // default
+  { value: 'kc', text: 'kc - 즉시 신호 변경' },
+  { value: 'gr', text: 'gr - 녹색시간 조정' },
+  { value: 'gro', text: 'gro - 녹색시간과 옵셋 조정' }
+]
+const methodOptions = [
+  { value: 'sappo', text: 'SAPPO' },
+  { value: 'ddqn', text: 'DDQN' },
+  { value: 'sappo_rnd', text: 'SAPPO_RND' }
+]
+const rewardFuncOptions = [
+  { value: 'pn', text: 'pn - 통과 차량 수' },
+  { value: 'wt', text: 'wt - 대기 시간' },
+  { value: 'tt', text: 'tt - 통과 소요 시간' },
+  { value: 'wq', text: 'wq - 대기 큐 길이' },
+  { value: 'cwq', text: 'cwq - 축적된 대기 큐 길이' }
+]
+
+const stateOptions = [
+  { value: 'v', text: 'v - 차량 수' },
+  { value: 'd', text: 'd - 차량 밀도' },
+  { value: 'vd', text: 'vd - 차량 수와 밀도' },
+  { value: 'vdd', text: 'vdd - 차량 수를 밀도로 나눈 값' }
 ]
 
 const intervalOptions = [
@@ -75,14 +108,24 @@ export default {
       areaSelected: areaOptions[0].value, //
       scriptSelected: scriptOptions[0].value, //
       intervalSelected: intervalOptions[0].value, //
-      junctionId: '',
+      actionOptionSelected: actionOptions[0].value, //
+      methodOptionSelected: methodOptions[0].value, //
+      rewardFuncOptionSelected: rewardFuncOptions[0].value, //
+      stateOptionSelected: stateOptions[0].value,
+      junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
-      dockerImage: 'images4uniq/optimizer:v0.1a.20211028',
+      // dockerImage: 'images4uniq/optimizer:v1.1a.20220531',
+      dockerImage: 'images4uniq/optimizer:v1.1a.20220629.d',
+      imageOptions: [],
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
       scriptOptions: [...scriptOptions],
       intervalOptions: [...intervalOptions],
+      stateOptions: [...stateOptions],
+      actionOptions,
+      methodOptions,
+      rewardFuncOptions,
       loading: false,
       showMap: false,
       showEnv: true,
@@ -90,6 +133,15 @@ export default {
     }
   },
   async mounted () {
+    HTTP({
+      url: '/salt/v1/helper/docker',
+      method: 'get'
+    })
+      .then(r => r.data)
+      .then(d => {
+        this.imageOptions = d.optimization.images
+      })
+
     // console.log('simulation register ui', this.modalName)
     if (this.modalName === 'create-simulation-modal') {
       this.showEnv = false
@@ -106,18 +158,26 @@ export default {
       this.areaSelected = env.configuration.region
       this.scriptSelected = env.configuration.script
       this.intervalSelected = env.configuration.interval
+
+      this.actionOptionSelected = env.configuration.action
+      this.methodOptionSelected = env.configuration.method
+      this.rewardFuncOptionSelected = env.configuration.rewardFunc
+
       this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
       this.dockerImage = env.configuration.dockerImage
       this.modelSavePeriod = env.configuration.modelSavePeriod
     }
-    // try {
-    //   this.scriptOptions = await simulationService.getScripts()
-    // } catch (err) {
-    //   this.scriptOptions = [...scriptOptions]
-    // }
   },
+
   methods: {
+    regionChanged (v) {
+      if (v === 'doan') {
+        this.junctionId = 'SA 101,SA 107,SA 111,SA 104'
+      } else if (v === 'cdd3') {
+        this.junctionId = 'SA 1701,SA 1702'
+      }
+    },
     openSignalMap () {
       this.$refs['signal-map'].show()
     },
@@ -130,7 +190,7 @@ export default {
       const from = moment(`${this.fromDate} ${this.fromTime}`)
       const to = moment(`${this.toDate} ${this.toTime}`)
       const begin = moment.duration(this.fromTime).asSeconds()
-      const end = (to.diff(from) / 1000 - 60) + begin
+      const end = to.diff(from) / 1000 - 60 + begin
       const days = to.diff(from, 'days') + 1
       const day = from.day()
 
@@ -160,10 +220,13 @@ export default {
           days,
           interval: this.intervalSelected,
           junctionId: this.junctionId,
-          dockerImage: this.dockerImage,
           script: this.scriptSelected,
           epoch: this.epoch,
-          modelSavePeriod: this.modelSavePeriod
+          modelSavePeriod: this.modelSavePeriod,
+          action: this.actionOptionSelected,
+          method: this.methodOptionSelected,
+          rewardFunc: this.rewardFuncOptionSelected,
+          dockerImage: this.dockerImage
         }
       }
 

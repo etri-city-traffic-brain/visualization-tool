@@ -12,26 +12,30 @@ const barChartOption = () => ({
   },
   responsive: true,
   scales: {
-    xAxes: [{
-      stacked: true,
-      ticks: {
-        autoSkip: true,
-        autoSkipPadding: 50,
-        maxRotation: 0,
-        display: true,
-        fontColor: 'white'
+    xAxes: [
+      {
+        stacked: true,
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 50,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
       }
-    }],
-    yAxes: [{
-      stacked: true,
-      ticks: {
-        autoSkip: true,
-        autoSkipPadding: 10,
-        maxRotation: 0,
-        display: true,
-        fontColor: 'white'
+    ],
+    yAxes: [
+      {
+        stacked: true,
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 10,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
       }
-    }]
+    ]
   }
 })
 

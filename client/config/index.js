@@ -11,7 +11,6 @@ const target = {
 
 module.exports = {
   dev: {
-
     // resolve: {
     //   symlinks: false
     // },
@@ -24,8 +23,14 @@ module.exports = {
       '/simulations': target,
       '/statistics': target,
       '/map': target,
-      '/salt': target,
-      '/video': target
+      // '/salt': target,
+      '/video': target,
+      '/public': target,
+      '/salt/**': {
+        target: 'http://localhost:8080',
+        secure: false,
+        changeOrigin: true
+      }
     },
 
     // Various Dev Server settings

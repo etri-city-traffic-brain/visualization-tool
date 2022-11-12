@@ -1,4 +1,3 @@
-
 const fs = require('fs-extra')
 // const csv = require('neat-csv')
 const csv = require('csv-parser')
@@ -8,9 +7,12 @@ async function read (simulationId) {
   // const file = `/home/ubuntu/uniq-sim/output/${simulationId}/train/train_epoch_tl_reward.txt`
   const file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/train/train_epoch_tl_reward.txt`
 
-  await fs.access(file, fs.F_OK)
-
-  return csvToObj(file)
+  try {
+    await fs.access(file, fs.F_OK)
+    return csvToObj(file)
+  } catch (err) {
+    return {}
+  }
 }
 
 async function csvToObj (file) {
@@ -19,7 +21,7 @@ async function csvToObj (file) {
     try {
       fs.createReadStream(file)
         .pipe(csv())
-        .on('data', (row) => {
+        .on('data', row => {
           const target = map[row.tl_name] || []
           target.push({
             // phase: row.phase,

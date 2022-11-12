@@ -2,20 +2,22 @@
 
 const serialize = obj => JSON.stringify(obj)
 
-const { log, group, groupEnd } = console
+const { log } = console
 const { WebSocket } = window
 
 // eslint-disable-next-line no-undef
 const env = process && process.env
-console.log('env:', env)
+if (env) {
+  log(`NODE_ENV is %c${env.NODE_ENV}`, 'color: red')
+}
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://101.79.1.124:8080' : 'ws://101.79.1.124:8080/'
-const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.124:8080/'
+const wsUrl =
+  env.NODE_ENV === 'development'
+    ? 'ws://127.0.0.1:8080'
+    : 'ws://101.79.1.124:8080/'
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.117:8080/'
 
-log('execution mode:', env.NODE_ENV)
-log('ws:', wsUrl)
-
-const extend = (extent) => {
+const extend = extent => {
   const { min, max } = extent
   return {
     min: {
@@ -37,7 +39,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   let status = 'ready'
   let socket = null
 
-  const send = (obj) => {
+  const send = obj => {
     try {
       socket.send(serialize(obj))
     } catch (err) {
@@ -49,35 +51,31 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       socket.close()
     }
   }
-
   const kill = () => {
-    console.log('kill ws client')
     killed = true
     status = 'close'
     close()
   }
-
   const restart = () => {
     killed = false
     init()
   }
-
-  function init () {
-    // log('init websocket:', simulationId, wsUrl)
-    group('init websocket')
-    log(simulationId)
-    log(wsUrl)
-    groupEnd()
+  function init (slaves) {
+    // log(`init ${simulationId} - ${wsUrl}`)
     if (status === 'open') {
       log('WebSocket is already opened!!')
       return
     }
-    socket = new WebSocket(url)
+    try {
+      socket = new WebSocket(url)
+    } catch (err) {
+      log(err.message)
+      return
+    }
     socket.addEventListener('open', () => {
       send({ type: 0, simulationId })
       status = 'open'
       eventBus.$emit('ws:open')
-      log('websocket is opened')
     })
 
     socket.addEventListener('message', ({ data }) => {
@@ -93,36 +91,45 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     socket.addEventListener('close', () => {
       eventBus.$emit('ws:close', {})
       status = 'close'
-      log('websocket is closed')
       if (killed) {
-        console.log('killed')
         return
       }
       setTimeout(() => init(), 1000)
     })
 
     socket.addEventListener('error', () => {
-      eventBus.$emit('ws:error', new Error(`WebSocket connection to ${url} failed`))
+      eventBus.$emit(
+        'ws:error',
+        new Error(`WebSocket connection to ${url} failed`)
+      )
       status = 'error'
     })
 
-    eventBus.$on('salt:set', ({ extent, zoom }) => {
-      // const roadType = zoom >= 18 ? 1 : 0 // 1: cell, 0: link
-      // const roadType = zoom >= 17 ? 1 : 0 // 1: cell, 0: link
+    // 시뮬레이터로 BBox 설정을 요청한다.
+    function setBoundingBox (simulationId, extent) {
       const { min, max } = extend(extent)
       send({
         simulationId,
-        type: 10, // Set
+        type: 10, // Set(10)
         extent: [min.x, max.y, max.x, min.y],
-        roadType: 1
+        roadType: 1 // Cell(1), Link(0)
       })
+    }
+
+    eventBus.$on('salt:set', ({ simulationId, extent }) => {
+      if (slaves) {
+        setBoundingBox(slaves[0], extent)
+        setBoundingBox(slaves[1], extent)
+        return
+      }
+      setBoundingBox(simulationId, extent)
     })
 
-    eventBus.$on('salt:stop', (sId) => {
+    eventBus.$on('salt:stop', sId => {
       if (simulationId === sId) {
         send({
           simulationId,
-          type: 11 // Set
+          type: 11 // Stop
         })
       }
     })

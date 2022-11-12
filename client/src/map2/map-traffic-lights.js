@@ -10,41 +10,33 @@ import mapService from '../service/map-service'
 
 import signalGroups from '@/config/junction-config'
 import OptStatusLayer from './opt-status-layer'
-
-const addLayerTo = map => name => new maptalks.VectorLayer(name, [], {}).addTo(map)
+import signalService from '@/service/signal-service'
+const addLayerTo = map => name =>
+  new maptalks.VectorLayer(name, [], {}).addTo(map)
 
 const { log } = console
 
 function makeGroupPolygon (group) {
-  const geometry = new maptalks.Polygon(
-    group.features.geometry.coordinates
-    , {
-      visible: true,
-      editable: true,
-      cursor: 'pointer',
-      shadowBlur: 0,
-      shadowColor: 'black',
-      draggable: false,
-      dragShadow: false, // display a shadow during dragging
-      drawOnAxis: null, // force dragging stick on a axis, can be: x, y
-      symbol: {
-        lineColor: '#34495e',
-        lineWidth: 2,
-        polygonFill: group.properties.color,
-        polygonOpacity: 0.2
-      }
+  const geometry = new maptalks.Polygon(group.features.geometry.coordinates, {
+    visible: true,
+    editable: true,
+    cursor: 'pointer',
+    shadowBlur: 0,
+    shadowColor: 'black',
+    draggable: false,
+    dragShadow: false, // display a shadow during dragging
+    drawOnAxis: null, // force dragging stick on a axis, can be: x, y
+    symbol: {
+      lineColor: '#6495ED',
+      lineWidth: 2,
+      polygonFill: group.properties.color,
+      polygonOpacity: 0.2
     }
-
-  )
-    .setMenu({
-      items: [
-        {
-          item: `🙂 연동 교차로 선택 - <div style="border: 1px solid gray;">${group.properties.groupId}</div>`,
-          click: () => {}
-        }
-      ]
-    })
-    .openMenu()
+  })
+  geometry.setInfoWindow({
+    title: '연동교차로',
+    content: group.properties.groupId
+  })
   geometry.properties = group.properties
   return geometry
 }
@@ -56,7 +48,7 @@ const [SA101, SA107, SA111, SA104] = signalGroups.map(value => {
   }
 })
 
-const groupColor = (nodeId) => {
+const groupColor = nodeId => {
   let color = 'grey'
   if (SA101.junctions.includes(nodeId)) {
     color = SA101.color
@@ -103,11 +95,11 @@ async function getLinkIds (map, { properties }) {
       feature.properties.ST_ND_ID === nodeId
   )
 
-  return filtered.map((feature) => {
+  return filtered.map(feature => {
     const { properties, geometry } = feature
     const { ST_ND_ID } = properties
 
-    properties.isForward = (ST_ND_ID === nodeId)
+    properties.isForward = ST_ND_ID === nodeId
 
     return {
       LINK_ID: properties.LINK_ID,
@@ -121,30 +113,37 @@ async function getLinkIds (map, { properties }) {
 
 export default function SaltTrafficLightsLoader (map, element, events) {
   const addLayer = addLayerTo(map)
+  const signalGroupLayer = addLayer('signalGroupLayer')
   const trafficLightsLayer = addLayer('trafficLightsLayer')
   const linkLayer = addLayer('tmpLinkLayer')
-  const signalGroupLayer = addLayer('signalGroupLayer')
-  signalGroupLayer.hide()
+  // signalGroupLayer.hide()
   new maptalks.control.Toolbar({
     position: 'top-right',
-    items: [{
-      item: '연동교차로 ',
-      click: () => toggleGroupLayer()
-    }]
-  })
-    .addTo(map)
+    items: [
+      {
+        item: '연동교차로 ',
+        click: () => {
+          if (signalGroupLayer.isVisible()) {
+            signalGroupLayer.hide()
+          } else {
+            signalGroupLayer.show()
+          }
+        }
+      }
+    ]
+  }).addTo(map)
   const show = () => trafficLightsLayer.show()
   const hide = () => trafficLightsLayer.hide()
 
   const groups = signalGroups.map(group => {
     const area = makeGroupPolygon(group)
-    area.on('click', (e) => {
+    area.on('click', e => {
       events.$emit('signalGroup:clicked', e.target.properties)
     })
     return area
   })
 
-  map.on('zoomend', (event) => {
+  map.on('zoomend', event => {
     if (event.to < 14) {
       hide()
     } else {
@@ -154,15 +153,19 @@ export default function SaltTrafficLightsLoader (map, element, events) {
 
   signalGroupLayer.addGeometry(groups)
 
-  const selectConnection = async (target) => {
+  const selectConnection = async target => {
     const linkIds = await getLinkIds(map, target.owner)
+    console.log(
+      target.owner.properties.NODE_ID,
+      linkIds.map(l => l.LINK_ID)
+    )
     const lines = linkIds.map(makeLinkLine)
     linkLayer.clear()
     linkLayer.addGeometry(lines)
     map.addLayer(linkLayer)
   }
 
-  const editConnection = async (target) => {
+  const editConnection = async target => {
     const { owner } = target
     const [x, y] = owner.toGeoJSONGeometry().coordinates
     const linkIds = await getLinkIds(map, target.owner)
@@ -180,7 +183,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     })
   }
 
-  const deleteConnection = (target) => {
+  const deleteConnection = target => {
     const { owner } = target
     const [x, y] = owner.toGeoJSONGeometry().coordinates
 
@@ -192,6 +195,8 @@ export default function SaltTrafficLightsLoader (map, element, events) {
   }
 
   function makeTrafficLight (feature, color) {
+    const crossName = signalService.nodeIdToName(feature.properties.NODE_ID)
+
     const trafficLight = new maptalks.Marker(feature.geometry.coordinates, {
       symbol: [
         {
@@ -204,7 +209,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
         }
       ]
     })
-      .on('click', async (e) => {
+      .on('click', async e => {
         const target = e.target
         if (!target) {
           return
@@ -214,36 +219,33 @@ export default function SaltTrafficLightsLoader (map, element, events) {
           coordinates: target.toGeoJSONGeometry().coordinates
         })
       })
-      .on('mouseenter', (e) => {
-        e.target.updateSymbol({
-          textName: feature.properties.CROSS_NM,
-          textSize: 20,
-          markerFillOpacity: 1,
-          textFaceName: 'sans-serif',
-          textHaloFill: '#fff',
-          textHaloRadius: 15
-        })
+      .on('mouseenter', e => {
+        e.target.updateSymbol([
+          {
+            markerFillOpacity: 1
+          }
+        ])
         e.target.bringToFront()
-      }).on('mouseout', (e) => {
-        e.target.updateSymbol({
-          markerFillOpacity: 0.7,
-          textName: ''
-        })
+      })
+      .on('mouseout', e => {
+        e.target.updateSymbol([
+          {
+            markerFillOpacity: 0.7,
+            textName: ''
+          }
+        ])
+      })
+      .setInfoWindow({
+        title: '교차로(' + crossName + ')',
+        content: feature.properties.NODE_ID.substring(0, 30)
       })
       .setMenu({
         items: [
           {
             item: `선택(${feature.properties.NODE_ID.substring(0, 10)})`,
-            click: editConnection
+            // click: editConnection
+            click: selectConnection
           }
-          // {
-          //   item: '삭제',
-          //   click: deleteConnection
-          // },
-          // {
-          //   item: '선택',
-          //   click: selectConnection
-          // }
         ]
       })
       .openMenu()
@@ -258,7 +260,7 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     }
     const { features } = await mapService.getTrafficLights(extent(map))
     trafficLightsLayer.clear()
-    const geometries = features.map((feature) => {
+    const geometries = features.map(feature => {
       const color = groupColor(feature.properties.NODE_ID)
 
       const trafficLight = makeTrafficLight(feature, color)
@@ -267,13 +269,13 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     trafficLightsLayer.addGeometry(geometries)
   }
 
-  const toggleGroupLayer = () => {
-    if (signalGroupLayer.isVisible()) {
-      signalGroupLayer.hide()
-    } else {
-      signalGroupLayer.show()
-    }
-  }
+  // const toggleGroupLayer = () => {
+  //   if (signalGroupLayer.isVisible()) {
+  //     signalGroupLayer.hide()
+  //   } else {
+  //     signalGroupLayer.show()
+  //   }
+  // }
 
   const layer = new OptStatusLayer('hello')
 
@@ -284,10 +286,12 @@ export default function SaltTrafficLightsLoader (map, element, events) {
       junctionIds.forEach(junctionId => {
         if (g.properties.NODE_ID === junctionId) {
           data.push({
-            coord: g.getCoordinates().add(0.00, 0.0003).toArray(),
+            coord: g
+              .getCoordinates()
+              .add(0.0, 0.0003)
+              .toArray(),
             text: '최적화 중 '
             // text: ''
-
           })
           // layer.setData([
           //   {
@@ -305,9 +309,17 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     layer.setData([])
   }
 
-  function setCurrentLoads (loads) {
-
+  // 대상 교차로의 그룹 강조
+  function setTargetJunctions (junctionsIds) {
+    signalGroupLayer.getGeometries().forEach(g => {
+      const groupId = g.properties.groupId
+      if (!junctionsIds.includes(groupId)) {
+        g.hide()
+      }
+    })
   }
+
+  function setCurrentLoads (loads) {}
 
   map.on('zoomend moveend', load)
 
@@ -315,9 +327,10 @@ export default function SaltTrafficLightsLoader (map, element, events) {
     load,
     show,
     hide,
-    toggleGroup: toggleGroupLayer,
+    // toggleGroup: toggleGroupLayer,
     setOptJunction,
     clearOptJunction,
-    setCurrentLoads
+    setCurrentLoads,
+    setTargetJunctions
   }
 }

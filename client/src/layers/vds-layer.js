@@ -1,97 +1,53 @@
 import * as maptalks from 'maptalks'
+import axios from 'axios'
+const symbolOrigin = {
+  lineWidth: 2,
+  lineColor: 'orange',
+  textSize: 12,
+  textFill: 'orange',
+  polygonOpacity: 0.4
+}
 
-function Layer (map, getEdges) {
-  const canvasLayer = new maptalks.CanvasLayer('vds', {
-    forceRenderOnMoving: true,
-    forceRenderOnZooming: true
-  })
+const symbolHighlight = {
+  lineWidth: 12,
+  lineColor: 'skyblue',
+  textSize: 20,
+  polygonFill: 'skyblue',
+  textFill: 'skyblue',
+  polygonOpacity: 0.4
+}
 
-  canvasLayer.draw = function draw (ctx) {
-    ctx.font = 'bolder 14px sans-serif'
-    ctx.strokeStyle = 'blue'
-    ctx.fillStyle = 'blue'
-    getEdges()
-      .forEach(edge => {
-        if (edge.properties.vdsId) {
-          const p = map.coordinateToContainerPoint(edge.getCenter())
-          const c = edge.getCoordinates()
-          const p2 = c[0]
-          const p1 = c[c.length - 1]
+let vdsTable
 
-          const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-
-          const x = Math.cos(angle - Math.PI / 2) * 25
-          const y = Math.sin(angle - Math.PI / 2) * 25
-
-          ctx.save()
-          ctx.beginPath()
-          ctx.arc(p.x, p.y, 5, 0, Math.PI * 2, true)
-          ctx.translate(p.x + x, p.y + y)
-
-          ctx.fillText(edge.properties.vdsId, 0, 0)
-          ctx.stroke()
-          ctx.fill()
-          ctx.restore()
-        }
+function VdsLayer (map, getEdges, eventBus) {
+  if (!vdsTable) {
+    axios({
+      url: '/salt/v1/vds',
+      method: 'get'
+    })
+      .then(res => res.data)
+      .then(data => {
+        vdsTable = data
       })
-
-    this.completeRender()
-
-    canvasLayer.completeRender()
   }
-
-  canvasLayer.drawOnInteracting = (context, view) => {
-    canvasLayer.draw(context, view)
-  }
-
-  canvasLayer.updateRealtimeData = () => {
-    canvasLayer.redraw()
-  }
-
-  return canvasLayer
-}
-
-function text (str, pos) {
-  return new maptalks.Marker(
-    pos,
-    {
-      properties: {
-        name: str
-      },
-      symbol: {
-        textFaceName: 'sans-serif',
-        textName: '{name}', // value from name in geometry's properties
-        textWeight: 'normal', // 'bold', 'bolder'
-        textStyle: 'normal', // 'italic', 'oblique'
-        textSize: 15,
-        textFont: null, // same as CanvasRenderingContext2D.font, override textName, textWeight and textStyle
-        textFill: '#34495e',
-        textOpacity: 1,
-        // textHaloFill: '#fff',
-        textHaloFill: '#ff0',
-        textHaloRadius: 5,
-        textWrapWidth: null,
-        textWrapCharacter: '\n',
-        textLineSpacing: 0,
-
-        textDx: 0,
-        textDy: 0,
-
-        textHorizontalAlignment: 'middle', // left | middle | right | auto
-        textVerticalAlignment: 'middle', // top | middle | bottom | auto
-        textAlign: 'center' // left | right | center | auto
-      }
-    }
-  )
-}
-
-function Layer2 (map, getEdges, eventBus) {
-  const layer = new maptalks.VectorLayer('vds2', [])
-
-  layer.updateRealtimeData = () => {
+  const layer = new maptalks.VectorLayer('vds', [])
+  setTimeout(() => update(), 1000)
+  map.on('zoomend moveend', () => {
+    update()
+  })
+  function update () {
     layer.clear()
-    getEdges()
-      .forEach(edge => {
+    const circles = getEdges()
+      .map(edge => {
+        const vdsId = vdsTable[edge.properties.LINK_ID]
+        if (vdsId) {
+          edge.properties.vdsId = vdsId.vdsId
+          edge.properties.secionId = vdsId.sectionId
+          edge.properties.sId = vdsId.sId
+          edge.properties.dId = vdsId.dId
+        }
+
+        let circle
         if (edge.properties.vdsId) {
           const c = edge.getCoordinates()
           const p2 = c[0]
@@ -101,55 +57,44 @@ function Layer2 (map, getEdges, eventBus) {
 
           const x = Math.cos(angle - Math.PI / 2) * 30
           const y = Math.sin(angle - Math.PI / 2) * 30
-          const circle = new maptalks.Circle(edge.getCenter(), 10, {
+          // circle = new maptalks.Circle(edge.getCenter(), 20, {
+          circle = new maptalks.Circle(edge.getFirstCoordinate(), 20, {
             symbol: {
-              lineColor: '#34495e',
-              lineWidth: 2,
-              polygonFill: '#1bbc9b',
-              polygonOpacity: 0.4,
+              ...symbolOrigin,
               textName: edge.properties.vdsId,
               textPlacement: edge.properties.vdsId,
-              textSize: 20,
-              textFill: '#34495e',
               textDy: y,
               textDx: x
             }
           })
-          circle.on('mouseover', (x) => {
-
-          })
-          circle.on('mouseout', (x) => {
-          })
-          circle.on('click', (x) => {
-            const marker = x.target
-            const player = marker.animate({
-              symbol: {
-                polygonOpacity: 1,
-                textSize: 40
+          circle.on('mouseover', ({ target: t }) =>
+            t.updateSymbol(symbolHighlight)
+          )
+          circle.on('mouseout', ({ target: t }) => t.updateSymbol(symbolOrigin))
+          circle.on('click', ({ target: t }) => {
+            t.animate(
+              { symbol: { polygonOpacity: 1, textSize: 80 } },
+              { duration: 1000 },
+              frame => {
+                if (frame.state.playState === 'finished') {
+                  t.updateSymbol(symbolOrigin)
+                }
               }
-            }, {
-              duration: 200
-            }, function (frame) {
-              if (frame.state.playState === 'finished') {
-                marker.updateSymbol({
-                  lineWidth: 2,
-                  polygonOpacity: 0.4,
-                  textSize: 20
-                })
-              }
-            })
-
+            )
             eventBus.$emit('vds:selected', edge)
           })
-          layer.addGeometry(circle)
+          return circle
         }
+        return null
       })
+      .filter(d => d !== null)
+    layer.addGeometry(circles)
   }
   return layer
 }
 
 export default (map, getEdges, eventBus) => {
-  const layer = Layer2(map, getEdges, eventBus)
+  const layer = VdsLayer(map, getEdges, eventBus)
   layer.show()
   return layer
 }

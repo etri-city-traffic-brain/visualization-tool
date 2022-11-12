@@ -1,4 +1,3 @@
-
 //  신호 최적화를 위한 환경 목록
 //  신호 최적화 시뮬레이션을 하기 위해서는,
 //  먼저 시뮬레이션을 위한 환경을 등록해야 한다.
@@ -32,8 +31,7 @@ export default {
     async reload () {
       this.envs = await optEnvService.get()
     },
-    hideCreateSimulationDialog () {
-    },
+    hideCreateSimulationDialog () {},
     async saveOptEnvConfig (config) {
       const obj = this.envs.find(env => env.envName === config.envName)
       if (obj) {
@@ -69,7 +67,12 @@ export default {
       })
 
       const random = () => `${Math.floor(Math.random() * 1000)}`
-      const generateRandomId = (prefix = 'DEFU') => `${prefix.substring(0, 4).toUpperCase()}_${moment().year()}${moment().format('MM')}_${random().padStart(5, '0')}`
+      const generateRandomId = (prefix = 'DEFU') =>
+        `${prefix
+          .substring(0, 4)
+          .toUpperCase()}_${moment().year()}${moment().format(
+          'MM'
+        )}_${random().padStart(5, '0')}`
       env.id = generateRandomId(env.role)
       try {
         await simulationService.createSimulation(this.userId, env)

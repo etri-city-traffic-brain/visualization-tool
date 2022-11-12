@@ -21,7 +21,7 @@ debug('xxxx')
 const config = require('../../config')
 const { output } = config.saltPath
 
-const subIds = (cellId) => {
+const subIds = cellId => {
   const subIds = cellId.split('_')
   return {
     linkId: subIds[0],
@@ -31,7 +31,9 @@ const subIds = (cellId) => {
 }
 
 const pickResultFile = id => {
-  const file = fs.readdirSync(`${output}/${id}`).find(file => file.endsWith('.csv'))
+  const file = fs
+    .readdirSync(`${output}/${id}`)
+    .find(file => file.endsWith('.csv'))
   if (!file) return null
   return `${output}/${id}/${file}`
 }
@@ -52,13 +54,23 @@ const cook = ({ simulationId, duration, period }) => {
 
   return new Promise((resolve, reject) => {
     const stream = fs.createReadStream(simulationResultFile)
-    const transform = ([start, end, id, vehPassed, speed, avgDensity, waitingLength, waitingTime, sumTravelLength, sumTravelTime]) =>
-      ({ start, id, speed, sumTravelTime, vehPassed, waitingTime })
+    const transform = ([
+      start,
+      end,
+      id,
+      vehPassed,
+      speed,
+      avgDensity,
+      waitingLength,
+      waitingTime,
+      sumTravelLength,
+      sumTravelTime
+    ]) => ({ start, id, speed, sumTravelTime, vehPassed, waitingTime })
 
     const cells = {}
     const start = Date.now()
 
-    const handleData = (row) => {
+    const handleData = row => {
       // salt specific annotation
       // we have to ignore it
       if (row.id && row.id === 'simulation') {
@@ -100,13 +112,21 @@ const cook = ({ simulationId, duration, period }) => {
         debug('😀 chart data created, elapsedTime:', elapsedTime)
 
         const memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024
-        debug(`The job uses approximately ${Math.round(memoryUsed * 100) / 100} MB`)
+        debug(
+          `The job uses approximately ${Math.round(memoryUsed * 100) / 100} MB`
+        )
         debug(`${(Date.now() - start) / 1000} sec`)
 
-        updateStatus(simulationId, status.FINISHED, { ended: currentTimeFormatted() })
+        updateStatus(simulationId, status.FINISHED, {
+          ended: currentTimeFormatted()
+        })
         resolve(true)
       } catch (err) {
-        updateStatus(simulationId, status.ERROR, { error: err.message, ended: currentTimeFormatted() })
+        console.log('***** err ', err.message)
+        updateStatus(simulationId, status.ERROR, {
+          error: err.message,
+          ended: currentTimeFormatted()
+        })
         debug(err.message)
         reject(err)
       }

@@ -10,16 +10,26 @@ const { config } = require('../../globals')
 const { routePerDay } = config.simulation
 const { tcpPort } = config.server
 
-const getRouteFor = (day) => {
+const getRouteFor = day => {
   const route = routePerDay[day] || routePerDay[routePerDay.length - 1]
   // return `${routes}/${route}`
   return `../../routes/${route}`
 }
 
+const getRouteForSim = region => {
+  return `../../routes/${region}.rou.xml`
+}
+
 const output = '/uniq/simulator/salt/volume/output'
 
-module.exports = ({ id, host, configuration: { begin, end, day, period, interval = 10 } }, type) => {
-  console.log('type:', type)
+module.exports = (
+  {
+    id,
+    host,
+    configuration: { begin, end, day, period, interval = 10, region }
+  },
+  type
+) => {
   if (type === 'optimization') {
     return {
       scenario: {
@@ -69,7 +79,8 @@ module.exports = ({ id, host, configuration: { begin, end, day, period, interval
           link: 'edge.xml',
           connection: 'connection.xml',
           trafficLightSystem: 'tss.xml',
-          route: getRouteFor(day)
+          // route: getRouteFor(day)
+          route: getRouteForSim(region)
         },
         parameter: {
           minCellLength: 30.0,

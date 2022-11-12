@@ -1,8 +1,8 @@
-
 import moment from 'moment'
 
 import SimulationCreationPanel from '@/components/SimulationCreation'
 import UniqRegister from '@/components/UniqRegister'
+import SimRegister from '@/components/SimRegister'
 
 import BarChart from '@/components/charts/BarChart'
 
@@ -16,13 +16,6 @@ import fileMgmtMixin from './file-mgmt-mixin'
 
 import map from '@/region-code'
 
-const variant = {
-  finished: 'primary',
-  running: 'success',
-  error: 'danger',
-  ready: 'secondary'
-}
-
 const { log } = console
 
 export default {
@@ -30,7 +23,8 @@ export default {
   components: {
     BarChart,
     SimulationCreationPanel,
-    UniqRegister
+    UniqRegister,
+    SimRegister
   },
   mixins: [dragDropMixin, fileMgmtMixin],
   data () {
@@ -39,13 +33,24 @@ export default {
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
-        // { class: 'text-center', key: 'statusText', label: '상태' },
-        { class: 'text-center', key: 'configuration.period', label: '주기' },
-        { class: 'text-center', key: 'duration', label: '기간' },
-        // { class: 'text-center', key: 'ended', label: '종료' },
-        { class: 'text-center', key: 'actions', label: '제어' }
-        // { class: 'text-center', key: 'details', label: '상세' },
-        // { class: 'text-center', key: 'del', label: '삭제' }
+        { class: 'text-center', key: 'region', label: '지역' },
+        {
+          class: 'text-center',
+          key: 'configuration.period',
+          label: '통계주기'
+        },
+        {
+          class: 'text-center',
+          key: 'configuration.fromTime',
+          label: '시작시간'
+        },
+        {
+          class: 'text-center',
+          key: 'configuration.toTime',
+          label: '종료시간'
+        },
+        { class: 'text-center', key: 'created', label: '생성일' },
+        { class: 'text-center', key: 'actions', label: '기능' }
       ],
       items: [],
       currentPage: 1,
@@ -101,7 +106,9 @@ export default {
     async toggleDetails (id, status, hide) {
       if (!hide) {
         if (status === 'finished') {
-          this.barChartDataTable[id] = await statisticsService.getSummaryChart(id)
+          this.barChartDataTable[id] = await statisticsService.getSummaryChart(
+            id
+          )
           this.$forceUpdate()
         }
       } else {
@@ -173,7 +180,12 @@ export default {
     async dataProvider ({ currentPage }) {
       this.isBusy = true
       try {
-        const { data, total, perPage } = (await simulationService.getSimulations(this.userState.userId, currentPage)).data
+        const { data, total, perPage } = (
+          await simulationService.getSimulations(
+            this.userState.userId,
+            currentPage
+          )
+        ).data
         this.totalRows = total
         this.isBusy = false
         this.perPage = perPage
@@ -184,14 +196,15 @@ export default {
         return []
       }
     },
-    status (text) {
-      return variant[text]
-    },
-    async saveOptEnvConfig (env) {
+    async saveSim (env) {
       try {
+        this.msg = '시뮬레이션 준비중...'
         await simulationService.createSimulation(this.userId, env)
+        this.updateTable()
       } catch (err) {
         log(err)
+      } finally {
+        this.msg = ''
       }
     },
     async removeSimulation (param) {
@@ -219,7 +232,7 @@ export default {
       }
     },
     hideCreateSimulationDialog () {
-      this.updateTable()
+      // this.updateTable()
     },
     makeToast (msg, variant = 'info') {
       this.$bvToast.toast(msg, {
@@ -229,6 +242,15 @@ export default {
         appendToast: true,
         toaster: 'b-toaster-bottom-right'
       })
+    },
+    sColor (value) {
+      const c = {
+        running: 'bg-green-500',
+        error: 'bg-red-500',
+        ready: 'bg-gray-500',
+        finished: 'bg-blue-500'
+      }
+      return c[value] || 'bg-gray-300'
     }
   }
 }

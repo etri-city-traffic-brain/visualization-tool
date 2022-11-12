@@ -26,6 +26,8 @@ function SaltMsgHandler () {
     const socket = simulationIdToSocket[simulationId]
     if (socket) {
       socket.write(buffer)
+    } else {
+      // console.log('*** no socket ***', simulationId)
     }
   }
 
@@ -34,21 +36,28 @@ function SaltMsgHandler () {
     try {
       const initMsg = Init(buffer)
       const simulationId = initMsg.simulationId
-      if (!socketToSimulationId[socket.remotePort]) {
-        socketToSimulationId[socket.remotePort] = simulationId
-        simulationIdToSocket[simulationId] = socket
+
+      if (!(simulationId.startsWith('S') || simulationId.startsWith('O'))) {
+        console.log(simulationId)
+        console.log('--- 의심 ---')
+        return
       }
+      // if (!socketToSimulationId[socket.remotePort]) {
+      socketToSimulationId[socket.remotePort] = simulationId
+      simulationIdToSocket[simulationId] = socket
+      console.log('add socket', socket.remotePort, simulationId)
+      // }
       debug(`[INIT] ${simulationId}, ${socket.remotePort}`)
-      console.log(chalk.green('[INIT] =====>'))
-      console.log(chalk.green(`[INIT] =====> ${simulationId}, ${socket.remotePort}`))
-      console.log(chalk.green('[INIT] =====> ', buffer.length))
 
       if (buffer.length > 100) {
         handleSaltData(socket, buffer)
       }
       // console.log(initMsg)
       if (simulationId.startsWith('SIM')) {
-        fs.writeFileSync(path.join(config.saltPath.output, simulationId, LOG_FILE), '')
+        fs.writeFileSync(
+          path.join(config.saltPath.output, simulationId, LOG_FILE),
+          ''
+        )
       }
       const setBuffer = msgFactory.makeSet({
         // extent: [127.33342, 36.3517, 127.34806, 36.34478], // max.y 가 min.y 보다 작아야 함
@@ -58,8 +67,7 @@ function SaltMsgHandler () {
 
       send(simulationId, setBuffer)
     } catch (err) {
-      console.log(err)
-      console.log('**** error parse Init ***')
+      debug(err.message)
     }
   }
 
@@ -79,7 +87,11 @@ function SaltMsgHandler () {
       })
 
       if (simulationId.startsWith('SIM')) {
-        const logFile = path.join(config.saltPath.output, simulationId, LOG_FILE)
+        const logFile = path.join(
+          config.saltPath.output,
+          simulationId,
+          LOG_FILE
+        )
 
         const line = data.roads.reduce((acc, cur) => {
           const result = acc + cur.roadId + ':' + cur.numVehicles + ','
@@ -110,7 +122,6 @@ function SaltMsgHandler () {
   //  STATUS
   const handleSaltStatus = (socket, buffer) => {
     const status = Status(buffer)
-    // console.log('*****', status, '******')
     const simulationId = socketToSimulationId[socket.remotePort]
     // console.log(simulationId)
     eventBus.emit(EVENT_STATUS, {
@@ -126,13 +137,15 @@ function SaltMsgHandler () {
     [STATUS]: handleSaltStatus
   }
 
-  const clearResource = (socket) => {
+  const clearResource = socket => {
     delete simulationIdToSocket[socketToSimulationId[socket.remotePort]]
     delete socketToSimulationId[socket.remotePort]
   }
 
   return Object.assign(eventBus, {
-    get (type) { return handlers[type] },
+    get (type) {
+      return handlers[type]
+    },
     clearResource,
     send
   })

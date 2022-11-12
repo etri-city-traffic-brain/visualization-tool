@@ -25,48 +25,70 @@ const downloadScenarioTest = require('./utils/prepare-scenario-test')
 const addSimulation = require('../../main/simulation-manager/crud/create')
 
 const {
-  updateStatus, currentTimeFormatted, getSimulations, config
+  downloadScenarioByCoordinate
+} = require('../../main/service/scenario-downloader')
+
+const { log } = console
+const {
+  updateStatus,
+  currentTimeFormatted,
+  getSimulations,
+  config
 } = require('../../globals')
 
 const { base, server } = config
 const host = server.ip
-const existSimulation = id => getSimulations().find({ id }).value()
+const tcpPort = config?.server?.tcpPort
+
+const existSimulation = id =>
+  getSimulations()
+    .find({ id })
+    .value()
 const stringify = obj => JSON.stringify(obj, false, 2)
 
-const randomId = (num) => ('S-' + ((Math.random() * 10000000) + '').replace('.', '')).substring(0, 14) + '-' + num
+const randomId = num =>
+  ('S-' + (Math.random() * 10000000 + '').replace('.', '')).substring(0, 14) +
+  '-' +
+  num
 
 async function createScenarioFile (targetDir, { host, body, id }, type) {
   await writeFile(
+    // `${targetDir}/doan_${type}.scenario.json`,
     `${targetDir}/salt.scenario.json`,
     stringify(makeScenario({ host, ...body, id }, type))
   )
 }
 
-const makeOptScenario = (id, { configuration: { begin, end, period, interval = 10 } }, fileDir) => {
+const makeOptScenario = (
+  id,
+  { configuration: { region, begin, end, period, interval = 10 } },
+  fileDir
+) => {
   return {
     scenario: {
       id,
       host,
-      port: config.server.tcpPort,
+      port: tcpPort,
       interval,
       time: {
-        begin: 0,
-        end: end - begin + 60
+        // begin: 0,
+        // end: end - begin + 60
+        begin,
+        end: end + 60
       },
       input: {
         fileType: 'SALT',
-        node: 'doan.nod.xml',
-        link: 'doan.edg.xml',
-        connection: 'doan.con.xml',
-        trafficLightSystem: 'doan_20210421.tss.xml',
-        route: 'dj_doan_kaist_2h.rou.xml'
+        node: `${region}.node.xml`,
+        link: `${region}.edge.xml`,
+        connection: `${region}.connection.xml`,
+        trafficLightSystem: `${region}.tss.xml`,
+        route: `${region}.rou.xml`
       },
       parameter: {
         minCellLength: 30.0,
         vehLength: 5.0
       },
       output: {
-        // fileDir: `${output}/${id}/`,
         fileDir,
         period,
         level: 'cell',
@@ -76,13 +98,60 @@ const makeOptScenario = (id, { configuration: { begin, end, period, interval = 1
   }
 }
 
-async function createOPtScenarioFile (id, body, outDir, file) {
-  const configFile = makeOptScenario(id, body, file)
+async function createOPtScenarioFile (id, body, outDir, file, mode) {
+  const configFile = makeOptScenario(id, body, file, mode)
   // console.log(configFile)
-  await writeFile(
-    outDir,
-    stringify(configFile)
-  )
+  await writeFile(outDir, stringify(configFile))
+}
+
+const refineDate = text => text.replace(/-/g, '')
+const refineTime = text => text.replace(/:/g, '')
+
+const refineParam = param => ({
+  include: 0,
+  fromDate: refineDate(param.fromDate),
+  toDate: refineDate(param.toDate),
+  fromTime: refineTime(param.fromTime),
+  toTime: refineTime(param.toTime),
+  region: param.region,
+  partitions: param.partitions,
+  subregion: 0,
+  signal: 1,
+  route: 1,
+  event: 1,
+  // weather: 1
+  busstop: 1
+})
+
+/**
+ * SALT 시뮬레이터를 위한 준비작업
+ *
+ */
+async function prepareSimulation (id, body, role, slaves = [], type) {
+  const simInputDir = `${base}/data/${id}`
+  const simOutputDir = `${base}/output/${id}`
+
+  try {
+    await mkdir(simInputDir)
+    await mkdir(simOutputDir)
+    await addSimulation({ ...body, id, slaves, role })
+    await createScenarioFile(simInputDir, { host, body, id }, type)
+
+    const path = `${base}/routes/scenario_dj_${body.configuration.region}.zip`
+    await unzip(path, { dir: simInputDir })
+    //
+    // const param = {
+    //   ...body.configuration,
+    //   ...refineParam(body.configuration)
+    // }
+    // await downloadScenarioByCoordinate(param, simInputDir)
+    // await unzip(simInputDir + '/data.zip', { dir: simInputDir })
+  } catch (err) {
+    log(err)
+    return err
+  }
+  updateStatus(id, 'ready', {})
+  log(`[simulation] ${id} is ready`)
 }
 
 async function prepareOptimization (ids, body) {
@@ -90,45 +159,34 @@ async function prepareOptimization (ids, body) {
   const simOutputDir = `${base}/output/${ids[0]}`
   await mkdir(simOutputDir)
 
-  const path = '/home/ubuntu/uniq-sim/routes/scenario.zip'
+  const region = body.configuration.region // 'doan'
+  const path = `/home/ubuntu/uniq-sim/routes/scenario_${region}.zip`
   await unzip(path, { dir: targetDir })
-  // await mkdir(targetDir)
-  // await mkdir(`${targetDir}/scenario`)
-  // await mkdir(`${targetDir}/scenario/doan`)
-  createOPtScenarioFile(ids[0], body, `${targetDir}/scenario/doan/salt.scenario.train.json`, 'output/rl/')
-  createOPtScenarioFile(ids[1], body, `${targetDir}/scenario/doan/salt.scenario.test.json`, 'output/test/')
-  createOPtScenarioFile(ids[2], body, `${targetDir}/scenario/doan/salt.scenario.simulation.json`, 'output/ft/')
+
+  log(`rename ${targetDir}/scenario_${region} to ${targetDir}/scenario`)
+
+  fs.renameSync(`${targetDir}/scenario_${region}`, `${targetDir}/scenario`)
+
+  createOPtScenarioFile(
+    ids[0],
+    body,
+    `${targetDir}/scenario/${region}/${region}_train.scenario.json`,
+    '/uniq/optimizer/io/output/train/'
+  )
+  createOPtScenarioFile(
+    ids[1],
+    body,
+    `${targetDir}/scenario/${region}/${region}_test.scenario.json`,
+    '/uniq/optimizer/io/output/test/'
+  )
+  createOPtScenarioFile(
+    ids[2],
+    body,
+    `${targetDir}/scenario/${region}/${region}_simulate.scenario.json`,
+    '/uniq/optimizer/io/output/simulate/'
+  )
   updateStatus(ids[0], 'ready', {})
 }
-
-async function prepareSimulation (id, body, role, slaves = [], type) {
-  // await downloadScenario(simInputDir, body.configuration)
-
-  if (type === 'optimization') {
-    // const simInputDir = `${base}/data/${id}`
-    // await mkdir(simInputDir)
-    // const path = '/home/ubuntu/uniq-sim/routes/scenario.zip'
-    // await unzip(path, { dir: simInputDir })
-    // await addSimulation({ ...body, id, slaves, role })
-    // console.log('**** add')
-    // await prepareOptimization([id, ...slaves], body)
-
-    // const file1 = makeOptScenario({ id, host, body })
-  } else {
-    const simInputDir = `${base}/data/${id}`
-    const simOutputDir = `${base}/output/${id}`
-    await mkdir(simInputDir)
-    await mkdir(simOutputDir)
-    await addSimulation({ ...body, id, slaves, role })
-    await createScenarioFile(simInputDir, { host, body, id }, type)
-    await downloadScenarioTest(simInputDir, body.configuration)
-    console.log('*** caution: you have to update this scenario download ***')
-    console.log('file: api-create.js, line: 55')
-  }
-
-  updateStatus(id, 'ready', {})
-}
-
 const ROLE = {
   TRAINING: 'training',
   TEST: 'test',
@@ -137,7 +195,7 @@ const ROLE = {
 }
 
 /**
- * 신호최적화 시무률레이션을 위한 입력데이터를 준비한다.
+ * 요청 type 에 따른 시률레이션 설정 생성
  */
 module.exports = async (req, res, next) => {
   const { body: { id, type } = {} } = req
@@ -152,19 +210,19 @@ module.exports = async (req, res, next) => {
     next(createError(409, `simulation [${id}] already exists...`))
     return
   }
-  console.log('type:==>', type)
   try {
     if (type === 'optimization') {
       const idTest = randomId(0) // for test
       const idFixed = randomId(1) // for fixed
-      // await prepareSimulation(id, req.body, ROLE.TRAINING, [idTest, idFixed], 'optimization')
-      // req.body.masterId = id
-      // await prepareSimulation(idTest, req.body, ROLE.TEST, [], 'optimization')
-      // await prepareSimulation(idFixed, req.body, ROLE.FIXED, [], 'optimization')
-      await addSimulation({ ...req.body, id, slaves: [idTest, idFixed], role: ROLE.TRAINING })
+
+      await addSimulation({
+        ...req.body,
+        id,
+        slaves: [idTest, idFixed],
+        role: ROLE.TRAINING
+      })
       await prepareOptimization([id, idTest, idFixed], req.body)
     } else {
-      console.log('prepare simulation data')
       await prepareSimulation(id, req.body, ROLE.SIMULATION)
     }
     debug(`simulation ${id} is ready!`)

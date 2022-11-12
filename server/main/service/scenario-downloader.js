@@ -28,11 +28,13 @@ async function download (url, targetDir = './') {
 
     return new Promise((resolve, reject) => {
       data.on('end', () => {
-        const stats = fs.statSync(targetFilePath)
-        if (stats.size < 100) {
-          reject(new Error('scenario file is not correct'))
-          return
-        }
+        console.log(targetFilePath)
+        // const stats = fs.statSync(targetFilePath)
+        // console.log(stats.size)
+        // if (stats.size < 100) {
+        //   reject(new Error('scenario file is not correct'))
+        //   return
+        // }
         resolve(targetFilePath)
       })
       data.on('error', error => reject(error))
@@ -98,7 +100,8 @@ function makeUrlForScenarioByCoordinate ({
   partitions = '1',
   route = '0',
   event = '0',
-  weather = '0'
+  weather = '0',
+  busstop = '1'
 }) {
   const reqestParameter = `
   ?include=${include}&
@@ -111,6 +114,7 @@ function makeUrlForScenarioByCoordinate ({
   maxX=${maxX}&
   maxY=${maxY}&
   signal=${signal}&
+  busstop=${busstop}&
   weather=${weather}`.replace(/\s/g, '')
 
   return `${urlBaseForScenarioByCoordinate}${reqestParameter}`

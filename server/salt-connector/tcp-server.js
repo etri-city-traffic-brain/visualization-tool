@@ -1,4 +1,8 @@
-
+/**
+ * tcp-server.js
+ * author: beanpole
+ * last modified: 2022-11-10
+ */
 const debug = require('debug')('salt-connector:tcp-server')
 
 const net = require('net')
@@ -18,33 +22,32 @@ module.exports = (port = 1337) => {
 
   const consumeSaltMsg = (socket, bufferManager) => {
     const buffer = bufferManager.getBuffer(socket)
-    // console.log('----------------> consume <----------------------', buffer.length)
     if (buffer && buffer.length >= HEADER_LENGTH) {
       const header = Header(buffer)
-      // console.log(red('************************************'))
-      // console.log(red(JSON.stringify(header)))
-      // console.log(red('************************************'))
       const handler = saltMsgHandler.get(header.type)
       if (handler) {
         const bodyLength = header.length + HEADER_LENGTH
         if (buffer.length >= bodyLength) {
-          handler(socket, buffer.slice(HEADER_LENGTH, bodyLength))
-          bufferManager.setBuffer(socket, buffer.slice(bodyLength))
+          handler(socket, buffer.slice(HEADER_LENGTH, bodyLength)) // body part
+          bufferManager.setBuffer(socket, buffer.slice(bodyLength)) // remains
+        } else {
+          bufferManager.setBuffer(socket, buffer) // remains
         }
+      } else {
+        console.log('no handler')
       }
     }
-    // timer = setTimeout(() => consumeSaltMsg(socket, bufferManager), 20)
   }
 
   const bufferManagerRegistry = {}
 
-  const handleData = socket => (buffer) => {
+  const handleData = socket => buffer => {
     const bufferManager = bufferManagerRegistry[socket.remotePort]
     bufferManager.addBuffer(socket, buffer)
     consumeSaltMsg(socket, bufferManager)
   }
 
-  const handleClose = socket => () => {
+  const handleCloseX = socket => () => {
     setTimeout(() => {
       saltMsgHandler.clearResource(socket)
       const bufferManager = bufferManagerRegistry[socket.remotePort]
@@ -57,25 +60,28 @@ module.exports = (port = 1337) => {
     }, 500)
   }
 
+  const handleClose = socket => buffer => {
+    console.log('socket closed', socket.remoteAddress)
+  }
+
   const handleError = socket => () => {
     debug(green(`[socket-error] ${socket.remoteAddress}`))
   }
 
-  const server = net.createServer((socket) => {
+  const server = net.createServer(socket => {
     socket.on('data', handleData(socket))
     socket.on('close', handleClose(socket))
     socket.on('error', handleError(socket))
 
     const bufferManager = BufferManager()
     bufferManagerRegistry[socket.remotePort] = bufferManager
-    // consumeSaltMsg(socket, bufferManager)
   })
 
-  server.on('connection', (socket) => {
+  server.on('connection', socket => {
     debug(green(`[connection] ${socket.remoteAddress}`))
   })
 
-  server.on('error', (socket) => {
+  server.on('error', socket => {
     debug(green(`[server-error] ${socket.remoteAddress}`))
   })
 

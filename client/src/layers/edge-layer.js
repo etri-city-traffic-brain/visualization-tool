@@ -1,4 +1,3 @@
-
 import * as maptalks from 'maptalks'
 
 import color from '@/utils/colors'
@@ -7,12 +6,20 @@ import color from '@/utils/colors'
 const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1
 
 function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
+  if (Object.keys(linkSpeeds).length === 0) {
+    return
+  }
   const lineWidth = calcLineWidth(map.getZoom())
-  edgeLayer.getGeometries().forEach((geometry) => {
+  edgeLayer.getGeometries().forEach(geometry => {
     const speeds = linkSpeeds[geometry.getId()] || []
-    const speed = speeds[step]
+    let speed = speeds[step] || 0
+    // let speed = road.speed
+    if (geometry.properties.SPEEDLH <= 30) {
+      speed = (speed / 30) * 50
+    }
+
     if (speed) {
-      const lineColor = color(speeds[step]) || '#808080'
+      const lineColor = color(speed) || '#808080'
       geometry.updateSymbol({
         lineWidth,
         lineColor,
@@ -30,7 +37,7 @@ function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
   })
 }
 
-export default (map) => {
+export default map => {
   const edgeLayer = new maptalks.VectorLayer('edgeLayer', [], {
     enableAltitude: true,
     drawAltitude: {
@@ -42,7 +49,7 @@ export default (map) => {
     }
   })
 
-  map.on('zoomend moveend', (event) => {
+  map.on('zoomend moveend', event => {
     const map = event.target
     if (map.getZoom() >= 19 || map.getZoom() <= 14) {
       // layer.hide()
@@ -52,12 +59,21 @@ export default (map) => {
   })
 
   function updateRealtimeSpeed (speedByEdgeId = {}) {
-    edgeLayer.getGeometries().forEach((geometry) => {
-      const road = speedByEdgeId[geometry.getId()]
+    edgeLayer.getGeometries().forEach(geometry => {
+      let edgeId = geometry.getId()
+      if (!edgeId.includes('_')) {
+        edgeId = edgeId + '_0_0'
+      }
+      const road = speedByEdgeId[edgeId]
       if (road) {
+        let speed = road.speed
+        if (geometry.properties.SPEEDLH <= 30) {
+          // speed = road.speed * 2
+          speed = (speed / 30) * 50
+        }
         geometry.updateSymbol({
           lineWidth: calcLineWidth(map.getZoom()),
-          lineColor: color(road.speed)
+          lineColor: color(speed)
         })
       }
     })
@@ -67,7 +83,7 @@ export default (map) => {
     updateCongestion(edgeLayer, map, currentSpeedsPerLink, currentStep)
   }
 
-  edgeLayer.updateRealtimeData = (data) => {
+  edgeLayer.updateRealtimeData = data => {
     updateRealtimeSpeed(data)
   }
 

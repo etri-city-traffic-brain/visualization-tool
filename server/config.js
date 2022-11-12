@@ -3,7 +3,7 @@
  */
 const base = '/home/ubuntu/uniq-sim'
 const cloudApiBase = 'http://180.210.14.16'
-const dataApiBase = 'http://101.79.1.111:8080/rest.api'
+const dataApiBase = 'http://101.79.1.111:8080/restapi'
 
 module.exports = {
   test: false,
@@ -46,13 +46,15 @@ module.exports = {
     urlBase: cloudApiBase
   },
   server: {
-    ip: '192.168.1.222',
+    ip: '192.168.1.223',
     tcpPort: process.env.tcpPort || 1337,
     wsPort: 8082,
     webPort: process.env.webPort || 8080
   },
   db: {
-    mongodbUrl: 'mongodb://127.0.0.1:27017/map',
+    // mongodbUrl: 'mongodb://1234:1234@localhost:27017/map',
+    mongodbUrl:
+      'mongodb://1234:1234@localhost:27017/map?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',
     mongoOption: {
       useNewUrlParser: true,
       //  autoReconnect: true,
@@ -63,5 +65,21 @@ module.exports = {
       useUnifiedTopology: true
     },
     lowDBFile: process.env.db || './db.json'
+  },
+  docker: {
+    simulation: {
+      images: [
+        'images4uniq/salt:v2.1a.20210915.test_BUS',
+        'images4uniq/salt:v2.1a.221019'
+      ]
+    },
+    optimization: {
+      images: [
+        'images4uniq/optimizer:v1.1a.20220629.d',
+        'images4uniq/optimizer:v1.2a.20220720PM',
+        'images4uniq/optimizer:v2.1a.221012 -- error',
+        'images4uniq/optimizer:v2.1a.20221012'
+      ]
+    }
   }
 }

@@ -1,20 +1,17 @@
-
 import moment from 'moment'
 
-// import SimulationCreationPanel from '@/components/SimulationCreation';
 import OptimizationCreationPanel from '@/components/OptimizationCreation'
 import UniqRegister from '@/components/UniqRegister'
 import BarChart from '@/components/charts/BarChart'
 
-import { simulationService, statisticsService, optimizationService } from '@/service'
-
+import { simulationService } from '@/service'
+import { HTTP } from '@/http-common'
 import userState from '@/user-state'
-import calcInterval from '@/utils/calc-time-interval'
 
 import dragDropMixin from './drag-drop-mixin'
 import fileMgmtMixin from './file-mgmt-mixin'
 
-import map from '@/region-code'
+import optEnvService from '@/service/optenv-service'
 
 const variant = {
   finished: 'primary',
@@ -37,80 +34,159 @@ export default {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
-        { class: 'text-center', key: 'id', label: '시뮬레이션 아이디' },
+        { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
+        { class: 'text-center', key: 'region', label: '지역' },
         { class: 'text-center', key: 'configuration.period', label: '주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
         { class: 'text-center', key: 'actions', label: '교차로수' },
-        { class: 'text-center', key: 'configuration.epoch', label: 'Epoch' },
-        { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
-        { class: 'text-center', key: 'details', label: '최적화' },
-        { class: 'text-center', key: 'stop', label: '제어' },
-        { class: 'text-center', key: 'del', label: '삭제' }
-        // { class: 'text-center', key: 'envName', label: '환경' }
-        // { class: 'text-center', key: 'statusText', label: '상태' },
-        // { class: 'text-center', key: 'configuration.epoch', label: 'Epoch' },
-        // { class: 'text-center', key: 'configuration.begin', label: '시작' },
-        // { class: 'text-center', key: 'configuration.end', label: '종료' },
-        // { class: 'text-center', key: 'analisys', label: '분석' },
+        { class: 'text-center', key: 'configuration.epoch', label: '에포크' },
+        { class: 'text-center', key: 'configuration.method', label: '모델' },
+        { class: 'text-center', key: 'configuration.action', label: '액션' },
+        {
+          class: 'text-center',
+          key: 'configuration.rewardFunc',
+          label: '보상함수'
+        },
+        {
+          class: 'text-center',
+          key: 'configuration.modelSavePeriod',
+          label: '모델저장주기'
+        },
+        { class: 'text-center', key: 'details', label: '기능' }
       ],
       items: [],
       currentPage: 1,
       perPage: 10,
       totalRows: 0,
+      envFields: [
+        { class: 'text-center', key: 'envName', label: '아이디' },
+        { class: 'text-center', key: 'region', label: '지역' },
+        { class: 'text-center', key: 'configuration.period', label: '주기' },
+        {
+          class: 'text-center',
+          key: 'duration',
+          label: '대상시간'
+        },
+        { class: 'text-center', key: 'junctions', label: '교차로수' },
+        { class: 'text-center', key: 'epoch', label: '에포크' },
+        { class: 'text-center', key: 'configuration.method', label: '모델' },
+        { class: 'text-center', key: 'configuration.action', label: '액션' },
+        {
+          class: 'text-center',
+          key: 'configuration.rewardFunc',
+          label: '보상함수'
+        },
+        {
+          class: 'text-center',
+          key: 'configuration.modelSavePeriod',
+          label: '모델저장주기'
+        },
+        { class: 'text-center', key: 'func', label: '기능' }
+      ],
+      envItems: [],
+      envCurrentPage: 0,
+      envPerPage: 10,
+      envTotalRows: 0,
+
       isBusy: false,
       msg: '',
       variant: 'info',
       barChartDataTable: {},
-      resultFile: null, // upload file
-      dataFile: null,
       warning: null,
       userState,
       modalShow: false,
       autoRefresh: false,
-      expanded: false
+      expanded: false,
+
+      envs: [],
+      currentEnv: null,
+      resultFile: null // upload file for model files (.zip)
     }
   },
   mounted () {
     this.dataProvider({ currentPage: this.currentPage })
-    this.interval = setInterval(async () => {
-      if (this.autoRefresh) {
-        this.dataProvider({ currentPage: this.currentPage })
-      }
-    }, 3000)
+    this.reload().then(r => {})
   },
-  destroyed () {
-    clearInterval(this.interval)
-  },
+  watch: {},
+  computed: {},
+  destroyed () {},
   methods: {
-    calcDuration (configuration) {
-      if (configuration.status === 'finished') {
-        return calcInterval(configuration.started, configuration.ended)
-      } else if (configuration.status === 'running') {
-        return calcInterval(
-          configuration.started,
-          moment().format('YYYY-MM-DD HH:mm:ss')
-        )
-      } else {
-        return ''
+    getRegionName (v) {
+      const m = {
+        doan: '도안',
+        cdd3: '연구단지'
       }
+      return m[v] || ''
+    },
+    getActionName (v) {
+      const o = {
+        offset: '옵셋 조정',
+        kc: '즉시 신호 변경',
+        gr: '녹색시간 조정',
+        gro: '녹색시간과 옵셋 조정'
+      }
+      return o[v] || '모름'
+    },
+    getRewardFunctionName (v) {
+      const o = {
+        pn: '통과 차량 수',
+        wt: '대기 시간',
+        tt: '통과 소요 시간',
+        wq: '대기 큐 길이',
+        cwq: '축적된 대기 큐 길이'
+      }
+      return o[v] || '모름'
+    },
+    uploadModel (obj) {
+      const formData = new window.FormData()
+      formData.append('file', this.resultFile)
+      this.$swal.showLoading('업로딩')
+      HTTP.post(`/salt/v1/optimization/upload/model?id=${obj.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+        .then(res => console.log(res))
+        .catch(err => {
+          this.$swal({
+            type: 'error',
+            title: err.message,
+            text: err.response
+          })
+        })
+        .finally(() => {
+          setTimeout(() => this.$swal.close(), 1000)
+        })
+    },
+    numberOfJunctions (jId) {
+      const SA = {
+        'SA 101': 10,
+        'SA 107': 4,
+        'SA 111': 2,
+        'SA 104': 5,
+        'SA 1701': 11,
+        'SA 1702': 8
+      }
+      const jIds = jId.split(',').map(v => v.trim())
+      let sum = 0
+      jIds.forEach(id => {
+        sum += SA[id] || 0
+      })
+      return sum
     },
     statusColor (status) {
       const colors = {
-        running: 'primary',
-        error: 'danger',
-        ready: 'secondary',
-        finished: 'success'
+        running: 'bg-blue-400',
+        error: 'bg-red-400',
+        ready: 'bg-gray-400',
+        finished: 'bg-green-400'
       }
-      return colors[status] || 'secondary'
-    },
-    getRegionName (code) {
-      return map[code] || map[0]
+      return colors[status] || 'bg-gray-400'
     },
     async toggleDetails (id, status, hide) {
       if (!hide) {
         if (status === 'finished') {
-          // this.barChartDataTable[id] = await statisticsService.getSummaryChart(id);
           this.$forceUpdate()
         }
       } else {
@@ -124,7 +200,6 @@ export default {
       return value === 'finished'
     },
     async updateTable () {
-      // this.$refs['simulations-table'].refresh()
       this.dataProvider({ currentPage: this.currentPage })
     },
     hideAlert () {
@@ -137,58 +212,30 @@ export default {
         this.$swal('Problem', item.error, 'warning')
       }
     },
-    async startSimulation (id) {
-      const { value: yes } = await this.$swal({
-        title: '신호 최적화 시작',
-        text: id,
-        type: 'info',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: '시작',
-        cancelButtonText: '취소'
-      })
-
-      if (!yes) {
-        return
-      }
-      let seconds = 0
-      const interval = setInterval(() => {
-        this.msg = `시뮬레이션을 시작하고 있습니다... ${seconds++}초`
-      }, 1000)
+    async stopSimulation (id) {
       try {
-        // await simulationService.startSimulation(id, this.userState.userId);
-
-        await optimizationService.runTrain(id)
-        this.msg = 'Started successfully...'
-        this.hideAlert()
+        await simulationService.stopSimulation(id)
         this.updateTable()
       } catch (err) {
         log(err)
-        if (err.response) {
-          this.msg = err.response.data.error
-        } else {
-          this.msg = err.message
-        }
-        this.variant = 'danger'
-        // this.updateTable();
-      } finally {
-        this.updateTable()
-        clearInterval(interval)
       }
     },
 
-    async applyOptimization (id) {
-
-    },
-    async stopSimulation (id) {
-      await simulationService.stopSimulation(id)
-      this.updateTable()
+    async reload () {
+      this.envs = await optEnvService.get()
+      this.envItems = this.envs
+      this.envTotalRows = this.envs.length
     },
     async dataProvider ({ currentPage }) {
       this.isBusy = true
       try {
-        const { data, total, perPage } = (await simulationService.getOptimizations(this.userState.userId, currentPage)).data
+        const { data, total, perPage } = (
+          await simulationService.getOptimizations(
+            this.userState.userId,
+            currentPage
+          )
+        ).data
+
         this.totalRows = total
         this.isBusy = false
         this.perPage = perPage
@@ -203,20 +250,20 @@ export default {
       return variant[text]
     },
     async removeSimulation (param) {
-      // const result = await this.$swal({
-      //   title: `${param.id} 시뮬레이션을 삭제합니다.`,
-      //   text: 'Please note that you can not cancel it',
-      //   type: 'warning',
-      //   showCancelButton: true,
-      //   confirmButtonColor: '#3085d6',
-      //   cancelButtonColor: '#d33',
-      //   confirmButtonText: 'Delete',
-      //   cancelButtonText: 'Cancel',
-      // });
+      const result = await this.$swal({
+        title: `${param.id} 시뮬레이션을 삭제합니다.`,
+        text: 'Please note that you can not cancel it',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel'
+      })
 
-      // if (!result.value) {
-      //   return;
-      // }
+      if (!result.value) {
+        return
+      }
       // this.msg = `${param.id}를 삭제하고 있습니다.`
       try {
         await simulationService.remove(param.id)
@@ -238,14 +285,52 @@ export default {
         toaster: 'b-toaster-bottom-right'
       })
     },
-    async downloadScenario (id) {
-      // console.log('download')
-      // await simulationService.downloadScenario(id)
-      this.downloadDataFile({ id })
-    },
-    async downloadScenarioConfig (id) {
-      this.downloadConfigFile({ id })
-    }
 
+    async saveOptEnvConfig (config) {
+      const obj = this.envs.find(env => env.envName === config.envName)
+      if (obj) {
+        try {
+          await optEnvService.update(config)
+        } catch (err) {
+          this.$bvToast.toast('Fail to update configuration')
+        }
+      } else {
+        try {
+          await optEnvService.add(config)
+        } catch (err) {
+          this.$bvToast.toast('Fail to save configuration')
+        }
+      }
+      this.$refs.modal.hide()
+      await this.reload()
+    },
+    openModify (env) {
+      this.currentEnv = env
+      this.$refs.modal.show()
+    },
+    modalHide () {
+      this.currentEnv = null
+    },
+    async registerSimulation (env) {
+      const random = () => `${Math.floor(Math.random() * 1000)}`
+      const generateRandomId = (prefix = 'DEFU') =>
+        `${prefix
+          .substring(0, 4)
+          .toUpperCase()}_${moment().year()}${moment().format(
+          'MM'
+        )}_${random().padStart(5, '0')}`
+      env.id = generateRandomId(env.role)
+      try {
+        await simulationService.createSimulation(this.userId, env)
+      } catch (err) {
+        log(err)
+      }
+      this.updateTable()
+    },
+    async remove (id) {
+      await optEnvService.remove(id)
+      // this.envs = await optEnvService.get()
+      await this.reload()
+    }
   }
 }

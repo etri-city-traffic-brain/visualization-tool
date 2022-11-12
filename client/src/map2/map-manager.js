@@ -21,10 +21,11 @@ import {
   makeCanvasLayer,
   makeToolLayer,
   makeVdsLayer,
-  makeCctvLayer
+  makeCctvLayer,
+  makeRseLayer
 } from '../layers'
 
-const ZOOM_MINIMUM = 13
+const ZOOM_MINIMUM = 14
 
 const { log } = console
 
@@ -35,22 +36,50 @@ const { log } = console
  * @param {string} param.simulationId - Simulation id
  * @param {Object} param.eventBus - Vue Object as event bus
  */
-function MapManager ({ map, simulationId, eventBus }) {
+function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   let currentSpeedsPerLink = {}
   let currentStep = 0
 
   const edgeLayer = makeEdgeLayer(map, eventBus)
   // const gridLayer = makeGridLayer(map)
-  const canvasLayer = makeCanvasLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus, extent)
-  const toolLayer = makeToolLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
-  const vdsLayer = makeVdsLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
-  const cctvLayer = makeCctvLayer(map, edgeLayer.getGeometries.bind(edgeLayer), eventBus)
+  const canvasLayer = makeCanvasLayer(
+    map,
+    edgeLayer.getGeometries.bind(edgeLayer),
+    eventBus,
+    extent
+  )
+  const toolLayer = makeToolLayer(
+    map,
+    edgeLayer.getGeometries.bind(edgeLayer),
+    eventBus
+  )
+  const vdsLayer = makeVdsLayer(
+    map,
+    edgeLayer.getGeometries.bind(edgeLayer),
+    eventBus
+  )
+  const cctvLayer = makeCctvLayer(
+    map,
+    edgeLayer.getGeometries.bind(edgeLayer),
+    eventBus
+  )
+  const rseLayer = makeRseLayer(
+    map,
+    edgeLayer.getGeometries.bind(edgeLayer),
+    eventBus
+  )
+
   map.addLayer(edgeLayer)
-  // map.addLayer(gridLayer)
   map.addLayer(canvasLayer)
   map.addLayer(toolLayer)
-  map.addLayer(vdsLayer)
+  map.addLayer(rseLayer)
   map.addLayer(cctvLayer)
+  map.addLayer(vdsLayer)
+
+  rseLayer.hide()
+  cctvLayer.hide()
+  vdsLayer.hide()
+  toolLayer.hide() // default hide
 
   function toggleFocusTool () {
     const showHide = toolLayer.isVisible()
@@ -60,9 +89,7 @@ function MapManager ({ map, simulationId, eventBus }) {
     toolLayer.toggleFocusTool()
   }
 
-  toolLayer.hide() // default hide
-
-  eventBus.$on('salt:data', (data) => {
+  eventBus.$on('salt:data', data => {
     if (data.simulationId !== simulationId) {
       return
     }
@@ -95,8 +122,7 @@ function MapManager ({ map, simulationId, eventBus }) {
     // target.updateSymbol({ lineWidth: 1 });
   }
 
-  eventBus.$on('vds:selected', (edge) => {
-    console.log('vds clicked', edge)
+  eventBus.$on('vds:selected', edge => {
     edgeClicked({ target: edge })
   })
 
@@ -130,59 +156,52 @@ function MapManager ({ map, simulationId, eventBus }) {
       .on('mouseout', edgeMouseOut)
 
   async function updateSimulationResult () {
-    currentSpeedsPerLink = await simulationService.getSimulationResult(simulationId, extent(map))
-    edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
-    // gridLayer.updateGrid(simulationId, currentStep)
+    if (simulationId) {
+      currentSpeedsPerLink = await simulationService.getSimulationResult(
+        simulationId,
+        extent(map)
+      )
+      edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
+      // gridLayer.updateGrid(simulationId, currentStep)
+    }
   }
 
   function addFeatures (features) {
-    features.forEach(feature => {
-      const vdsId = vdsTable[feature.properties.LINK_ID]
-      if (vdsId) {
-        feature.properties.vdsId = vdsId.vdsId
-        feature.properties.secionId = vdsId.sectionId
-        feature.properties.sId = vdsId.sId
-        feature.properties.dId = vdsId.dId
-      }
+    const g = features.forEach(feature => {
+      const f = R.compose(addEventHandler, makeGeometry)(feature)
+      edgeLayer.addGeometry(f)
     })
 
-    features.forEach((feature) => {
-      R.compose(
-        edgeLayer.addGeometry.bind(edgeLayer),
-        addEventHandler,
-        makeGeometry
-      )(feature)
-    })
-
-    vdsLayer.updateRealtimeData()
+    // edgeLayer.addGeometry(g)
   }
-  let vdsTable = {}
 
   async function loadMapData (event) {
-    if (Object.keys(vdsTable).length < 1) {
-      const res = await axios({
-        url: '/salt/v1/vds',
-        method: 'get'
-      })
-      vdsTable = res.data
+    if (!useSaltLink) {
+      eventBus.$emit('map:loaded')
+      return
     }
 
-    const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
     try {
       const { features } = await mapService.getMap(extent(map))
       if (event === 'zoomend') {
-        // removeEdges(edgesExisted)
         removeEdges(edgeLayer.getGeometries())
         addFeatures(features)
       } else if (event === 'moveend') {
-        const edgesNew = features.map(makeId)
-        const willBeRemoved = R.difference(edgesExisted, edgesNew)
-        const willBeAdded = R.difference(edgesNew, edgesExisted)
-        removeEdges(willBeRemoved)
-        addFeatures(features.filter(feature => willBeAdded.includes(makeId(feature))))
+        const edgesExisted = edgeLayer
+          .getGeometries()
+          .map(geometry => geometry.getId())
+        const idsNew = features.map(makeId)
+        const idsWillBeRemoved = R.difference(edgesExisted, idsNew)
+        const idsWillBeAdded = R.difference(idsNew, edgesExisted)
+        removeEdges(idsWillBeRemoved)
+        const added = features.filter(feature =>
+          idsWillBeAdded.includes(makeId(feature))
+        )
+        addFeatures(added)
       } else {
         addFeatures(features)
       }
+      eventBus.$emit('map:loaded')
     } catch (err) {
       log(err.message)
     }
@@ -195,7 +214,7 @@ function MapManager ({ map, simulationId, eventBus }) {
     // gridLayer.updateGrid(simulationId, currentStep)
   }
 
-  const handleZoomEvent = async (event) => {
+  const handleZoomEvent = async event => {
     const zoom = map.getZoom()
     if (zoom <= ZOOM_MINIMUM) {
       // gridLayer.updateGrid(simulationId, currentStep)
@@ -206,8 +225,11 @@ function MapManager ({ map, simulationId, eventBus }) {
     if (eventBus) {
       const data = {
         zoom,
-        extent: extent(map)
+        extent: extent(map),
+        simulationId
       }
+
+      // console.log('salt:set', data.simulationId)
       eventBus.$emit('map:moved', data)
       eventBus.$emit('salt:set', data)
     }
@@ -234,6 +256,7 @@ function MapManager ({ map, simulationId, eventBus }) {
     getEdgesInView,
     bus: eventBus,
     showRse (rseId, links) {
+      console.log('showRse')
       edgeLayer.getGeometries().forEach(feature => {
         const linkId = feature.properties.LINK_ID
 
@@ -253,20 +276,23 @@ function MapManager ({ map, simulationId, eventBus }) {
             feature.flash(
               200, // flash interval in ms
               5, // count
-              function () { // callback when flash end
+              function () {
+                // callback when flash end
                 // alert('flash ended')
                 feature.updateSymbol({
                   lineWidth: 5,
                   lineColor: 'black'
                 })
-              })
+              }
+            )
           }
         })
       })
     },
     getCurrentLinks () {
       return edgeLayer.getGeometries()
-    }
+    },
+    edgeLayer
   }
 }
 

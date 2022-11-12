@@ -1,41 +1,44 @@
 /* eslint-disable no-await-in-loop */
-const debug = require('debug')('api:stop');
-const { Client } = require('ssh2');
-const { updateStatus } = require('../../globals');
+const debug = require('debug')('api:stop')
+const { Client } = require('ssh2')
+const { updateStatus } = require('../../globals')
 
-async function kill(vmInfo, port) {
+async function kill (vmInfo, port) {
   return new Promise((resolve, reject) => {
-    const client = new Client();
-    const cmd = `fuser -kn tcp ${port}`;
-    client.on('ready', () => {
-      client.exec(cmd, (err, stream) => {
-        if (err) {
-          return;
-        }
-        const logs = [];
-        stream
-          .on('end', () => resolve(logs))
-          .on('data', (data) => {
-            debug(data);
-            logs.push(data.toString());
-          })
-          .on('error', (err) => {
-            debug(err.toString());
-            reject(new Error(err.toString()));
-          })
-          .stderr
-          .on('data', (err) => {
-            debug(err.toString());
-          });
-      });
-    }).connect(vmInfo);
-  });
+    const client = new Client()
+    const cmd = `fuser -kn tcp ${port}`
+    client
+      .on('ready', () => {
+        client.exec(cmd, (err, stream) => {
+          if (err) {
+            return
+          }
+          const logs = []
+          stream
+            .on('end', () => resolve(logs))
+            .on('data', data => {
+              debug(data)
+              logs.push(data.toString())
+            })
+            .on('error', err => {
+              debug(err.toString())
+              reject(new Error(err.toString()))
+            })
+            .stderr.on('data', err => {
+              debug(err.toString())
+            })
+        })
+      })
+      .connect(vmInfo)
+  })
 }
 
 /* eslint no-unused-expressions:0 */
-async function stop(req, res) {
-  const { params: { id } } = req;
-
+async function stop (req, res) {
+  const {
+    params: { id }
+  } = req
+  console.log('stop simulation')
   // const simulation = getSimulation(id);
   // const masterVmInfo = await cloudService.getVmInfo(simulation.user);
   // debug('stop', masterVmInfo.host, simulation.masterPort);
@@ -50,10 +53,10 @@ async function stop(req, res) {
   //     username: 'ubuntu',
   //   }, simulation.workerPort);
   // }
-  updateStatus(id, 'stopped');
+  updateStatus(id, 'stopped')
   res.json({
-    id,
-  });
+    id
+  })
 }
 
-module.exports = stop;
+module.exports = stop

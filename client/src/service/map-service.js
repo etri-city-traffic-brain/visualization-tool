@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const query = ({ min, max, zoom }) => `extent=[${min.x},${min.y},${max.x},${max.y}]&zoom=${zoom}`
+const query = ({ min, max, zoom }) =>
+  `extent=[${min.x},${min.y},${max.x},${max.y}]&zoom=${zoom}`
 const get = async (param = '') => axios.get(`${param}`)
 
 const uriBase = 'salt/v1/map'
@@ -10,6 +11,15 @@ export default {
     return (await get(`${uriBase}?${query(extent)}`)).data
   },
   async getLinks (extent) {
+    const { min, max } = extent
+    min.x -= min.x * 0.00001
+    min.y -= min.y * 0.00001
+    max.x += max.x * 0.00001
+    max.y += max.y * 0.00001
+    const { data } = await get(`${uriBase}/links/?${query(extent)}`)
+    return data
+  },
+  async getCells (extent) {
     const { min, max } = extent
     min.x -= min.x * 0.00001
     min.y -= min.y * 0.00001

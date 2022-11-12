@@ -1,4 +1,3 @@
-
 export default (max, callback) => {
   let position = 0
   let interval
