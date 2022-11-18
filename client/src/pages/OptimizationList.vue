@@ -4,6 +4,7 @@
       <div class="text-white text-lg font-bold py-1" >
         신호최적화 환경
       </div>
+      <!--
       <div class="grid grid-cols-5 flex-wrap gap-2 max-w-full" v-if="false">
         <div class="bg-gray-700 grid rounded-xl">
           <button
@@ -89,17 +90,12 @@
               </div>
             </div>
             <div class="flex justify-end space-x-2 pt-2">
-              <!-- <b-btn size="sm" @click="openModify(env)" variant="info">수정</b-btn> -->
-              <!-- <b-btn size="sm" @click="remove(env.id)" variant="danger">삭제</b-btn> -->
-              <!-- <b-btn size="sm" @click="registerSimulation(env)" variant="primary">실험 </b-btn> -->
               <button
                 class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700"
                 @click="openModify(env)"
               >
                 수정
               </button>
-              <!-- <button class="bg-yellow-400 px-2 py-1 rounded text-sm text-black font-bold hover:bg-yellow-700"
-                @click="remove(env.id)">삭제</button> -->
               <button
                 class="bg-blue-400 px-2 py-1 rounded text-sm font-bold hover:bg-blue-700"
                 @click="registerSimulation(env)"
@@ -110,14 +106,14 @@
           </div>
         </div>
       </div>
-
+      -->
       <div class="max-h-96 overflow-y-auto">
         <div class="flex justify-between space-x-1">
           <button
             class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
             v-b-modal.create-simulation-modal
           >
-            환경등록
+            <b-icon icon="plus-square"/> 환경등록
           </button>
           <button
             class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"

@@ -5,7 +5,7 @@ export default (
   animation: false,
   spanGaps: true, // enable for all datasets
   responsive: true,
-  showLine: false, // disable for a single dataset
+  showLine: true, // disable for a single dataset
   title: {
     display: !!title,
     text: title
@@ -45,7 +45,10 @@ export default (
           autoSkipPadding: 10,
           maxRotation: 0,
           display: true,
-          fontColor
+          fontColor,
+          callback: function (value, index, values) {
+            return value + '(s)'
+          }
         }
       }
     ]

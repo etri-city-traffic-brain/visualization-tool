@@ -188,8 +188,13 @@
                 </div> -->
               </div>
               <div v-else class=" p-5">
-                <div class="text-4xl text-white animate-pulse">Waiting...</div>
-                <div class="text-md text-white pl-3">데이터가 확인중...</div>
+                <div class="text-white flex items-center">
+                  <svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <div class="text-md text-white pl-3">데이터 확인중...</div>
+                </div>
                 <div class="text-md text-white pl-3"> {{ statusText }}</div>
               </div>
             </div>
@@ -219,12 +224,21 @@
           <div content-class="" active-nav-item-class="" >
             <div title="평균통과시간" title-item-class="font-bold bg-gray-500 " v-if="!speedView">
               <div class="bg-blue-400 mb-1 p-1 text-center text-white">평균통과시간</div>
-              <div class="text-white bg-gray-800 p-1 text-sm font-bold">
+              <div class="text-white bg-gray-800 p-1" v-if="chart.travelTimeChartInView">
                 <line-chart
                   :chartData="chart.travelTimeChartInView"
                   :options="lineChartOption({})"
                   :height="142"
                 />
+              </div>
+              <div class="text-white bg-gray-800 p-5 font-bold" v-else>
+                <div class="flex items-center">
+                  <svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <div class="text-md text-white pl-3">데이터 확인중...</div>
+                </div>
               </div>
             </div>
             <!-- <div title="평균속도" title-item-class="font-bold bg-gray-500" v-else>

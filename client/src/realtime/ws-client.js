@@ -105,17 +105,6 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
       status = 'error'
     })
 
-    // 시뮬레이터로 BBox 설정을 요청한다.
-    function setBoundingBox (simulationId, extent) {
-      const { min, max } = extend(extent)
-      send({
-        simulationId,
-        type: 10, // Set(10)
-        extent: [min.x, max.y, max.x, min.y],
-        roadType: 1 // Cell(1), Link(0)
-      })
-    }
-
     eventBus.$on('salt:set', ({ simulationId, extent }) => {
       if (slaves) {
         setBoundingBox(slaves[0], extent)
@@ -135,12 +124,24 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     })
   }
 
+  // 시뮬레이터로 BBox 설정을 요청한다.
+  function setBoundingBox (simulationId, extent) {
+    const { min, max } = extend(extent)
+    send({
+      simulationId,
+      type: 10, // Set(10)
+      extent: [min.x, max.y, max.x, min.y],
+      roadType: 1 // Cell(1), Link(0)
+    })
+  }
+
   return {
     init,
     send,
     close,
     kill,
-    restart
+    restart,
+    setBoundingBox
   }
 }
 
