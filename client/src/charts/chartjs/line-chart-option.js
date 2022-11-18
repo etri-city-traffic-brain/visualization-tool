@@ -7,25 +7,16 @@ export default (
   responsive: true,
   showLine: true, // disable for a single dataset
   title: {
-    display: !!title,
-    text: title
+    display: !!title
   },
   interaction: {
     mode: 'index'
   },
   tooltips: {
     mode: 'index',
-    intersect: false
+    intersect: false,
+    enabled: false
   },
-  // hover: {
-  //   mode: 'nearest',
-  //   intersect: false,
-  //   onHover: function (e) {
-  //     const point = this.getElementAtEvent(e)
-  //     if (point.length) e.target.style.cursor = 'pointer'
-  //     else e.target.style.cursor = 'default'
-  //   }
-  // },
   scales: {
     xAxes: [
       {

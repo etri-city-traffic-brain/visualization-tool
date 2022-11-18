@@ -48,6 +48,11 @@ const calcAvg = (values = []) => {
   if (!Array.isArray(values)) {
     return 0
   }
+
+  if (values.length === 0) {
+    return 0
+  }
+
   return (
     values.reduce((acc, cur) => {
       return acc + cur
@@ -94,20 +99,20 @@ function calcAverage (data) {
       cnt += 1
 
       const tt = avgTravelTimesPerStep[target.step] || []
-      tt.push(target.sumTravelTime / target.sumPassed)
+
+      const avgTT = target.sumTravelTime / target.sumPassed
+
+      if (!Number.isNaN(avgTT)) {
+        tt.push(avgTT)
+      }
+
       avgTravelTimesPerStep[target.step] = tt
     }
   }
 
   let avgTravelTimes = Object.values(avgTravelTimesPerStep).map(calcAvg)
 
-  return [
-    sumTravelTime / sumPassed,
-    avgTravelTimes,
-    sumAvgSpeed / cnt
-    // sumTravelTime,
-    // sumPassed
-  ]
+  return [sumTravelTime / sumPassed, avgTravelTimes, sumAvgSpeed / cnt]
 }
 
 const dataset = (label, color, data) => ({
@@ -251,7 +256,6 @@ export default {
       mapHeight: 600, // map view height
       sidebar: false,
       currentStep: 1,
-      // slideMax: 0,
       congestionColor,
       currentEdge: null,
       playBtnToggle: false,
@@ -279,7 +283,6 @@ export default {
         efficiency1: 0,
         effSpeed: 0,
         action: ''
-        // effTravelTime: 0
       },
       chart: {
         avgSpeedChartInView: {}, // realtime chart
@@ -313,7 +316,7 @@ export default {
       statusMessage: [],
       timer: null,
       statusText: '',
-      speedView: false,
+      // speedView: false,
       ss: null
     }
   },
@@ -514,8 +517,7 @@ export default {
 
         this.chart1.travelTimeJunction = avgTTFT
         this.chart2.travelTimeJunction = avgTTRL
-        this.statusText =
-          'updated... ' + (new Date().getTime() - start) / 1000 + ' sec'
+        this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
 
         if (this.ss === null) {
           setTimeout(() => {
@@ -540,6 +542,21 @@ export default {
 
     updateReward(true)
     window.addEventListener('resize', this.resize)
+
+    const result = await optSvc.getRewardTotal(this.simulation.id)
+
+    const results = Object.values(result.data)
+
+    const total = results[0]
+    if (!total) {
+      this.statusText = '모델파일 없음'
+      return
+    }
+    const label = new Array(total.length).fill(0).map((v, i) => i)
+    const reward = total.map(v => Number(v.reward).toFixed(2))
+    const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
+
+    this.rewards = makeRewardChart('total', label, reward, avg)
   },
   methods: {
     initSignaSystem () {
@@ -571,9 +588,9 @@ export default {
     getRegionName (region) {
       return map[region] || region
     },
-    toggleView () {
-      this.speedView = !this.speedView
-    },
+    // toggleView () {
+    //   this.speedView = !this.speedView
+    // },
     showModal () {
       this.$refs.optenvmodal.show()
     },
