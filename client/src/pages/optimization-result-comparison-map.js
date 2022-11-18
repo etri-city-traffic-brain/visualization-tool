@@ -104,10 +104,9 @@ function calcAverage (data) {
   return [
     sumTravelTime / sumPassed,
     avgTravelTimes,
-    [],
-    sumAvgSpeed / cnt,
-    sumTravelTime,
-    sumPassed
+    sumAvgSpeed / cnt
+    // sumTravelTime,
+    // sumPassed
   ]
 }
 
@@ -279,13 +278,14 @@ export default {
         speedsPerJunction: {},
         efficiency1: 0,
         effSpeed: 0,
-        action: '',
-        effTravelTime: 0
+        action: ''
+        // effTravelTime: 0
       },
       chart: {
         avgSpeedChartInView: {}, // realtime chart
         avgChartJunctions: {},
-        junctionSpeeds: {}
+        junctionSpeeds: {},
+        effTravelTime: 0
       },
 
       bottomStyle: { ...style.bottomStyle },
@@ -307,10 +307,7 @@ export default {
       selectedEpoch: 0,
       showEpoch: false,
       trafficLightManager: null,
-      // phaseRewardChartFt: null,
-      // phaseRewardChartRl: null,
       selectedNode: '',
-      // selectedNode: '미래부동산삼거리',
       showWaitingMsg: false,
       avgSpeedJunction: 0,
       statusMessage: [],
@@ -340,24 +337,6 @@ export default {
         return {}
       }
     },
-    improvementRate () {
-      const v1 = this.chart1.avgSpeed
-      const v2 = this.chart2.avgSpeed
-      return 100 * ((v2 - v1) / ((v2 + v1) / 2))
-    },
-    speedsPerJunction () {
-      const keys = Object.keys(this.chart2.speedsPerJunction)
-      const result = {}
-      for (let i = 0; i < keys.length; i++) {
-        const jId = keys[i]
-        const v1 = this.chart1.speedsPerJunction[jId] || []
-        const v2 = this.chart2.speedsPerJunction[jId] || []
-        const spd1 = calcAvg(v1.map(v => Number(v.avgSpeed)))
-        const spd2 = calcAvg(v2.map(v => Number(v.avgSpeed)))
-        result[jId] = [spd1, spd2]
-      }
-      return result
-    },
     travelTimePerJunction () {
       const keys = Object.keys(this.chart2.speedsPerJunction)
       const ttsFt = this.chart1.speedsPerJunction
@@ -367,9 +346,9 @@ export default {
         const jId = keys[i]
         const vFt = ttsFt[jId] || []
         const vRl = ttsRl[jId] || []
-        const ttFt = calcAvg(vFt.map(v => Number(v.avgTravelTime)))
-        const ttRl = calcAvg(vRl.map(v => Number(v.avgTravelTime)))
-        result[jId] = [ttFt, ttRl]
+        const ttFt = calcAvg(vFt.map(v => Number(v.avgTravelTime))).toFixed(2)
+        const ttRl = calcAvg(vRl.map(v => Number(v.avgTravelTime))).toFixed(2)
+        result[jId] = [ttFt, ttRl, (((ttFt - ttRl) / ttFt) * 100).toFixed(2)]
       }
       return result
     },
@@ -495,20 +474,6 @@ export default {
       this.selectedNode = crossName
 
       this.initSignaSystem()
-
-      // const rl = this.chart2.speedsPerJunction[crossName]
-
-      // if (!rl) {
-      //   return
-      // }
-      // this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
-      // const ft = this.chart1.speedsPerJunction[crossName]
-      // if (!ft) {
-      //   return
-      // }
-      // this.phaseRewardChartFt.setOption(
-      //   drawChart.makeOption(ft.slice(0, rl.length))
-      // )
     })
 
     const updateReward = async forceUpdate => {
@@ -521,26 +486,17 @@ export default {
           optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
           optSvc.getPhaseReward(this.simulation.id, 'ft').then(res => res.data)
         ])
-        console.log(new Date().getTime() - start)
+        log(new Date().getTime() - start)
         this.statusText = '데이터 로드 완료'
 
         this.chart1.speedsPerJunction = dataFt // simulate
         this.chart2.speedsPerJunction = dataRl // optimization
 
-        const avgRl = calcAverage(dataRl)
-        const avgFt = calcAverage(dataFt)
+        const [avgTTRL, avgTTRLs, avgSpdRl] = calcAverage(dataRl)
 
-        const [avgTTRL, avgTTRLs, avgSpeedsRL, avgSpdRl] = avgRl
-        const [avgTTFT, avgTTFTs, avgSpeedsFT, avgSpdFt] = avgFt
+        const [avgTTFT, avgTTFTs, avgSpdFt] = calcAverage(dataFt)
 
-        this.chart2.effTravelTime = ((avgTTFT - avgTTRL) / avgTTFT) * 100
-        // this.chart2.effTravelTime = ((sumTTFT - sumTTRL) / sumTTFT) * 100
-        // this.chart2.effSpeed = calcEff(avgSpeedFt, avgSpeedRl)
-
-        // this.chart.avgSpeedChartInView = makeSpeedLineData(
-        //   avgSpeedsFT,
-        //   avgSpeedsRL
-        // )
+        this.chart.effTravelTime = ((avgTTFT - avgTTRL) / avgTTFT) * 100
 
         this.chart.travelTimeChartInView = makeSpeedLineData(
           avgTTFTs,
@@ -583,57 +539,7 @@ export default {
     }
 
     updateReward(true)
-
     window.addEventListener('resize', this.resize)
-
-    // const result = await optSvc.getRewardTotal(this.simulation.id)
-
-    // const results = Object.values(result.data)
-
-    // const total = results[0]
-    // if (!total) {
-    //   this.statusText = '모델파일 없음'
-    //   return
-    // }
-    // const label = new Array(total.length).fill(0).map((v, i) => i)
-    // const reward = total.map(v => Number(v.reward).toFixed(2))
-    // const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
-
-    // this.rewards = makeRewardChart('total', label, reward, avg)
-
-    // this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
-    // this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
-
-    // this.speedChart1 = drawChart2(this.$refs['chart-avg-speed-junction'], 20)
-    // a chart on zoom -> dispatch an action
-    // this.phaseRewardChartFt.on('datazoom', params => {
-    //   const { start, end, batch } = params
-
-    //   if (batch) {
-    //     this.phaseRewardChartRl.dispatchAction({
-    //       type: 'dataZoom',
-    //       start: start,
-    //       end: end,
-    //       batch: [
-    //         {
-    //           startValue: batch[0].startValue,
-    //           endValue: batch[0].endValue,
-    //           start: batch[0].start,
-    //           end: batch[0].end
-    //         }
-    //       ]
-    //     })
-    //   } else {
-    //     this.phaseRewardChartRl.dispatchAction({
-    //       type: 'dataZoom',
-    //       start: start,
-    //       end: end
-    //     })
-    //   }
-
-    // })
-
-    // this.phaseRewardChartRl.on('datazoom', function (params) {})
   },
   methods: {
     initSignaSystem () {

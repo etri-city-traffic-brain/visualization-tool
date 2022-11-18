@@ -14,7 +14,7 @@
           <strong
             class="flex animate__animated animate__bounceInLeft animate__bounceIn"
           >
-            <div class="text-blue-400 animate-bounce duration-300">U</div>
+            <div class="text-blue-400 animate-bounce ">U</div>
             <div class="animate-bounce-">N</div>
             <div class="animate-bounce-">I</div>
             <div class="animate-bounce-">Q</div>
