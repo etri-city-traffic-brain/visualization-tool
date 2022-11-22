@@ -1,4 +1,5 @@
 # 교통 시뮬레이션 및 신호 최적화 가시화 도구
+![스크린샷_20221118_023813](https://user-images.githubusercontent.com/2037433/203231188-d9abdfda-f559-4b19-8f8d-bc846876fbe8.png)
 
 ## 구성
 
