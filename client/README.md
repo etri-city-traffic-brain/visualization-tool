@@ -1,18 +1,14 @@
-> # UNIQ-VIS Client
-> - *Visualize simulation result.*
+# UNIQ-VIS 웹 클라이언트
 
-## Development Setup
+## 개발설정
 
-``` bash
-# install dependencies
+```bash
+# 의존성 라이브러리 설치
 npm install
 
-# serve with hot reload at localhost:8080
+# 개발서버 실행
 npm run dev
 
-# build for production with minification
+# 배포를 위한 빌드
 npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
 ```

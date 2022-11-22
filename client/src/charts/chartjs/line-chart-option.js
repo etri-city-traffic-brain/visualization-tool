@@ -5,27 +5,18 @@ export default (
   animation: false,
   spanGaps: true, // enable for all datasets
   responsive: true,
-  showLine: false, // disable for a single dataset
+  showLine: true, // disable for a single dataset
   title: {
-    display: !!title,
-    text: title
+    display: !!title
   },
   interaction: {
     mode: 'index'
   },
   tooltips: {
     mode: 'index',
-    intersect: false
+    intersect: false,
+    enabled: false
   },
-  // hover: {
-  //   mode: 'nearest',
-  //   intersect: false,
-  //   onHover: function (e) {
-  //     const point = this.getElementAtEvent(e)
-  //     if (point.length) e.target.style.cursor = 'pointer'
-  //     else e.target.style.cursor = 'default'
-  //   }
-  // },
   scales: {
     xAxes: [
       {
@@ -45,7 +36,10 @@ export default (
           autoSkipPadding: 10,
           maxRotation: 0,
           display: true,
-          fontColor
+          fontColor,
+          callback: function (value, index, values) {
+            return value + '(s)'
+          }
         }
       }
     ]

@@ -12,7 +12,7 @@
         <div>
 
         <div class="flex items-center space-x-1">
-          <select v-model="selectedEpoch" size="sm" class="text-black rounded py-1 px-1">
+          <select v-model="selectedEpoch" size="sm" class="text-black rounded py-1 px-1 bg-indigo-100" style="height:30px">
             <option
               v-for="(reward, idx) of rewards.labels.filter((v,i)=> (i % simulation.configuration.modelSavePeriod) == 0)" :key="reward"
               :value="reward"
@@ -26,7 +26,7 @@
           <b-btn @click="stopTest" variant="secondary" size="sm" class="flex-none">
             중지 <b-icon icon="stop-fill"></b-icon>
           </b-btn>
-          <div class="flex space-x-1 items-center text-sm text-white flex-none">
+          <!-- <div class="flex space-x-1 items-center text-sm text-white flex-none">
             <div class="flex-shrink-0">
               <b-btn @click="checkStatus" size="sm">상태 확인</b-btn>
             </div>
@@ -39,52 +39,54 @@
             <div v-else class="px-2 uppercase w-full text-white ">
               {{ status }}
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
       </div>
-      <div class="text-white p-2 flex justify-between border-b- border-gray-200">
-        <div class="space-x-1">
-          <span class="font-bold bg-indigo-500 px-1 p-1 rounded">{{ getRegionName(config.region) }}</span>
-          <span class="font-bold bg-indigo-500 px-1 p-1 rounded">{{ config.fromTime }} ~ {{ config.toTime }}</span>
-          <span>대상교차로</span>
-          <span class="font-bold bg-indigo-500 px-1 p-1 rounded">{{ simulation.configuration.junctionId }}</span>
+      <div class="text-white p-1 pt-2 flex justify-between border-b- border-gray-200">
+        <div class="space-x-1-">
+          <span class="font-bold text-indigo-100 px-1 p-1 rounded">{{ getRegionName(config.region) }}</span> |
+          <span class="font-bold text-indigo-100 px-1 p-1 rounded">{{ config.fromTime }} ~ {{ config.toTime }}</span> |
+          <span class="font-bold text-indigo-100 px-1 p-1 rounded">{{ simulation.configuration.junctionId }}</span>
         </div>
-        <div>
+        <div class="pr-2">
           <button @click="showModal"><b-icon icon="gear-fill"></b-icon></button>
         </div>
       </div>
       <div v-if="showWaitingMsg">
-        <div class="animate-pulse mx-auto text-center bg-blue-300 p-5 text-xl font-bold">
-          실행 준비 중입니다. 잠시후 실행 됩니다.
+        <div class="px-2">
+          <div class="rounded mx-auto text-center bg-blue-300 p-5 text-xl font-bold flex items-center space-x-1 justify-center">
+            <svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div>
+              실행 준비 중입니다. 잠시후 실행 됩니다.
+            </div>
+          </div>
         </div>
       </div>
       <div class="grid grid-cols-4 gap-0 p-1">
         <div class="col-span-3">
-          <div class="grid grid-cols-2">
+          <div class="grid grid-cols-2 gap-1">
             <div class="bg-gray-700 rounded-lg">
               <div class="grid grid-cols-3 gap-1 m-1 items-center">
-                <div class="text-white text-center p-2 text-xl font-bold">기존신호</div>
-                <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-100 flex items-center justify-center space-x-2 rounded-lg">
+                <div class="tracking-wide text-white text-center text-xl font-bold">기존신호</div>
+                <div class="text-center text-2xl font-bold p-2 bg-gray-500- text-gray-100 flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">평균속도</div>
                   <div>
                     {{chart1.avgSpeedJunction }}<span class="text-sm">km</span>
                   </div>
                 </div>
-                <div class="text-center text-2xl font-bold p-2 bg-gray-500 text-gray-100  flex items-center justify-center space-x-2 rounded-lg">
+                <div class="text-center text-2xl font-bold p-2 bg-gray-500- text-gray-100  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">통과시간</div>
                   <div>
-                    {{chart1.travelTimeJunction.toFixed(2) }}<span class="text-sm"></span>
+                    {{chart1.travelTimeJunction.toFixed(2) }}<span class="text-sm">sec</span>
                   </div>
                 </div>
-                <!-- <div class="text-center text-2xl font-bold border- p-2 bg-indigo-500">
-                  <div class="text-xs">교차로 평균속도</div>
-                  <div>{{chart1.avgSpeedInView}}<span class="text-sm">km</span></div>
-                </div> -->
               </div>
               <div class="border-2 border-gray-700" >
                 <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" />
-
                 <b-progress height="1rem" class="no-border-radius">
                   <b-progress-bar :value="chart1.progress" variant="secondary">
                     <span> {{ chart1.progress }} %</span>
@@ -92,26 +94,26 @@
                 </b-progress>
               </div>
             </div>
-            <div class="bg-yellow-400 rounded-lg">
+            <div class="bg-yellow-300 rounded-lg">
               <div class="grid grid-cols-3 gap-1 text-black m-1 items-center">
-                <div class="text-black text-center bg-yellow-400 p-2 text-xl font-bold">최적신호</div>
-                <div class="text-center text-2xl font-bold p-2 bg-yellow-200  flex items-center justify-center space-x-2 rounded-lg">
+                <div class="tracking-wide text-black text-center p-2 text-xl font-bold">최적신호</div>
+                <div class="text-center text-2xl font-bold p-2 bg-yellow-200-  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">평균속도</div>
                   <div class="flex justify-center space-x-2">
                     <div>{{chart2.avgSpeedJunction }}<span class="text-sm">km</span> </div>
                     <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effSpeed}}<span class="text-xs">%</span></div> -->
                   </div>
                 </div>
-                <div class="text-center text-2xl font-bold p-2 bg-yellow-200  flex items-center justify-center space-x-2 rounded-lg">
+                <div class="text-center text-2xl font-bold p-2 bg-yellow-200-  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">통과시간</div>
                   <div class="flex justify-center space-x-2">
-                    <div>{{chart2.travelTimeJunction.toFixed(2) }}<span class="text-sm"></span></div>
+                    <div>{{chart2.travelTimeJunction.toFixed(2) }}<span class="text-sm">sec</span></div>
                     <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effTravelTime}}<span class="text-xs">%</span></div> -->
                   </div>
                 </div>
               </div>
 
-              <div class="border-2 border-yellow-400">
+              <div class="border-2 border-yellow-300">
                 <div :ref="mapIds[1]" :id="mapIds[1]" :style="{height: '600px'}" />
                 <b-progress height="1rem" class="no-border-radius" show-progress >
                   <b-progress-bar :value="chart2.progress" variant="secondary">
@@ -127,12 +129,12 @@
         </div>
         <div class="">
           <div class="mx-1">
-            <div class="p-3 bg-yellow-200 text-center font-bold rounded-lg">
+            <div class="p-3 bg-green-200 text-center font-bold rounded-lg">
               <div class="">
                 통과시간 향상률
               </div>
-              <div class="text-5xl">
-                {{chart2.effTravelTime.toFixed(2)}}<span class="text-lg">%</span>
+              <div class="text-6xl">
+                {{chart.effTravelTime.toFixed(2)}}<span class="text-lg">%</span>
               </div>
             </div>
           </div>
@@ -144,52 +146,30 @@
               </div>
 
               <div content-class="mt-3" v-if="Object.keys(travelTimePerJunction).length > 0">
-                <!-- <div class="text-right">
-                  <button @click="toggleView" class="bg-indigo-200 rounded text-black px-1 mb-1">
-                    <span v-if="speedView">통과시간 보기</span>
-                    <span v-else>평균속도 보기</span>
-                  </button>
-                </div> -->
                 <div title="평균통과시간" class="text-white" v-if="!speedView">
-                  <div class="bg-blue-400 mb-1 p-1 text-center font-bold">평균통과시간</div>
+                  <div class="bg-gray-500 mb-1 p-1 text-center font-bold">교차로별 평균통과시간 향상률</div>
                   <div class="text-white grid grid-cols-6 gap-1 text-center">
-                    <div class="py-1 bg-blue-400 col-span-3">교차로 </div>
-                    <div class="py-1 bg-blue-400">기존 </div>
-                    <div class="py-1 bg-blue-400">모델</div>
-                    <div class="py-1 bg-blue-400">향상률</div>
+                    <div class="py-1 bg-gray-400 col-span-3">교차로 </div>
+                    <div class="py-1 bg-gray-400">기존 </div>
+                    <div class="py-1 bg-gray-400">최적</div>
+                    <div class="py-1 bg-gray-400">향상률</div>
                   </div>
                   <div v-for="v of Object.entries(travelTimePerJunction)" class="text-white grid grid-cols-6 px-1">
                     <div class="border-b col-span-3">{{ v[0] }} </div>
-                    <div class="border-b text-right">{{ Number(v[1][0]).toFixed(2) }} </div>
-                    <div class="border-b text-right">{{ Number(v[1][1]).toFixed(2)}}</div>
-                    <!-- <div class="border-b" v-if="Number(v[1][0]) !== 0">{{ (100 * (Number(v[1][0]) - Number(v[1][1])) / ((Number(v[1][1]) + Number(v[1][0])) / 2)).toFixed(2) }}</div> -->
-                    <div class="border-b text-right" v-if="Number(v[1][0]) !== 0">
-                    {{ (((Number(v[1][0]) - Number(v[1][1])) / Number(v[1][0])) * 100).toFixed(2) }}
-                    </div>
-                    <div class="border-b" v-else>0 </div>
+                    <div class="border-b text-right">{{ v[1][0] }} </div>
+                    <div class="border-b text-right">{{ v[1][1]}}</div>
+                    <div class="border-b text-right"> {{ v[1][2] }} </div>
                   </div>
                 </div>
-                <!-- <div title="평균속도" class="text-white mt-1" v-else>
-                  <div class="bg-blue-400 mb-1 p-1 text-center">평균속도</div>
-                  <div class="mt-1">
-                    <div class="text-white grid grid-cols-6 gap-1 text-center">
-                      <div class="py-1 bg-blue-400 col-span-3">교차로 </div>
-                      <div class="py-1 bg-blue-400">기존 </div>
-                      <div class="py-1 bg-blue-400">모델</div>
-                      <div class="py-1 bg-blue-400">향상률</div>
-                    </div>
-                    <div v-for="v of Object.entries(speedsPerJunction)" class="text-white grid grid-cols-6">
-                      <div class="border-b col-span-3">{{ v[0] }} </div>
-                      <div class="border-b text-right">{{ Number(v[1][0]).toFixed(2) }} </div>
-                      <div class="border-b text-right">{{ Number(v[1][1]).toFixed(2)}}</div>
-                      <div class="border-b text-right">{{ (100 * (Number(v[1][1]) - Number(v[1][0])) / ((Number(v[1][1]) + Number(v[1][0])) / 2)).toFixed(2) }} </div>
-                    </div>
-                  </div>
-                </div> -->
               </div>
               <div v-else class=" p-5">
-                <div class="text-4xl text-white animate-pulse">Waiting...</div>
-                <div class="text-md text-white pl-3">데이터가 확인중...</div>
+                <div class="text-white flex items-center">
+                  <svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <div class="text-md text-white pl-3">데이터 확인중...</div>
+                </div>
                 <div class="text-md text-white pl-3"> {{ statusText }}</div>
               </div>
             </div>
@@ -217,14 +197,23 @@
       <div class="grid grid-cols-4 gap-1 ml-1">
         <div class="col-span-3">
           <div content-class="" active-nav-item-class="" >
-            <div title="평균통과시간" title-item-class="font-bold bg-gray-500 " v-if="!speedView">
-              <div class="bg-blue-400 mb-1 p-1 text-center text-white">평균통과시간</div>
-              <div class="text-white bg-gray-800 p-1 text-sm font-bold">
+            <div>
+              <div class="bg-gray-500 tracking-wide mb-1 p-1 font-bold text-center text-white">평균통과시간</div>
+              <div class="text-white bg-gray-800 p-1" v-if="chart.travelTimeChartInView">
                 <line-chart
                   :chartData="chart.travelTimeChartInView"
                   :options="lineChartOption({})"
                   :height="142"
                 />
+              </div>
+              <div class="text-white bg-gray-800 p-5 font-bold" v-else>
+                <div class="flex items-center">
+                  <svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <div class="text-md text-white pl-3">데이터 확인중...</div>
+                </div>
               </div>
             </div>
             <!-- <div title="평균속도" title-item-class="font-bold bg-gray-500" v-else>
@@ -236,7 +225,7 @@
           </div>
         </div>
         <div class="text-white items-center">
-          <div class="bg-blue-400 mb-1 p-1 text-center">신호시스템</div>
+          <div class="bg-gray-500 mb-1 p-1 text-center">신호시스템</div>
           <div class="text-center bg-gray-800">{{ selectedNode || '교차로를 선택하세요' }}</div>
           <!-- <div>{{ actionForOpt[0].action }}</div> -->
           <!-- <div>{{ actionForOpt[1].action }}</div> -->
@@ -322,7 +311,7 @@
                 통과시간 향상률
               </div>
               <div class="text-5xl">
-                {{chart2.effTravelTime.toFixed(2)}}<span class="text-xs">%</span>
+                {{chart.effTravelTime.toFixed(2)}}<span class="text-xs">%</span>
               </div>
             </div>
         <line-chart

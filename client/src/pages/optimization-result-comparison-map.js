@@ -48,29 +48,47 @@ const calcAvg = (values = []) => {
   if (!Array.isArray(values)) {
     return 0
   }
-  const sum = values.reduce((acc, cur) => {
-    acc += cur
-    return acc
-  }, 0)
-  return sum / values.length
+
+  if (values.length === 0) {
+    return 0
+  }
+
+  return (
+    values.reduce((acc, cur) => {
+      return acc + cur
+    }, 0) / values.length
+  )
+}
+
+function zeroFill (len) {
+  return new Array(len).fill(0)
 }
 
 function calcAverage (data) {
   const values = Object.values(data)
   if (values.length < 1) {
-    return [0, [], []]
+    return [0, [], [], 0, 0, 0]
   }
-  const stepCount = values[0].length
 
-  const sumTravelTimes = new Array(stepCount).fill(0)
-  const sumPasseds = new Array(stepCount).fill(0)
-  const avgSpeeds = new Array(stepCount).fill(0)
   let sumAvgSpeed = 0
   let sumPassed = 0
   let sumTravelTime = 0
   let cnt = 0
+
+  let sumTravelTimes
+  let sumPasseds
+  let avgSpeeds
+
+  const avgTravelTimesPerStep = Object.create(null)
+
   for (let i = 0; i < values.length; i++) {
-    for (let j = 0; j < stepCount; j++) {
+    const steps = values[i].length
+    sumTravelTimes = zeroFill(steps)
+    sumPasseds = zeroFill(steps)
+    avgSpeeds = zeroFill(steps)
+
+    // 교차로
+    for (let j = 0; j < steps; j++) {
       const target = values[i][j]
       sumTravelTimes[j] += Number(target.sumTravelTime)
       sumPasseds[j] += Number(target.sumPassed)
@@ -79,23 +97,22 @@ function calcAverage (data) {
       sumPassed = sumPassed + Number(target.sumPassed)
       sumTravelTime = sumTravelTime + Number(target.sumTravelTime)
       cnt += 1
+
+      const tt = avgTravelTimesPerStep[target.step] || []
+
+      const avgTT = target.sumTravelTime / target.sumPassed
+
+      if (!Number.isNaN(avgTT)) {
+        tt.push(avgTT)
+      }
+
+      avgTravelTimesPerStep[target.step] = tt
     }
   }
-  const avgTravelTimes = []
-  for (let i = 0; i < sumTravelTimes.length; i++) {
-    if (sumPasseds[i] !== 0) {
-      avgTravelTimes.push(sumTravelTimes[i] / sumPasseds[i])
-    } else {
-      // avgTravelTimes.push(sumTravelTime[i])
-    }
-  }
-  // console.log(sumP, sumT, cnt)
-  return [
-    sumTravelTime / sumPassed,
-    avgTravelTimes,
-    avgSpeeds,
-    sumAvgSpeed / cnt
-  ]
+
+  let avgTravelTimes = Object.values(avgTravelTimesPerStep).map(calcAvg)
+
+  return [sumTravelTime / sumPassed, avgTravelTimes, sumAvgSpeed / cnt]
 }
 
 const dataset = (label, color, data) => ({
@@ -185,7 +202,7 @@ const initSimulationData = async (
   const center =
     region === 'cdd3' ? [127.3549527, 36.385148] : [127.3396677, 36.3423342]
 
-  const map = makeMap({ mapId: mapId, zoom: 17, center })
+  const map = makeMap({ mapId: mapId, zoom: 16, center })
 
   const mapManager = MapManager({
     map: map,
@@ -239,7 +256,6 @@ export default {
       mapHeight: 600, // map view height
       sidebar: false,
       currentStep: 1,
-      // slideMax: 0,
       congestionColor,
       currentEdge: null,
       playBtnToggle: false,
@@ -266,13 +282,13 @@ export default {
         speedsPerJunction: {},
         efficiency1: 0,
         effSpeed: 0,
-        action: '',
-        effTravelTime: 0
+        action: ''
       },
       chart: {
         avgSpeedChartInView: {}, // realtime chart
         avgChartJunctions: {},
-        junctionSpeeds: {}
+        junctionSpeeds: {},
+        effTravelTime: 0
       },
 
       bottomStyle: { ...style.bottomStyle },
@@ -294,16 +310,14 @@ export default {
       selectedEpoch: 0,
       showEpoch: false,
       trafficLightManager: null,
-      // phaseRewardChartFt: null,
-      // phaseRewardChartRl: null,
       selectedNode: '',
-      // selectedNode: '미래부동산삼거리',
       showWaitingMsg: false,
       avgSpeedJunction: 0,
       statusMessage: [],
       timer: null,
       statusText: '',
-      speedView: false
+      // speedView: false,
+      ss: null
     }
   },
   destroyed () {
@@ -326,24 +340,6 @@ export default {
         return {}
       }
     },
-    improvementRate () {
-      const v1 = this.chart1.avgSpeed
-      const v2 = this.chart2.avgSpeed
-      return 100 * ((v2 - v1) / ((v2 + v1) / 2))
-    },
-    speedsPerJunction () {
-      const keys = Object.keys(this.chart2.speedsPerJunction)
-      const result = {}
-      for (let i = 0; i < keys.length; i++) {
-        const jId = keys[i]
-        const v1 = this.chart1.speedsPerJunction[jId] || []
-        const v2 = this.chart2.speedsPerJunction[jId] || []
-        const spd1 = calcAvg(v1.map(v => Number(v.avgSpeed)))
-        const spd2 = calcAvg(v2.map(v => Number(v.avgSpeed)))
-        result[jId] = [spd1, spd2]
-      }
-      return result
-    },
     travelTimePerJunction () {
       const keys = Object.keys(this.chart2.speedsPerJunction)
       const ttsFt = this.chart1.speedsPerJunction
@@ -353,9 +349,9 @@ export default {
         const jId = keys[i]
         const vFt = ttsFt[jId] || []
         const vRl = ttsRl[jId] || []
-        const ttFt = calcAvg(vFt.map(v => Number(v.avgTravelTime)))
-        const ttRl = calcAvg(vRl.map(v => Number(v.avgTravelTime)))
-        result[jId] = [ttFt, ttRl]
+        const ttFt = calcAvg(vFt.map(v => Number(v.avgTravelTime))).toFixed(2)
+        const ttRl = calcAvg(vRl.map(v => Number(v.avgTravelTime))).toFixed(2)
+        result[jId] = [ttFt, ttRl, (((ttFt - ttRl) / ttFt) * 100).toFixed(2)]
       }
       return result
     },
@@ -371,34 +367,7 @@ export default {
     }
   },
   async mounted () {
-    const initSignaSystem = () => {
-      if (this.actionForOpt.length < 1) {
-        return
-      }
-      const actionFt = this.actionForOpt[0].action
-
-      const rFt = parseAction(actionFt)
-      if (!rFt) {
-        log('parse action failed:', actionFt)
-        return
-      }
-      ss = SignalSystem(container, {
-        offset: rFt.offset,
-        duration: rFt.duration
-      })
-      const actionRl = this.actionForOpt[1].action
-      const rRl = parseAction(actionRl)
-      ss.update(rRl.offset, rRl.duration)
-
-      log('대상교차로:', this.selectedNode)
-      log('기존신호:', this.actionForOpt[0].action)
-      log('최적신호:', this.actionForOpt[1].action)
-    }
-
     window.scrollTo(0, 0)
-
-    const container = this.$refs.actionvis
-    let ss = null
 
     const optId = this.$route.params ? this.$route.params.id : null
 
@@ -425,7 +394,6 @@ export default {
         this.fixedSlave,
         this,
         simEventBusFixed,
-        // simEventBusFixed,
         wsBus,
         this.simulation.configuration.junctionId.split(','),
         [this.fixedSlave, this.testSlave]
@@ -451,12 +419,30 @@ export default {
       buffer.push(data)
     })
 
+    let boundingBoxSet = false
+
     // 최적화 시뮬레이션이 수행 속도가 느림
     // 버퍼로부터 데이터 가져와 이벤트 발생
     busTest.$on('salt:data', () => {
       const dataSim = buffer.splice(0, 1)[0]
       if (dataSim) {
         simEventBusFixed.$emit('salt:data', dataSim)
+
+        if (!boundingBoxSet) {
+          setTimeout(() => {
+            const map1 = this.simulations[0].map
+            const map2 = this.simulations[1].map
+            map1.animateTo({
+              center: map1.getCenter(),
+              zoom: map1.getZoom() + 1
+            })
+            map2.animateTo({
+              center: map2.getCenter(),
+              zoom: map2.getZoom() + 1
+            })
+          }, 500)
+          boundingBoxSet = true
+        }
       }
     })
 
@@ -469,6 +455,10 @@ export default {
         this.chart2.progress = 100
         this.chart1.progress = 100
       }
+    })
+
+    busFixed.$on('optimization:finished', () => {
+      this.checkStatus()
     })
 
     // wsBus.$on('salt:status', async () => {})
@@ -486,21 +476,7 @@ export default {
       const crossName = signalService.nodeIdToName(p.nodeId)
       this.selectedNode = crossName
 
-      initSignaSystem()
-
-      // const rl = this.chart2.speedsPerJunction[crossName]
-
-      // if (!rl) {
-      //   return
-      // }
-      // this.phaseRewardChartRl.setOption(drawChart.makeOption(rl))
-      // const ft = this.chart1.speedsPerJunction[crossName]
-      // if (!ft) {
-      //   return
-      // }
-      // this.phaseRewardChartFt.setOption(
-      //   drawChart.makeOption(ft.slice(0, rl.length))
-      // )
+      this.initSignaSystem()
     })
 
     const updateReward = async forceUpdate => {
@@ -513,24 +489,17 @@ export default {
           optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
           optSvc.getPhaseReward(this.simulation.id, 'ft').then(res => res.data)
         ])
+        log(new Date().getTime() - start)
         this.statusText = '데이터 로드 완료'
 
         this.chart1.speedsPerJunction = dataFt // simulate
         this.chart2.speedsPerJunction = dataRl // optimization
 
-        const avgRl = calcAverage(dataRl)
-        const avgFt = calcAverage(dataFt)
+        const [avgTTRL, avgTTRLs, avgSpdRl] = calcAverage(dataRl)
 
-        const [avgTTRL, avgTTRLs, avgSpeedsRL, avgSpdRl] = avgRl
-        const [avgTTFT, avgTTFTs, avgSpeedsFT, avgSpdFt] = avgFt
+        const [avgTTFT, avgTTFTs, avgSpdFt] = calcAverage(dataFt)
 
-        this.chart2.effTravelTime = ((avgTTFT - avgTTRL) / avgTTFT) * 100
-        // this.chart2.effSpeed = calcEff(avgSpeedFt, avgSpeedRl)
-
-        // this.chart.avgSpeedChartInView = makeSpeedLineData(
-        //   avgSpeedsFT,
-        //   avgSpeedsRL
-        // )
+        this.chart.effTravelTime = ((avgTTFT - avgTTRL) / avgTTFT) * 100
 
         this.chart.travelTimeChartInView = makeSpeedLineData(
           avgTTFTs,
@@ -548,18 +517,17 @@ export default {
 
         this.chart1.travelTimeJunction = avgTTFT
         this.chart2.travelTimeJunction = avgTTRL
-        this.statusText =
-          'updated... ' + (new Date().getTime() - start) / 1000 + ' sec'
+        this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
 
-        if (ss === null) {
+        if (this.ss === null) {
           setTimeout(() => {
-            initSignaSystem()
+            this.initSignaSystem()
           }, 2000)
         } else {
           const str2 = this.actionForOpt[1].action
           const o2 = parseAction(str2)
           this.statusText = '신호정보 업데이트'
-          ss.update(o2.offset, o2.duration)
+          this.sss && this.ss.update(o2.offset, o2.duration)
         }
       }
 
@@ -573,7 +541,6 @@ export default {
     }
 
     updateReward(true)
-
     window.addEventListener('resize', this.resize)
 
     const result = await optSvc.getRewardTotal(this.simulation.id)
@@ -590,48 +557,40 @@ export default {
     const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
 
     this.rewards = makeRewardChart('total', label, reward, avg)
-
-    // this.phaseRewardChartFt = drawChart(this.$refs['phase-reward-ft'], [])
-    // this.phaseRewardChartRl = drawChart(this.$refs['phase-reward-rl'], [])
-
-    // this.speedChart1 = drawChart2(this.$refs['chart-avg-speed-junction'], 20)
-    // a chart on zoom -> dispatch an action
-    // this.phaseRewardChartFt.on('datazoom', params => {
-    //   const { start, end, batch } = params
-
-    //   if (batch) {
-    //     this.phaseRewardChartRl.dispatchAction({
-    //       type: 'dataZoom',
-    //       start: start,
-    //       end: end,
-    //       batch: [
-    //         {
-    //           startValue: batch[0].startValue,
-    //           endValue: batch[0].endValue,
-    //           start: batch[0].start,
-    //           end: batch[0].end
-    //         }
-    //       ]
-    //     })
-    //   } else {
-    //     this.phaseRewardChartRl.dispatchAction({
-    //       type: 'dataZoom',
-    //       start: start,
-    //       end: end
-    //     })
-    //   }
-
-    // })
-
-    // this.phaseRewardChartRl.on('datazoom', function (params) {})
   },
   methods: {
+    initSignaSystem () {
+      const container = this.$refs.actionvis
+
+      if (this.actionForOpt.length < 1) {
+        return
+      }
+      const actionFt = this.actionForOpt[0].action
+
+      const rFt = parseAction(actionFt)
+      if (!rFt) {
+        log('parse action failed:', actionFt)
+        return
+      }
+      this.ss = SignalSystem(container, {
+        offset: rFt.offset,
+        duration: rFt.duration
+      })
+      const actionRl = this.actionForOpt[1].action
+      const rRl = parseAction(actionRl)
+      this.ss.update(rRl.offset, rRl.duration)
+
+      log('대상교차로:', this.selectedNode)
+      log('기존신호:', this.actionForOpt[0].action)
+      log('최적신호:', this.actionForOpt[1].action)
+    },
+
     getRegionName (region) {
       return map[region] || region
     },
-    toggleView () {
-      this.speedView = !this.speedView
-    },
+    // toggleView () {
+    //   this.speedView = !this.speedView
+    // },
     showModal () {
       this.$refs.optenvmodal.show()
     },

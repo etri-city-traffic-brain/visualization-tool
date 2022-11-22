@@ -215,6 +215,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   }
 
   const handleZoomEvent = async event => {
+    console.log('zoom event ***')
     const zoom = map.getZoom()
     if (zoom <= ZOOM_MINIMUM) {
       // gridLayer.updateGrid(simulationId, currentStep)

@@ -26,17 +26,18 @@ async function read (simulationId, type) {
 async function csvToObj (file) {
   const map = Object.create({})
   return new Promise((resolve, reject) => {
+    let i = 0
+    const start = Date.now()
     try {
       fse
         .createReadStream(file)
         .pipe(csv())
         .on('data', row => {
-          let avgTravelTime = 0
-          if (Number(row.sum_travel_time) === 0) {
-            avgTravelTime = Number(0)
-          } else {
-            avgTravelTime = Number(row.sum_travel_time) / Number(row.sum_passed)
-          }
+          let avgTravelTime =
+            Number(row.sum_travel_time) === 0
+              ? 0
+              : Number(row.sum_travel_time) / Number(row.sum_passed)
+
           const target = map[row.tl_name] || []
           target.push({
             phase: row.phase,
@@ -49,8 +50,10 @@ async function csvToObj (file) {
             avgTravelTime
           })
           map[row.tl_name] = target
+          i += 1
         })
         .on('end', () => {
+          console.log(Date.now() - start, 'total:', i)
           resolve(map)
         })
     } catch (err) {
