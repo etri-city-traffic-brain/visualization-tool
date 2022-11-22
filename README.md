@@ -20,6 +20,21 @@ uniq-vis 는 웹 클라이언트와 서버 프로젝트로 구성되면 상세 �
 /home/{user}/uniq-sim/routes
 /home/{user}/uniq-sim/output
 ```
+## 다운로드 지도 데이터
+아래 링크에서 지도 데이터를 다운로드 받아 MongoDB 에 임포트 한다.
+- [ulinks.zip](https://github.com/kusubang/visualization-tool/files/10064450/ulinks.zip)
+- [ucells.zip](https://github.com/kusubang/visualization-tool/files/10064452/ucells.zip)
+- [signals.zip](https://github.com/kusubang/visualization-tool/files/10064454/signals.zip)
+
+## 다운로드 공유디렉토리
+아래 링크에서 공유디렉토리를 다운로드 받아 압축해제 한다. 압축 해제 후 해당 디렉토리는 server/config.js 파일을 수정하여 설정한다.
+- [uniq-sim.zip](https://github.com/kusubang/visualization-tool/files/10064471/uniq-sim.zip)
+
+uniq-sim.zip 파일에는 교통시뮬레이션 및 신호 최적화 시 필요한 설정 파일이 각 1개씩 포함된다.
+1. uniq-sim/routes/scenario_cdd3.zip -> 신호 최적화 시 사용
+2. uniq-sim/routes/scenario_dj_doan.zip -> 교통 시뮬레이션 시 사용
+
+웹 클라이언트에서 시뮬레이션 등록 시 해당 위치의 시뮬레이션 만 사용할 수 있다. 
 
 ## 빌드
 
