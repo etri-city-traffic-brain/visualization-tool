@@ -207,17 +207,18 @@
     >
       <b-spinner small type="grow"/> {{ msg }} <b-spinner small type="grow"/>
     </b-alert>
-    <b-pagination
-      :total-rows="totalRows"
-      :per-page="perPage"
-      v-model="currentPage"
-      first-text="|◀"
-      prev-text="◀"
-      next-text="▶"
-      last-text="▶|"
-      align="center"
-      size="sm"
-    />
+    <div class="flex justify-center">
+      <b-pagination
+        :total-rows="totalRows"
+        :per-page="perPage"
+        v-model="currentPage"
+        first-text="|◀"
+        prev-text="◀"
+        next-text="▶"
+        last-text="▶|"
+        size="sm"
+      />
+    </div>
     <b-modal
       title="시뮬레이션 생성"
       id="create-simulation-modal"

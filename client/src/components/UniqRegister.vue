@@ -1,13 +1,14 @@
 <template>
   <div class="">
     <div class="grid- grid-cols-2 gap-2 p-3 bg-gray-600 text-white font-bold space-y-1">
-      <div v-if="showEnv" label-cols-sm="3" label="환경명" label-class="text-sm-right" label-for="envName" >
+      <div class="flex space-x-2 items-center">
+        <div class="flex-none w-40 text-right">ID</div>
         <b-form-input autofocus id="envName" v-model="envName" focus select size="sm" ></b-form-input>
       </div>
-      <div class="flex space-x-2 items-center">
+      <!-- <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">아이디</div>
         <b-form-input autofocus id="id" v-model="id" size="sm"></b-form-input>
-      </div>
+      </div> -->
       <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">설명</div>
         <b-form-input

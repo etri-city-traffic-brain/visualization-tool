@@ -5,15 +5,17 @@
     <!-- <b-card-group> -->
 
       <!-- <uniq-card-title title="평균속도" class="info-card"/> -->
-      <!-- <div class="bg-gray-700 p-1 space-y-1"
+      <div class="bg-gray-700 p-1 space-y-1"
       >
         <div class="text-center text-white">평균속도</div>
-        <b-progress height="2rem" max="70" class="w-100" style="border-radius:0">
-          <b-progress-bar animated striped :value="avgSpeed" v-bind:style="{'background-color':congestionColor(avgSpeed)}">
-            <span> {{ (avgSpeed).toFixed(2) }} km </span>
-          </b-progress-bar>
-          </b-progress>
-      </div> -->
+        <!-- <b-progress height="2rem" max="70" class="w-100" style="border-radius:0"> -->
+          <!-- <b-progress-bar animated striped :value="avgSpeed" v-bind:style="{'background-color':congestionColor(avgSpeed)}"> -->
+          <div class="bg-green-100 p-3 text-center">
+            <span class="text-3xl"> {{ (avgSpeed).toFixed(2) }} km </span>
+          </div>
+          <!-- </b-progress-bar> -->
+          <!-- </b-progress> -->
+      </div>
 
       <!-- <uniq-card-title title="혼잡도 분포" class="info-card"/> -->
       <!-- <b-card

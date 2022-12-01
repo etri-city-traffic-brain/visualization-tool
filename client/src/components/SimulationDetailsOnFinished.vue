@@ -1,25 +1,25 @@
 <template>
   <div class="space-y-1 p-1">
     <div class="bg-gray-700 p-2 space-y-1">
-      <div class="text-white text-center text-sm">평균속도</div>
-      <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption()" :height="150"/>
+      <div class="text-white text-center text-sm ">평균속도</div>
+      <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption()" :height="100"/>
     </div>
     <div class="bg-gray-700 p-2 space-y-1">
       <div class="text-white text-center text-sm">속도분포</div>
-      <histogram-chart :chartData="chart.histogramData" :height="150" class="mt-1"/>
+      <histogram-chart :chartData="chart.histogramData" :height="100" class="mt-1"/>
     </div>
-    <div class="bg-gray-700 p-2 space-y-1" >
+    <!-- <div class="bg-gray-700 p-2 space-y-1" >
       <div class="text-white text-center text-sm">스텝별 속도분포</div>
       <histogram-chart class="mt-1" :chartData="chart.histogramDataStep" :height="150"/>
-    </div>
-    <div class="bg-gray-700 p-2 space-y-1" >
-      <div class="text-white text-center text-sm">혼잡도 분포</div>
+    </div> -->
+    <!-- <div class="bg-gray-700 p-2 space-y-1" >
+      <div class="text-white text-center text-sm h-48">혼잡도 분포</div>
        <doughnut :chartData="chart.pieData" :height="80" />
     </div>
     <div class="bg-gray-700 p-2 space-y-1" >
-      <div class="text-white text-center text-sm">스텝별 혼잡도 분포</div>
+      <div class="text-white text-center text-sm h-48">스텝별 혼잡도 분포</div>
       <doughnut :chartData="chart.pieDataStep" :height="80"/>
-    </div>
+    </div> -->
 
   </div>
 </template>
