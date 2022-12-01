@@ -7,10 +7,10 @@
         </div>
       </div>
     </div>
-    <div class="mx-1 fixed z-50 inset-y-40" v-if="simulation.error">
+    <!-- <div class="mx-1 fixed z-50 inset-y-40" v-if="simulation.error">
       <div class="max-w-full break-normal bg-red-200 rounded text-black p-2">{{simulation.error }}</div>
       <div>{{ statusText }}</div>
-    </div>
+    </div> -->
     <div class="bg-gray-600">
       <div class="my-1">
         <div class="flex justify-between items-center p-2 border-b">
@@ -42,7 +42,7 @@
             <!-- <span class="font-bold bg-gray-500 p-1 rounded">실행 상태</span> -->
           </div>
           <div class="flex">
-            <button @click="showModal"><b-icon icon="gear-fill"></b-icon></button>
+            <button @click="showModal">결과보기</button>
           </div>
         </div>
       </div>
@@ -109,6 +109,17 @@
       </SimulationDetailsOnRunning>
     </div>
 
+    <div>
+      <div class="mt-2 p-1 py-2 bg-gray-600 rounded-xl " v-if="simulation.status === 'finished'">
+        <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption('시각', '')" :height="50"/>
+         <!-- <SimulationDetailsOnFinished
+            :simulation="simulation"
+            :simulationId="simulation.id"
+            :chart="chart"
+          /> -->
+      </div>
+    </div>
+
     <!-- <div class="bg-gray-600 p-2"></div> -->
 
     <div v-if="currentEdge" class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
@@ -144,9 +155,9 @@
       size="xl"
       hide-footer
     >
-      <div class="p-2 space-y-1 bg-gray-700 mx-1">
-        <div class="text-white min-w-max space-y-2">
-          <div class="border-blue-600 space-y-2">
+      <div class="space-y-1 bg-gray-700- mx-1">
+        <div class="text-white min-w-max space-y-2 bg-gray-600 p-2 rounded-lg">
+          <div class=" grid grid-cols-2 border-blue-600 space-y-2">
             <div class="flex space-x-1 items-center">
               <div class="bg-gray-500 px-1 rounded">지역</div><div class="px-1 rounded"> {{ getRegionName(config.region) }}</div>
             </div>
@@ -172,10 +183,17 @@
           </div>
         </div>
         <div class="flex items-center space-x-1" v-if="simulation.error">
-            <div class="max-w-6xl break-normal bg-red-200 rounded text-black p-2">{{simulation.error }}</div>
-          </div>
-        <div class="mt-2 p-1 py-2 bg-gray-600 rounded-xl ">
+          <div class="max-w-6xl break-normal bg-red-200 rounded text-black p-2">{{simulation.error }}</div>
+        </div>
+
+        <div class="mt-2 p-1 py-2 bg-gray-600 rounded-xl " v-if="simulation.status === 'finished'">
           <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption('시각', '')" :height="50"/>
+          <SimulationResult :simulationId="simulation.id"/>
+          <!-- <SimulationDetailsOnFinished
+            :simulation="simulation"
+            :simulationId="simulation.id"
+            :chart="chart"
+          /> -->
         </div>
       </div>
     </b-modal>
@@ -193,7 +211,7 @@
     width: 300px;
     position: absolute;
     padding: 0;
-    top: 180px;
+    top: 300px;
     right: 10px;
     z-index:100;
   }

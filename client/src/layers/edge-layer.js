@@ -62,7 +62,28 @@ export default map => {
     edgeLayer.getGeometries().forEach(geometry => {
       let edgeId = geometry.getId()
       if (!edgeId.includes('_')) {
-        edgeId = edgeId + '_0_0'
+        // edgeId = edgeId + '_0_0'
+
+        const ids = Object.keys(speedByEdgeId).filter(v => v.startsWith(edgeId))
+        // console.log(ids)
+        let speed =
+          ids.reduce((ac, c) => {
+            const road = speedByEdgeId[c]
+            if (road) {
+              ac += road.speed || 1
+            }
+            return ac
+          }, 0) / ids.length
+        if (speed) {
+          if (geometry.properties.SPEEDLH <= 30) {
+            // speed = road.speed * 2
+            speed = (speed / 30) * 50
+          }
+          geometry.updateSymbol({
+            lineWidth: calcLineWidth(map.getZoom()),
+            lineColor: color(speed)
+          })
+        }
       }
       const road = speedByEdgeId[edgeId]
       if (road) {

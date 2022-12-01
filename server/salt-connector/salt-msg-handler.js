@@ -65,7 +65,7 @@ function SaltMsgHandler () {
         roadType: 1
       })
 
-      send(simulationId, setBuffer)
+      // send(simulationId, setBuffer)
     } catch (err) {
       debug(err.message)
     }

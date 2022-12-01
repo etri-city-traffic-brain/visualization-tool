@@ -27,7 +27,7 @@ import region from '@/map2/region'
 import map from '@/region-code'
 
 // import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
-// import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
+import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 // import HistogramChart from '@/components/charts/HistogramChart'
 // import Doughnut from '@/components/charts/Doughnut'
 // import BarChart from '@/components/charts/BarChart'
@@ -184,6 +184,7 @@ export default {
   components: {
     SimulationResult,
     SimulationDetailsOnRunning,
+    SimulationDetailsOnFinished,
     LineChart,
     UniqCongestionColorBar,
     UniqMapChanger
@@ -216,7 +217,9 @@ export default {
         linkSpeeds: [],
         linkVehPassed: [],
         linkWaitingTime: [],
-        links: []
+        links: [],
+        pieData: [],
+        pieDataStep: []
       },
       // currentZoom: '',
       // currentExtent: '',
@@ -406,23 +409,29 @@ export default {
     },
     async updateChart () {
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this))
-      // this.chart.histogramDataStep = await statisticsService.getHistogramChart(
-      //   this.simulationId,
-      //   0
-      // )
-      // this.chart.histogramData = await statisticsService.getHistogramChart(
-      //   this.simulationId
-      // )
-      // this.chart.pieDataStep = await statisticsService.getPieChart(
-      //   this.simulationId,
-      //   0
-      // )
-      // this.chart.pieData = await statisticsService.getPieChart(
-      //   this.simulationId
-      // )
+      this.chart.histogramDataStep = await statisticsService.getHistogramChart(
+        this.simulationId,
+        0
+      )
+      this.chart.histogramData = await statisticsService.getHistogramChart(
+        this.simulationId
+      )
+      this.chart.pieDataStep = await statisticsService.getPieChart(
+        this.simulationId,
+        0
+      )
+      this.chart.pieData = await statisticsService.getPieChart(
+        this.simulationId
+      )
       this.speedsPerStep = await statisticsService.getSummaryChart(
         this.simulationId
       )
+
+      // this.pieData = await statisticsService.getPieChart(this.simulationId)
+      // this.pieDataStep = await statisticsService.getPieChart(
+      //   this.simulationId,
+      //   0
+      // )
 
       this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
         this.speedsPerStep.datasets[0].data,
@@ -437,7 +446,8 @@ export default {
       return 0
     },
     resize () {
-      this.mapHeight = window.innerHeight - 150 // update map height to current height
+      // this.mapHeight = window.innerHeight - 150 // update map height to current height
+      this.mapHeight = window.innerHeight - 170 // update map height to current height
     },
     togglePlay () {
       if (this.currentStep >= this.slideMax) {
@@ -461,15 +471,13 @@ export default {
           this.simulationId,
           step
         )
-        this.chart.histogramDataStep = await statisticsService.getHistogramChart(
-          this.simulationId,
-          step
-        )
+        this.chart.histogramDataStep =
+          await statisticsService.getHistogramChart(this.simulationId, step)
       }
     },
     centerTo () {
       const center = region[this.config.region] || region.doan
-      this.map.animateTo({ center, zoom: 17 }, { duration: 1000 })
+      this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
     },
     makeToast (msg, variant = 'info') {
       this.$bvToast.toast(msg, {

@@ -86,7 +86,7 @@ export default {
       ],
       envItems: [],
       envCurrentPage: 0,
-      envPerPage: 10,
+      envPerPage: 5,
       envTotalRows: 0,
 
       isBusy: false,

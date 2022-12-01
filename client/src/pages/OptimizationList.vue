@@ -200,6 +200,13 @@
             </button>
           </template>
         </b-table>
+        <b-pagination
+          class="mt-1"
+          :total-rows="envTotalRows"
+          :per-page="envPerPage"
+          v-model="envCurrentPage"
+          align="center"
+        />
       </div>
     </div>
 
