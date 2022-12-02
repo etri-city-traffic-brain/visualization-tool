@@ -258,11 +258,11 @@ export default {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
 
-    this.resize()
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
 
     setTimeout(() => this.centerTo(), 1000)
     await this.updateSimulation()
+    this.resize()
 
     this.mapManager = MapManager({
       map: this.map,
@@ -334,6 +334,7 @@ export default {
         this.showWaitingMsg = false
         this.simulation.status = 'finished'
         this.showModal()
+        this.resize()
       }
     })
 
@@ -372,6 +373,7 @@ export default {
     async startSimulation () {
       log('start simulation')
       this.simulation.status = 'running'
+      this.resize()
       try {
         await simSvc.startSimulation(this.simulationId, this.userState.userId)
         log('end')
@@ -447,7 +449,12 @@ export default {
     },
     resize () {
       // this.mapHeight = window.innerHeight - 150 // update map height to current height
-      this.mapHeight = window.innerHeight - 170 // update map height to current height
+      console.log('resize')
+      if (this.simulation.status === 'finished') {
+        this.mapHeight = window.innerHeight - 350 // update map height to current height
+      } else {
+        this.mapHeight = window.innerHeight - 170 // update map height to current height
+      }
     },
     togglePlay () {
       if (this.currentStep >= this.slideMax) {

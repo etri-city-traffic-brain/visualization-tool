@@ -182,9 +182,9 @@
             </div>
           </div>
         </div>
-        <div class="flex items-center space-x-1" v-if="simulation.error">
+        <!-- <div class="flex items-center space-x-1" v-if="simulation.error">
           <div class="max-w-6xl break-normal bg-red-200 rounded text-black p-2">{{simulation.error }}</div>
-        </div>
+        </div> -->
 
         <div class="mt-2 p-1 py-2 bg-gray-600 rounded-xl " v-if="simulation.status === 'finished'">
           <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption('시각', '')" :height="50"/>
