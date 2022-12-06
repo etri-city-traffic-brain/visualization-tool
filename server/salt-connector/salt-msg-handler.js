@@ -123,7 +123,7 @@ function SaltMsgHandler () {
   const handleSaltStatus = (socket, buffer) => {
     const status = Status(buffer)
     const simulationId = socketToSimulationId[socket.remotePort]
-    console.log(simulationId, status)
+    // console.log(simulationId, status)
     eventBus.emit(EVENT_STATUS, {
       event: EVENT_STATUS,
       simulationId,
