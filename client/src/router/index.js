@@ -15,6 +15,8 @@ import OptimizationList from '@/pages/OptimizationList'
 import OptimizationResultMap from '@/pages/OptimizationResultMap'
 import OptimizationResultComparisonMap from '@/pages/OptimizationResultComparisonMap'
 
+import Admin from '@/pages/Admin'
+
 import OptEnvList from '@/pages/OptEnvList'
 
 import Dashboard from '@/pages/Dashboard.vue'
@@ -49,6 +51,7 @@ export default new Router({
     route('/SignalEditor', SignalEditor),
     route('/OptEnvList', OptEnvList),
     route('/Dashboard', Dashboard, true),
-    route('/Junction', Junction)
+    route('/Junction', Junction),
+    route('/Admin', Admin)
   ]
 })
