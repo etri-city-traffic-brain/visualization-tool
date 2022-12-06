@@ -65,7 +65,7 @@ function SaltMsgHandler () {
         roadType: 1
       })
 
-      // send(simulationId, setBuffer)
+      send(simulationId, setBuffer)
     } catch (err) {
       debug(err.message)
     }
@@ -123,7 +123,7 @@ function SaltMsgHandler () {
   const handleSaltStatus = (socket, buffer) => {
     const status = Status(buffer)
     const simulationId = socketToSimulationId[socket.remotePort]
-    // console.log(simulationId)
+    console.log(simulationId, status)
     eventBus.emit(EVENT_STATUS, {
       event: EVENT_STATUS,
       simulationId,
