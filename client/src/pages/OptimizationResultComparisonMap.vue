@@ -146,7 +146,7 @@
               </div>
 
               <div content-class="mt-3" v-if="Object.keys(travelTimePerJunction).length > 0">
-                <div title="평균통과시간" class="text-white" v-if="!speedView">
+                <div title="평균통과시간" class="text-white" >
                   <div class="bg-gray-500 mb-1 p-1 text-center font-bold">교차로별 평균통과시간 향상률</div>
                   <div class="text-white grid grid-cols-6 gap-1 text-center">
                     <div class="py-1 bg-gray-400 col-span-3">교차로 </div>
