@@ -29,7 +29,7 @@
     "ejs": "~2.5.7",
     "express": "~4.16.0",
     "express-favicon": "^2.0.1",
-    "extract-zip": "^1.6.7",
+    "extract-zip": "^1.7.0",
     "fast-csv": "^2.4.1",
     "fast-xml-parser": "^3.20.3",
     "form-data": "^2.5.0",
@@ -60,7 +60,7 @@
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "faucet": "0.0.1",
+    "faucet": "0.0.4",
     "nodemon": "^1.17.4",
     "tape": "^5.0.1"
   }
