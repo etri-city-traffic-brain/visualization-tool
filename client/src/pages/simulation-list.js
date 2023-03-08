@@ -31,6 +31,11 @@ export default {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
+        {
+          class: 'text-center',
+          key: 'configuration.simulationType',
+          label: '타입'
+        },
         { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'region', label: '지역' },
@@ -81,6 +86,15 @@ export default {
     clearInterval(this.interval)
   },
   methods: {
+    getClassByType (type) {
+      if (type === 'multi') {
+        return 'bg-blue-200'
+      } else if (type === 'micro') {
+        return 'bg-yellow-200'
+      } else {
+        return 'bg-green-200'
+      }
+    },
     calcDuration (configuration) {
       if (configuration.status === 'finished') {
         return calcInterval(configuration.started, configuration.ended)

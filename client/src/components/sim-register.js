@@ -47,6 +47,12 @@ const regionOptions = [
   { text: '중구', value: 'jg' }
 ]
 
+const sTypeOptions = [
+  { text: '메소', value: 'meso' },
+  { text: '마이크로', value: 'micro' },
+  { text: '멀티스케일', value: 'multi' }
+]
+
 export default {
   name: 'sim-registration',
   props: [
@@ -72,7 +78,7 @@ export default {
       toTime: '08:59',
       periodSelected: periodOptions[0].value,
       intervalSelected: intervalOptions[0].value,
-      regionSelected: regionOptions[0].value,
+      regionSelected: 'doan',
       junctionId: 'SA 101,SA 107,SA 111,SA 104',
       epoch: 10,
       extent: null, // current map extent
@@ -80,27 +86,35 @@ export default {
       periodOptions: [...periodOptions],
       intervalOptions: [...intervalOptions],
       regionOptions: [...regionOptions],
+      simulationTypeOptions: [...sTypeOptions],
+      areaTypeOptions: [
+        { text: '지역', value: 'region' },
+        { text: '영역', value: 'area' }
+      ],
+      areaType: 'region',
       images: [],
       loading: false,
       showMap: false,
       showEnv: true,
       modelSavePeriod: 20,
+      simulationTypeSelected: 'meso',
       map: null,
       mapId: `map-${Math.floor(Math.random() * 100)}`,
-      region: {},
-      currentConfig: {}
+      // region: {},
+      currentConfig: {},
+      dockerImages: {}
     }
   },
   destroyed () {
-    // if (this.map) {
-    //   this.map.remove()
-    // }
+    if (this.map) {
+      this.map.remove()
+    }
   },
   mounted () {
-    // setTimeout(() => {
-    //   this.map = makeMap({ mapId: this.mapId, zoom: 13 })
-    //   setTimeout(() => this.selectRegion(), 200)
-    // }, 200)
+    setTimeout(() => {
+      this.map = makeMap({ mapId: this.mapId, zoom: 13 })
+      // setTimeout(() => this.selectRegion(), 200)
+    }, 200)
 
     HTTP({
       url: '/salt/v1/helper/docker',
@@ -108,8 +122,9 @@ export default {
     })
       .then(r => r.data)
       .then(d => {
-        console.log(d)
-        this.images = d.simulation.images
+        this.dockerImages = d.simulation.images
+        console.log(d.simulation.images)
+        // this.images = d.simulation.images
       })
 
     const env = this.env
@@ -130,10 +145,52 @@ export default {
       this.modelSavePeriod = env.configuration.modelSavePeriod
     }
   },
+  watch: {
+    areaType: function (t) {
+      if (t === 'area') {
+        if (this.rectangleMeso) {
+          this.rectangleMeso.startEdit()
+          this.rectangleMeso.show()
+        } else {
+          this.setMesoRegion()
+        }
+        this.regionSelected = null
+        return
+      }
+      if (this.rectangleMeso) {
+        this.rectangleMeso.endEdit()
+        this.rectangleMeso.hide()
+      }
+    },
+    simulationTypeSelected: function (type) {
+      if (type === 'multi') {
+        if (this.rectangleMicro) {
+          this.rectangleMicro.startEdit()
+          this.rectangleMicro.show()
+          return
+        }
+        this.setMicroRegion()
+        return
+      }
+      if (this.rectangleMicro) {
+        this.rectangleMicro.endEdit()
+        this.rectangleMicro.hide()
+      }
+      if (type === 'meso') {
+        this.microArea = {}
+      }
+      if (type === 'micro') {
+        this.microArea = {}
+      }
+    }
+  },
   methods: {
-    getExtent () {
-      if (this.rectangle) {
-        const e = this.rectangle.getExtent()
+    getDockerImage () {
+      return this.dockerImages[this.simulationTypeSelected]
+    },
+    getExtentMicro () {
+      if (this.rectangleMicro) {
+        const e = this.rectangleMicro.getExtent()
         return {
           minX: e.xmin,
           minY: e.ymin,
@@ -142,25 +199,72 @@ export default {
         }
       }
     },
-    // selectRegion () {
-    //   const center = this.map.getCenter()
-    //   if (this.rectangle) {
-    //     this.rectangle.setCoordinates(center)
-    //     return
-    //   }
-    //   const rect = new maptalks.Rectangle(center, 5000, 5000, {
-    //     symbol: {
-    //       lineColor: '#34495e',
-    //       lineWidth: 2,
-    //       polygonFill: 'rgb(216,115,149)',
-    //       polygonOpacity: 0.2
-    //     }
-    //   })
-    //   this.rectangle = rect
+    getExtent () {
+      if (this.rectangleMeso) {
+        const e = this.rectangleMeso.getExtent()
+        return {
+          minX: e.xmin,
+          minY: e.ymin,
+          maxX: e.xmax,
+          maxY: e.ymax
+        }
+      }
+    },
+    setMesoRegion () {
+      const center = this.map.getCenter()
+      if (this.rectangleMeso) {
+        this.rectangleMeso.setCoordinates(center)
+        return
+      }
+      const rectMeso = new maptalks.Rectangle(center, 3000, 3000, {
+        symbol: {
+          lineColor: '#34495e',
+          lineWidth: 2,
+          polygonFill: 'blue',
+          polygonOpacity: 0.1,
+          textName: 'Meso Area',
+          textPlacement: 'Meso Area',
+          textSize: 20,
+          textDy: -20
+        }
+      })
+      this.rectangleMeso = rectMeso
 
-    //   new maptalks.VectorLayer('vector').addGeometry([rect]).addTo(this.map)
-    //   rect.startEdit()
-    // },
+      new maptalks.VectorLayer('vectorMeso')
+        .addGeometry([rectMeso])
+        .addTo(this.map)
+      rectMeso.startEdit()
+    },
+    setMicroRegion () {
+      const center = this.map.getCenter()
+      if (this.rectangleMicro) {
+        this.rectangleMicro.setCoordinates(center.add(-0.02, 0.02))
+        return
+      }
+      const rectMicor = new maptalks.Rectangle(
+        center.add(-0.02, 0.02),
+        2000,
+        2000,
+        {
+          symbol: {
+            lineColor: '#34495e',
+            lineWidth: 2,
+            polygonFill: 'rgb(216,115,149)',
+            polygonOpacity: 0.1,
+            textName: 'Micro Area',
+            textPlacement: 'Micro Area',
+            textSize: 20,
+            textDy: -20
+          }
+        }
+      )
+      this.rectangleMicro = rectMicor
+
+      new maptalks.VectorLayer('vectorMicro')
+        .addGeometry([rectMicor])
+        .addTo(this.map)
+      rectMicor.startEdit()
+    },
     resetForm () {
       this.id = generateRandomId(this.role)
       this.description = '...'
@@ -198,7 +302,10 @@ export default {
           script: this.scriptSelected,
           epoch: this.epoch,
           modelSavePeriod: this.modelSavePeriod,
-          ...this.getExtent()
+          simulationType: this.simulationTypeSelected,
+          microArea: { ...this.getExtentMicro() },
+          area: { ...this.getExtent() },
+          areaType: this.areaType
         }
       }
       return simulationConfig

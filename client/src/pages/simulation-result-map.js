@@ -449,7 +449,6 @@ export default {
     },
     resize () {
       // this.mapHeight = window.innerHeight - 150 // update map height to current height
-      console.log('resize')
       if (this.simulation.status === 'finished') {
         this.mapHeight = window.innerHeight - 350 // update map height to current height
       } else {
@@ -483,6 +482,11 @@ export default {
       }
     },
     centerTo () {
+      if (this.config.areaType === 'area') {
+        const center = [this.config.area.minX, this.config.area.minY]
+        this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
+        return
+      }
       const center = region[this.config.region] || region.doan
       this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
     },

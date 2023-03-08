@@ -86,23 +86,24 @@ function makeUrlForScenarioByRegion ({
   return `${urlBaseForScenarioByRegion}${reqestParameter}`
 }
 
-function makeUrlForScenarioByCoordinate ({
-  include = 0,
-  fromDate,
-  toDate,
-  fromTime,
-  toTime,
-  minX,
-  minY,
-  maxX,
-  maxY,
-  signal = '0',
-  partitions = '1',
-  route = '0',
-  event = '0',
-  weather = '0',
-  busstop = '1'
-}) {
+function makeUrlForScenarioByCoordinate (
+  {
+    include = 0,
+    fromDate,
+    toDate,
+    fromTime,
+    toTime,
+    // microArea: { minX, minY, maxX, maxY },
+
+    signal = '0',
+    partitions = '1',
+    route = '0',
+    event = '0',
+    weather = '0',
+    busstop = '1'
+  },
+  { minX, minY, maxX, maxY }
+) {
   const reqestParameter = `
   ?include=${include}&
   fromDate=${fromDate}&
@@ -124,8 +125,8 @@ async function downloadScenarioByRegion (param, targetDir) {
   return download(makeUrlForScenarioByRegion(param), targetDir)
 }
 
-async function downloadScenarioByCoordinate (param, targetDir) {
-  return download(makeUrlForScenarioByCoordinate(param), targetDir)
+async function downloadScenarioByCoordinate (param, area, targetDir) {
+  return download(makeUrlForScenarioByCoordinate(param, area), targetDir)
 }
 
 module.exports = {

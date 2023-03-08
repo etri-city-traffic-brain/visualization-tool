@@ -17,6 +17,9 @@ const getRouteFor = day => {
 }
 
 const getRouteForSim = region => {
+  if (!region) {
+    return '../../routes/dj.rou.xml' // 대전전체
+  }
   return `../../routes/${region}.rou.xml`
 }
 
@@ -79,6 +82,7 @@ module.exports = (
           link: 'edge.xml',
           connection: 'connection.xml',
           trafficLightSystem: 'tss.xml',
+          multiarea: 'multiarea/edge.xml',
           // route: getRouteFor(day)
           route: getRouteForSim(region)
         },

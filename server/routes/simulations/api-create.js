@@ -17,6 +17,7 @@ const util = require('util')
 const createError = require('http-errors')
 
 const mkdir = util.promisify(fs.mkdir)
+const unlink = util.promisify(fs.unlink)
 const writeFile = util.promisify(fs.writeFile)
 const unzip = util.promisify(require('extract-zip'))
 const makeScenario = require('../../main/simulation-manager/make-scenario')
@@ -40,10 +41,7 @@ const { base, server } = config
 const host = server.ip
 const tcpPort = config?.server?.tcpPort
 
-const existSimulation = id =>
-  getSimulations()
-    .find({ id })
-    .value()
+const existSimulation = id => getSimulations().find({ id }).value()
 const stringify = obj => JSON.stringify(obj, false, 2)
 
 const randomId = num =>
@@ -137,15 +135,30 @@ async function prepareSimulation (id, body, role, slaves = [], type) {
     await addSimulation({ ...body, id, slaves, role })
     await createScenarioFile(simInputDir, { host, body, id }, type)
 
-    const path = `${base}/routes/scenario_dj_${body.configuration.region}.zip`
-    await unzip(path, { dir: simInputDir })
+    const param = {
+      ...body.configuration,
+      ...refineParam(body.configuration)
+    }
+
+    log('area Type:', body.configuration.areaType)
+    if (body.configuration.areaType != 'area') {
+      const path = `${base}/routes/scenario_dj_${body.configuration.region}.zip`
+      await unzip(path, { dir: simInputDir })
+    } else {
+      await downloadScenarioByCoordinate(param, param.area, simInputDir)
+      await unzip(simInputDir + '/data.zip', {
+        dir: simInputDir
+      })
+      await unlink(simInputDir + '/data.zip')
+    }
     //
-    // const param = {
-    //   ...body.configuration,
-    //   ...refineParam(body.configuration)
-    // }
-    // await downloadScenarioByCoordinate(param, simInputDir)
-    // await unzip(simInputDir + '/data.zip', { dir: simInputDir })
+    if (param.microArea.minX) {
+      await downloadScenarioByCoordinate(param, param.microArea, simInputDir)
+      await unzip(simInputDir + '/data.zip', {
+        dir: simInputDir + '/multiarea'
+      })
+      await unlink(simInputDir + '/data.zip')
+    }
   } catch (err) {
     log(err)
     return err

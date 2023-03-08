@@ -68,10 +68,14 @@ module.exports = {
   },
   docker: {
     simulation: {
-      images: [
-        'images4uniq/salt:v2.1a.20210915.test_BUS',
-        'images4uniq/salt:v2.1a.221019'
-      ]
+      images: {
+        meso: [
+          'images4uniq/salt:v2.1a.20210915.test_BUS',
+          'images4uniq/salt:v2.1a.221019'
+        ],
+        micro: ['images4uniq/salt:v2.1a.20230228.test_mult_scale'],
+        multi: ['images4uniq/salt:v2.1a.20230228.test_mult_scale']
+      }
     },
     optimization: {
       images: [
