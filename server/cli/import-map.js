@@ -1,72 +1,77 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
+// 입력으로 받은 GeoJSON을 MongoDB 에 추가한다.
+// GeoJSON은 edge.xml 을 사용하여 변환한 결과물이다.
+const fs = require('fs')
 const fse = require('fs-extra')
-const { connect } = require('./db');
 const chalk = require('chalk')
-const { log } = console;
 
-// const data = {
-//   links: '../data/map-link.geojson',
-//   sections: '../data/map-section.geojson',
-//   cells: '../data/map-cell.geojson',
-//   signals: '../data/map-traffic-light.geojson',
-// };
+const { connect } = require('./db')
 
-async function run(connection, collectionName, geojson) {
-  const { db } = connection;
-  const collection = db.collection(collectionName);
+const { log } = console
+
+async function insertBulk (collection, geojson) {
   try {
-    log('drop existing collection:', collectionName);
-    await db.collection(collectionName).drop();
+    log('drop existing collection')
+    await collection.drop()
   } catch (err) {
     // ignore
+    log(err.message)
   }
-  const bulk = collection.initializeOrderedBulkOp();
+  const bulk = collection.initializeOrderedBulkOp()
   log('start bulk insert')
-  geojson.features.forEach(bulk.insert.bind(bulk));
-  const result = await bulk.execute();
+  geojson.features.forEach(bulk.insert.bind(bulk))
+  const result = await bulk.execute()
   log('create index')
-  await collection.createIndex({ geometry: '2dsphere' });
+  await collection.createIndex({ geometry: '2dsphere' })
   log('end bulk insert')
-  return result;
+  return result
 }
 
-async function importData(collectionName, filePath) {
-  log('start processing', filePath)
-  const { connection } = await connect('map');
+async function loadData (dbName, collectionName, filePath) {
+  log('target file:', chalk.green(filePath))
+  const { connection } = await connect(dbName)
   const exists = await fse.pathExists(filePath)
-  if(!exists) {
+  if (!exists) {
     log(`${filePath} not exists`)
     return false
   }
+
+  const { db } = connection
+  const collection = db.collection(collectionName)
+
   try {
-    const geojson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    await run(connection, collectionName, geojson);
-    log(chalk.green(`${filePath} finished`));
+    const geojson = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+    await insertBulk(collection, geojson)
+    log(chalk.green(`${filePath} finished`))
   } catch (err) {
-    log('fail to load ', collectionName);
+    log('fail to load ', collectionName)
+    log(err.message)
   }
 }
 
+function makeLoader (db) {
+  return loadData.bind(null, db)
+}
 
 if (require.main === module) {
-
   if (process.argv.length < 3) {
-    log('usage', 'node import [directory path]');
-    process.exit(1);
+    log('usage:', 'node import-map [directory path]')
+    process.exit(1)
   }
+  const DATABASE = 'map_v2'
+  const targetDir = process.argv[2]
+  const load = makeLoader(DATABASE)
 
-  const dir = process.argv[2]
+  fse.pathExists(targetDir).then(async exists => {
+    if (!exists) {
+      log(chalk.red(`[${targetDir}] not exists`))
+      return
+    }
 
-  fse.pathExists(dir)
-    .then(async (exists) => {
-      if(exists) {
-        await importData('ulinks', `${dir}/link.geojson`)
-        await importData('ucells', `${dir}/cell.geojson`)
-        process.exit(1)
-      } else {
-        log(chalk.red(`[${dir}] not exists`))
-      }
-    })
+    // await load('ulinks', `${dir}/link.geojson`)
+    await load('ucells', `${targetDir}/cell.geojson`)
+    // await load('ucells', `${targetDir}/sample.geojson`)
+    process.exit(1)
+  })
 }

@@ -54,7 +54,7 @@ module.exports = {
   db: {
     // mongodbUrl: 'mongodb://1234:1234@localhost:27017/map',
     mongodbUrl:
-      'mongodb://1234:1234@localhost:27017/map?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',
+      'mongodb://1234:1234@localhost:27017/map_v2?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',
     mongoOption: {
       useNewUrlParser: true,
       //  autoReconnect: true,
