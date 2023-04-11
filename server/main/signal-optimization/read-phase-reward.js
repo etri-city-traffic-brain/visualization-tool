@@ -1,8 +1,9 @@
 const fse = require('fs-extra')
 const fs = require('fs')
 const csv = require('csv-parser')
+const { config } = require('../../globals')
 
-const baseDir = '/home/ubuntu/uniq-sim/data'
+const baseDir = `${config.base}/data`
 
 async function read (simulationId, type) {
   let file
