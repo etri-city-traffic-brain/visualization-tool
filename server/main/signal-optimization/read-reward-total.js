@@ -1,10 +1,11 @@
-
 const fs = require('fs-extra')
 const csv = require('csv-parser')
 
+const { config } = require('../../globals')
+
 async function read (simulationId) {
   // const file = `/home/ubuntu/uniq-sim/output/${simulationId}/train/train_epoch_total_reward.txt`
-  const file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/train/train_epoch_total_reward.txt`
+  const file = `${config.base}/data/${simulationId}/output/train/train_epoch_total_reward.txt`
 
   await fs.access(file, fs.F_OK)
 
@@ -19,7 +20,7 @@ async function csvToObj (file) {
     try {
       fs.createReadStream(file)
         .pipe(csv())
-        .on('data', (row) => {
+        .on('data', row => {
           const target = map[row.tl_name] || []
           if (row.reward) {
             target.push({

@@ -10,8 +10,8 @@ module.exports = {
   base,
   saltPath: {
     home: base,
-    volume: '/c/home/ubuntu/uniq-sim/data',
-    volumeSim: '/c/home/ubuntu/uniq-sim',
+    volume: base + '/data',
+    volumeSim: base,
     data: `${base}/data`,
     output: `${base}/output`,
     scripts: `${base}/scripts`
@@ -52,9 +52,9 @@ module.exports = {
     webPort: process.env.webPort || 8080
   },
   db: {
-    // mongodbUrl: 'mongodb://1234:1234@localhost:27017/map',
-    mongodbUrl:
-      'mongodb://1234:1234@localhost:27017/map?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',
+    mongodbUrl: 'mongodb://localhost:27017/map',
+    // mongodbUrl:
+    //   'mongodb://1234:1234@localhost:27017/map?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',
     mongoOption: {
       useNewUrlParser: true,
       //  autoReconnect: true,
@@ -69,16 +69,16 @@ module.exports = {
   docker: {
     simulation: {
       images: [
-        'images4uniq/salt:v2.1a.20210915.test_BUS',
-        'images4uniq/salt:v2.1a.221019'
+        'images4uniq/salt:v2.1a.221019',
+        'images4uniq/salt:v2.1a.20210915.test_BUS'
       ]
     },
     optimization: {
       images: [
+        'images4uniq/optimizer:v2.1a.20221012',
         'images4uniq/optimizer:v1.1a.20220629.d',
         'images4uniq/optimizer:v1.2a.20220720PM',
-        'images4uniq/optimizer:v2.1a.221012 -- error',
-        'images4uniq/optimizer:v2.1a.20221012'
+        'images4uniq/optimizer:v2.1a.221012 -- error'
       ]
     }
   }

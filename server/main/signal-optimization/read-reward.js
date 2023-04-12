@@ -3,9 +3,11 @@ const fs = require('fs-extra')
 const csv = require('csv-parser')
 // const fs = require('fs')
 
+const { config } = require('../../globals')
+
 async function read (simulationId) {
   // const file = `/home/ubuntu/uniq-sim/output/${simulationId}/train/train_epoch_tl_reward.txt`
-  const file = `/home/ubuntu/uniq-sim/data/${simulationId}/output/train/train_epoch_tl_reward.txt`
+  const file = `${config.base}/data/${simulationId}/output/train/train_epoch_tl_reward.txt`
 
   try {
     await fs.access(file, fs.F_OK)
