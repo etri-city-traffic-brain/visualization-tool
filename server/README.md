@@ -1,41 +1,31 @@
 # UNIQ-VIS 가시화 서버
 
-UNIQ-VIS 가시화 서버는 교통 시뮬레이터 및 신호최적화 모듈과 연계하여 UNIQ-VIS 웹 클라이언트에서 그 결과를 시각화 할 수 있도록 필요한 기능을 제공한다.
+UNIQ-VIS 가시화 서버는 `교통 시뮬레이터` 및 `신호 최적화` 모듈과 연계하여 실행 제어 및 결과 가시화 기능을 제공한다.
 
 ## 사전 준비
 
-가시화 서버는 사전 환경 조건만 맞으면 운영체제에 상관없이 실행이 가능하지만 편의를 위해 Ubuntu 18.04 LTS 버전을 기준으로 설명한다. 가시화 서버 실행을 위해서 Node.js 런타임이 설치되어야 하며 시뮬레이션 결과 관리 및 지도(Link, Cell, 신호정보) 데이터 관리를 위해서 MongoDB 가 설치되어야 한다. 또한 시뮬레이션 구동을 위해서 도커(Docker)가 설치되어 있어야 한다.
+`가시화 서버`는 운영체제에 상관없이 실행이 가능하지만 편의를 위해 `Ubuntu 18.04 LTS` 버전을 기준으로 설명한다. 가시화 서버 실행을 위해서 Node.js 런타임이 설치되어야 하며 시뮬레이션 결과 관리 및 지도(Link, Cell, 신호정보) 가시화를 위해서 MongoDB 가 설치되어야 한다. 또한 시뮬레이션 구동을 위해서 도커(Docker)가 설치되어 있어야 한다.
 
-- Docker 설치
-  - [여기](https://docs.docker.com/engine/install/ubuntu/)에 기술된 설치 절차에 따라 설치
-- Node.js 설치
-  - [여기](https://nodejs.org/en/) 에 기술된 설치 절차에 따라 Node.js 14.21.3 버전을 설치한다.
-- MongoDB 설치
-  - [여기](https://dev.to/sonyarianto/how-to-spin-mongodb-server-with-docker-and-docker-compose-2lef) 에 기술된 설치 절차에 따라 최신 버전의 MongoDB를 설치한다.
-- MongoDB 설정 (지도데이터 등록)
-  - MongoDB 설치가 완료되면 지도(Link, Cell, 신호) 데이터를 등록한다.
-- 공유 디렉토리 생성
-  - 교통 시뮬레이터 또는 신호 최적화 서브시스템 모듈과의 데이터 공유를 위해서 공유 디렉토리를 설정한다.
-- 도커 이미지 준비
-  - 교통시뮬레이션 및 신호최적화를 위한 도커 이미지를 pull 받는다.
-- 가시화 서버 설정
-  - 가시화 서버의 config.js 파일의 내용을 필요에 맞게 수정 한다.
+- [Docker 설치](https://docs.docker.com/engine/install/ubuntu/)
+- [Node.js 14.21.3 설치](https://nodejs.org/en/)
+- [MongoDB 설치](https://dev.to/sonyarianto/how-to-spin-mongodb-server-with-docker-and-docker-compose-2lef)
 
 ## MongoDB 설치
 
-docker-compose 를 이용해서 MongoDB(5.0.6)를 설치한다. 다음과 같은 내용으로 docker-compose.yaml 파일을 생성한다. volumes 는 설치하는 서버의 정보로 변경한다.
+docker-compose 를 이용해서 MongoDB(5.0.16)를 설치한다. 다음과 같은 내용으로 docker-compose.yaml 파일을 생성한다.
 
 ```yaml
 # docker-compose.yaml
 version: "3.8"
 services:
   mongodb:
-    image: mongo
+    image: mongo:5.0.16
     container_name: mongodb
     environment:
       - PUID=1000
       - PGID=1000
     volumes:
+      # 필요시 볼륨 위치를 변경한다.
       - /home/ubuntu/mongodb/database:/data/db
     ports:
       - 27017:27017
@@ -57,6 +47,7 @@ sudo apt install mongo-tools
 ```
 
 mongoimport 명령을 사용해서 JSON 형태의 파일들을 import 한다.
+데이터베이스 이름(`map`)과 collection 이름(`ulinks`, `ucells`, `signals`)은 변경하지 않는다.
 
 ```
 mongoimport --uri mongodb://localhost:27017/map --collection ulinks --type json --file ulinks.json --jsonArray
@@ -89,12 +80,11 @@ mongoimport --uri mongodb://localhost:27017/map --collection signals --type json
 가시화 서버는 교통 시뮬레이터 및 신호 최적화 모듈과 `파일시스템`을 이용해서 데이터를 공유한다. [uniq-sim.zip](https://github.com/kusubang/visualization-tool/files/10064471/uniq-sim.zip) 파일을 다운로드 하여 사용하고자 하는 디렉토리에 압축해제 한다. 디렉토리 구조는 다음과 같다.
 
 ```
-
 uniq-sim/
-├── data (교통 시뮬레이션 설정, 신호 최적화 설정, 신호 최적화 결과)
-├── output (교통 시뮬레이션 결과)
-├── routes
-└── vds
+  ├── data (교통 시뮬레이션 설정, 신호 최적화 설정, 신호 최적화 결과)
+  ├── output (교통 시뮬레이션 결과)
+  ├── routes
+  └── vds
 
 ```
 
@@ -171,7 +161,7 @@ docker pull images4uniq/optimizer:v2.1a.20221012
 
 ## 가시화서버 설정
 
-./server/config.js 파일의 내용을 수정한다.  
+`./server/config.js` 파일의 내용을 수정한다.  
 config.js 파일의 base, server.ip, db.mongodbUrl 정보를 업데이트 한다.
 
 - base: uniq-sim 디렉토리
