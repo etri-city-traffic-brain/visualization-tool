@@ -109,10 +109,10 @@ export default {
         //   path: 'SignalEditor',
         //   name: '신호편집'
         // },
-        {
-          path: "Dashboard",
-          name: "교통데이터 분석"
-        },
+        // {
+        //   path: "Dashboard",
+        //   name: "교통데이터 분석"
+        // },
         {
           path: "Junction",
           name: "교차로 조회"
