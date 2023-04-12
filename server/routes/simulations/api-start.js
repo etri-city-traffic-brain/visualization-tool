@@ -7,10 +7,7 @@ const {
 } = require('../../globals')
 const { executeSimulation } = require('../../sim-runner')
 
-const getSimulation = id =>
-  getSimulations()
-    .find({ id })
-    .value()
+const getSimulation = id => getSimulations().find({ id }).value()
 
 /**
  * Start a simulation
@@ -33,7 +30,7 @@ async function start (req, res) {
     executeSimulation(simulation).catch(err => {
       console.log(err.message)
       updateStatus(id, 'error', {
-        error: `fail to start simulation ${err.message.slice(0, 200)}`,
+        error: `fail to start simulation ${err.message.slice(0, 300)}`,
         ended: currentTimeFormatted()
       })
     })

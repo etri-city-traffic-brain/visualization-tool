@@ -11,7 +11,7 @@ module.exports = {
   saltPath: {
     home: base,
     volume: base + '/data',
-    volumeSim: base,
+    volumeSim: '/c' + base,
     data: `${base}/data`,
     output: `${base}/output`,
     scripts: `${base}/scripts`
