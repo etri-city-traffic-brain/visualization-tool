@@ -7,10 +7,7 @@
         </div>
       </div>
     </div>
-    <!-- <div class="mx-1 fixed z-50 inset-y-40" v-if="simulation.error">
-      <div class="max-w-full break-normal bg-red-200 rounded text-black p-2">{{simulation.error }}</div>
-      <div>{{ statusText }}</div>
-    </div> -->
+
     <div class="bg-gray-600">
       <div class="my-1">
         <div class="flex justify-between items-center p-2 border-b">
@@ -35,15 +32,23 @@
         </div>
         <div class="p-2 text-white flex justify-between items-center">
           <div class="flex items-center space-x-2">
-            <!-- <span class="font-bold bg-gray-500 p-1 rounded"> 지역</span> -->
-            <span class="font-bold bg-gray-500 px-2 p-1 rounded">{{ getRegionName(config.region) }}</span>
-            <!-- <span class="font-bold bg-gray-500 p-1 rounded"> 시간</span> -->
-            <span class="font-bold bg-gray-500 px-2 p-1 rounded">{{ config.fromTime }} ~ {{ config.toTime }}</span>
+            <span class="font-bold bg-blue-300 px-2 rounded text-black"> 지역</span>
+            <span class="font-bold ">{{ getRegionName(config.region) }}</span>
+            <span class="font-bold bg-blue-300 px-2 rounded text-black"> 시간</span>
+            <span class="font-bold ">{{ config.fromTime }} ~ {{ config.toTime }}</span>
             <!-- <span class="font-bold bg-gray-500 p-1 rounded">실행 상태</span> -->
           </div>
           <div class="flex">
-            <button @click="showModal">결과보기</button>
+            <button class="font-bold bg-blue-300 px-2 rounded text-black" @click="showModal">결과보기</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pb-1" v-if="simulation.error">
+      <div class="break-normal bg-red-200 rounded text-black p-2 w-full">
+        <div v-for="line in simulation.error.split(':')" :key="line">
+          {{ line }}
         </div>
       </div>
     </div>
@@ -156,28 +161,35 @@
       hide-footer
     >
       <div class="space-y-1 bg-gray-700- mx-1">
+        <div class="pb-1" v-if="simulation.error">
+          <div class="break-normal bg-red-200 rounded text-black p-2 w-full">
+            <div v-for="line in simulation.error.split(':')" :key="line">
+              {{ line }}
+            </div>
+          </div>
+       </div>
         <div class="text-white min-w-max space-y-2 bg-gray-600 p-2 rounded-lg">
           <div class=" grid grid-cols-2 border-blue-600 space-y-2">
             <div class="flex space-x-1 items-center">
-              <div class="bg-gray-500 px-1 rounded">지역</div><div class="px-1 rounded"> {{ getRegionName(config.region) }}</div>
+              <div class="bg-blue-300 text-black font-bold px-1 rounded">지역</div><div class="px-1 rounded"> {{ getRegionName(config.region) }}</div>
             </div>
             <div class="flex space-x-1 items-center">
-            <div class="bg-gray-500 px-1 rounded">통계주기</div> <div class="px-1 rounded">{{ config.period / 60 }}분</div>
+            <div class="bg-blue-300 text-black font-bold px-1 rounded">통계주기</div> <div class="px-1 rounded">{{ config.period / 60 }}분</div>
             </div>
             <div class="flex space-x-1">
-              <div class="bg-gray-500 px-1 rounded">시간</div><div class="px-1 rounded"> {{ config.fromTime }} ~
+              <div class="bg-blue-300 text-black font-bold px-1 rounded">시간</div><div class="px-1 rounded"> {{ config.fromTime }} ~
               {{ config.toTime }}</div>
             </div>
             <div class="flex space-x-1">
-              <div class="bg-gray-500 px-1 rounded">스텝</div>
+              <div class="bg-blue-300 text-black font-bold px-1 rounded">스텝</div>
               <div class="px-1 rounded"> {{ Math.ceil((config.end - config.begin) / config.period) }}</div>
             </div>
             <div class="flex space-x-1">
-              <div class="bg-gray-500 px-1 rounded">대상교차로</div>
+              <div class="bg-blue-300 text-black font-bold px-1 rounded">대상교차로</div>
               <div class="px-1 rounded"> {{ config.junctionId }}</div>
             </div>
             <div class="flex space-x-1">
-              <div class="bg-gray-500 px-1 rounded">이미지</div>
+              <div class="bg-blue-300 text-black font-bold px-1 rounded">이미지</div>
               <div class="px-1 rounded"> {{ config.dockerImage }}</div>
             </div>
           </div>

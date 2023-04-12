@@ -373,6 +373,8 @@ export default {
     async startSimulation () {
       log('start simulation')
       this.simulation.status = 'running'
+      this.simulation.error = ''
+      this.statusText = ''
       this.resize()
       try {
         await simSvc.startSimulation(this.simulationId, this.userState.userId)

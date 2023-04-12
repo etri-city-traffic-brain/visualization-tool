@@ -67,7 +67,7 @@ function zeroFill (len) {
 function calcAverage (data) {
   const values = Object.values(data)
   if (values.length < 1) {
-    return [0, [], [], 0, 0, 0]
+    return [0, [], 0]
   }
 
   let sumAvgSpeed = 0
@@ -489,7 +489,7 @@ export default {
           optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
           optSvc.getPhaseReward(this.simulation.id, 'ft').then(res => res.data)
         ])
-        log(new Date().getTime() - start)
+        // log(new Date().getTime() - start)
         this.statusText = '데이터 로드 완료'
 
         this.chart1.speedsPerJunction = dataFt // simulate
@@ -499,7 +499,12 @@ export default {
 
         const [avgTTFT, avgTTFTs, avgSpdFt] = calcAverage(dataFt)
 
-        this.chart.effTravelTime = ((avgTTFT - avgTTRL) / avgTTFT) * 100
+        const diffTT = avgTTFT - avgTTRL
+        if (diffTT === 0) {
+          this.chart.effTravelTime = 0
+        } else {
+          this.chart.effTravelTime = (diffTT / avgTTFT) * 100
+        }
 
         this.chart.travelTimeChartInView = makeSpeedLineData(
           avgTTFTs,
@@ -512,8 +517,9 @@ export default {
 
         // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
         // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
-        this.chart1.avgSpeedJunction = avgSpdFt ? avgSpdFt.toFixed(2) : ''
-        this.chart2.avgSpeedJunction = avgSpdRl ? avgSpdRl.toFixed(2) : ''
+
+        this.chart1.avgSpeedJunction = avgSpdFt ? avgSpdFt.toFixed(2) : '0.00'
+        this.chart2.avgSpeedJunction = avgSpdRl ? avgSpdRl.toFixed(2) : '0.00'
 
         this.chart1.travelTimeJunction = avgTTFT
         this.chart2.travelTimeJunction = avgTTRL
@@ -569,7 +575,7 @@ export default {
 
       const rFt = parseAction(actionFt)
       if (!rFt) {
-        log('parse action failed:', actionFt)
+        // log('parse action failed:', actionFt)
         return
       }
       this.ss = SignalSystem(container, {

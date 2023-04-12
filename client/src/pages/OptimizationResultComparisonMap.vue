@@ -66,7 +66,7 @@
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-4 gap-0 p-1">
+      <div class="grid grid-cols-4 gap-1 p-1 min-w-max">
         <div class="col-span-3">
           <div class="grid grid-cols-2 gap-1">
             <div class="bg-gray-700 rounded-lg">
@@ -162,15 +162,15 @@
                   </div>
                 </div>
               </div>
-              <div v-else class=" p-5">
+              <div v-else class="p-5">
                 <div class="text-white flex items-center">
-                  <svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <!-- <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <div class="text-md text-white pl-3">데이터 확인중...</div>
+                  </svg> -->
+                  <div class="text-md text-white pl-3">데이터 없음...</div>
                 </div>
-                <div class="text-md text-white pl-3"> {{ statusText }}</div>
+                <!-- <div class="text-md text-white pl-3"> {{ statusText }}</div> -->
               </div>
             </div>
           </div>
@@ -194,7 +194,7 @@
           </div> -->
         </div>
       </div>
-      <div class="grid grid-cols-4 gap-1 ml-1">
+      <div class="grid grid-cols-4 gap-1 px-1 min-w-fit">
         <div class="col-span-3">
           <div content-class="" active-nav-item-class="" >
             <div>
@@ -203,12 +203,12 @@
                 <line-chart
                   :chartData="chart.travelTimeChartInView"
                   :options="lineChartOption({})"
-                  :height="142"
+                  :height="140"
                 />
               </div>
               <div class="text-white bg-gray-800 p-5 font-bold" v-else>
                 <div class="flex items-center">
-                  <svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

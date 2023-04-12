@@ -85,7 +85,7 @@ export default {
         { class: 'text-center', key: 'func', label: '기능' }
       ],
       envItems: [],
-      envCurrentPage: 0,
+      envCurrentPage: 1,
       envPerPage: 5,
       envTotalRows: 0,
 

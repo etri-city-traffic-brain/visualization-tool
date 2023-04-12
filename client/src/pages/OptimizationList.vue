@@ -200,6 +200,7 @@
             </button>
           </template>
         </b-table>
+        <!-- {{ envCurrentPage }} -->
         <b-pagination
           class="mt-1"
           :total-rows="envTotalRows"
@@ -412,7 +413,7 @@
           <b-spinner small type="grow" /> {{ msg }}
           <b-spinner small type="grow" />
         </b-alert>
-
+        {{  currentPage }}
         <b-pagination
           class="mt-1"
           :total-rows="totalRows"

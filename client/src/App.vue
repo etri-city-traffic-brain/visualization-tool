@@ -122,7 +122,6 @@ export default {
   },
   methods: {
     showOrHide() {
-      console.log(this.currentRouteName);
       const hides = [
         "Intro",
         "OptimizationResultMap",
