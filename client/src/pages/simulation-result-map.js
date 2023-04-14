@@ -44,7 +44,7 @@ const defaultOption = (xTitle = '', yTitle) => ({
   responsive: true,
   title: {
     display: false,
-    text: 'Line Chart'
+    text: xTitle
   },
   tooltips: {
     mode: 'index',
@@ -73,6 +73,7 @@ const defaultOption = (xTitle = '', yTitle) => ({
     ],
     yAxes: [
       {
+        id: 'A',
         scaleLabel: {
           display: true,
           labelString: yTitle || '속도(km/h)',
@@ -84,10 +85,25 @@ const defaultOption = (xTitle = '', yTitle) => ({
           maxRotation: 0,
           display: true,
           fontColor: 'white',
-          callback: function (value, index, ticks) {
+          callback: function (value) {
             return value
-            // return value + ' km/h'
           }
+        }
+      },
+      {
+        id: 'B',
+        scaleLabel: {
+          display: true,
+          labelString: '통행량',
+          fontColor: 'white'
+        },
+        position: 'right',
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 20,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
         }
       }
     ]
@@ -101,58 +117,43 @@ const defaultOption = (xTitle = '', yTitle) => ({
   }
 })
 
-function makeLinkCompChart (data) {
-  // console.log(data)
+function makeLinkCompChart (data, mean) {
   const ll = data.map(d => d.data.length)
-  const maxValue = Math.max(...ll)
   const minValue = Math.min(...ll)
 
-  const maxIdx = data.findIndex(d => d.data.length === maxValue)
-
-  // console.log('maxIdx:', maxIdx)
-  const dataset = (label, color, data) => ({
+  const dataset = (label, color, data, id) => ({
     label,
     fill: false,
+    type: id === 'B' ? 'bar' : 'line',
     borderColor: color,
     backgroundColor: color,
     borderWidth: 2,
     pointRadius: 1,
-    data
+    data,
+    yAxisID: id
   })
-  const labels = new Array(data[maxIdx].data.length)
-    .fill(0)
-    .map((_, i) => i + '')
-  const datasets = data.map(d => {
-    return dataset(d.label, d.color, d.data.slice(0, minValue))
+
+  const datasets = data.map((d, i) => {
+    let id = i === 0 ? 'A' : 'B'
+    return dataset(d.label, d.color, d.data.slice(0, minValue), id)
   })
   return {
-    labels: labels.slice(0, minValue),
-    datasets
+    labels: mean.labels,
+    datasets: [mean.dataset, ...datasets]
   }
 }
-
-// function stepToTime (step, startTime, periodSec) {
-//   const hourStart = startTime.substring(0, 2)
-//   const periodMin = periodSec / 60
-//   let hour = Number(hourStart) - 1
-//   if (step % 60 === 0) {
-//     hour += 1
-//   }
-//   const hh = (hour + '').padStart(2, '0')
-//   const mm = ((step % 60) + '').padStart(2, '0')
-//   const r = hh + ':' + mm
-//   return
-// }
 
 const makeLinkSpeedChartData = (data1, startTime, periodSec) => {
   const dataset = (label, color, data) => ({
     label,
+    type: 'line',
     fill: false,
     borderColor: color,
     backgroundColor: color,
     borderWidth: 2,
     pointRadius: 1,
-    data
+    data,
+    order: 0
   })
 
   const hourStart = startTime.substring(0, 2)
@@ -173,7 +174,7 @@ const makeLinkSpeedChartData = (data1, startTime, periodSec) => {
 
   return {
     labels: labels,
-    datasets: [dataset('링크속도', '#7FFFD4', data1)]
+    datasets: [dataset('링크속도', '#7FFF00', data1)]
   }
 }
 
@@ -234,7 +235,8 @@ export default {
 
       showWaitingMsg: false,
       speedsByEdgeId: {},
-      statusText: ''
+      statusText: '',
+      isShowAvgSpeedChart: true
     }
   },
   destroyed () {
@@ -255,6 +257,24 @@ export default {
     }
   },
   async mounted () {
+    document.addEventListener('keydown', event => {
+      // if (event.ctrlKey && event.keyCode === 90) {
+      //   this.isShowAvgTravelChart = !this.isShowAvgTravelChart
+      // }
+      if (event.keyCode === 67) {
+        this.isShowAvgSpeedChart = !this.isShowAvgSpeedChart
+
+        // window.scrollTo(0, 1000)
+        setTimeout(() => {
+          window.scrollTo({
+            left: 0,
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+          })
+        }, 500)
+      }
+    })
+
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
 
@@ -442,6 +462,11 @@ export default {
         this.simulation.configuration.fromTime,
         this.simulation.configuration.period
       )
+
+      this.chart.linkSpeeds = {
+        labels: this.chart.linkMeanSpeeds.labels,
+        datasets: this.chart.linkMeanSpeeds.datasets
+      }
     },
     edgeSpeed () {
       if (this.currentEdge && this.currentEdge.speeds) {
@@ -450,11 +475,11 @@ export default {
       return 0
     },
     resize () {
-      // this.mapHeight = window.innerHeight - 150 // update map height to current height
+      // this.mapHeight = window.innerHeight - 150
       if (this.simulation.status === 'finished') {
-        this.mapHeight = window.innerHeight - 350 // update map height to current height
+        this.mapHeight = window.innerHeight - 150
       } else {
-        this.mapHeight = window.innerHeight - 170 // update map height to current height
+        this.mapHeight = window.innerHeight - 138
       }
     },
     togglePlay () {
@@ -520,13 +545,24 @@ export default {
           linkId
         )
 
-        this.chart.linkSpeeds = makeLinkCompChart([
-          { label: 'simulation', color: '#FF8C00', data: linkData.values }
-        ])
+        this.chart.linkSpeeds = makeLinkCompChart(
+          [
+            { label: '평균속도', color: '#FF8C00', data: linkData.values },
+            { label: '통행량', color: '#5F9EA0', data: linkData.vehPassed }
+          ],
+          {
+            labels: this.chart.linkMeanSpeeds.labels,
+            dataset: this.chart.linkMeanSpeeds.datasets[0]
+          }
+        )
+        // this.chart.linkSpeeds.labels = this.chart.linkMeanSpeeds.labels
+        // this.chart.linkSpeeds.datasets.push(
+        //   this.chart.linkMeanSpeeds.datasets[0]
+        // )
 
-        this.chart.linkVehPassed = makeLinkCompChart([
-          { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
-        ])
+        // this.chart.linkVehPassed = makeLinkCompChart([
+        //   { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
+        // ])
       } catch (err) {
         log(err.message)
       }

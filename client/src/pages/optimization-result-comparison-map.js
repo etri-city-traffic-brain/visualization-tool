@@ -301,7 +301,8 @@ export default {
       lineChartOption,
       barChartOption,
       rewards: {
-        labels: []
+        labels: [],
+        values: []
       },
       phaseFixed: {},
       phaseTest: {},
@@ -317,7 +318,8 @@ export default {
       timer: null,
       statusText: '',
       // speedView: false,
-      ss: null
+      ss: null,
+      isShowAvgTravelChart: false
     }
   },
   destroyed () {
@@ -368,6 +370,23 @@ export default {
   },
   async mounted () {
     window.scrollTo(0, 0)
+
+    document.addEventListener('keydown', event => {
+      // if (event.ctrlKey && event.keyCode === 90) {
+      //   this.isShowAvgTravelChart = !this.isShowAvgTravelChart
+      // }
+      if (event.keyCode === 67) {
+        this.isShowAvgTravelChart = !this.isShowAvgTravelChart
+        // window.scrollTo(0, 1000)
+        setTimeout(() => {
+          window.scrollTo({
+            left: 0,
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+          })
+        }, 500)
+      }
+    })
 
     const optId = this.$route.params ? this.$route.params.id : null
 
@@ -483,18 +502,20 @@ export default {
       const start = new Date().getTime()
       const progress = this.chart1.progress
       if ((progress > 0 && progress < 100) || forceUpdate) {
-        this.statusText = 'loading...'
+        this.statusText = 'loading data...'
 
         const [dataRl, dataFt] = await Promise.all([
           optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
           optSvc.getPhaseReward(this.simulation.id, 'ft').then(res => res.data)
         ])
+        // this.statusText = 'loaded ' + (Date.now() - start) / 1000
+
         // log(new Date().getTime() - start)
-        this.statusText = '데이터 로드 완료'
+        // this.statusText = '데이터 로드 완료'
 
         this.chart1.speedsPerJunction = dataFt // simulate
         this.chart2.speedsPerJunction = dataRl // optimization
-
+        this.statusText = 'calculating average travel time'
         const [avgTTRL, avgTTRLs, avgSpdRl] = calcAverage(dataRl)
 
         const [avgTTFT, avgTTFTs, avgSpdFt] = calcAverage(dataFt)
@@ -505,15 +526,17 @@ export default {
         } else {
           this.chart.effTravelTime = (diffTT / avgTTFT) * 100
         }
-
+        this.statusText = 'building travel time chart '
+        // chart: average travel time
         this.chart.travelTimeChartInView = makeSpeedLineData(
           avgTTFTs,
           avgTTRLs,
           avgTTRL,
           avgTTFT
         )
+        this.statusText = 'chart created...' + +(Date.now() - start) / 1000
 
-        this.statusText = '평균통과시간 계산완료'
+        // this.statusText = '평균통과시간 계산완료'
 
         // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
         // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
@@ -549,22 +572,26 @@ export default {
     updateReward(true)
     window.addEventListener('resize', this.resize)
 
-    const result = await optSvc.getRewardTotal(this.simulation.id)
-
-    const results = Object.values(result.data)
-
-    const total = results[0]
-    if (!total) {
-      this.statusText = '모델파일 없음'
-      return
-    }
-    const label = new Array(total.length).fill(0).map((v, i) => i)
-    const reward = total.map(v => Number(v.reward).toFixed(2))
-    const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
-
-    this.rewards = makeRewardChart('total', label, reward, avg)
+    this.updateRewardTotal()
   },
   methods: {
+    async updateRewardTotal () {
+      const result = await optSvc.getRewardTotal(this.simulation.id)
+
+      const results = Object.values(result.data)
+
+      const total = results[0]
+      if (!total) {
+        this.statusText = '모델파일 없음'
+        return
+      }
+      const labels = new Array(total.length).fill(0).map((v, i) => i)
+      const rewards = total.map(v => Number(v.reward).toFixed(2))
+      // const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
+      // this.rewards = makeRewardChart('total', label, reward, avg)
+      this.rewards.labels = labels
+      this.rewards.values = rewards
+    },
     initSignaSystem () {
       const container = this.$refs.actionvis
 
@@ -590,13 +617,9 @@ export default {
       log('기존신호:', this.actionForOpt[0].action)
       log('최적신호:', this.actionForOpt[1].action)
     },
-
     getRegionName (region) {
       return map[region] || region
     },
-    // toggleView () {
-    //   this.speedView = !this.speedView
-    // },
     showModal () {
       this.$refs.optenvmodal.show()
     },
@@ -606,7 +629,10 @@ export default {
       return ((100 * (v2 - v1)) / ((v2 + v1) / 2)).toFixed(2)
     },
     resize () {
-      this.mapHeight = window.innerHeight - 50 // update map height to current height
+      this.mapHeight = window.innerHeight - 220 // update map height to current height
+    },
+    height () {
+      return window.innerHeight
     },
     async runTest () {
       this.showWaitingMsg = true

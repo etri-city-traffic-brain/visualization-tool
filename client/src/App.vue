@@ -136,9 +136,7 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-}
+
 
 .godo {
   font-family: "Godo";
@@ -183,4 +181,17 @@ export default {
     url("//cdn.jsdelivr.net/korean-webfonts/1/corps/godo/Godo/GodoM.woff")
       format("woff");
 }
+
+@import url("//fonts.googleapis.com/earlyaccess/notosanskr.css");
+
+html,
+body {
+  font-family: "Noto Sans KR", sans-serif;
+}
+
+#app {
+  /* font-family: "Avenir", Helvetica, Arial, sans-serif; */
+   font-family: "Noto Sans KR", sans-serif;
+}
+
 </style>

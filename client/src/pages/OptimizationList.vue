@@ -1,126 +1,25 @@
 <template>
   <div class="min-w-max p-2">
-    <div class="p-2 border-2 border-gray-500 rounded-lg space-y-2">
-      <div class="text-white text-lg font-bold py-1" >
+    <div class="bg-gray-700 w-max px-4 mt-2 text-white font-bold py-1 flex items-center space-x-2" >
+      <div>
         신호최적화 환경
       </div>
-      <!--
-      <div class="grid grid-cols-5 flex-wrap gap-2 max-w-full" v-if="false">
-        <div class="bg-gray-700 grid rounded-xl">
-          <button
-            class="rounded p-2 text-4xl text-center font-bold text-white hover:bg-gray-800"
-            v-b-modal.create-simulation-modal
-          >
-            +
-          </button>
-        </div>
-        <div
-          v-for="env of envs"
-          :key="env.envName"
-          class="text-white min-w-max"
-        >
-          <div class="bg-gray-700 p-2 rounded-xl min-h-full">
-            <div class="flex justify-between items-center font-bold text pt-1 mb-2">
-              <div>⚙️ {{ env.envName }}</div>
-              <div>
-                <button class="bg-gray-600 px-2 py-1 rounded text-xs text-black font-bold hover:bg-red-300" @click="remove(env.id)">
-                  X
-                </button>
-              </div>
-            </div>
-            <div class="grid grid-cols-3 text-xs gap-1">
-              <div class="bg-yellow-50 text-black p-1 rounded text-center">
-                <div>통계주기</div>
-                <div
-                  v-if="env.configuration.period >= 600"
-                  class="text-center text-lg font-bold"
-                >
-                  {{ env.configuration.period / 60 }}분
-                </div>
-                <div v-else class="text-center text-lg font-bold">
-                  {{ env.configuration.period }}초
-                </div>
-              </div>
-              <div class="bg-yellow-50 text-black p-1 rounded text-center">
-                <div>Epoch</div>
-                <div class="text-center text-lg font-bold">
-                  {{ env.configuration.modelSavePeriod }}/{{
-                    env.configuration.epoch
-                  }}
-                </div>
-              </div>
-              <div class="bg-green-50 text-black p-1 rounded text-center">
-                <div>Action</div>
-                <div class="text-center text-lg font-bold">
-                  {{ env.configuration.action }}
-                </div>
-              </div>
-              <div class="bg-yellow-50 text-black p-1 rounded text-center">
-                <div>Method</div>
-                <div class="text-center text-lg font-bold">
-                  {{ env.configuration.method }}
-                </div>
-              </div>
-              <div class="bg-yellow-50 text-black p-1 rounded text-center">
-                <div>보상함수</div>
-                <div class="text-center text-lg font-bold">
-                  {{ env.configuration.rewardFunc }}
-                </div>
-              </div>
-              <div class="bg-yellow-50 text-black p-1 rounded">
-                <div class="text-center">
-                  Duration
-                </div>
-                <div class="text-center text-lg font-bold">
-                  {{ env.configuration.end - env.configuration.begin + 60 }}
-                </div>
-              </div>
-            </div>
+      <button v-b-modal.create-simulation-modal class="bg-gray-500 rounded hover:bg-indigo-500">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+        </svg>
 
-            <div class="bg-blue-50 mt-1 p-2 rounded text-sm font-bold">
-              <div class="text-black mb-1">교차로</div>
-              <div class="flex flex-wrap">
-                <div
-                  v-for="j of env.configuration.junctionId.split(',')"
-                  :key="j"
-                  class="bg-blue-300 rounded px-1 ml-1 text-black text-xs"
-                >
-                  {{ j }}
-                </div>
-              </div>
-            </div>
-            <div class="flex justify-end space-x-2 pt-2">
-              <button
-                class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700"
-                @click="openModify(env)"
-              >
-                수정
-              </button>
-              <button
-                class="bg-blue-400 px-2 py-1 rounded text-sm font-bold hover:bg-blue-700"
-                @click="registerSimulation(env)"
-              >
-                실험생성
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      -->
+      </button>
+    </div>
+    <div class="p-2 border-2 border-gray-700 space-y-2">
       <div class="max-h-96 overflow-y-auto">
-        <div class="flex justify-between space-x-1">
+        <div class="flex justify-end space-x-1">
           <button
-            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
-            v-b-modal.create-simulation-modal
-          >
-            <b-icon icon="plus-square"/> 환경등록
-          </button>
-          <button
-            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
+            class="text-white px-2 py-1 hover:text-indigo-200 rounded font-bold"
             @click.stop="reload"
             v-b-tooltip.hover
           >
-            <b-icon icon="arrow-clockwise" /> 새로고침
+            새로고침
           </button>
         </div>
 
@@ -211,19 +110,19 @@
       </div>
     </div>
 
-    <div class="p-2 border-2 border-gray-500 rounded-lg space-y-2 mt-2 min-w-max" >
-      <div class="text-white font-bold py-1 rounded text-lg" >
-        신호최적화 실험
-      </div>
+    <div class="bg-gray-700 w-max px-4 mt-2 text-white font-bold py-1" >
+      신호최적화 실험
+    </div>
+    <div class="p-2 border-2 border-gray-700 space-y-2 min-w-max" >
       <div fluid class="mt-0 p-1">
         <div class="flex justify-end">
           <button
-            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold"
+            class="text-white px-2 py-1 hover:text-white rounded font-bold"
             @click.stop="updateTable"
             v-b-tooltip.hover
             title="테이블을 업데이트합니다."
           >
-            <b-icon icon="arrow-clockwise" /> 새로고침
+            새로고침
           </button>
         </div>
 
@@ -413,7 +312,6 @@
           <b-spinner small type="grow" /> {{ msg }}
           <b-spinner small type="grow" />
         </b-alert>
-        {{  currentPage }}
         <b-pagination
           class="mt-1"
           :total-rows="totalRows"

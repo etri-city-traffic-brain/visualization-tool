@@ -1,7 +1,7 @@
 <template>
-  <div class="container- p-3 bg-gray-600">
+  <div class="p-3 bg-gray-600">
     <div
-      class="bg-gray-500- border-2 border-gray-500 mt-2 rounded-xl py-2 px-2 min-w-max"
+      class="border-2 border-gray-500 mt-2 rounded-xl py-2 px-2 min-w-max"
     >
       <!-- <div class="text-white font-bold bg-gray-700 w-40 text-center px-2 py-1 rounded"> 🚙 교통 시뮬레이션 </div> -->
       <!-- <div class="text-white text-lg text-center font-bold bg-gray-700- w-32 py-1 rounded">교통시뮬레이션</div> -->
@@ -12,23 +12,28 @@
         <!-- <div> -->
         <button
           v-b-modal.create-simulation-modal
-          class="px-2 bg-gray-600 py-1 hover:bg-indigo-400 hover:text-black rounded font-bold text-gray-100"
+          class="px-2 py-1 hover:text-indigo-200 rounded font-bold text-gray-100 flex space-x-1"
         >
-          <b-icon icon="plus" /> 시뮬레이션 생성
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+          <div>
+            시뮬레이션 생성
+          </div>
         </button>
         <div>
           <button
-            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold text-gray-100"
+            class="px-2 py-1 hover:text-white rounded font-bold text-gray-100"
             v-b-toggle.collapse1
             title="시뮬레이션 비교"
           >
-            <b-icon icon="files" /> 시뮬레이션 비교
+            시뮬레이션 비교
           </button>
           <button
-            class="px-2 bg-indigo-400 py-1 hover:bg-indigo-600 hover:text-white rounded font-bold text-gray-100"
+            class="px-2 py-1 hover:text-white rounded font-bold text-gray-100"
             @click.stop="updateTable"
           >
-            <b-icon icon="arrow-clockwise" /> 새로고침
+            새로고침
           </button>
         </div>
         <!-- </div> -->
@@ -186,17 +191,17 @@
             :to="{ name: 'SimulationResultMap', params: { id: row.item.id } }"
           >
             <button
-              class="px-2 py-1 text-sm bg-gray-500 hover:bg-blue-300 rounded text-white"
+              class="px-2 py-1 text-sm bg-blue-300 text-black hover:bg-blue-300 rounded"
             >
               시뮬레이션
               <!-- <b-icon icon="zoom-in"></b-icon> -->
             </button>
           </router-link>
           <button
-            class="bg-gray-600 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300 text-gray-200"
+            class="bg-yellow-400 px-2 py-1 rounded text-sm text-black font-bold hover:bg-red-300 text-black"
             @click.stop="removeSimulation(row.item)"
           >
-            X
+            삭제
           </button>
         </template>
         <template v-slot:cell(details)="row"> </template>

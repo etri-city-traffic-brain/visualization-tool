@@ -8,7 +8,7 @@ const { WebSocket } = window
 // eslint-disable-next-line no-undef
 const env = process && process.env
 if (env) {
-  log(`NODE_ENV is %c${env.NODE_ENV}`, 'color: red')
+  log(`Mode: %c${env.NODE_ENV}`, 'color: red')
 }
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://101.79.1.124:8080' : 'ws://101.79.1.124:8080/'
 const wsUrl =
@@ -16,6 +16,8 @@ const wsUrl =
     ? 'ws://127.0.0.1:8080'
     : 'ws://101.79.1.124:8080/'
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://127.0.0.1:8080' : 'ws://101.79.1.117:8080/'
+
+log(`Web Socket Address: ${wsUrl}`)
 
 const extend = extent => {
   const { min, max } = extent

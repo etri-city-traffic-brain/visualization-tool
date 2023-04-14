@@ -1,23 +1,31 @@
 <template>
   <div>
-    <div class="fixed z-50 inset-auto h-full " v-if="showWaitingMsg">
-      <div class="w-screen">
-        <div class="animate-pulse mx-auto text-center mt-10 bg-yellow-300 p-5 text-xl font-bold">
-          실행결과 분석 중입니다. 잠시후 실행 됩니다.
+    <div class="fixed z-50 inset-auto h-full top-60" v-if="showWaitingMsg">
+      <div class="w-screen p-2">
+        <div class="flex justify-center space-x-2 bg-green-300 p-5 text-xl font-bold rounded-lg">
+          <div>
+            <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <div>
+            실행결과 분석 중...
+          </div>
         </div>
       </div>
     </div>
 
     <div class="bg-gray-600">
-      <div class="my-1">
+      <div class="">
         <div class="flex justify-between items-center p-2 border-b">
           <div class="text-white font-bold">시뮬레이션: {{ simulationId }}</div>
           <div class="text-center flex items-center space-x-1">
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click.stop="startSimulation()"> 시작<b-icon icon="caret-right-fill"/> </button>
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click="stop"> 중지<b-icon icon="stop-fill"/> </button>
-            <button class="bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click="updateSimulation"> 상태확인 </button>
-            <div class="bg-blue-400 p-1 rounded-lg">
-              <span class="uppercase" v-if="simulation.status ==='running'">
+            <button class="text-sm bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click.stop="startSimulation()"> 시작<b-icon icon="caret-right-fill"/> </button>
+            <button class="text-sm bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click="stop"> 중지<b-icon icon="stop-fill"/> </button>
+            <button class="text-sm bg-blue-200 rounded px-2 py-1 font-bold hover:bg-blue-400 hover:text-white" @click="updateSimulation"> 상태확인 </button>
+            <div class="text-sm bg-blue-400 p-1 rounded-lg">
+              <span class="text-sm uppercase" v-if="simulation.status ==='running'">
                 <div class="flex space-x-2 items-center">
                   <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -26,20 +34,20 @@
                   <div> {{ progress }} %</div>
                 </div>
               </span>
-              <span class="uppercase font-bold text-white px-2" v-else>{{ simulation.status }}</span>
+              <span class="text-sm uppercase font-bold text-white px-2" v-else>{{ simulation.status }}</span>
             </div>
           </div>
         </div>
         <div class="p-2 text-white flex justify-between items-center">
           <div class="flex items-center space-x-2">
-            <span class="font-bold bg-blue-300 px-2 rounded text-black"> 지역</span>
-            <span class="font-bold ">{{ getRegionName(config.region) }}</span>
-            <span class="font-bold bg-blue-300 px-2 rounded text-black"> 시간</span>
-            <span class="font-bold ">{{ config.fromTime }} ~ {{ config.toTime }}</span>
+            <!-- <span class="text-md"> 지역</span> -->
+            <span class="text-md bg-gray-700 px-3 rounded-lg">{{ getRegionName(config.region) }}</span>
+            <!-- <span class="text-md"> 시간</span> -->
+            <span class="text-md bg-gray-700 px-3 rounded-lg">{{ config.fromTime }} ~ {{ config.toTime }}</span>
             <!-- <span class="font-bold bg-gray-500 p-1 rounded">실행 상태</span> -->
           </div>
           <div class="flex">
-            <button class="font-bold bg-blue-300 px-2 rounded text-black" @click="showModal">결과보기</button>
+            <button class="font-bold bg-blue-300 px-2 rounded text-black hover:bg-blue-400 hover:text-white" @click="showModal">결과보기</button>
           </div>
         </div>
       </div>
@@ -58,9 +66,9 @@
       <div class="w-40 p-1 absolute bottom-2 right-24">
         <UniqCongestionColorBar/>
       </div>
-      <div class="absolute top-3 bg-gray-600 p-1 ml-1 rounded">
+      <div class="absolute top-3 bg-gray-700 p-1 ml-1 rounded">
         <uniq-map-changer :map="map"/>
-        <b-button variant="dark" size="sm" class="ml-1" @click="centerTo">처음위치</b-button>
+        <button class="bg-blue-700 text-white text-xs p-1 rounded hover:bg-blue-400 hover:text-black" @click="centerTo">처음위치</button>
       </div>
       <div class="p-1 absolute bottom-2 left-1 flex items-center bg-gray-600 rounded-lg">
         <div class="">
@@ -99,7 +107,7 @@
         </div>
       </div>
     </div>
-    <div class="uniq-bottom-left w-96">
+    <div class="fixed left-0 bottom-20 w-full">
       <SimulationDetailsOnRunning
         v-if="simulation.status === 'running'"
         :simulation="simulation"
@@ -114,43 +122,23 @@
       </SimulationDetailsOnRunning>
     </div>
 
-    <div>
-      <div class="mt-2 p-1 py-2 bg-gray-600 rounded-xl " v-if="simulation.status === 'finished'">
-        <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption('시각', '')" :height="50"/>
-         <!-- <SimulationDetailsOnFinished
-            :simulation="simulation"
-            :simulationId="simulation.id"
-            :chart="chart"
-          /> -->
+    <!-- CHART OVERLAY -->
+    <div v-if="isShowAvgSpeedChart && mapHeight > 500">
+      <div class="fixed bottom-20 w-full px-1 opacity-95" v-if="simulation.status === 'finished'">
+        <div class="bg-gray-600 rounded-xl min-h-max">
+          <line-chart
+            :chartData="chart.linkSpeeds"
+            :options="defaultOption()"
+            :height="50"
+          />
+        </div>
       </div>
     </div>
 
-    <!-- <div class="bg-gray-600 p-2"></div> -->
-
-    <div v-if="currentEdge" class="p-1 space-y-1 uniq-top-right rounded-xl bg-gray-500" >
-      <div v-if="currentEdge">
-      {{ speedsByEdgeId[currentEdge.LINK_ID] || speedsByEdgeId[currentEdge.LINK_ID + '_0_0'] }}
-        <div class="rounded-xl text-white text-center">
-          <h5>
-            <b-badge>{{ currentEdge.LINK_ID }}</b-badge>
-            <b-badge>{{ currentEdge.vdsId }}</b-badge>
-          </h5>
-        </div>
-        <div class="bg-gray-800 p-2 rounded-xl mt-1" >
-          <div class="text-white text-sm text-center">SPEED</div>
-          <line-chart :chartData="chart.linkSpeeds" :options="defaultOption()" :height="200"/>
-        </div>
-        <div class="bg-gray-800 p-2 rounded-xl mt-1" >
-          <div class="text-white text-sm text-center">VOLUME</div>
-          <line-chart :chartData="chart.linkVehPassed" :options="defaultOption('', '통행량')" :height="200"/>
-        </div>
-      </div>
-      <div v-else>
-        <!-- <div class="bg-gray-800 p-2 rounded-xl text-white text-center">링크를 선택하세요.</div> -->
-      </div>
-    </div>
-
-    <b-modal title="시뮬레이션 정보" ref="simmodal" header-border-variant="dark"
+    <b-modal
+      title="시뮬레이션 정보"
+      ref="simmodal"
+      header-border-variant="dark"
       header-bg-variant="dark"
       header-text-variant="light"
       body-bg-variant="dark"

@@ -15,7 +15,7 @@ import makeId from './make-id'
 import makeGeometry from './make-geometry'
 import simulationService from '../service/simulation-service'
 import mapService from '../service/map-service'
-import axios from 'axios'
+
 import {
   makeEdgeLayer,
   makeCanvasLayer,
@@ -215,7 +215,6 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   }
 
   const handleZoomEvent = async event => {
-    console.log('zoom event ***')
     const zoom = map.getZoom()
     if (zoom <= ZOOM_MINIMUM) {
       // gridLayer.updateGrid(simulationId, currentStep)

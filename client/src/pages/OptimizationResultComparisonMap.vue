@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-600 relative min-h-screen">
+  <div class="bg-gray-600 relative min-h-screen- opt-container-" style="height: calc(100vh - 50px)">
     <div v-if="!simulation" class="w-80 mx-auto text-center">
       <div class="font-bold text-lg">We're sorry!!</div>
       <div class="font-bold text-sm">시뮬레이션 정보를 읽어오는데 실패하였습니다.</div>
@@ -17,7 +17,8 @@
               v-for="(reward, idx) of rewards.labels.filter((v,i)=> (i % simulation.configuration.modelSavePeriod) == 0)" :key="reward"
               :value="reward"
             >
-            모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}})
+            <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
+            모델:{{ reward }} 보상({{ rewards.values[idx]}})
             </option>
           </select>
           <b-btn @click.prevent="runTest" variant="primary" size="sm" class="flex-none">
@@ -49,7 +50,8 @@
           <span class="font-bold text-indigo-100 px-1 p-1 rounded">{{ config.fromTime }} ~ {{ config.toTime }}</span> |
           <span class="font-bold text-indigo-100 px-1 p-1 rounded">{{ simulation.configuration.junctionId }}</span>
         </div>
-        <div class="pr-2">
+        <div class="flex pr-2 space-x-2 text-sm items-center text-blue-200">
+          <div>{{ statusText }}</div>
           <button @click="showModal"><b-icon icon="gear-fill"></b-icon></button>
         </div>
       </div>
@@ -66,7 +68,7 @@
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-4 gap-1 p-1 min-w-max">
+      <div class="grid grid-cols-4 gap-1 p-1 min-w-max ">
         <div class="col-span-3">
           <div class="grid grid-cols-2 gap-1">
             <div class="bg-gray-700 rounded-lg">
@@ -86,7 +88,8 @@
                 </div>
               </div>
               <div class="border-2 border-gray-700" >
-                <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" />
+                <!-- <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" /> -->
+                <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: mapHeight + 'px'}" />
                 <b-progress height="1rem" class="no-border-radius">
                   <b-progress-bar :value="chart1.progress" variant="secondary">
                     <span> {{ chart1.progress }} %</span>
@@ -114,7 +117,8 @@
               </div>
 
               <div class="border-2 border-yellow-300">
-                <div :ref="mapIds[1]" :id="mapIds[1]" :style="{height: '600px'}" />
+                <!-- <div :ref="mapIds[1]" :id="mapIds[1]" :style="{height: '600px'}" /> -->
+                <div :ref="mapIds[1]" :id="mapIds[1]" :style="{height: mapHeight + 'px'}" />
                 <b-progress height="1rem" class="no-border-radius" show-progress >
                   <b-progress-bar :value="chart2.progress" variant="secondary">
                     <span> {{ chart2.progress }} %</span>
@@ -127,7 +131,7 @@
           <!-- </div> -->
 
         </div>
-        <div class="">
+        <div class="max-w-84 bg-gray-700">
           <div class="mx-1">
             <div class="p-3 bg-green-200 text-center font-bold rounded-lg">
               <div class="">
@@ -140,15 +144,22 @@
           </div>
 
           <div class="mb-1 space-y-1">
-            <div class="p-1 bg-gray-700 overflow-auto text-sm" style="height:555px">
+            <div class="p-1 bg-gray-800 overflow-auto text-sm" style="max-height:455px">
               <div v-for="(s, i) of statusMessage" :key="i" class="bg-gray-800 text-xs text-white">
                 {{ s }}
               </div>
 
               <div content-class="mt-3" v-if="Object.keys(travelTimePerJunction).length > 0">
                 <div title="평균통과시간" class="text-white" >
-                  <div class="bg-gray-500 mb-1 p-1 text-center font-bold">교차로별 평균통과시간 향상률</div>
-                  <div class="text-white grid grid-cols-6 gap-1 text-center">
+                  <div class="bg-gray-500 mb-1 p-1 text-center font-bold flex justify-between">
+                    <div>교차로별 평균통과시간 향상률</div>
+                    <div>
+                      <div>
+                      <button @click="isShowAvgTravelChart = !isShowAvgTravelChart">차트</button>
+                    </div>
+                  </div>
+                  </div>
+                  <div class="text-white font-bold grid grid-cols-6 gap-1 text-center">
                     <div class="py-1 bg-gray-400 col-span-3">교차로 </div>
                     <div class="py-1 bg-gray-400">기존 </div>
                     <div class="py-1 bg-gray-400">최적</div>
@@ -162,17 +173,26 @@
                   </div>
                 </div>
               </div>
-              <div v-else class="p-5">
-                <div class="text-white flex items-center">
+              <div v-else class="py-5">
+                <div class="text-white flex items-center justify-center">
                   <!-- <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg> -->
-                  <div class="text-md text-white pl-3">데이터 없음...</div>
+                  <div class="text-md text-white text-center">데이터 없음...</div>
                 </div>
                 <!-- <div class="text-md text-white pl-3"> {{ statusText }}</div> -->
               </div>
             </div>
+            <div class="text-white items-center bg-gray-700">
+              <div class="bg-gray-500 mb-1 p-1 text-center font-bold">
+                <div>신호시스템</div>
+              </div>
+              <div class="text-sm text-center">{{ selectedNode || '교차로를 선택하세요' }}</div>
+              <div ref="actionvis" class="mx-auto w-80 h-80  p-2 max-w-xs">
+              </div>
+            </div>
+
           </div>
           <!----- 보상 그래프 ----->
           <!-- <div class="px-2 pt-2 text-sm text-white bg-gray-800 rounded-t-lg font-bold">
@@ -194,52 +214,48 @@
           </div> -->
         </div>
       </div>
-      <div class="grid grid-cols-4 gap-1 px-1 min-w-fit">
-        <div class="col-span-3">
-          <div content-class="" active-nav-item-class="" >
-            <div>
-              <div class="bg-gray-500 tracking-wide mb-1 p-1 font-bold text-center text-white">평균통과시간</div>
-              <div class="text-white bg-gray-800 p-1" v-if="chart.travelTimeChartInView">
-                <line-chart
-                  :chartData="chart.travelTimeChartInView"
-                  :options="lineChartOption({})"
-                  :height="140"
-                />
-              </div>
-              <div class="text-white bg-gray-800 p-5 font-bold" v-else>
-                <div class="flex items-center">
-                  <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <div class="text-md text-white pl-3">데이터 확인중...</div>
+      <div class="fixed- bottom-0 w-full">
+        <transition name="bounce">
+        <div class="grid grid-cols-4 gap-1 px-1 min-w-fit" v-if="isShowAvgTravelChart">
+          <div class="col-span-4">
+            <div content-class="" active-nav-item-class="" >
+              <div>
+                <div class="bg-gray-500 tracking-wide p-1 px-2 font-bold text-center text-white flex justify-between">
+                  <div> 평균통과시간</div>
+                  <div><button @click="isShowAvgTravelChart = !isShowAvgTravelChart">닫기</button></div>
+                </div>
+                <div class="text-white bg-gray-800 p-1" v-if="chart.travelTimeChartInView">
+                  <line-chart
+                    :chartData="chart.travelTimeChartInView"
+                    :options="lineChartOption({})"
+                    :height="100"
+                  />
+                </div>
+                <div class="text-white bg-gray-800 p-5 font-bold" v-else>
+                  <div class="flex items-center">
+                    <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <div class="text-md text-white pl-3">데이터 확인중...</div>
+                  </div>
                 </div>
               </div>
             </div>
-            <!-- <div title="평균속도" title-item-class="font-bold bg-gray-500" v-else>
-              <div class="bg-blue-400 mb-1 p-1 text-center">평균속도</div>
-              <div class="text-white bg-gray-800 p-1 text-sm font-bold mt-1">
-                <line-chart :chartData="chart.avgSpeedChartInView" :options="lineChartOption({})" :height="165" />
-              </div>
-            </div> -->
           </div>
+          <!-- <div class="text-white items-center">
+            <div class="bg-gray-500 mb-1 p-1 text-center">신호시스템</div>
+            <div class="text-center bg-gray-800">{{ selectedNode || '교차로를 선택하세요' }}</div>
+            <div ref="actionvis" class="w-84 h-96 bg-gray-800 p-3">
+            </div>
+          </div> -->
         </div>
-        <div class="text-white items-center">
-          <div class="bg-gray-500 mb-1 p-1 text-center">신호시스템</div>
-          <div class="text-center bg-gray-800">{{ selectedNode || '교차로를 선택하세요' }}</div>
-          <!-- <div>{{ actionForOpt[0].action }}</div> -->
-          <!-- <div>{{ actionForOpt[1].action }}</div> -->
-
-          <div ref="actionvis" class="w-84 h-96 bg-gray-800 p-3">
-
-          </div>
-
-        </div>
+        </transition>
       </div>
     </div>
 
     <!-- BOTTOM STATUS TEXT -->
-    <div class="flex my-1 p-1 justify-between bg-gray-700">
+    <!-- <div class="flex my-1 p-1 justify-between bg-gray-700">
       <div class="text-center text-white px-2 text-sm">
         {{ simulation.id }} {{ statusText }}
       </div>
@@ -257,7 +273,7 @@
           <button @click="checkStatus" class="bg-indigo-500 px-2 rounded">실행상태 확인</button>
         </div>
       </div>
-    </div>
+    </div> -->
     <!-- BOTTOM STATUS TEXT END -->
 
     <b-modal size="xl" title="신호 최적화 정보" ref="optenvmodal"
@@ -338,6 +354,10 @@
     /* LKheight: 100%; */
   }
 
+  .opt-container {
+    height: calc(100vh) - 100
+  }
+
   .no-border-radius {
     border-radius: 0;
   }
@@ -408,6 +428,20 @@
   100% {
     transform: scale(1);
   }
+}
+
+/* Enter and leave animations can use different */
+/* durations and timing functions.              */
+.slide-fade-enter-active {
+  transition: all .3s ease;
+}
+.slide-fade-leave-active {
+  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
 }
 
   /* @import '@/assets/images/gb1.jpg'; */
