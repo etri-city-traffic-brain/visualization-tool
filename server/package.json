@@ -31,7 +31,7 @@
     "express-favicon": "^2.0.1",
     "extract-zip": "^1.6.7",
     "fast-csv": "^2.4.1",
-    "fast-xml-parser": "^3.20.3",
+    "fast-xml-parser": "^4.2.4",
     "form-data": "^2.5.0",
     "fs-extra": "^7.0.0",
     "he": "^1.2.0",
