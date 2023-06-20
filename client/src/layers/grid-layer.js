@@ -13,7 +13,7 @@ async function updateGrid(simulationId, currentStep, gridLayer) {
     if (gridData) {
       gridLayer.getGeometries().forEach((geometry, i) => {
         const speeds = gridData[geometry.getId()];
-        if (i === 0 ) {
+        if (i === 0) {
           // console.log(speeds);
           // console.log('max', Math.max(...speeds), Math.min(...speeds));
         }
@@ -40,7 +40,7 @@ async function loadGrid(gridLayer) {
   features.forEach((feature) => {
     const geometry = toGeometry(feature);
     geometry.updateSymbol({
-      lineColor: 'gray',
+      lineColor: 'blue',
       lineWidth: 2,
       polygonFill: 'gray',
     });
@@ -54,7 +54,7 @@ function makeGridLayer(map) {
   const layer = new VectorLayer('gridLayer', [], {})
   map.on('zoomend moveend', async (event) => {
     const map = event.target;
-    if(map.getZoom() <= 14) {
+    if (map.getZoom() <= 14) {
       await loadGrid(layer);
       layer.show()
     } else {

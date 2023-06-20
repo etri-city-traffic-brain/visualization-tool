@@ -28,9 +28,9 @@ import map from '@/region-code'
 
 // import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
-// import HistogramChart from '@/components/charts/HistogramChart'
-// import Doughnut from '@/components/charts/Doughnut'
-// import BarChart from '@/components/charts/BarChart'
+import HistogramChart from '@/components/charts/HistogramChart'
+import Doughnut from '@/components/charts/Doughnut'
+
 // import D3SpeedBar from '@/charts/d3/D3SpeedBar'
 // import axios from 'axios'
 // import * as d3 from 'd3'
@@ -39,6 +39,8 @@ import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinishe
 // import bins from '@/stats/histogram'
 // import config from '@/stats/config'
 // import { labels } from '../utils/color-of-congestion'
+
+// import { simulationService } from '@/service'
 
 const defaultOption = (xTitle = '', yTitle) => ({
   responsive: true,
@@ -117,7 +119,7 @@ const defaultOption = (xTitle = '', yTitle) => ({
   }
 })
 
-function makeLinkCompChart (data, mean) {
+function makeLinkCompChart(data, mean) {
   const ll = data.map(d => d.data.length)
   const minValue = Math.min(...ll)
 
@@ -188,9 +190,11 @@ export default {
     SimulationDetailsOnFinished,
     LineChart,
     UniqCongestionColorBar,
-    UniqMapChanger
+    UniqMapChanger,
+    HistogramChart,
+    Doughnut
   },
-  data () {
+  data() {
     return {
       defaultOption,
       userState,
@@ -220,8 +224,13 @@ export default {
         linkWaitingTime: [],
         links: [],
         pieData: [],
-        pieDataStep: []
+        pieDataStep: [],
+
+        histogramData: null,
+        histogramDataStep: null
       },
+      // histogramData: [],
+      // histogramDataStep: null,
       // currentZoom: '',
       // currentExtent: '',
       // wsStatus: 'ready',
@@ -239,7 +248,7 @@ export default {
       isShowAvgSpeedChart: true
     }
   },
-  destroyed () {
+  destroyed() {
     if (this.map) {
       this.map.remove()
     }
@@ -252,11 +261,14 @@ export default {
     window.removeEventListener('resize', this.resize.bind(this))
   },
   computed: {
-    config () {
+    config() {
       return this.simulation.configuration
     }
   },
-  async mounted () {
+  async mounted() {
+
+
+
     document.addEventListener('keydown', event => {
       // if (event.ctrlKey && event.keyCode === 90) {
       //   this.isShowAvgTravelChart = !this.isShowAvgTravelChart
@@ -277,6 +289,8 @@ export default {
 
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
+
+    // this.histogramData = await statisticsService.getHistogramChart(this.simulationId)
 
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
 
@@ -366,13 +380,13 @@ export default {
     window.addEventListener('resize', this.resize.bind(this))
   },
   methods: {
-    showModal () {
+    showModal() {
       this.$refs.simmodal.show()
     },
-    hideModal () {
+    hideModal() {
       this.$refs.simmodal.hide()
     },
-    startReplay () {
+    startReplay() {
       this.wsClient.send({
         simulationId: this.simulationId,
         type: 'replay',
@@ -380,7 +394,7 @@ export default {
         step: 0
       })
     },
-    stopReplay () {
+    stopReplay() {
       this.wsClient.send({
         simulationId: this.simulationId,
         type: 'replay',
@@ -390,7 +404,7 @@ export default {
     },
     ...stepperMixin,
 
-    async startSimulation () {
+    async startSimulation() {
       log('start simulation')
       this.simulation.status = 'running'
       this.simulation.error = ''
@@ -406,32 +420,32 @@ export default {
       setTimeout(() => this.updateSimulation(), 5000)
     },
 
-    stop () {
+    stop() {
       this.$emit('salt:stop', this.simulationId)
       simSvc.stopSimulation(this.simulationId).then(() => {
         this.updateSimulation()
       })
     },
-    addLog (text) {
+    addLog(text) {
       this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
       if (this.logs.length > 5) {
         this.logs.shift()
       }
     },
-    toggleFocusTool () {
+    toggleFocusTool() {
       this.mapManager.toggleFocusTool()
     },
-    toggleState () {
+    toggleState() {
       return this.playBtnToggle ? '중지' : '시작'
     },
-    async updateSimulation () {
+    async updateSimulation() {
       const { simulation, ticks } = await simSvc.getSimulationInfo(
         this.simulationId
       )
       this.simulation = simulation
       this.slideMax = ticks - 1
     },
-    async updateChart () {
+    async updateChart() {
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this))
       this.chart.histogramDataStep = await statisticsService.getHistogramChart(
         this.simulationId,
@@ -468,13 +482,13 @@ export default {
         datasets: this.chart.linkMeanSpeeds.datasets
       }
     },
-    edgeSpeed () {
+    edgeSpeed() {
       if (this.currentEdge && this.currentEdge.speeds) {
         return this.currentEdge.speeds[this.currentStep] || 0
       }
       return 0
     },
-    resize () {
+    resize() {
       // this.mapHeight = window.innerHeight - 150
       if (this.simulation.status === 'finished') {
         this.mapHeight = window.innerHeight - 150
@@ -482,16 +496,16 @@ export default {
         this.mapHeight = window.innerHeight - 138
       }
     },
-    togglePlay () {
+    togglePlay() {
       if (this.currentStep >= this.slideMax) {
         this.currentStep = 0
       }
       this.playBtnToggle = !this.playBtnToggle
-      ;(this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(
-        this
-      )()
+        ; (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(
+          this
+        )()
     },
-    async stepChanged (step) {
+    async stepChanged(step) {
       setTimeout(() => {
         if (step >= this.slideMax) {
           this.currentStep = 0
@@ -508,7 +522,7 @@ export default {
           await statisticsService.getHistogramChart(this.simulationId, step)
       }
     },
-    centerTo () {
+    centerTo() {
       if (this.config.areaType === 'area') {
         const center = [this.config.area.minX, this.config.area.minY]
         this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
@@ -517,7 +531,7 @@ export default {
       const center = region[this.config.region] || region.doan
       this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
     },
-    makeToast (msg, variant = 'info') {
+    makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
         title: 'Notification',
         autoHideDelay: 5000,
@@ -526,19 +540,19 @@ export default {
         toaster: 'b-toaster-bottom-right'
       })
     },
-    async connectWebSocket () {
+    async connectWebSocket() {
       this.wsClient.init()
     },
-    getRegionName (r) {
+    getRegionName(r) {
       return map[r] || r
     },
-    removeLinkChart (linkId) {
+    removeLinkChart(linkId) {
       const idx = this.chart.links.findIndex(obj => obj.linkId === linkId)
       if (idx >= 0) {
         this.chart.links.splice(idx, 1)
       }
     },
-    async updateLinkChart (linkId, vdsId) {
+    async updateLinkChart(linkId, vdsId) {
       try {
         const linkData = await simSvc.getValueByLinkOrCell(
           this.simulationId,

@@ -22,7 +22,8 @@ import {
   makeToolLayer,
   makeVdsLayer,
   makeCctvLayer,
-  makeRseLayer
+  makeRseLayer,
+  makeGridLayer,
 } from '../layers'
 
 const ZOOM_MINIMUM = 14
@@ -36,7 +37,7 @@ const { log } = console
  * @param {string} param.simulationId - Simulation id
  * @param {Object} param.eventBus - Vue Object as event bus
  */
-function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
+function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
   let currentSpeedsPerLink = {}
   let currentStep = 0
 
@@ -75,13 +76,14 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   map.addLayer(rseLayer)
   map.addLayer(cctvLayer)
   map.addLayer(vdsLayer)
+  // map.addLayer(gridLayer)
 
   rseLayer.hide()
   cctvLayer.hide()
   vdsLayer.hide()
   toolLayer.hide() // default hide
 
-  function toggleFocusTool () {
+  function toggleFocusTool() {
     const showHide = toolLayer.isVisible()
       ? toolLayer.hide.bind(toolLayer)
       : toolLayer.show.bind(toolLayer)
@@ -155,7 +157,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
       .on('mouseover', edgeMouseOver)
       .on('mouseout', edgeMouseOut)
 
-  async function updateSimulationResult () {
+  async function updateSimulationResult() {
     if (simulationId) {
       currentSpeedsPerLink = await simulationService.getSimulationResult(
         simulationId,
@@ -166,7 +168,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     }
   }
 
-  function addFeatures (features) {
+  function addFeatures(features) {
     const g = features.forEach(feature => {
       const f = R.compose(addEventHandler, makeGeometry)(feature)
       edgeLayer.addGeometry(f)
@@ -175,7 +177,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     // edgeLayer.addGeometry(g)
   }
 
-  async function loadMapData (event) {
+  async function loadMapData(event) {
     if (!useSaltLink) {
       eventBus.$emit('map:loaded')
       return
@@ -208,7 +210,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     await updateSimulationResult()
   }
 
-  function changeStep (step) {
+  function changeStep(step) {
     currentStep = step
     edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
     // gridLayer.updateGrid(simulationId, currentStep)
@@ -235,7 +237,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     }
   }
 
-  function getEdgesInView () {
+  function getEdgesInView() {
     // const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
     // const { features } = await mapService.getMap(extent(map))
 
@@ -255,7 +257,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     map,
     getEdgesInView,
     bus: eventBus,
-    showRse (rseId, links) {
+    showRse(rseId, links) {
       console.log('showRse')
       edgeLayer.getGeometries().forEach(feature => {
         const linkId = feature.properties.LINK_ID
@@ -289,7 +291,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
         })
       })
     },
-    getCurrentLinks () {
+    getCurrentLinks() {
       return edgeLayer.getGeometries()
     },
     edgeLayer

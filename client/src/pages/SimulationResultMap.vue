@@ -68,9 +68,10 @@
       </div>
       <div class="absolute top-3 bg-gray-700 p-1 ml-1 rounded">
         <uniq-map-changer :map="map"/>
-        <button class="bg-blue-700 text-white text-xs p-1 rounded hover:bg-blue-400 hover:text-black" @click="centerTo">처음위치</button>
+        <button class="bg-gray-600 text-white text-xs p-1 rounded hover:bg-blue-400 hover:text-black" @click="centerTo">처음위치</button>
       </div>
-      <div class="p-1 absolute bottom-2 left-1 flex items-center bg-gray-600 rounded-lg">
+      <div class="absolute bottom-2 flex justify-center items-center w-full">
+      <div class="bg-gray-600 rounded">
         <div class="">
           <div class="" v-if="simulation.status === 'finished'">
             <div class="px-1 flex items-center">
@@ -106,6 +107,7 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
     <div class="fixed left-0 bottom-20 w-full">
       <SimulationDetailsOnRunning
@@ -123,16 +125,78 @@
     </div>
 
     <!-- CHART OVERLAY -->
-    <div v-if="isShowAvgSpeedChart && mapHeight > 500">
-      <div class="fixed bottom-20 w-full px-1 opacity-95" v-if="simulation.status === 'finished'">
-        <div class="bg-gray-600 rounded-xl min-h-max">
+    <div v-if="isShowAvgSpeedChart && mapHeight > 500" class="w-92 bg-red-500">
+      <div class="fixed top-48 px-1 opacity-90 space-y-1" v-if="simulation.status === 'finished'">
+        <div class="bg-gray-600 rounded">
+          <div class="text-center font-bold text-white pt-2">
+            혼잡도 분포
+          </div>
+          <doughnut class="p-1" :chartData="chart.pieData" style="height:100px" />
+        </div>
+
+        <div class="bg-gray-600 rounded">
+          <div class="text-white font-bold text-center pt-2">
+            스텝별 혼잡도 분포
+          </div>
+          <doughnut class="p-1" :chartData="chart.pieDataStep" style="height:100px" />
+        </div>
+
+        <div class="bg-gray-600 rounded">
+          <div class="text-white font-bold text-center pt-2">
+            속도분포
+          </div>
+          <histogram-chart class="bar bg-gray-600 p-2" :chartData="chart.histogramData" :height="100" />
+        </div>
+
+        <div class="bg-gray-600 rounded">
+          <div v-if="chart.histogramDataStep !==null" >
+            <div class="text-white font-bold text-center pt-2">
+            스텝별 속도분포
+          </div>
+          <histogram-chart class="bar bg-gray-600 p-2" :chartData="chart.histogramDataStep" :height="100" />
+          </div>
+        </div>
+
+        <div class="bg-gray-600 rounded">
           <line-chart
             :chartData="chart.linkSpeeds"
             :options="defaultOption()"
-            :height="50"
+            :height="150"
           />
         </div>
       </div>
+      <div class="fixed top-64 right-1 opacity-90 space-y-1" v-if="simulation.status === 'finished'">
+        <div class="text-white min-w-max space-y-2 bg-gray-600 p-2 rounded-lg text-sm">
+          <div class=" grid grid-cols-1 border-blue-600 space-y-1">
+            <div class="flex space-x-1 items-center">
+              <div class="bg-blue-300 text-black text-center font-bold rounded w-20">지역</div>
+              <div class="px-1 rounded"> {{ getRegionName(config.region) }}</div>
+            </div>
+            <div class="flex space-x-1 items-center">
+              <div class="bg-blue-300 text-black text-center font-bold rounded w-20">통계주기</div>
+              <div class="px-1 rounded">{{ config.period / 60 }}분</div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="bg-blue-300 text-black text-center font-bold rounded w-20">시간</div>
+              <div class="px-1 rounded"> {{ config.fromTime }} ~ {{ config.toTime }}</div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="bg-blue-300 text-black text-center font-bold rounded w-20">스텝</div>
+              <div class="px-1 rounded"> {{ Math.ceil((config.end - config.begin) / config.period) }}</div>
+            </div>
+            <!-- <div class="flex space-x-1">
+              <div class="bg-blue-300 text-black font-bold px-1 rounded w-24">대상교차로</div>
+              <div class="px-1 rounded"> {{ config.junctionId }}</div>
+            </div> -->
+            <div class="flex space-x-1">
+              <div class="bg-blue-300 text-black text-center font-bold rounded w-20">이미지</div>
+              <div class="px-1 rounded"> {{ config.dockerImage }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
     <b-modal
@@ -172,10 +236,10 @@
               <div class="bg-blue-300 text-black font-bold px-1 rounded">스텝</div>
               <div class="px-1 rounded"> {{ Math.ceil((config.end - config.begin) / config.period) }}</div>
             </div>
-            <div class="flex space-x-1">
+            <!-- <div class="flex space-x-1">
               <div class="bg-blue-300 text-black font-bold px-1 rounded">대상교차로</div>
               <div class="px-1 rounded"> {{ config.junctionId }}</div>
-            </div>
+            </div> -->
             <div class="flex space-x-1">
               <div class="bg-blue-300 text-black font-bold px-1 rounded">이미지</div>
               <div class="px-1 rounded"> {{ config.dockerImage }}</div>
@@ -203,25 +267,4 @@
 <script src="./simulation-result-map.js"> </script>
 
 <style>
-  .map {
-    /* max-height: 1024px; */
-    /* max-height: calc(100%); */
-  }
-  .uniq-top-right {
-    width: 300px;
-    position: absolute;
-    padding: 0;
-    top: 300px;
-    right: 10px;
-    z-index:100;
-  }
-  .uniq-bottom-left {
-    /* width: 300px; */
-    position: absolute;
-    padding: 0;
-    bottom: 70px;
-    left: 10px;
-    /* right: 10px; */
-    z-index:100;
-  }
 </style>
