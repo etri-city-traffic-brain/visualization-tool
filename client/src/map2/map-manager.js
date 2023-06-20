@@ -42,7 +42,7 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
   let currentStep = 0
 
   const edgeLayer = makeEdgeLayer(map, eventBus)
-  // const gridLayer = makeGridLayer(map)
+  const gridLayer = makeGridLayer(map)
   const canvasLayer = makeCanvasLayer(
     map,
     edgeLayer.getGeometries.bind(edgeLayer),
@@ -76,7 +76,7 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
   map.addLayer(rseLayer)
   map.addLayer(cctvLayer)
   map.addLayer(vdsLayer)
-  // map.addLayer(gridLayer)
+  map.addLayer(gridLayer)
 
   rseLayer.hide()
   cctvLayer.hide()

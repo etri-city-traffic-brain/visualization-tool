@@ -4,7 +4,7 @@ const {
   saltPath: { output }
 } = require('../../config')
 
-const grid = JSON.parse(fs.readFileSync(`${output}/grids.geojson`, 'utf-8'))
+const grid = JSON.parse(fs.readFileSync(`${output}/grid_.geojson`, 'utf-8'))
 
 module.exports = (req, res) => {
   res.json(grid)

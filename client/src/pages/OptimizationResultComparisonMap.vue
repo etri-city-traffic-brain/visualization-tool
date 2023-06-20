@@ -166,7 +166,9 @@
                     <div class="py-1 bg-gray-400">향상률</div>
                   </div>
                   <div v-for="v of Object.entries(travelTimePerJunction)" class="text-white grid grid-cols-6 px-1">
-                    <div class="border-b col-span-3">{{ v[0] }} </div>
+                    <div class="border-b col-span-3 hover:cursor" >
+                      <button @click="selectCrossName(v[0])">{{ v[0] }}</button>
+                    </div>
                     <div class="border-b text-right">{{ v[1][0] }} </div>
                     <div class="border-b text-right">{{ v[1][1]}}</div>
                     <div class="border-b text-right"> {{ v[1][2] }} </div>
@@ -184,14 +186,7 @@
                 <!-- <div class="text-md text-white pl-3"> {{ statusText }}</div> -->
               </div>
             </div>
-            <div class="text-white items-center bg-gray-700">
-              <div class="bg-gray-500 mb-1 p-1 text-center font-bold">
-                <div>신호시스템</div>
-              </div>
-              <div class="text-sm text-center">{{ selectedNode || '교차로를 선택하세요' }}</div>
-              <div ref="actionvis" class="mx-auto w-80 h-80  p-2 max-w-xs">
-              </div>
-            </div>
+
 
           </div>
           <!----- 보상 그래프 ----->
@@ -214,33 +209,60 @@
           </div> -->
         </div>
       </div>
-      <div class="fixed- bottom-0 w-full">
-        <transition name="bounce">
-        <div class="grid grid-cols-4 gap-1 px-1 min-w-fit" v-if="isShowAvgTravelChart">
-          <div class="col-span-4">
-            <div content-class="" active-nav-item-class="" >
+      <div class="fixed bottom-0 w-full">
+        <transition name="slide">
+        <div class="px-1 min-w-fit" v-if="isShowAvgTravelChart">
+          <div class="">
+
               <div>
-                <div class="bg-gray-500 tracking-wide p-1 px-2 font-bold text-center text-white flex justify-between">
-                  <div> 평균통과시간</div>
-                  <div><button @click="isShowAvgTravelChart = !isShowAvgTravelChart">닫기</button></div>
-                </div>
-                <div class="text-white bg-gray-800 p-1" v-if="chart.travelTimeChartInView">
-                  <line-chart
-                    :chartData="chart.travelTimeChartInView"
-                    :options="lineChartOption({})"
-                    :height="100"
-                  />
-                </div>
-                <div class="text-white bg-gray-800 p-5 font-bold" v-else>
-                  <div class="flex items-center">
-                    <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <div class="text-md text-white pl-3">데이터 확인중...</div>
+                <div class="tracking-wide px-2 font-bold text-center text-white flex justify-between items-center">
+                  <div class="flex space-x-1">
+                    <div class="bg-gray-800 p-1 px-2">
+                      <button @click.prevent="currentTab='total'" >전체 평균통과시간</button>
+                    </div>
+                    <div class="bg-gray-600 p-1 px-2">
+                      <button @click.prevent="currentTab='';selectCrossName(selectedNode)">
+                        {{ selectedNode }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="bg-gray-600 p-1 px-2">
+                    <button @click="isShowAvgTravelChart = !isShowAvgTravelChart">닫기</button>
                   </div>
                 </div>
-              </div>
+
+                <div v-if="currentTab==='total'" class="h-64">
+                  <div class="text-white bg-gray-800 p-1" v-if="chart.travelTimeChartInView">
+                    <line-chart
+                      :chartData="chart.travelTimeChartInView"
+                      :options="lineChartOption({})"
+                      :height="70"
+                    />
+                  </div>
+                  <div class="text-white bg-gray-600 p-5 font-bold" v-else>
+                    <div class="flex items-center">
+                      <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <div class="text-md text-white pl-3">데이터 확인중...</div>
+                    </div>
+                  </div>
+               </div>
+               <div v-else class="h-64 bg-gray-600">
+
+                <div class="flex">
+                  <div class="bg-gray-600 w-full text-center text-white">
+                    {{  selectedNode }}
+                  </div>
+                  <div class="text-white items-center bg-gray-600">
+                    <!-- <div class="text-sm text-center">{{ selectedNode || '교차로를 선택하세요' }}</div> -->
+                    <div ref="actionvis" class="mx-auto w-60 h-60  p-2 max-w-xs">
+                    </div>
+                  </div>
+                 </div>
+                </div>
+
             </div>
           </div>
           <!-- <div class="text-white items-center">

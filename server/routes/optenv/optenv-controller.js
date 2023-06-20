@@ -48,6 +48,7 @@ module.exports = {
     })
     res.send(obj)
   },
+
   async remove(req, res, next) {
     const id = req.query.id
     if (!id) {

@@ -60,11 +60,11 @@ const calcAvg = (values = []) => {
   )
 }
 
-function zeroFill (len) {
+function zeroFill(len) {
   return new Array(len).fill(0)
 }
 
-function calcAverage (data) {
+function calcAverage(data) {
   const values = Object.values(data)
   if (values.length < 1) {
     return [0, [], 0]
@@ -246,7 +246,7 @@ export default {
     UniqMapChanger,
     UniqCardTitle
   },
-  data () {
+  data() {
     return {
       status: '',
       simulation: { configuration: {} }, // means optimization
@@ -319,10 +319,11 @@ export default {
       statusText: '',
       // speedView: false,
       ss: null,
-      isShowAvgTravelChart: false
+      isShowAvgTravelChart: true,
+      currentTab: 'total'
     }
   },
-  destroyed () {
+  destroyed() {
     this.simulations.forEach(({ map, wsClient }) => {
       map.remove()
       wsClient.close()
@@ -335,14 +336,14 @@ export default {
     window.removeEventListener('resize', this.getWindowHeight)
   },
   computed: {
-    config () {
+    config() {
       if (this.simulation) {
         return this.simulation.configuration
       } else {
         return {}
       }
     },
-    travelTimePerJunction () {
+    travelTimePerJunction() {
       const keys = Object.keys(this.chart2.speedsPerJunction)
       const ttsFt = this.chart1.speedsPerJunction
       const ttsRl = this.chart2.speedsPerJunction
@@ -357,7 +358,7 @@ export default {
       }
       return result
     },
-    actionForOpt () {
+    actionForOpt() {
       const info = this.chart2.speedsPerJunction
       const s = this.selectedNode
       const t = info[s]
@@ -368,7 +369,7 @@ export default {
       return [{}, {}]
     }
   },
-  async mounted () {
+  async mounted() {
     window.scrollTo(0, 0)
 
     document.addEventListener('keydown', event => {
@@ -378,6 +379,9 @@ export default {
       if (event.keyCode === 67) {
         this.isShowAvgTravelChart = !this.isShowAvgTravelChart
         // window.scrollTo(0, 1000)
+        if (this.currentTab === '') {
+          this.initSignaSystem()
+        }
         setTimeout(() => {
           window.scrollTo({
             left: 0,
@@ -495,7 +499,9 @@ export default {
       const crossName = signalService.nodeIdToName(p.nodeId)
       this.selectedNode = crossName
 
-      this.initSignaSystem()
+      this.selectCrossName(crossName)
+
+
     })
 
     const updateReward = async forceUpdate => {
@@ -575,7 +581,15 @@ export default {
     this.updateRewardTotal()
   },
   methods: {
-    async updateRewardTotal () {
+    async selectCrossName(name) {
+      this.selectedNode = name
+      this.isShowAvgTravelChart = true
+      setTimeout(() => {
+        this.currentTab = ''
+        this.initSignaSystem()
+      }, 1000)
+    },
+    async updateRewardTotal() {
       const result = await optSvc.getRewardTotal(this.simulation.id)
 
       const results = Object.values(result.data)
@@ -592,9 +606,13 @@ export default {
       this.rewards.labels = labels
       this.rewards.values = rewards
     },
-    initSignaSystem () {
+    initSignaSystem() {
       const container = this.$refs.actionvis
-
+      if (!container) {
+        setTimeout(() => {
+          this.initSignaSystem()
+        }, 500)
+      }
       if (this.actionForOpt.length < 1) {
         return
       }
@@ -617,24 +635,24 @@ export default {
       log('기존신호:', this.actionForOpt[0].action)
       log('최적신호:', this.actionForOpt[1].action)
     },
-    getRegionName (region) {
+    getRegionName(region) {
       return map[region] || region
     },
-    showModal () {
+    showModal() {
       this.$refs.optenvmodal.show()
     },
-    calcEfficency (v1, v2) {
+    calcEfficency(v1, v2) {
       v1 = Number(v1)
       v2 = Number(v2)
       return ((100 * (v2 - v1)) / ((v2 + v1) / 2)).toFixed(2)
     },
-    resize () {
+    resize() {
       this.mapHeight = window.innerHeight - 220 // update map height to current height
     },
-    height () {
+    height() {
       return window.innerHeight
     },
-    async runTest () {
+    async runTest() {
       this.showWaitingMsg = true
       this.chart1.avgSpeedsInView = []
       this.chart2.avgSpeedsInView = []
@@ -654,13 +672,13 @@ export default {
       }
       this.status = 'running'
     },
-    addMessage (msg) {
+    addMessage(msg) {
       this.statusMessage.push(msg)
       if (this.statusMessage.length > 100) {
         this.statusMessage.shift()
       }
     },
-    async stopTest () {
+    async stopTest() {
       this.status = 'stopping'
       this.addMessage('stop ' + this.simulation.id)
       await optSvc
@@ -671,7 +689,7 @@ export default {
         })
       this.checkStatus()
     },
-    initMapEventHandler (obj) {
+    initMapEventHandler(obj) {
       const map1 = this.simulations[0].map
       const map2 = this.simulations[1].map
 
@@ -707,7 +725,7 @@ export default {
       map1.on('zoomend', map1ToMap2)
       map2.on('zoomend', map2ToMap1)
     },
-    async checkStatus () {
+    async checkStatus() {
       simulationService.getSimulationInfo(this.simulation.id).then(data => {
         this.status = data.simulation.status
       })
