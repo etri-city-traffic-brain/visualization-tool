@@ -125,24 +125,26 @@
     </div>
 
     <!-- CHART OVERLAY -->
-    <div v-if="isShowAvgSpeedChart && mapHeight > 500" class="w-92 bg-red-500">
-      <div class="fixed top-48 px-1 opacity-90 space-y-1" v-if="simulation.status === 'finished'">
-        <div class="bg-gray-600 rounded">
-          <div class="text-center font-bold text-white pt-2">
-            혼잡도 분포
+    <div v-if="isShowAvgSpeedChart && mapHeight > 500">
+      <div class="fixed top-48 p-1 opacity-90 space-y-1 w-80" v-if="simulation.status === 'finished'">
+        <div class="grid grid-cols-2 gap-1 w-full">
+          <div class="bg-gray-600 rounded">
+            <div class="text-center text-sm text-white pt-2">
+              혼잡도 분포
+            </div>
+            <doughnut class="px-2" :chartData="chart.pieData" style="height:100px" />
           </div>
-          <doughnut class="p-1" :chartData="chart.pieData" style="height:100px" />
+
+          <div class="bg-gray-600 rounded">
+            <div class="text-white text-sm text-center pt-2">
+              스텝별 혼잡도 분포
+            </div>
+            <doughnut class="px-2" :chartData="chart.pieDataStep" style="height:100px" />
+          </div>
         </div>
 
-        <div class="bg-gray-600 rounded">
-          <div class="text-white font-bold text-center pt-2">
-            스텝별 혼잡도 분포
-          </div>
-          <doughnut class="p-1" :chartData="chart.pieDataStep" style="height:100px" />
-        </div>
-
-        <div class="bg-gray-600 rounded">
-          <div class="text-white font-bold text-center pt-2">
+        <div class="bg-gray-600 rounded mt-2">
+          <div class="text-white text-sm text-center pt-2">
             속도분포
           </div>
           <histogram-chart class="bar bg-gray-600 p-2" :chartData="chart.histogramData" :height="100" />
@@ -150,18 +152,18 @@
 
         <div class="bg-gray-600 rounded">
           <div v-if="chart.histogramDataStep !==null" >
-            <div class="text-white font-bold text-center pt-2">
+            <div class="text-white text-sm text-center pt-2">
             스텝별 속도분포
           </div>
           <histogram-chart class="bar bg-gray-600 p-2" :chartData="chart.histogramDataStep" :height="100" />
           </div>
         </div>
 
-        <div class="bg-gray-600 rounded">
+        <div class="bg-gray-600 rounded h-40">
           <line-chart
             :chartData="chart.linkSpeeds"
             :options="defaultOption()"
-            :height="150"
+            :height="220"
           />
         </div>
       </div>
