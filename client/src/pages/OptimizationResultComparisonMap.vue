@@ -83,7 +83,7 @@
                 <div class="text-center text-2xl font-bold p-2 bg-gray-500- text-gray-100  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">통과시간</div>
                   <div>
-                    {{chart1.travelTimeJunction.toFixed(2) }}<span class="text-sm">sec</span>
+                    {{chart1.travelTimeJunction }}<span class="text-sm">sec</span>
                   </div>
                 </div>
               </div>
@@ -110,7 +110,7 @@
                 <div class="text-center text-2xl font-bold p-2 bg-yellow-200-  flex items-center justify-center space-x-2 rounded-lg">
                   <div class="text-xs">통과시간</div>
                   <div class="flex justify-center space-x-2">
-                    <div>{{chart2.travelTimeJunction.toFixed(2) }}<span class="text-sm">sec</span></div>
+                    <div>{{chart2.travelTimeJunction }}<span class="text-sm">sec</span></div>
                     <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effTravelTime}}<span class="text-xs">%</span></div> -->
                   </div>
                 </div>
@@ -185,10 +185,38 @@
                 </div>
                 <!-- <div class="text-md text-white pl-3"> {{ statusText }}</div> -->
               </div>
+
             </div>
 
+            <div>
+              <!-- 신규모듈 적용 -->
+              <div class="text-sm bg-gray-800">
+                <div v-if="Object.keys(chart.travelTimePerJunction || {}).length > 0">
+                  <div class="text-white font-bold grid grid-cols-6 gap-1 text-center">
+                    <div class="py-1 bg-gray-400 col-span-3">교차로 </div>
+                    <div class="py-1 bg-gray-400">기존 </div>
+                    <div class="py-1 bg-gray-400">최적</div>
+                    <div class="py-1 bg-gray-400">향상률</div>
+                  </div>
 
+                  <div v-for="v of Object.entries(chart.travelTimePerJunction)"
+                    :key="v[0]"
+                    class="text-white grid grid-cols-6 px-1"
+                  >
+                    <div class="border-b col-span-3">
+                      <button @click="selectCrossName(v[0])">{{ v[0] }}</button>
+                    </div>
+                    <div class="border-b text-right">{{ v[1].simulate }}</div>
+                    <div class="border-b text-right">{{ v[1].test }}</div>
+                    <div class="border-b text-right">{{ v[1].improvement_rate }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
+
+
           <!----- 보상 그래프 ----->
           <!-- <div class="px-2 pt-2 text-sm text-white bg-gray-800 rounded-t-lg font-bold">
             보상 그래프
@@ -248,21 +276,27 @@
                       <div class="text-md text-white pl-3">데이터 확인중...</div>
                     </div>
                   </div>
-               </div>
-               <div v-else class="h-64 bg-gray-600">
-
-                <div class="flex">
-                  <div class="bg-gray-600 w-full text-center text-white">
-                    {{  selectedNode }}
-                  </div>
-                  <div class="text-white items-center bg-gray-600">
-                    <!-- <div class="text-sm text-center">{{ selectedNode || '교차로를 선택하세요' }}</div> -->
-                    <div ref="actionvis" class="mx-auto w-60 h-60  p-2 max-w-xs">
+              </div>
+              <div v-else class="bg-gray-600">
+                <div class="grid grid-cols-4 gap-1 p-1">
+                  <div class="col-span-3">
+                    <div class="bg-gray-700 text-center text-white">
+                      <div class="text-white p-1 h-60" v-if="chart.travelTimeJunctionChart">
+                        <line-chart
+                          :chartData="chart.travelTimeJunctionChart"
+                          :options="lineChartOption({})"
+                          :height="80"
+                        />
+                      </div>
                     </div>
                   </div>
-                 </div>
+                  <div class="">
+                    <div class="text-white items-center bg-gray-700 flex-none">
+                      <div ref="actionvis" class="mx-auto w-80 h-60  p-2 max-w-xs">                   </div>
+                    </div>
+                  </div>
                 </div>
-
+              </div>
             </div>
           </div>
           <!-- <div class="text-white items-center">
@@ -296,9 +330,12 @@
         </div>
       </div>
     </div> -->
-    <!-- BOTTOM STATUS TEXT END -->
 
-    <b-modal size="xl" title="신호 최적화 정보" ref="optenvmodal"
+    <!-- BOTTOM STATUS TEXT END -->
+    <b-modal
+      size="xl"
+      title="신호 최적화 정보"
+      ref="optenvmodal"
       header-border-variant="dark"
       header-bg-variant="dark"
       header-text-variant="light"
@@ -329,7 +366,6 @@
             <div class="w-12">{{ config.method }}</div>
             <div class="w-20 text-center bg-gray-500 px-1 rounded">Action</div>
             <div>{{ config.action }}</div>
-
           </div>
           <div class="flex space-x-1">
             <div class="w-20 text-center bg-gray-500 px-1 rounded">시간</div>
@@ -345,18 +381,18 @@
           </div>
         </div>
         <div class="p-3 bg-yellow-200 text-black text-center font-bold rounded-xl mt-2 ">
-              <div class="">
-                통과시간 향상률
-              </div>
-              <div class="text-5xl">
-                {{chart.effTravelTime.toFixed(2)}}<span class="text-xs">%</span>
-              </div>
-            </div>
+          <div class="">
+            통과시간 향상률
+          </div>
+          <div class="text-5xl">
+            {{chart.effTravelTime.toFixed(2)}}<span class="text-xs">%</span>
+          </div>
+        </div>
         <line-chart
-            :chartData="chart.travelTimeChartInView"
-            :options="lineChartOption({})"
-            :height="142"
-          />
+          :chartData="chart.travelTimeChartInView"
+          :options="lineChartOption({})"
+          :height="142"
+        />
       </div>
     </b-modal>
   </div>

@@ -1,4 +1,4 @@
-function calcDuration (duration) {
+function parseDuration(duration) {
   const result = duration.slice()
   for (let i = 0; i < duration.length; i++) {
     if (duration[i] < 5) {
@@ -8,7 +8,7 @@ function calcDuration (duration) {
   return result.filter(v => v >= 5)
 }
 
-function parseActions (str = '') {
+function parseActions(str = '') {
   const values = str.split('#')
   if (values.length < 3) {
     return null
@@ -18,7 +18,7 @@ function parseActions (str = '') {
   return {
     action: Number(values[0]),
     offset: Number(values[1]),
-    duration: calcDuration(durationStr)
+    duration: parseDuration(durationStr)
   }
 }
 

@@ -1,12 +1,12 @@
 import * as vis from 'vis'
 
-const bShape = {
+const CIRCLE = {
   shape: 'circle',
   color: '#2d5986',
   font: { size: 12, color: 'lime', face: 'Verdana' }
 }
 
-const edgeColor = {
+const EDGE_COLOR = {
   color: '#848484',
   highlight: '#848484',
   hover: '#848484',
@@ -14,25 +14,28 @@ const edgeColor = {
   opacity: 1.0
 }
 
-const edgeBasic = {
+const EDGE = {
   arrows: 'to',
-  color: edgeColor,
+  color: EDGE_COLOR,
   length: 120,
   smooth: {
     type: 'curvedCW' // dynamic
   }
 }
-
-function SignalSystem (container, ns = {}) {
-  const durInitial = ns.duration
-  let offsetUpdated = ns.offset
+/**
+ * 신호정보를 가시화 한다.
+ */
+function SignalSystem(container, action = { duration: [], offset: 0 }) {
+  const durInitial = action.duration
+  let offsetUpdated = action.offset
   let durUpdated = durInitial.slice()
-  const items = ns.duration
+
+  const dataset = action.duration
     .map((n, id) => ({
       id,
       label: 'signal' + id + '\n\n',
       offset: n,
-      ...bShape
+      ...CIRCLE
     }))
     .map((node, index, arr) => {
       const angle = 2 * Math.PI * (index / arr.length + 0.75)
@@ -44,14 +47,14 @@ function SignalSystem (container, ns = {}) {
       return node
     })
 
-  const nodes = new vis.DataSet(items)
+  const nodes = new vis.DataSet(dataset)
 
   const edgeItems = []
-  for (let i = 0; i < ns.duration.length; i++) {
-    if (i === ns.duration.length - 1) {
-      edgeItems.push({ from: i, to: 0, ...edgeBasic })
+  for (let i = 0; i < action.duration.length; i++) {
+    if (i === action.duration.length - 1) {
+      edgeItems.push({ from: i, to: 0, ...EDGE })
     } else {
-      edgeItems.push({ from: i, to: i + 1, ...edgeBasic })
+      edgeItems.push({ from: i, to: i + 1, ...EDGE })
     }
   }
 
@@ -59,7 +62,7 @@ function SignalSystem (container, ns = {}) {
   const edges = new vis.DataSet(edgeItems)
 
   // create a network
-  const data = {
+  const networkData = {
     nodes: nodes,
     edges: edges
   }
@@ -79,12 +82,11 @@ function SignalSystem (container, ns = {}) {
       zoomView: false
     }
   }
-  const network = new vis.Network(container, data, options)
+  const network = new vis.Network(container, networkData, options)
 
   network.on('afterDrawing', ctx => {
-    // const nodeIds = [1, 2, 3, 4]
-    const nodeIds = items.map(v => v.id)
-    const nodePosition = network.getPositions(items.map(v => v.id))
+    const nodeIds = dataset.map(v => v.id)
+    const nodePosition = network.getPositions(dataset.map(v => v.id))
 
     ctx.textAlign = 'center'
 
@@ -110,10 +112,10 @@ function SignalSystem (container, ns = {}) {
     ctx.fillStyle = 'cyan'
     ctx.lineWidth = 1
     ctx.font = '30px Verdana'
-    const offset = offsetUpdated - ns.offset
+    const offset = offsetUpdated - action.offset
     const osffsetStr = offset > 0 ? '+' + offset : offset
     ctx.fillText('Offset', 0, -40)
-    ctx.fillText(ns.offset, 0, -5)
+    ctx.fillText(action.offset, 0, -5)
     ctx.fillStyle = 'yellow'
     ctx.fillText(osffsetStr, 0, 25)
 
@@ -122,9 +124,9 @@ function SignalSystem (container, ns = {}) {
   })
 
   return {
-    update (off, nis) {
-      durUpdated = nis
-      offsetUpdated = off
+    update(action) {
+      durUpdated = action.duration
+      offsetUpdated = action.offset
       network.redraw()
     }
   }

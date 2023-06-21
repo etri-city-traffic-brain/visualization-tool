@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="bg-gray-600">
+  <div id="app">
     <b-navbar
       type="dark"
       :variant="variant"

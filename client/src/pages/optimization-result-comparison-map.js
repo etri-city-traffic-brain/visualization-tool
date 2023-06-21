@@ -155,8 +155,9 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
 const makeSpeedLineData = (
   dataFt = [],
   dataRl = [],
+  avgTTFT = 0,
   avgTTRL = 0,
-  avgTTFT = 0
+  filterStep = 29
 ) => {
   let avgFt = dataFt.reduce((acc, cur) => (acc += ~~cur), 0) / dataFt.length
   let avgRl = dataRl.reduce((acc, cur) => (acc += ~~cur), 0) / dataRl.length
@@ -165,7 +166,7 @@ const makeSpeedLineData = (
   avgRl = avgRl.toFixed(2)
 
   return {
-    labels: new Array(dataRl.length).fill(0).map((_, i) => i),
+    labels: new Array(dataRl.length).fill(0).map((_, i) => i * filterStep),
     normalized: true,
 
     datasets: [
@@ -260,7 +261,7 @@ export default {
       currentEdge: null,
       playBtnToggle: false,
       player: null,
-      chart1: {
+      chart1: { // 기존신호
         avgSpeedsInView: [],
         avgSpeedsJunctions: [],
         avgSpeedInView: 0,
@@ -268,10 +269,10 @@ export default {
         travelTimeJunction: 0,
         avgSpeed: 0,
         progress: 0,
-        speedsPerJunction: {},
+        data: {},
         action: ''
       },
-      chart2: {
+      chart2: { // 최적신호
         avgSpeedsInView: [],
         avgSpeedsJunctions: [],
         avgSpeedInView: 0,
@@ -279,7 +280,7 @@ export default {
         travelTimeJunction: 0,
         avgSpeed: 0,
         progress: 0,
-        speedsPerJunction: {},
+        data: {},
         efficiency1: 0,
         effSpeed: 0,
         action: ''
@@ -288,7 +289,8 @@ export default {
         avgSpeedChartInView: {}, // realtime chart
         avgChartJunctions: {},
         junctionSpeeds: {},
-        effTravelTime: 0
+        effTravelTime: 0,
+        travelTimeJunctionChart: {}
       },
 
       bottomStyle: { ...style.bottomStyle },
@@ -344,9 +346,9 @@ export default {
       }
     },
     travelTimePerJunction() {
-      const keys = Object.keys(this.chart2.speedsPerJunction)
-      const ttsFt = this.chart1.speedsPerJunction
-      const ttsRl = this.chart2.speedsPerJunction
+      const keys = Object.keys(this.chart2.data)
+      const ttsFt = this.chart1.data
+      const ttsRl = this.chart2.data
       const result = {}
       for (let i = 0; i < keys.length; i++) {
         const jId = keys[i]
@@ -359,52 +361,34 @@ export default {
       return result
     },
     actionForOpt() {
-      const info = this.chart2.speedsPerJunction
-      const s = this.selectedNode
-      const t = info[s]
+      const junctions = this.chart2.data // 최적신호 데이터
 
-      if (t) {
-        return [t[0], t[t.length - 1]]
+      const junction = junctions[this.selectedNode]
+
+      if (!junction) {
+        return [{}, {}]
       }
-      return [{}, {}]
+      return [junction[0], junction[junction.length - 1]] // step first and step last
     }
   },
   async mounted() {
-    window.scrollTo(0, 0)
+    const optimizationId = this.$route.params.id
 
-    document.addEventListener('keydown', event => {
-      // if (event.ctrlKey && event.keyCode === 90) {
-      //   this.isShowAvgTravelChart = !this.isShowAvgTravelChart
-      // }
-      if (event.keyCode === 67) {
-        this.isShowAvgTravelChart = !this.isShowAvgTravelChart
-        // window.scrollTo(0, 1000)
-        if (this.currentTab === '') {
-          this.initSignaSystem()
-        }
-        setTimeout(() => {
-          window.scrollTo({
-            left: 0,
-            top: document.body.scrollHeight,
-            behavior: 'smooth'
-          })
-        }, 500)
-      }
-    })
+    if (!optimizationId) {
+      log("optimization id is missed")
+      return
+    }
 
-    const optId = this.$route.params ? this.$route.params.id : null
-
-    const { simulation } = await simulationService.getSimulationInfo(optId)
+    const { simulation } = await simulationService.getSimulationInfo(optimizationId)
 
     if (!simulation) {
+      log("cannot find optimization information")
       return
     }
     this.status = simulation.status
     this.simulation = simulation
     this.fixedSlave = simulation.slaves[1]
     this.testSlave = simulation.slaves[0]
-
-    this.resize()
 
     const simEventBusFixed = new Vue({})
     const simEventBusTest = new Vue({})
@@ -498,10 +482,7 @@ export default {
     this.$on('junction:clicked', async p => {
       const crossName = signalService.nodeIdToName(p.nodeId)
       this.selectedNode = crossName
-
       this.selectCrossName(crossName)
-
-
     })
 
     const updateReward = async forceUpdate => {
@@ -514,13 +495,10 @@ export default {
           optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
           optSvc.getPhaseReward(this.simulation.id, 'ft').then(res => res.data)
         ])
-        // this.statusText = 'loaded ' + (Date.now() - start) / 1000
 
-        // log(new Date().getTime() - start)
-        // this.statusText = '데이터 로드 완료'
 
-        this.chart1.speedsPerJunction = dataFt // simulate
-        this.chart2.speedsPerJunction = dataRl // optimization
+        this.chart1.data = dataFt // simulate
+        this.chart2.data = dataRl // optimization
         this.statusText = 'calculating average travel time'
         const [avgTTRL, avgTTRLs, avgSpdRl] = calcAverage(dataRl)
 
@@ -532,26 +510,26 @@ export default {
         } else {
           this.chart.effTravelTime = (diffTT / avgTTFT) * 100
         }
+
+
         this.statusText = 'building travel time chart '
-        // chart: average travel time
+
         this.chart.travelTimeChartInView = makeSpeedLineData(
-          avgTTFTs,
-          avgTTRLs,
+          avgTTFTs.filter((v, i) => i % 29 === 0),
+          avgTTRLs.filter((_, i) => i % 29 === 0),
+          avgTTFT,
           avgTTRL,
-          avgTTFT
         )
+
+
         this.statusText = 'chart created...' + +(Date.now() - start) / 1000
-
-        // this.statusText = '평균통과시간 계산완료'
-
-        // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
-        // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
 
         this.chart1.avgSpeedJunction = avgSpdFt ? avgSpdFt.toFixed(2) : '0.00'
         this.chart2.avgSpeedJunction = avgSpdRl ? avgSpdRl.toFixed(2) : '0.00'
+        this.chart1.travelTimeJunction = avgTTFT ? avgTTFT.toFixed(2) : '0.00'
+        this.chart2.travelTimeJunction = avgTTRL ? avgTTRL.toFixed(2) : '0.00'
 
-        this.chart1.travelTimeJunction = avgTTFT
-        this.chart2.travelTimeJunction = avgTTRL
+
         this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
 
         if (this.ss === null) {
@@ -559,10 +537,8 @@ export default {
             this.initSignaSystem()
           }, 2000)
         } else {
-          const str2 = this.actionForOpt[1].action
-          const o2 = parseAction(str2)
           this.statusText = '신호정보 업데이트'
-          this.sss && this.ss.update(o2.offset, o2.duration)
+          this.ss.update(parseAction(this.actionForOpt[1].action))
         }
       }
 
@@ -576,11 +552,52 @@ export default {
     }
 
     updateReward(true)
-    window.addEventListener('resize', this.resize)
-
     this.updateRewardTotal()
+
+
+    // 상단 개별 값 업데이트
+    // 신규 모듈로 업그레이드 예정
+    this.chart.effTravelTime = -20 // 통과시간 향상률
+    this.chart1.travelTimeJunction = -10
+    this.chart1.avgSpeedJunction = -20
+
+    this.chart2.travelTimeJunction = -10
+    this.chart2.avgSpeedJunction = -20
+
+    this.chart.travelTimeChartInView = makeSpeedLineData([10, 20, 10], [11, 23, 13], 12, 13)
+    this.chart.travelTimeJunctionChart = makeSpeedLineData([50, 20, 100], [11, 23, 13], 12, 13)
+    this.chart.travelTimePerJunction = {
+      '신성네거리': {
+        simulate: 10,
+        test: 20,
+        improvement_rate: 19.2,
+        cumulative_avg: [],
+        signal_explain: {}
+      }
+    }
+    // 임시 end
+
+
+    this.initKeyListener()
+    this.resize()
+
+    window.scrollTo(0, 0)
+    window.addEventListener('resize', this.resize.bind(this))
+
   },
   methods: {
+
+    initKeyListener() {
+      document.addEventListener('keydown', event => {
+        if (event.key === 'c') { // 'c'
+          this.isShowAvgTravelChart = !this.isShowAvgTravelChart
+          if (!this.currentTab) {
+            this.initSignaSystem()
+          }
+        }
+      })
+    },
+
     async selectCrossName(name) {
       this.selectedNode = name
       this.isShowAvgTravelChart = true
@@ -589,6 +606,7 @@ export default {
         this.initSignaSystem()
       }, 1000)
     },
+
     async updateRewardTotal() {
       const result = await optSvc.getRewardTotal(this.simulation.id)
 
@@ -606,30 +624,18 @@ export default {
       this.rewards.labels = labels
       this.rewards.values = rewards
     },
+
     initSignaSystem() {
       const container = this.$refs.actionvis
       if (!container) {
         setTimeout(() => {
           this.initSignaSystem()
         }, 500)
-      }
-      if (this.actionForOpt.length < 1) {
         return
       }
-      const actionFt = this.actionForOpt[0].action
 
-      const rFt = parseAction(actionFt)
-      if (!rFt) {
-        // log('parse action failed:', actionFt)
-        return
-      }
-      this.ss = SignalSystem(container, {
-        offset: rFt.offset,
-        duration: rFt.duration
-      })
-      const actionRl = this.actionForOpt[1].action
-      const rRl = parseAction(actionRl)
-      this.ss.update(rRl.offset, rRl.duration)
+      this.ss = SignalSystem(container, parseAction(this.actionForOpt[0].action))
+      this.ss.update(parseAction(this.actionForOpt[1].action))
 
       log('대상교차로:', this.selectedNode)
       log('기존신호:', this.actionForOpt[0].action)
