@@ -17,4 +17,6 @@ router.post('/upload/model', require('./api-upload-model'))
 
 router.get('/phasereward', require('./api-phase-reward'))
 
+router.get('/result', require('./api-optimization-result'))
+
 module.exports = router

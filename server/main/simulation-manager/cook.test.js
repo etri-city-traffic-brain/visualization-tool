@@ -9,7 +9,7 @@ if (require.main === module) {
 
   setTimeout(async () => {
     await cook({
-      simulationId: 'SIMU_202209_00089',
+      simulationId: 'test',
       duration: 7080,
       period: 300
     })

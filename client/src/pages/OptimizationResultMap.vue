@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="uniq-top-left">
-      <div class="bg-gray-700 py-2 text-white p-2 rounded-lg text-sm space-y-1 border">
+      <div class="bg-gray-700 py-2 text-white p-2 rounded-lg text-sm space-y-1 border w-80">
 
         <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">ID</span> {{ simulation.id }} </div>
         <div> <span class="w-14 inline-block text-center bg-gray-500 text-white rounded text-sm px-1 font-bold">지역</span> {{ getRegionName(simulation.configuration.region) }} </div>
@@ -63,7 +63,7 @@
         </b-card> -->
        </div>
 
-      <div class="bg-gray-700 mt-2 rounded-lg border" >
+      <div class="bg-gray-700 mt-2 rounded-lg border w-80" >
         <!-- <div class="text-white text-center p-1 text-sm">Total Reward</div> -->
         <div class="font-bold p-2 text-white text-center">보상그래프</div>
       <!-- 보상 그래프 -->
@@ -80,7 +80,7 @@
 
       </div>
 
-      <div class="mt-2 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded-lg">
+      <div class="mt-2 p-2 bg-gray-700 font-bold text-white text-sm opacity-90 rounded-lg w-80">
       <!-- 최적화 진행률 -->
         <div class="mb-1 uppercase inline-block text-center text-white rounded text-sm px-1 font-bold">
           Epoch: {{ progressOpt }} / {{ simulation.configuration.epoch }}
@@ -93,7 +93,7 @@
         </b-progress>
       </div>
 
-      <div class="bg-gray-600 opacity-90 rounded-lg mt-2 p-2">
+      <div class="bg-gray-600 opacity-90 rounded-lg mt-2 p-2 w-80">
         <div>
           <button class="font-bold bg-blue-300 px-2 rounded text-sm hover:bg-blue-600 hover:text-white py-1" @click="runTrain">
             <b-icon icon="play-fill"/> 학습 시작
@@ -101,9 +101,8 @@
           <button class="font-bold bg-yellow-300 px-2 rounded text-sm hover:bg-yellow-600 hover:text-white py-1" @click="stop" size="sm">
             <b-icon icon="stop-fill"></b-icon> 학습 중지
           </button>
-        </div>
-        <div class="mt-1">
           <router-link
+            v-if="status==='finished' || status==='stopped'"
             class="bg-gray-400 px-2 rounded text-sm hover:bg-gray-800 hover:text-white py-1 "
             tag="button"
             :to="{
@@ -113,6 +112,8 @@
           >
             <b-icon icon="front"/> 신호비교
           </router-link>
+        </div>
+        <div class="mt-1">
         </div>
       </div>
     </div>
@@ -137,11 +138,11 @@
         <div class="w-80 text-center text-xs text-white px-2 pt-2 py-1 bg-gray-600 rounded-t-lg tracking-wide">
           {{ chart.label }}
         </div>
-        <div class="bg-gray-700 pb-1 pr-1 w-80 h-40 rounded-b-lg">
+        <div class="bg-gray-700 pb-1 pr-1 w-80 h-48 rounded-b-lg">
           <line-chart
             :chartData="chart"
             :options="defaultOption({}, ()=>{})"
-            :height="100"
+            :height="180"
             :width="200"
           />
         </div>

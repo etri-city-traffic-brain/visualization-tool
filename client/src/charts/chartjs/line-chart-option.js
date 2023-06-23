@@ -2,7 +2,8 @@ export default (
   { title, displayLegend = true, fontColor = 'white' } = {},
   callback
 ) => ({
-  animation: false,
+  maintainAspectRatio: false,
+  // animation: false,
   spanGaps: true, // enable for all datasets
   responsive: true,
   showLine: true, // disable for a single dataset

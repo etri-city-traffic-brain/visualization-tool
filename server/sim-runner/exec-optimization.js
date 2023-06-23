@@ -1,7 +1,7 @@
 const chalk = require('chalk')
 
 const {
-  saltPath: { volume: volumePath }
+  saltPath: { volumeOpt: volumePath }
 } = require('../config')
 
 const { log } = console
@@ -25,7 +25,7 @@ const options = {
  * @param {Number} modelNum
  * @returns {Promise}
  */
-async function run (simulation, mode, modelNum) {
+async function run(simulation, mode, modelNum) {
   if (!simulation || !mode) {
     log('check argruments: simulation or mode is missed')
     return false

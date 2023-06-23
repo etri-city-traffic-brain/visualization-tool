@@ -8,7 +8,7 @@
     />
     <div
       class="fixed left-2 top-16 bg-gray-50 text-black "
-      style="max-width:600px"
+      style="max-width:680px"
     >
       <div class="bg-indigo-100 text-right px-1 p-2 font-bold">
         <button
@@ -46,10 +46,10 @@
           </select>
           <input v-model="nodeId" class="px-2" style="height:34px" />
           <select type="select" v-model="color" class="p-1" style="height:34px">
-            <option v-for="c of colorOptions" :key="c.value" :value="c.value">{{
-              c.text
-            }}</option>
-          </select>
+            <option v-for="c of colorOptions" :key="c.value" :value="c.value">
+            <span>{{ c.text }}</span>
+          </option>
+        </select>
           <button
             @click="addNode(nodeId)"
             class="px-1 bg-blue-300 text-black"
@@ -74,16 +74,17 @@
             <div class="w-40 truncate" :title="v.id">{{ v.id }}</div>
             <div class="w-40 truncate">{{ v.name }}</div>
             <button
-              :class="'bg-' + v.color + '-200 text-black'"
               class="bg-red-300 px-1 text-black text-sm rounded"
               @click="del(v.id, v.groupId)"
+              :style="{'background-color': '#'+v.color}"
             >
               X
             </button>
             <button
-              :class="'bg-' + v.color + '-200 text-black'"
-              class="bg-red-300 px-1 text-black text-sm rounded"
+
+              class="px-1 text-black text-sm rounded"
               @click="animate(v.id)"
+              :style="{'background-color': '#'+v.color}"
             >
               확인
             </button>

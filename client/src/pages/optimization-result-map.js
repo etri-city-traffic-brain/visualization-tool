@@ -68,7 +68,7 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
 
 const { log } = console
 
-function setupEventHandler () {
+function setupEventHandler() {
   this.$on('salt:data', d => {
     this.avgSpeed =
       d.roads
@@ -98,7 +98,7 @@ function setupEventHandler () {
         try {
           this.getReward().then(() => console.log('state updated'))
           console.log('update state')
-        } catch (err) {}
+        } catch (err) { }
       }, 5000)
     }
 
@@ -116,7 +116,7 @@ function setupEventHandler () {
     log('optimization:progress', e.progress)
     try {
       await this.getReward()
-    } catch (err) {}
+    } catch (err) { }
   })
 
   this.$on('salt:finished', async () => {
@@ -200,18 +200,18 @@ export default {
     UniqCardTitle
   },
   computed: {
-    progressOfEpoch () {
+    progressOfEpoch() {
       if (this.rewards.labels.length === 0) return 0
       return (
         (this.rewards.labels.length / +this.simulation.configuration.epoch) *
         100
       )
     },
-    status () {
+    status() {
       return this.simulation.status
     }
   },
-  data () {
+  data() {
     return {
       simulationId: null,
       simulation: { configuration: {} },
@@ -238,7 +238,7 @@ export default {
       rewardTotal: {}
     }
   },
-  destroyed () {
+  destroyed() {
     if (this.map) {
       this.map.remove()
     }
@@ -248,7 +248,7 @@ export default {
     window.removeEventListener('resize', this.getWindowHeight)
   },
 
-  async mounted () {
+  async mounted() {
     this.simulationId = this.$route.params ? this.$route.params.id : null
     // const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
     // this.simulation = simulation
@@ -280,12 +280,9 @@ export default {
     this.mapManager.loadMapData()
 
     this.trafficLightManager = TrafficLightManager(this.map, null, this)
-    this.trafficLightManager.setTargetJunctions(
-      this.simulation.configuration.junctionId.split(',')
-    )
-    this.trafficLightManager.setOptJunction(
-      this.simulation.configuration.junctionId.split(',')
-    )
+    this.trafficLightManager.setTargetJunctions(this.simulation.configuration.junctionId.split(','))
+    this.trafficLightManager.setOptJunction(this.simulation.configuration.junctionId.split(','))
+
     await this.trafficLightManager.load()
 
     this.wsClient = WebSocketClient({
@@ -307,29 +304,24 @@ export default {
       this.showProgressing()
     }
 
-    if (
-      this.simulation.status === 'finished' ||
-      this.simulation.status === 'running'
-    ) {
-      await this.getReward()
-    }
-    console.log(this.simulation.configuration.junctionId)
+    await this.getReward()
+
   },
   methods: {
-    getRegionName (v) {
+    getRegionName(v) {
       const m = {
         doan: '도안',
         cdd3: '연구단지'
       }
       return m[v] || ''
     },
-    stopVis () {
+    stopVis() {
       this.wsClient.kill()
     },
-    startVis () {
+    startVis() {
       this.wsClient.restart()
     },
-    showProgressing () {
+    showProgressing() {
       const junctionIds = this.simulation.configuration.junctionId.split(',')
       if (junctionIds[0].indexOf('SA') >= 0) {
         let jids = []
@@ -345,14 +337,14 @@ export default {
         this.trafficLightManager.setOptJunction(junctionIds)
       }
     },
-    chartClicked (value) {
+    chartClicked(value) {
       log('chart clicked value:', value)
     },
-    resize () {
+    resize() {
       // this.mapHeight = window.innerHeight - 220 // update map height to current height
       this.mapHeight = window.innerHeight - 50
     },
-    makeToast (msg, variant = 'info') {
+    makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
         title: 'Notification',
         autoHideDelay: 5000,
@@ -361,24 +353,25 @@ export default {
         toaster: 'b-toaster-bottom-right'
       })
     },
-    async connectWebSocket () {
+    async connectWebSocket() {
       this.wsClient.init()
     },
-    async updateStatus () {
+    async updateStatus() {
       try {
-        const { simulation } = await simulationService.getSimulationInfo(
-          this.simulationId
-        )
+        const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
+
         this.simulation = simulation
-        log(simulation.status)
+
         if (simulation.status !== 'running') {
-          this.trafficLightManager.setOptJunction([])
+          if (this.trafficLightManager) {
+            this.trafficLightManager.setOptJunction([])
+          }
         }
       } catch (e) {
-        log('fail to get simulation status')
+        log(e.message)
       }
     },
-    async runTrain () {
+    async runTrain() {
       try {
         this.simulation.status = 'running'
         await optimizationService.runTrain(this.simulationId)
@@ -387,8 +380,8 @@ export default {
       } catch (err) {
         log(err.message)
         this.apiErrorMessage = err.message
-        this.$bvToast.toast('최적화를 중지하고 다시 시도하세요.', {
-          title: '최적화 실패',
+        this.$bvToast.toast('신호학습을 중지하고 다시 시도하세요.', {
+          title: '신호학습 실패',
           variant: 'danger',
           autoHideDelay: 3000,
           appendToast: true,
@@ -396,7 +389,7 @@ export default {
         })
       }
     },
-    async getReward () {
+    async getReward() {
       const result = await optimizationService.getReward(this.simulationId)
       this.rewardCharts = []
       Object.keys(result.data).forEach(key => {
@@ -414,7 +407,7 @@ export default {
       await this.getRewardTotal()
       await this.updateStatus()
     },
-    async stop () {
+    async stop() {
       this.simulation.status = 'stopping'
       try {
         await optimizationService.stop(this.simulationId)
@@ -426,7 +419,7 @@ export default {
       // this.simulation = simulation
       // this.trafficLightManager.setOptJunction([])
     },
-    async getRewardTotal () {
+    async getRewardTotal() {
       try {
         const result = await optimizationService.getRewardTotal(
           this.simulationId

@@ -58,37 +58,38 @@ async function getPhaseReward(optId, type = 'ft') {
 }
 
 async function getSigOptResult(optId) {
-  return {
-    summary: {
-      improvement_rate: 10,
-      simulate: {
-        avg_speed: 10,
-        travel_time: 10
-      },
-      test: {
-        avg_speed: 10,
-        travel_time: 10
-      }
-    },
+  return HTTP.get(`${base}/result?id=${optId}`)
+  // return {
+  //   summary: {
+  //     improvement_rate: 10,
+  //     simulate: {
+  //       avg_speed: 10,
+  //       travel_time: 10
+  //     },
+  //     test: {
+  //       avg_speed: 10,
+  //       travel_time: 10
+  //     }
+  //   },
 
-    total: {
-      simulate: [], // step 별 평균 통과시간
-      simulate_avg: 10,
-      test: [],
-      test_avg: 10
-    },
+  //   total: {
+  //     simulate: [], // step 별 평균 통과시간
+  //     simulate_avg: 10,
+  //     test: [],
+  //     test_avg: 10
+  //   },
 
-    intersections: {
-      '신성네거리': {
-        simulate: 10,
-        test: 20,
-        improvement_rate: 19.2,
-        cumulative_avg: [],
-        signal_explain: {}
-      }
-    }
+  //   intersections: {
+  //     '신성네거리': {
+  //       simulate: 10,
+  //       test: 20,
+  //       improvement_rate: 19.2,
+  //       cumulative_avg: [],
+  //       signal_explain: {}
+  //     }
+  //   }
 
-  }
+  // }
 }
 
 export default {

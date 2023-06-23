@@ -5,7 +5,7 @@ const { config } = require('../../globals')
 
 const baseDir = `${config.base}/data`
 
-async function read (simulationId, type) {
+async function read(simulationId, type) {
   let file
   if (type === 'ft') {
     file = `${baseDir}/${simulationId}/output/simulate/ft_phase_reward_output.txt`
@@ -14,17 +14,22 @@ async function read (simulationId, type) {
   }
 
   try {
+    console.log('che s')
+    console.log('che s')
+    console.log('che s')
     await fse.access(file, fs.F_OK)
+    console.log('che e')
 
     const r = await csvToObj(file)
     return r
   } catch (err) {
+    console.log('I*e')
     console.log(err.message)
     return {}
   }
 }
 
-async function csvToObj (file) {
+async function csvToObj(file) {
   const map = Object.create({})
   return new Promise((resolve, reject) => {
     let i = 0

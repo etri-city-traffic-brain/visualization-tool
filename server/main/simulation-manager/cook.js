@@ -69,7 +69,7 @@ const cook = ({ simulationId, duration, period }) => {
 
     const cells = {}
     const start = Date.now()
-
+    let cnt = 0
     const handleData = row => {
       // salt specific annotation
       // we have to ignore it
@@ -87,7 +87,7 @@ const cook = ({ simulationId, duration, period }) => {
         cell.travelTimes = cell.travelTimes || []
         cell.vehPassed = cell.vehPassed || []
         cell.waitingTime = cell.waitingTime || []
-
+        cnt += 1
         cell.values.push(speed)
         cell.travelTimes.push(Number(row.sumTravelTime))
         cell.vehPassed.push(Number(row.vehPassed))
@@ -98,6 +98,7 @@ const cook = ({ simulationId, duration, period }) => {
 
     const handleEnd = async () => {
       stream.close()
+      console.log('total:', cnt)
       try {
         debug('==> insert into DB')
         await recordResult(simulationId, cells)
