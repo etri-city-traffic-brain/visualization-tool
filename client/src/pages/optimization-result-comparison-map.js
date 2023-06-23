@@ -7,7 +7,7 @@
  */
 
 import Vue from 'vue'
-
+import gsap from 'gsap'
 import makeMap from '@/map2/make-map'
 import MapManager from '@/map2/map-manager'
 
@@ -163,7 +163,8 @@ export default {
         avgSpeedChartInView: {}, // realtime chart
         avgChartJunctions: {},
         effTravelTime: 0,
-        travelTimeJunctionChart: {}
+        travelTimeJunctionChart: {},
+        improvement_rate: 0,
       },
       lineChartOption,
       rewards: {
@@ -186,8 +187,27 @@ export default {
       signalExplain: null,
       isShowAvgTravelChart: true,
       currentTab: 'total',
-      optResult: {}
+      optResult: {},
+      animated: {
+        improvement_rate: 0,
+        chart1_avgSpeedJunction: 0,
+        chart1_travelTimeJunction: 0,
+        chart2_avgSpeedJunction: 0,
+        chart2_travelTimeJunction: 0,
+      }
     }
+  },
+  watch: {
+    optResult(value) {
+      gsap.to(this.animated, {
+        improvement_rate: value.improvement_rate,
+        chart1_avgSpeedJunction: value.simulate.avg_speed,
+        chart1_travelTimeJunction: value.simulate.travel_time,
+        chart2_avgSpeedJunction: value.test.avg_speed,
+        chart2_travelTimeJunction: value.test.travel_time,
+      })
+    },
+
   },
   destroyed() {
     this.simulations.forEach(({ map, wsClient }) => {
@@ -487,7 +507,7 @@ export default {
     },
 
     resize() {
-      this.mapHeight = window.innerHeight - 225 // update map height to current height
+      this.mapHeight = window.innerHeight - 205 // update map height to current height
     },
 
     async runTest() {

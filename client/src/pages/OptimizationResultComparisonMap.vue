@@ -51,25 +51,13 @@
         <div class="grid grid-cols-4 gap-1 p-1">
           <div class="col-span-3">
             <div class="grid grid-cols-2 gap-1">
-              <div class="bg-gray-700 rounded-lg">
-                <div class="grid grid-cols-3 gap-1 m-1 items-center">
-                  <div class="tracking-wide text-white text-center text-xl font-bold">기존신호</div>
-                  <div class="text-center text-2xl font-bold p-2 bg-gray-500- text-gray-100 flex items-center justify-center space-x-2 rounded-lg">
-                    <div class="text-xs">평균속도</div>
-                    <div>
-                      {{chart1.avgSpeedJunction }}<span class="text-sm">km</span>
-                    </div>
-                  </div>
-                  <div class="text-center text-2xl font-bold p-2 bg-gray-500- text-gray-100  flex items-center justify-center space-x-2 rounded-lg">
-                    <div class="text-xs">통과시간</div>
-                    <div>
-                      {{chart1.travelTimeJunction }}<span class="text-sm">sec</span>
-                    </div>
+              <div class="">
+                <div class="">
+                  <div class="w-full tracking-wide text-white text-center text-xl font-bold bg-gray-700 p-1 rounded-t-lg">
+                    기존신호
                   </div>
                 </div>
                 <div class="border-2 border-gray-700" >
-                  <!-- <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: '600px'}" /> -->
-
                   <div class="relative">
                     <div :ref="mapIds[0]" :id="mapIds[0]" :style="{height: mapHeight + 'px'}" />
                     <div class="absolute top-0 w-full">
@@ -79,26 +67,31 @@
                         </b-progress-bar>
                       </b-progress>
                     </div>
+
+                    <div class="absolute top-4 w-full">
+                      <div class="flex space-x-1 justify-end border">
+                        <div class="bg-gray-500 px-2 text-center text-2xl font-bold text-gray-100 flex items-center justify-center space-x-2 rounded-lg">
+                          <div class="text-xs">평균속도</div>
+                          <div>
+                            {{animated.chart1_avgSpeedJunction.toFixed(2) }}<span class="text-sm">km</span>
+                          </div>
+                        </div>
+                        <div class="bg-gray-500 px-2 text-center text-2xl font-bold bg-gray-500- text-gray-100  flex items-center justify-center space-x-2 rounded-lg">
+                          <div class="text-xs">통과시간</div>
+                          <div>
+                            {{animated.chart1_travelTimeJunction.toFixed(2) }}<span class="text-sm">sec</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                 </div>
               </div>
               <div class="bg-yellow-300 rounded-lg">
-                <div class="grid grid-cols-3 gap-1 text-black m-1 items-center">
-                  <div class="tracking-wide text-black text-center p-2 text-xl font-bold">최적신호</div>
-                  <div class="text-center text-2xl font-bold p-2 bg-yellow-200-  flex items-center justify-center space-x-2 rounded-lg">
-                    <div class="text-xs">평균속도</div>
-                    <div class="flex justify-center space-x-2">
-                      <div>{{chart2.avgSpeedJunction }}<span class="text-sm">km</span> </div>
-                      <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effSpeed}}<span class="text-xs">%</span></div> -->
-                    </div>
-                  </div>
-                  <div class="text-center text-2xl font-bold p-2 bg-yellow-200-  flex items-center justify-center space-x-2 rounded-lg">
-                    <div class="text-xs">통과시간</div>
-                    <div class="flex justify-center space-x-2">
-                      <div>{{chart2.travelTimeJunction }}<span class="text-sm">sec</span></div>
-                      <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effTravelTime}}<span class="text-xs">%</span></div> -->
-                    </div>
+                <div class="">
+                  <div class="w-full tracking-wide text-black text-center text-xl font-bold bg-yellow-300 p-1 rounded-t-lg">
+                    최적신호
                   </div>
                 </div>
 
@@ -114,6 +107,26 @@
                        </b-progress>
                      </div>
 
+                     <div class="absolute top-4 w-full">
+                      <div class="flex space-x-1 justify-end border">
+                        <div class="bg-yellow-300 px-2 text-center text-2xl font-bold flex items-center justify-center space-x-2 rounded-lg">
+                          <div class="text-xs">평균속도</div>
+                          <div class="flex justify-center space-x-2">
+                            <div>
+                              {{animated.chart2_avgSpeedJunction.toFixed(2) }}<span class="text-sm">km</span>
+                            </div>
+                            <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effSpeed}}<span class="text-xs">%</span></div> -->
+                          </div>
+                        </div>
+                        <div class="bg-yellow-300 px-2 text-center text-2xl font-bold flex items-center justify-center space-x-2 rounded-lg">
+                          <div class="text-xs">통과시간</div>
+                          <div class="flex justify-center space-x-2">
+                            <div>{{animated.chart2_travelTimeJunction.toFixed(2) }}<span class="text-sm">sec</span></div>
+                            <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effTravelTime}}<span class="text-xs">%</span></div> -->
+                          </div>
+                        </div>
+                      </div>
+                     </div>
                    </div>
                 </div>
 
@@ -129,8 +142,9 @@
                   통과시간 향상률
                 </div>
                 <div class="text-6xl">
-                  {{chart.effTravelTime.toFixed(2)}}<span class="text-lg">%</span>
+                  {{animated.improvement_rate.toFixed(2)}}<span class="text-lg">%</span>
                 </div>
+                <!-- {{chart.improvement_rate.toFixed(2)}}<span class="text-lg">%</span> -->
               </div>
             </div>
 
