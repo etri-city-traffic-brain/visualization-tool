@@ -166,6 +166,10 @@
             :height="220"
           />
         </div>
+
+        <!-- <div  class="bg-gray-600 rounded h-40">
+          <line-chart :chartData="chart.linkMeanSpeeds" :options="defaultOption('시각', '')" :height="220"/>
+        </div> -->
       </div>
       <div class="fixed top-64 right-1 opacity-90 space-y-1" v-if="simulation.status === 'finished'">
         <div class="text-white min-w-max space-y-2 bg-gray-600 p-2 rounded-lg text-sm">

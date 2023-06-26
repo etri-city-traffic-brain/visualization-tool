@@ -49,7 +49,7 @@ const randomId = num =>
   '-' +
   num
 
-async function createScenarioFile (targetDir, { host, body, id }, type) {
+async function createScenarioFile(targetDir, { host, body, id }, type) {
   await writeFile(
     // `${targetDir}/doan_${type}.scenario.json`,
     `${targetDir}/salt.scenario.json`,
@@ -96,7 +96,7 @@ const makeOptScenario = (
   }
 }
 
-async function createOPtScenarioFile (id, body, outDir, file, mode) {
+async function createOPtScenarioFile(id, body, outDir, file, mode) {
   const configFile = makeOptScenario(id, body, file, mode)
   // console.log(configFile)
   await writeFile(outDir, stringify(configFile))
@@ -125,7 +125,7 @@ const refineParam = param => ({
  * SALT 시뮬레이터를 위한 준비작업
  *
  */
-async function prepareSimulation (id, body, role, slaves = [], type) {
+async function prepareSimulation(id, body, role, slaves = [], type) {
   const simInputDir = `${base}/data/${id}`
   const simOutputDir = `${base}/output/${id}`
 
@@ -141,7 +141,7 @@ async function prepareSimulation (id, body, role, slaves = [], type) {
     }
 
     log('area Type:', body.configuration.areaType)
-    if (body.configuration.areaType != 'area') {
+    if (body.configuration.areaType != 'area') { // region or area
       const path = `${base}/routes/scenario_dj_${body.configuration.region}.zip`
       await unzip(path, { dir: simInputDir })
     } else {
@@ -167,7 +167,7 @@ async function prepareSimulation (id, body, role, slaves = [], type) {
   log(`[simulation] ${id} is ready`)
 }
 
-async function prepareOptimization (ids, body) {
+async function prepareOptimization(ids, body) {
   const targetDir = `${base}/data/${ids[0]}`
   const simOutputDir = `${base}/output/${ids[0]}`
   await mkdir(simOutputDir)

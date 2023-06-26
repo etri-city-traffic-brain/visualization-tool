@@ -42,7 +42,7 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
   let currentStep = 0
 
   const edgeLayer = makeEdgeLayer(map, eventBus)
-  const gridLayer = makeGridLayer(map)
+  const gridLayer = makeGridLayer(map, simulationId)
   const canvasLayer = makeCanvasLayer(
     map,
     edgeLayer.getGeometries.bind(edgeLayer),
@@ -159,22 +159,17 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
 
   async function updateSimulationResult() {
     if (simulationId) {
-      currentSpeedsPerLink = await simulationService.getSimulationResult(
-        simulationId,
-        extent(map)
-      )
+      currentSpeedsPerLink = await simulationService.getSimulationResult(simulationId, extent(map))
       edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
-      // gridLayer.updateGrid(simulationId, currentStep)
+      gridLayer.updateGrid(simulationId, currentStep)
     }
   }
 
   function addFeatures(features) {
-    const g = features.forEach(feature => {
+    features.forEach(feature => {
       const f = R.compose(addEventHandler, makeGeometry)(feature)
       edgeLayer.addGeometry(f)
     })
-
-    // edgeLayer.addGeometry(g)
   }
 
   async function loadMapData(event) {
@@ -213,17 +208,20 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
   function changeStep(step) {
     currentStep = step
     edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
-    // gridLayer.updateGrid(simulationId, currentStep)
+    gridLayer.updateGrid(simulationId, currentStep)
   }
 
   const handleZoomEvent = async event => {
     const zoom = map.getZoom()
+    gridLayer.updateGrid(simulationId, currentStep)
     if (zoom <= ZOOM_MINIMUM) {
-      // gridLayer.updateGrid(simulationId, currentStep)
       return
     } else {
       await loadMapData(event.type)
     }
+
+
+
     if (eventBus) {
       const data = {
         zoom,
@@ -237,25 +235,22 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
     }
   }
 
-  function getEdgesInView() {
-    // const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
-    // const { features } = await mapService.getMap(extent(map))
+  // function getEdgesInView() {
+  // const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
+  // const { features } = await mapService.getMap(extent(map))
 
-    // console.log(currentSpeedsPerLink)
-    return currentSpeedsPerLink
-  }
+  // console.log(currentSpeedsPerLink)
+  // return currentSpeedsPerLink
+  // }
 
   map.on('zoomend moveend', handleZoomEvent)
-
-  // map.on('zoomend', () => { console.log('zoom end') })
-  // map.on('moveend', () => { console.log('move end') })
 
   return {
     loadMapData,
     changeStep,
     toggleFocusTool,
     map,
-    getEdgesInView,
+    // getEdgesInView,
     bus: eventBus,
     showRse(rseId, links) {
       console.log('showRse')

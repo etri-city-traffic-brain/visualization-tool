@@ -176,7 +176,7 @@ const makeLinkSpeedChartData = (data1, startTime, periodSec) => {
 
   return {
     labels: labels,
-    datasets: [dataset('링크속도', '#7FFF00', data1)]
+    datasets: [dataset('평균속도', '#7FFF00', data1)]
   }
 }
 
@@ -266,9 +266,6 @@ export default {
     }
   },
   async mounted() {
-
-
-
     document.addEventListener('keydown', event => {
       // if (event.ctrlKey && event.keyCode === 90) {
       //   this.isShowAvgTravelChart = !this.isShowAvgTravelChart
@@ -447,29 +444,11 @@ export default {
     },
     async updateChart() {
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this))
-      this.chart.histogramDataStep = await statisticsService.getHistogramChart(
-        this.simulationId,
-        0
-      )
-      this.chart.histogramData = await statisticsService.getHistogramChart(
-        this.simulationId
-      )
-      this.chart.pieDataStep = await statisticsService.getPieChart(
-        this.simulationId,
-        0
-      )
-      this.chart.pieData = await statisticsService.getPieChart(
-        this.simulationId
-      )
-      this.speedsPerStep = await statisticsService.getSummaryChart(
-        this.simulationId
-      )
-
-      // this.pieData = await statisticsService.getPieChart(this.simulationId)
-      // this.pieDataStep = await statisticsService.getPieChart(
-      //   this.simulationId,
-      //   0
-      // )
+      this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, 0)
+      this.chart.histogramData = await statisticsService.getHistogramChart(this.simulationId)
+      this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0)
+      this.chart.pieData = await statisticsService.getPieChart(this.simulationId)
+      this.speedsPerStep = await statisticsService.getSummaryChart(this.simulationId)
 
       this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
         this.speedsPerStep.datasets[0].data,
@@ -561,7 +540,7 @@ export default {
 
         this.chart.linkSpeeds = makeLinkCompChart(
           [
-            { label: '평균속도', color: '#FF8C00', data: linkData.values },
+            { label: '링크속도', color: '#FF8C00', data: linkData.values },
             { label: '통행량', color: '#5F9EA0', data: linkData.vehPassed }
           ],
           {

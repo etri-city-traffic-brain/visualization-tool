@@ -17,7 +17,7 @@ const { currentTimeFormatted, updateStatus } = require('../../globals')
 
 const makeChartData = require('../chart-data-maker')
 const recordResult = require('./insert-to-mongo')
-debug('xxxx')
+
 const config = require('../../config')
 const { output } = config.saltPath
 
