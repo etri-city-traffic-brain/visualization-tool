@@ -5,7 +5,7 @@ const streamUtil = require('./promiseStream')
  * @param {string} strData
  * @return {object}
  */
-function makeBar (strData) {
+function makeBar(strData) {
   const { meta, data } = strData
   console.log(meta)
   const formater = value => (value < 10 ? `0${value}` : `${value}`)

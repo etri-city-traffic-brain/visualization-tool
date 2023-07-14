@@ -26,9 +26,9 @@ module.exports = async simulation => {
   const imgName = img || DOCKER_IMAGE_DEFAULT
   const configPath = buildConfigPath(sId)
   const volume = `${VOLUME_HOST}:${VOLUME_CONTAINER}`
-  console.log('*** start simulation ***')
 
   const sType = simulation.configuration.simulationType // meso | micro | multi
+  console.log('*** start simulation ***', sType)
 
   if (sType === 'multi' || sType === 'micro') {
     const option = sType === 'multi' ? 'with_multi' : 'with_micro'
@@ -39,6 +39,7 @@ module.exports = async simulation => {
       { echo: true }
     )
   }
+
 
   return docker(
     `run --rm --name ${sId} -v ${volume} ${imgName} ${RUN_SCRIPT} -s ${configPath}`,

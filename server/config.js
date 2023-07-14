@@ -5,6 +5,7 @@ const base = '/home/ubuntu/uniq-sim'
 const cloudApiBase = 'http://180.210.14.16'
 const dataApiBase = 'http://101.79.1.111:8080/restapi'
 
+
 module.exports = {
   test: false,
   base,
