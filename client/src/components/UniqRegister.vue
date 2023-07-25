@@ -1,9 +1,18 @@
 <template>
   <div class="">
-    <div class="grid- grid-cols-2 gap-2 p-3 bg-gray-600 text-white font-bold space-y-1">
+    <div
+      class="grid- grid-cols-2 gap-2 p-3 bg-gray-600 text-white font-bold space-y-1"
+    >
       <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">ID</div>
-        <b-form-input autofocus id="envName" v-model="envName" focus select size="sm" ></b-form-input>
+        <b-form-input
+          autofocus
+          id="envName"
+          v-model="envName"
+          focus
+          select
+          size="sm"
+        ></b-form-input>
       </div>
       <!-- <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">아이디</div>
@@ -20,18 +29,18 @@
       <div class="flex space-x-2">
         <div class="flex-none w-40 text-right">시뮬레이션 시간</div>
         <!-- <div class="flex items-center space-x-2"> -->
-          <!-- <div class="flex-none text-white font-bold">시작</div> -->
-          <b-input-group>
-            <b-form-input v-model="fromDate" type="date" size="sm" />
-            <b-form-input v-model="fromTime" type="time" size="sm" />
-          </b-input-group>
+        <!-- <div class="flex-none text-white font-bold">시작</div> -->
+        <b-input-group>
+          <b-form-input v-model="fromDate" type="date" size="sm" />
+          <b-form-input v-model="fromTime" type="time" size="sm" />
+        </b-input-group>
         <!-- </div> -->
         <!-- <div class="flex items-center space-x-2"> -->
-          <!-- <div class="flex-none text-white font-bold">종료</div> -->
-          <b-input-group>
-            <b-form-input v-model="toDate" type="date" size="sm" />
-            <b-form-input v-model="toTime" type="time" size="sm" />
-          </b-input-group>
+        <!-- <div class="flex-none text-white font-bold">종료</div> -->
+        <b-input-group>
+          <b-form-input v-model="toDate" type="date" size="sm" />
+          <b-form-input v-model="toTime" type="time" size="sm" />
+        </b-input-group>
         <!-- </div> -->
       </div>
 
@@ -49,27 +58,42 @@
       <div class="flex space-x-2 items-center" v-if="intersectionField">
         <div class="flex-none w-40 text-right">대상 교차로</div>
         <b-input-group>
-          <b-form-input id="junctionId" v-model="junctionId" size="sm" ></b-form-input>
+          <b-form-input
+            id="junctionId"
+            v-model="junctionId"
+            size="sm"
+          ></b-form-input>
           <b-input-group-append>
-            <b-btn :pressed="showMap" variant="primary" class="ml-1" @click="showMap = !showMap" size="sm" >선택</b-btn >
+            <b-btn
+              :pressed="showMap"
+              variant="primary"
+              class="ml-1"
+              @click="showMap = !showMap"
+              size="sm"
+              >선택</b-btn
+            >
           </b-input-group-append>
         </b-input-group>
       </div>
 
       <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">도커 이미지</div>
-        <b-form-select v-model="dockerImage" :options="imageOptions"/>
+        <b-form-select v-model="dockerImage" :options="imageOptions" />
       </div>
-
     </div>
-    <transition name="slide-fade">
+    <transition name="slide-fade-">
       <div v-if="showMap">
-        <signal-map
+        <!-- <signal-map
           :region="areaSelected"
           v-on:junction:select="selectJunction"
           @selection:finished="selectionFinished"
         >
-        </signal-map>
+        </signal-map> -->
+        <junction
+          class=""
+          @selection:finished="selectionFinished"
+          :height="600"
+        />
       </div>
     </transition>
 

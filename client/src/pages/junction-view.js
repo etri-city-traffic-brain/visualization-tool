@@ -5,7 +5,6 @@ import mapService from '@/service/map-service'
 import signalService from '@/service/signal-service'
 
 import signalGroups from '@/config/junction-config'
-import Vue from 'vue'
 
 import groupMap from '@/config/signal-group'
 
@@ -38,7 +37,8 @@ function setDefault(g) {
         textSize: 20,
         textFill: 'white',
         textHaloFill: 'gray',
-        textHaloRadius: 2
+        textHaloRadius: 2,
+        textName: ''
       }
     ])
   }
@@ -52,6 +52,7 @@ const { log } = console
 // 사용자가 입력한 값에 따라 해당 노드를 보여지도록
 export default {
   name: 'Junction',
+  props: ["height"],
   data() {
     return {
       map: null,
@@ -60,7 +61,7 @@ export default {
       trafficLightManager: null,
       trafficLightsLayer: null,
       selected: [],
-      nodeId: 'SA 103',
+      nodeId: '',
       geometries: [],
       colorOptions: [
         // { text: '빨강', value: 'red' },
@@ -173,7 +174,8 @@ export default {
       groupOptions: [],
       type: 'group',
       mapHeight: 640,
-      hide: false
+      hide: false,
+      targetGroups: [],
     }
   },
   methods: {
@@ -216,9 +218,69 @@ export default {
       if (g) {
         this.map.animateTo({ center: g.getCenter(), zoom: 15 })
       }
+      this.update()
+    },
+    addTlGroup(groupId) {
+      console.log('delete', groupId)
+      if (this.targetGroups.includes(groupId)) {
+        return
+      }
+      this.targetGroups.push(groupId)
+    },
+    delTlGroup(groupId) {
+      const idx = this.targetGroups.findIndex(v => v === groupId)
+      if (idx >= 0) {
+        this.targetGroups.splice(idx, 1)
+      }
+    },
+
+    getTL(groupId) {
+      this.selected = []
+
+      if (this.type === 'id') {
+        const objs = this.geometries.filter(g => {
+          return g.$nodeId.includes(groupId)
+        })
+        objs.forEach(obj => {
+          const nodeId = obj.$nodeId
+          const ooo = Object.entries(groupMap).find(([key, value]) => {
+            if (value.includes(nodeId)) {
+              return true
+            }
+          }) || {}
+
+          const tlName = signalService.nodeIdToName(nodeId)
+          this.add(nodeId, this.color, ooo[0], tlName)
+        })
+      } else if (this.type === 'group') {
+        const nodIds = groupMap[groupId] || []
+
+        nodIds.forEach(nodeId => {
+          const tlName = signalService.nodeIdToName(nodeId)
+          this.add(nodeId, this.color, groupId, tlName)
+        })
+      } else if (this.type === 'name') {
+        const objs = this.geometries.filter(g => {
+          return g.$crossName.includes(groupId)
+        })
+        objs.forEach(obj => {
+          const nodeId = obj.$nodeId
+          const ooo = Object.entries(groupMap).find(([key, value]) => {
+            if (value.includes(nodeId)) {
+              return true
+            }
+          }) || {}
+
+          const tlName = signalService.nodeIdToName(nodeId)
+          this.add(nodeId, this.color, ooo[0], tlName)
+        })
+
+      }
+
+      // this.nodeId = ''
+      // this.update()
     },
     addNode(groupId) {
-      log('add group:', groupId)
       if (this.type === 'id') {
         const obj = this.geometries.find(g => g.$nodeId === groupId)
         if (obj) {
@@ -254,16 +316,17 @@ export default {
       this.geometries.forEach(g => {
         const obj = this.selected.find(s => s.id === g.$nodeId)
         if (obj) {
-          // g.properties.GROUP_ID = obj.groupId
           g.$groupId = obj.groupId
           g.updateSymbol([
             {
               markerFill: '#' + obj.color,
               markerWidth: 20,
               markerHeight: 20,
-              // textHaloFill: '#' + obj.color,
-              // textHaloRadius: 0,
-              textFill: '#' + obj.color,
+              textHaloFill: '#' + obj.color,
+              textHaloRadius: 1,
+              // textFill: '#' + obj.color,
+              textName: `${obj.groupId}(${obj.name})`,
+              textDy: -20,
             }
           ])
           g.bringToFront()
@@ -271,13 +334,28 @@ export default {
       })
     },
     resize() {
+      //
+      if (this.height) {
+        return
+      }
       this.mapHeight = window.innerHeight - 50 // update map height to current height
+      console.log('map height:', this.mapHeight)
+    },
+    finishTlSelection() {
+      this.$emit("selection:finished", {
+        junctions: this.targetGroups,
+      });
     }
   },
 
   async mounted() {
     this.groupOptions = Object.keys(groupMap).sort()
     this.map = makeMap({ mapId: this.mapId, zoom: 12 })
+
+    if (this.height) {
+      this.mapHeight = this.height
+    }
+
     const { features } = await mapService.getTrafficLights(extent(this.map))
 
     this.geometries = features.map(feature => {
@@ -292,30 +370,37 @@ export default {
             markerWidth: 5,
             markerHeight: 5,
             textSize: 20,
-            textFill: 'white',
-            textHaloFill: 'blue',
-            textHaloRadius: 2
+            // textFill: 'white',
+            // textHaloFill: 'blue',
+            // textHaloRadius: 1,
+            // textName: feature.target.$crossName + '[' + feature.target.$groupId + ']' || '',
+
           }
         ]
       })
         .on('mouseenter', e => {
+          if (!e.target.$groupId) {
+            return
+          }
           e.target.updateSymbol([
             {
               markerFillOpacity: 1,
-              textName: e.target.$crossName + '[' + e.target.$groupId + ']' || '',
+              textName: `${e.target.$groupId}(${e.target.$nodeId})`
             }
           ])
           e.target.bringToFront()
         })
         .on('mouseout', e => {
+          if (!e.target.$groupId) {
+            return
+          }
           e.target.updateSymbol([
             {
-              textName: ''
+              textName: `${e.target.$groupId}(${e.target.$crossName})`
             }
           ])
         })
         .on('click', e => {
-          console.log(e.target.$groupId, e.target.$crossName)
         })
       trafficLight.$crossName = crossName
       trafficLight.$nodeId = feature.properties.NODE_ID

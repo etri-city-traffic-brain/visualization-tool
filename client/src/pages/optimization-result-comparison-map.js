@@ -494,8 +494,12 @@ export default {
         return
       }
 
+      console.log(this.actionForOpt[0])
+      console.log(this.actionForOpt[1])
+
       this.signalExplain = SignalSystem(container, parseAction(this.actionForOpt[0]))
       this.signalExplain.update(parseAction(this.actionForOpt[1]))
+
     },
 
     getRegionName(region) {

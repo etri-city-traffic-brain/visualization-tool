@@ -1,14 +1,29 @@
 <template>
   <div class="min-w-max p-2">
-    <div class="bg-gray-700 w-max px-4 mt-2 text-white font-bold py-1 flex items-center space-x-2" >
+    <div
+      class="bg-gray-700 w-max px-4 mt-2 text-white font-bold py-1 flex items-center space-x-2"
+    >
       <div>
         신호최적화 환경
       </div>
-      <button v-b-modal.create-simulation-modal class="bg-gray-500 rounded hover:bg-indigo-500">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+      <button
+        v-b-modal.create-simulation-modal
+        class="bg-gray-500 rounded hover:bg-indigo-500"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-5 h-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 6v12m6-6H6"
+          />
         </svg>
-
       </button>
     </div>
     <div class="p-2 border-2 border-gray-700 space-y-2">
@@ -110,10 +125,10 @@
       </div>
     </div>
 
-    <div class="bg-gray-700 w-max px-4 mt-2 text-white font-bold py-1" >
+    <div class="bg-gray-700 w-max px-4 mt-2 text-white font-bold py-1">
       신호최적화 실험
     </div>
-    <div class="p-2 border-2 border-gray-700 space-y-2 min-w-max" >
+    <div class="p-2 border-2 border-gray-700 space-y-2 min-w-max">
       <div fluid class="mt-0 p-1">
         <div class="flex justify-end">
           <button
@@ -126,7 +141,16 @@
           </button>
         </div>
 
-        <b-table hover small striped responsive ref="simulations-table" table-variant="dark" head-variant="dark" foot-variant="dark" class="mt-1"
+        <b-table
+          hover
+          small
+          striped
+          responsive
+          ref="simulations-table"
+          table-variant="dark"
+          head-variant="dark"
+          foot-variant="dark"
+          class="mt-1"
           :items="items"
           :fields="fields"
           :current-page="currentPage"
@@ -136,7 +160,10 @@
             <b-btn
               variant="dark"
               size="sm"
-              @click="row.toggleDetails(); toggleDetails(row.item.id, row.item.status, row.detailsShowing);"
+              @click="
+                row.toggleDetails();
+                toggleDetails(row.item.id, row.item.status, row.detailsShowing);
+              "
             >
               <b-icon icon="arrow-up" v-if="row.detailsShowing"></b-icon>
               <b-icon icon="arrow-down" v-else></b-icon>
@@ -232,8 +259,19 @@
                 params: { id: row.item.id }
               }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-4 h-4 inline-block"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                />
               </svg>
               신호학습
             </router-link>
@@ -326,7 +364,7 @@
       title="신호 최적화 환경"
       id="create-simulation-modal"
       ref="modal"
-      size="lg"
+      size="xl"
       header-border-variant="dark"
       header-bg-variant="dark"
       header-text-variant="light"

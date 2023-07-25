@@ -6,27 +6,54 @@
       :style="{ height: mapHeight + 'px' }"
       class="map"
     />
+
+    <div class="absolute right-2 top-16 bg-indigo-300 w-48 rounded px-1">
+      <div class="font-bold bg-indigo-300 p-1">신호그룹 선택</div>
+      <div class="bg-white rounded-lg space-y-1">
+        <div v-if="targetGroups.length === 0" class="px-1">선택없음</div>
+        <div v-for="g in targetGroups" :key="g">
+          <div class="flex space-x-1 px-2 bg-indigo-200">
+            <div class="w-40" :title="g">{{ g }}</div>
+            <button
+              @click="delTlGroup(g)"
+              class="px-1 text-sm hover:text-white"
+            >
+              X
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="text-center m-2">
+        <button
+          @click.prevent="finishTlSelection"
+          class="bg-blue-500 rounded text-white px-2"
+        >
+          선택완료
+        </button>
+      </div>
+    </div>
+
     <div
-      class="fixed left-2 top-16 bg-gray-50 text-black "
-      style="max-width:680px"
+      class="absolute left-2 top-2 bg-gray-50 text-black text-sm"
+      style="max-width:660px"
     >
-      <div class="bg-indigo-100 text-right px-1 p-2 font-bold">
+      <div class="text-right px-1 p-2 font-bold ">
         <button
           class="bg-indigo-200 rounded px-1 hover:bg-indigo-500 hover:text-white font-bold"
           @click="hide = !hide"
           v-if="!hide"
         >
-          교차로 추가
+          X
         </button>
         <button
           class="bg-indigo-200 rounded px-1  hover:bg-indigo-500 hover:text-white"
           @click="hide = !hide"
           v-else
         >
-          X
+          교차로 조회
         </button>
       </div>
-      <div v-if="hide">
+      <div v-if="!hide">
         <div class="bg-blue-200 p-2 flex items-center space-x-1">
           <select type="select" v-model="type" class="" style="height:34px">
             <option v-for="o in typeOptions" :key="o.value" :value="o.value">
@@ -44,18 +71,30 @@
               c
             }}</option>
           </select>
-          <input v-model="nodeId" class="px-2" style="height:34px" />
+          <input
+            @keyup.enter="getTL(nodeId)"
+            v-model="nodeId"
+            class="px-2"
+            style="height:34px"
+          />
           <select type="select" v-model="color" class="p-1" style="height:34px">
             <option v-for="c of colorOptions" :key="c.value" :value="c.value">
-            <span>{{ c.text }}</span>
-          </option>
-        </select>
-          <button
+              <span>{{ c.text }}</span>
+            </option>
+          </select>
+          <!-- <button
             @click="addNode(nodeId)"
             class="px-1 bg-blue-300 text-black"
             style="height:34px"
           >
             추가
+          </button> -->
+          <button
+            @click="getTL(nodeId)"
+            class="px-1 bg-blue-300 text-black"
+            style="height:34px"
+          >
+            조회
           </button>
         </div>
         <div class="p-2 overflow-auto" style="max-height:calc(80vh)">
@@ -74,19 +113,25 @@
             <div class="w-40 truncate" :title="v.id">{{ v.id }}</div>
             <div class="w-40 truncate">{{ v.name }}</div>
             <button
-              class="bg-red-300 px-1 text-black text-sm rounded"
+              class="px-1 text-black text-sm rounded"
               @click="del(v.id, v.groupId)"
-              :style="{'background-color': '#'+v.color}"
+              :style_="{ 'background-color': '#' + v.color }"
             >
               X
             </button>
             <button
-
               class="px-1 text-black text-sm rounded"
               @click="animate(v.id)"
-              :style="{'background-color': '#'+v.color}"
+              :style="{ 'background-color': '#' + v.color }"
             >
-              확인
+              위치확인
+            </button>
+            <button
+              class="px-1 text-black text-sm rounded"
+              @click="addTlGroup(v.groupId)"
+              :style="{ 'background-color': '#' + v.color }"
+            >
+              추가
             </button>
           </div>
         </div>

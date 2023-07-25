@@ -9,7 +9,7 @@ const DEFAULT_ZOOM = 18
 
 const { log } = console
 
-export default function MakeMap ({
+export default function MakeMap({
   center = DEFAULT_CENTER,
   zoom = DEFAULT_ZOOM,
   mapId
@@ -44,8 +44,7 @@ export default function MakeMap ({
   })
 
   map.on('click', param => {
-    const coord = param.coordinate.toFixed(7)
-    log(coord.x, coord.y)
+    // const coord = param.coordinate.toFixed(7)
   })
 
   return map

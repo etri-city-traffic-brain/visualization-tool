@@ -4,6 +4,7 @@ import simulationService from '@/service/simulation-service'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
 import { HTTP } from '@/http-common'
+import Junction from '@/pages/JunctionView'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
 const generateRandomId = (prefix = 'DEFU') =>
@@ -93,9 +94,10 @@ export default {
   ],
   components: {
     SignalMap,
-    SignalEditor
+    SignalEditor,
+    Junction
   },
-  data () {
+  data() {
     return {
       envName: generateRandomId('Exp'), //
       id: generateRandomId(this.role), //
@@ -132,7 +134,7 @@ export default {
       modelSavePeriod: 20
     }
   },
-  async mounted () {
+  async mounted() {
     HTTP({
       url: '/salt/v1/helper/docker',
       method: 'get'
@@ -171,21 +173,21 @@ export default {
   },
 
   methods: {
-    regionChanged (v) {
+    regionChanged(v) {
       if (v === 'doan') {
         this.junctionId = 'SA 101,SA 107,SA 111,SA 104'
       } else if (v === 'cdd3') {
         this.junctionId = 'SA 1701,SA 1702'
       }
     },
-    openSignalMap () {
+    openSignalMap() {
       this.$refs['signal-map'].show()
     },
-    resetForm () {
+    resetForm() {
       this.id = generateRandomId(this.role)
       this.description = '...'
     },
-    async register () {
+    async register() {
       this.loading = true
       const from = moment(`${this.fromDate} ${this.fromTime}`)
       const to = moment(`${this.toDate} ${this.toTime}`)
@@ -238,16 +240,16 @@ export default {
       this.hide()
       this.loading = false
     },
-    hide () {
+    hide() {
       this.$emit('hide')
       this.$bvModal.hide(this.modalName)
       this.resetForm()
     },
-    selectJunction (junction) {
+    selectJunction(junction) {
       this.$refs['signal-map'].hide()
       // this.junctionId = junction.id
     },
-    selectionFinished ({ junctions, extent }) {
+    selectionFinished({ junctions, extent }) {
       this.junctionId = junctions.join(',')
       this.extent = extent
       this.showMap = false
