@@ -26,11 +26,11 @@ import userState from '@/user-state'
 import region from '@/map2/region'
 import map from '@/region-code'
 
-// import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 import HistogramChart from '@/components/charts/HistogramChart'
 import Doughnut from '@/components/charts/Doughnut'
 
+// import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
 // import D3SpeedBar from '@/charts/d3/D3SpeedBar'
 // import axios from 'axios'
 // import * as d3 from 'd3'
@@ -39,7 +39,6 @@ import Doughnut from '@/components/charts/Doughnut'
 // import bins from '@/stats/histogram'
 // import config from '@/stats/config'
 // import { labels } from '../utils/color-of-congestion'
-
 // import { simulationService } from '@/service'
 
 const defaultOption = (xTitle = '', yTitle) => ({
@@ -375,6 +374,11 @@ export default {
     // this.$on('ws:close', () => {})
 
     window.addEventListener('resize', this.resize.bind(this))
+
+    // test
+    // this.simulation.status = 'running'
+    // this.progress = 20
+
   },
   methods: {
     showModal() {

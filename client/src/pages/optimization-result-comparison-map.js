@@ -111,9 +111,9 @@ async function makeSimulationData(region, mapId, slave, eventTarget, mapBus, wsB
     region: map.getExtent()
     // eventBus: mapBus
   })
-  const trafficLightManager = TrafficLightManager(map, null, eventTarget)
-  await trafficLightManager.load()
-  trafficLightManager.setTargetJunctions(jIds)
+  const trafficLightManager = TrafficLightManager(map, jIds, eventTarget)
+  await trafficLightManager.load(jIds)
+  // trafficLightManager.setTargetJunctions(jIds)
 
   mapManager.loadMapData()
   wsClient.init(slaves)
@@ -286,6 +286,13 @@ export default {
         [this.fixedSlave, this.testSlave]
       )
     ]
+
+    const center = this.simulation.configuration.center
+    if (center) {
+      this.simulations[0].map.animateTo({
+        center: [center.x, center.y]
+      })
+    }
 
     this.initMapEventHandler(this)
 

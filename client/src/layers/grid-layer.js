@@ -10,6 +10,7 @@ import gridColor from '../utils/colors'
 const { log } = console
 
 async function updateGrid(simulationId, currentStep, gridLayer) {
+
   try {
     if (!gridLayer.gridData) {
       let gridData = await statisticsService.getSpeedsPerGrid(simulationId);

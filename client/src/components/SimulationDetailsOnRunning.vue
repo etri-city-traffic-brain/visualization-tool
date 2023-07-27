@@ -1,13 +1,13 @@
 <template>
   <div class="p-1">
-    <div class="bg-gray-700 p-1 rounded rounded-lg">
-      <div class="text-center text-white">평균속도</div>
-        <div class="bg-green-100 p-3 text-center">
-          <span class="text-3xl"> {{ (avgSpeed).toFixed(2) }} km </span>
-        </div>
+    <div class="bg-gray-800 p-1 rounded rounded-lg">
+      <div class="text-center text-white p-1">평균속도</div>
+      <div class="p-3 text-center ">
+        <span class="text-5xl text-white"> {{ avgSpeed.toFixed(2) }} km </span>
+      </div>
       <div>
         <div v-if="progress === 100">
-          <b-progress height="2rem" >
+          <b-progress height="2rem">
             <b-progress-bar value="100" animated striped variant="success">
               <span><strong> 통계정보 생성중... </strong></span>
             </b-progress-bar>
@@ -17,8 +17,9 @@
           <b-progress
             striped
             :animated="progress !== 100"
-            height="2rem"
-            show-progress class="w-100"
+            height="1rem"
+            show-progress
+            class="w-100"
             style="border-radius:0"
           >
             <b-progress-bar :value="progress" animated striped>
@@ -32,11 +33,11 @@
 </template>
 
 <script>
-import Doughnut from '@/components/charts/Doughnut';
-import congestionColor from '@/utils/colors';
-import UniqCardTitle from '@/components/func/UniqCardTitle';
+import Doughnut from "@/components/charts/Doughnut";
+import congestionColor from "@/utils/colors";
+import UniqCardTitle from "@/components/func/UniqCardTitle";
 export default {
-  name: 'SimulationDetailsOnRunning',
+  name: "SimulationDetailsOnRunning",
   components: {
     Doughnut,
     UniqCardTitle
@@ -52,5 +53,5 @@ export default {
   methods: {
     congestionColor
   }
-}
+};
 </script>

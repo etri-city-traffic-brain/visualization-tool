@@ -161,7 +161,8 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
     if (simulationId) {
       currentSpeedsPerLink = await simulationService.getSimulationResult(simulationId, extent(map))
       edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
-      gridLayer.updateGrid(simulationId, currentStep)
+      // gridLayer.updateGrid(simulationId, currentStep)
+      updateGrid()
     }
   }
 
@@ -205,15 +206,24 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
     await updateSimulationResult()
   }
 
+  function updateGrid() {
+    const zoom = map.getZoom()
+    if (zoom <= 14) {
+      gridLayer.updateGrid(simulationId, currentStep)
+    }
+  }
+
   function changeStep(step) {
     currentStep = step
     edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
-    gridLayer.updateGrid(simulationId, currentStep)
+    // gridLayer.updateGrid(simulationId, currentStep)
+    updateGrid()
   }
 
   const handleZoomEvent = async event => {
     const zoom = map.getZoom()
-    gridLayer.updateGrid(simulationId, currentStep)
+    // gridLayer.updateGrid(simulationId, currentStep)
+    updateGrid()
     if (zoom <= ZOOM_MINIMUM) {
       return
     } else {

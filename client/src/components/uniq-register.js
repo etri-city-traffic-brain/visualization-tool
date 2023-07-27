@@ -131,7 +131,8 @@ export default {
       loading: false,
       showMap: false,
       showEnv: true,
-      modelSavePeriod: 20
+      modelSavePeriod: 20,
+      center: {}
     }
   },
   async mounted() {
@@ -228,7 +229,8 @@ export default {
           action: this.actionOptionSelected,
           method: this.methodOptionSelected,
           rewardFunc: this.rewardFuncOptionSelected,
-          dockerImage: this.dockerImage
+          dockerImage: this.dockerImage,
+          center: this.center
         }
       }
 
@@ -249,10 +251,11 @@ export default {
       this.$refs['signal-map'].hide()
       // this.junctionId = junction.id
     },
-    selectionFinished({ junctions, extent }) {
+    selectionFinished({ junctions, extent, center }) {
       this.junctionId = junctions.join(',')
       this.extent = extent
       this.showMap = false
+      this.center = center
     }
   }
 }

@@ -262,25 +262,33 @@ export default {
       eventBus: this
     })
     const v = this.simulation.configuration.region
-    console.log(v, this.simulation.configuration.region)
-    if (v === 'doan') {
+    console.log(v, this.simulation.configuration)
+
+    const center = this.simulation.configuration.center
+    if (center) {
       this.map.animateTo({
-        center: [127.3396677, 36.3423342]
-        // zoom: 14
+        center: [center.x, center.y]
       })
-    } else if (v === 'cdd3') {
-      setTimeout(() => {
+    } else {
+      if (v === 'doan') {
         this.map.animateTo({
-          center: [127.35375270822743, 36.383148078460906]
+          center: [127.3396677, 36.3423342]
           // zoom: 14
         })
-      }, 1000)
+      } else if (v === 'cdd3') {
+        setTimeout(() => {
+          this.map.animateTo({
+            center: [127.35375270822743, 36.383148078460906]
+            // zoom: 14
+          })
+        }, 1000)
+      }
     }
 
     this.mapManager.loadMapData()
 
-    this.trafficLightManager = TrafficLightManager(this.map, null, this)
-    this.trafficLightManager.setTargetJunctions(this.simulation.configuration.junctionId.split(','))
+    this.trafficLightManager = TrafficLightManager(this.map, this.getGroupIds(), this)
+    // this.trafficLightManager.setTargetJunctions(this.simulation.configuration.junctionId.split(','))
     this.trafficLightManager.setOptJunction(this.simulation.configuration.junctionId.split(','))
 
     await this.trafficLightManager.load()
@@ -320,6 +328,20 @@ export default {
     },
     startVis() {
       this.wsClient.restart()
+    },
+    getGroupIds() {
+      const junctionIds = this.simulation.configuration.junctionId.split(',')
+      if (junctionIds[0].indexOf('SA') >= 0) {
+        let jids = []
+        junctionIds.forEach(jId => {
+          signalGroups.forEach(s => {
+            if (s.properties.groupId === jId) {
+              jids = jids.concat(s.properties.junctions)
+            }
+          })
+        })
+      }
+      return junctionIds
     },
     showProgressing() {
       const junctionIds = this.simulation.configuration.junctionId.split(',')
@@ -372,6 +394,9 @@ export default {
       }
     },
     async runTrain() {
+      let isExecuted = confirm("학습을 시작합니다.");
+      if (!isExecuted) { return }
+
       try {
         this.simulation.status = 'running'
         await optimizationService.runTrain(this.simulationId)
@@ -441,13 +466,13 @@ export default {
         }
       } catch (err) {
         log(err)
-        this.$bvToast.toast('Fail to load reward total', {
-          title: 'Error',
-          variant: 'danger',
-          autoHideDelay: 3000,
-          appendToast: true,
-          toaster: 'b-toaster-top-right'
-        })
+        // this.$bvToast.toast('Fail to load reward total', {
+        //   title: 'Error',
+        //   variant: 'danger',
+        //   autoHideDelay: 3000,
+        //   appendToast: true,
+        //   toaster: 'b-toaster-top-right'
+        // })
       }
     }
   }

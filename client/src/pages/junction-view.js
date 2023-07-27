@@ -52,7 +52,7 @@ const { log } = console
 // 사용자가 입력한 값에 따라 해당 노드를 보여지도록
 export default {
   name: 'Junction',
-  props: ["height"],
+  props: ["height", "groupSelection"],
   data() {
     return {
       map: null,
@@ -176,6 +176,7 @@ export default {
       mapHeight: 640,
       hide: false,
       targetGroups: [],
+      centerMarker: null
     }
   },
   methods: {
@@ -221,7 +222,7 @@ export default {
       this.update()
     },
     addTlGroup(groupId) {
-      console.log('delete', groupId)
+      console.log('add TL group', groupId)
       if (this.targetGroups.includes(groupId)) {
         return
       }
@@ -324,8 +325,9 @@ export default {
               markerHeight: 20,
               textHaloFill: '#' + obj.color,
               textHaloRadius: 1,
-              // textFill: '#' + obj.color,
+              textFill: 'black',
               textName: `${obj.groupId}(${obj.name})`,
+              textSize: 15,
               textDy: -20,
             }
           ])
@@ -339,12 +341,17 @@ export default {
         return
       }
       this.mapHeight = window.innerHeight - 50 // update map height to current height
-      console.log('map height:', this.mapHeight)
     },
     finishTlSelection() {
       this.$emit("selection:finished", {
         junctions: this.targetGroups,
+        center: this.centerMarker.getCoordinates(),
       });
+      console.log(this.centerMarker.getCoordinates())
+    },
+    showCenter() {
+      this.centerMarker.setCoordinates(this.map.getCenter())
+      this.centerMarker.bringToFront()
     }
   },
 
@@ -355,6 +362,29 @@ export default {
     if (this.height) {
       this.mapHeight = this.height
     }
+
+
+    this.centerMarker = new maptalks.Marker(this.map.getCenter(), {
+      id: 'tmp-01s',
+      // editable: true,
+      draggable: true,
+      symbol: [
+        {
+          markerType: 'ellipse',
+          markerFill: 'cyan',
+          // markerFillOpacity: 0.6,
+          markerWidth: 35,
+          markerHeight: 35,
+          textSize: 20,
+          // textFill: 'cyan',
+          // textHaloFill: 'blue',
+          // textHaloRadius: 1,
+          // textName: '중앙',
+
+        }
+      ]
+    })
+    const tmpLayer = new maptalks.VectorLayer('tmp-01s', [], {}).addTo(this.map)
 
     const { features } = await mapService.getTrafficLights(extent(this.map))
 
@@ -411,6 +441,7 @@ export default {
     const addLayer = addLayerTo(this.map)
     this.trafficLightsLayer = addLayer('trafficLightsLayer')
     this.trafficLightsLayer.addGeometry(this.geometries)
+    tmpLayer.addGeometry(this.centerMarker)
     this.update()
 
     window.addEventListener('resize', this.resize.bind(this))

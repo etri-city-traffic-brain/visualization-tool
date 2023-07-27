@@ -93,6 +93,7 @@
           class=""
           @selection:finished="selectionFinished"
           :height="600"
+          groupSelection="true"
         />
       </div>
     </transition>
