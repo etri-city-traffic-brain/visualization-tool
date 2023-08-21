@@ -5,13 +5,13 @@ function getAvgTT(sumTravelTime, sumPassed) {
 }
 
 function IntersectionCollector() {
-  let signalExplain = null
+  let signalExplains = []
   const cumlativeAvgs = []
   const calcSumTravelTime = Calculator.Sum()
   const calcSumPassed = Calculator.Sum()
 
   function collect(intersection) {
-    signalExplain = intersection.actions
+    signalExplains.push(intersection.actions)
     calcSumTravelTime.calculate(intersection.sumTravelTime)
     calcSumPassed.calculate(intersection.sumPassed)
     cumlativeAvgs.push(getAvgTT(calcSumTravelTime.get(), calcSumPassed.get()))
@@ -22,7 +22,7 @@ function IntersectionCollector() {
     return Object.freeze({
       travelTime,
       cumlativeAvgs,
-      signalExplain
+      signalExplains
     })
   }
 

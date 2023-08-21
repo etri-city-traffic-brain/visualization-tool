@@ -12,7 +12,7 @@ const DEFAULT_DOCKER_IMAGE = 'images4uniq/optimizer:v0.1a.20220418'
 const options = {
   machineName: undefined, // uses local docker
   currentWorkingDirectory: undefined, // uses current working directory
-  echo: false, // echo command output to stdout/stderr
+  echo: true, // echo command output to stdout/stderr
   env: undefined,
   stdin: undefined
 }
@@ -47,24 +47,24 @@ async function run(simulation, mode, modelNum) {
   const volume = `${volumePath}/${simulation.id}:/uniq/optimizer/io`
 
   const makeCmd = (mode, name) => {
-    const args = [
-      `run --rm --name ${name} -v ${volume} ${dockerImage}`,
-      'python ./run.py',
-      `--mode ${mode}`,
-      `--map ${map}`,
-      `--start-time ${begin} --end-time ${end}`,
-      `--epoch ${epoch}`,
-      '--io-home io',
-      '--scenario-file-path io/scenario',
-      `--target-TL "${targetTL}"`,
-      `--model-save-period ${modelSavePeriod}`,
-      '--result-comp False',
-      `--reward-func ${rewardFunc}`,
-      `--method ${method}`,
-      `--action ${action}`
-    ]
-    return args.join(' ')
-    // return `run --rm --name ${name} -v ${volume} ${dockerImage} python ./run.py --mode ${mode} --map ${map} --start-time ${begin} --end-time ${end} --epoch ${epoch} --io-home io --scenario-file-path io/scenario --target-TL "${targetTL}" --model-save-period ${modelSavePeriod} --result-comp False --reward-func ${rewardFunc} --action ${action}`
+    // const args = [
+    //   `run --rm --name ${name} -v ${volume} ${dockerImage}`,
+    //   'python ./run.py',
+    //   `--mode ${mode}`,
+    //   `--map ${map}`,
+    //   `--start-time ${begin} --end-time ${end}`,
+    //   `--epoch ${epoch}`,
+    //   '--io-home io',
+    //   '--scenario-file-path io/scenario',
+    //   `--target-TL "${targetTL}"`,
+    //   `--model-save-period ${modelSavePeriod}`,
+    //   '--result-comp False',
+    //   `--reward-func ${rewardFunc}`,
+    //   `--method ${method}`,
+    //   `--action ${action}`
+    // ]
+    // return args.join(' ')
+    return `run --rm --name ${name} -v ${volume} ${dockerImage} python ./run.py --mode ${mode} --map ${map} --start-time ${begin} --end-time ${end} --epoch ${epoch} --io-home io --scenario-file-path io/scenario --target-TL "${targetTL}" --model-save-period ${modelSavePeriod} --result-comp False --reward-func ${rewardFunc} --action ${action}`
   }
 
   if (mode === 'train') {

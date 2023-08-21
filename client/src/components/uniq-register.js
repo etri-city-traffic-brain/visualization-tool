@@ -131,7 +131,7 @@ export default {
       loading: false,
       showMap: false,
       showEnv: true,
-      modelSavePeriod: 20,
+      modelSavePeriod: 5,
       center: {}
     }
   },
@@ -201,6 +201,13 @@ export default {
         this.$bvToast.toast('환경 이름이 너무 짧거나 비어 있습니다.(3글자이상)')
         return
       }
+
+      if (!this.junctionId) {
+        this.$bvToast.toast('대상 교차로가 비었습니다.')
+        return
+      }
+
+
 
       const simulationConfig = {
         id: this.id,
