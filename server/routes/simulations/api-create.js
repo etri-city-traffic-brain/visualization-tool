@@ -76,11 +76,11 @@ const makeOptScenario = (
       },
       input: {
         fileType: 'SALT',
-        node: `${region}.node.xml`,
-        link: `${region}.edge.xml`,
-        connection: `${region}.connection.xml`,
-        trafficLightSystem: `${region}.tss.xml`,
-        route: `${region}.rou.xml`
+        node: `../../data/scenario/${region}/${region}.node.xml`,
+        link: `../../data/scenario/${region}/${region}.edge.xml`,
+        connection: `../../data/scenario/${region}/${region}.connection.xml`,
+        trafficLightSystem: `../../data/scenario/${region}/${region}.tss.xml`,
+        route: `../../data/route/${region}/${region}_20220601.rou.xml`
       },
       parameter: {
         minCellLength: 30.0,
@@ -89,7 +89,7 @@ const makeOptScenario = (
       output: {
         fileDir,
         period,
-        level: 'cell',
+        level: 'link',
         save: 1
       }
     }
@@ -167,37 +167,29 @@ async function prepareSimulation(id, body, role, slaves = [], type) {
   log(`[simulation] ${id} is ready`)
 }
 
+// 신호 학습을 위한 시나리오 파일 생성
 async function prepareOptimization(ids, body) {
-  const targetDir = `${base}/data/${ids[0]}`
-  const simOutputDir = `${base}/output/${ids[0]}`
-  await mkdir(simOutputDir)
 
-  const region = body.configuration.region // 'doan'
-  const path = `/home/ubuntu/uniq-sim/routes/scenario_${region}.zip`
-  await unzip(path, { dir: targetDir })
+  const [idTrain, idTest, idSimulate] = ids
 
-  log(`rename ${targetDir}/scenario_${region} to ${targetDir}/scenario`)
+  const optDir = `${base}/opt/${idTrain}`
+  const inputDir = `${optDir}/input`
 
-  fs.renameSync(`${targetDir}/scenario_${region}`, `${targetDir}/scenario`)
+  await mkdir(optDir)
+  await mkdir(inputDir)
 
-  createOPtScenarioFile(
-    ids[0],
-    body,
-    `${targetDir}/scenario/${region}/${region}_train.scenario.json`,
-    '/uniq/optimizer/io/output/train/'
-  )
-  createOPtScenarioFile(
-    ids[1],
-    body,
-    `${targetDir}/scenario/${region}/${region}_test.scenario.json`,
-    '/uniq/optimizer/io/output/test/'
-  )
-  createOPtScenarioFile(
-    ids[2],
-    body,
-    `${targetDir}/scenario/${region}/${region}_simulate.scenario.json`,
-    '/uniq/optimizer/io/output/simulate/'
-  )
+  const configFileTrain = makeOptScenario(idTrain, body, 'output/train/')
+  const configFileTest = makeOptScenario(idTrain, body, 'output/test/')
+  const configFileSimulate = makeOptScenario(idTrain, body, 'output/simulate/')
+
+  try {
+    await writeFile(`${inputDir}/${body.configuration.region}_train.scenario.json`, stringify(configFileTrain))
+    await writeFile(`${inputDir}/${body.configuration.region}_test.scenario.json`, stringify(configFileTest))
+    await writeFile(`${inputDir}/${body.configuration.region}_simulate.scenario.json`, stringify(configFileSimulate))
+  } catch (err) {
+    console.log(err)
+  }
+
   updateStatus(ids[0], 'ready', {})
 }
 const ROLE = {

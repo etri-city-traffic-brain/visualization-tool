@@ -4,9 +4,14 @@ const csv = require('csv-parser')
 const { config } = require('../../globals')
 
 async function read(simulationId) {
-  const file = `${config.base}/data/${simulationId}/output/train/train_epoch_total_reward.txt`
-  await fs.access(file, fs.F_OK)
-  return csvToObj(file)
+  const file = `${config.base}/opt/${simulationId}/output/train/train_epoch_total_reward.txt`
+  try {
+    await fs.access(file, fs.F_OK)
+    return csvToObj(file)
+  } catch (err) {
+    console.log(err.message)
+    return {}
+  }
 }
 
 async function csvToObj(file) {

@@ -20,8 +20,15 @@ class OptStatusLayer extends maptalks.Layer {
     return this
   }
 
+  setOptTrainResult(data) {
+    this.optTrainResult = data
+  }
+
   getData() {
     return this.data
+  }
+  getOptTrainResult() {
+    return this.optTrainResult || []
   }
 }
 
@@ -101,7 +108,10 @@ class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
       ctx.closePath()
       ctx.fill()
       ctx.restore()
+
     })
+
+    // console.log(this.layer.getOptTrainResult())
 
     return drawn
   }

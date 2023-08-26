@@ -91,6 +91,33 @@ async function getSigOptResult(optId) {
 
   // }
 }
+function getOptTrainResult(optId, epochNum) {
+  // return [
+  //   {
+  //     name: '상대초교(단)',
+  //     SA: 'SA 101',
+  //     ftVehPassed: 2778,
+  //     ftAvgTravelTime: 10.81,
+  //     rlAvgTravelTime: 12.68,
+  //     improvedRate: -17.36
+  //   },
+  //   {
+  //     name: '원골(단)',
+  //     SA: 'SA 101',
+  //     ftVehPassed: 2838,
+  //     ftAvgTravelTime: 38.01,
+  //     rlAvgTravelTime: 28.83,
+  //     improvedRate: 24.15
+  //   }
+
+  // ]
+
+  return HTTP.get(`${base}/optTrainResult?id=${optId}&epoch=${epochNum}`).then(res => res.data)
+}
+
+function getScenario() {
+  return HTTP.get(`${base}/scenario`).then(res => res.data)
+}
 
 export default {
   runTrain,
@@ -100,5 +127,7 @@ export default {
   getReward,
   getRewardTotal,
   getPhaseReward,
-  stop, getSigOptResult
+  stop, getSigOptResult,
+  getOptTrainResult,
+  getScenario
 }

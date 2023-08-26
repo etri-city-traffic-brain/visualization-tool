@@ -93,17 +93,14 @@ const makeSpeedLineData = (
 const randomId = () => `map-${Math.floor(Math.random() * 100)}`
 
 async function makeSimulationData(region, mapId, slave, eventTarget, mapBus, wsBus, jIds, slaves) {
-  const center =
-    region === 'cdd3' ? [127.3549527, 36.385148] : [127.3396677, 36.3423342]
-
-  const map = makeMap({ mapId: mapId, zoom: 16, center })
+  const map = makeMap({ mapId: mapId, zoom: 16 })
 
   const mapManager = MapManager({
     map: map,
     simulationId: slave,
     eventBus: mapBus
   })
-
+  log('make websocket for ', slave)
   const wsClient = WebSocketClient({
     simulationId: slave,
     eventBus: wsBus,
@@ -308,6 +305,7 @@ export default {
     // 최적화 시뮬레이션이 수행 속도가 느림
     // 버퍼로부터 데이터 가져와 이벤트 발생
     busTest.$on('salt:data', () => {
+      this.showWaitingMsg = false
       const dataSim = buffer.splice(0, 1)[0]
       if (dataSim) {
         simEventBusFixed.$emit('salt:data', dataSim)
@@ -333,12 +331,19 @@ export default {
     busTest.$on('salt:status', async status => {
       this.chart2.progress = status.progress
       this.chart1.progress = status.progress
-      this.showWaitingMsg = false
+      // this.showWaitingMsg = false
 
       if (status.progress >= 99) {
         this.chart2.progress = 100
         this.chart1.progress = 100
       }
+
+      if (status.progress > 100) {
+        this.chart2.progress = 0
+        this.chart1.progress = 0
+      }
+
+      log('test progress:', status.progress)
     })
 
     busFixed.$on('optimization:finished', () => {
@@ -500,9 +505,6 @@ export default {
         }, 100)
         return
       }
-
-      console.log(this.actionForOpt[0])
-      console.log(this.actionForOpt[1])
 
       this.signalExplain = SignalSystem(container, parseAction(this.actionForOpt[0]))
       this.signalExplain.update(parseAction(this.actionForOpt[1]))

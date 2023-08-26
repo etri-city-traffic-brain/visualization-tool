@@ -458,7 +458,7 @@
           </div>
         </div>
 
-        <div v-if="status === 'error'" class="absolute top-24 w-full">
+        <!-- <div v-if="status === 'error'" class="absolute top-24 w-full">
           <div class="flex justify-center">
             <div
               class="border rounded-xl text-center bg-red-400 p-5 text-xl font-bold w-92"
@@ -474,7 +474,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
       <!-- 메인 레이아웃 END -->
     </div>

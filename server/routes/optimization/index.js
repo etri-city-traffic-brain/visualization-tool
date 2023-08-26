@@ -19,4 +19,6 @@ router.get('/phasereward', require('./api-phase-reward'))
 
 router.get('/result', require('./api-optimization-result'))
 
+router.get('/optTrainResult', require('./api-opt-train-result'))
+router.get('/scenario', require('./api-scenario'))
 module.exports = router

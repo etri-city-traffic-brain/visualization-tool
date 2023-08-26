@@ -1,7 +1,7 @@
 /**
  * SALT-VIS configuration
  */
-const base = '/home/ubuntu/uniq-sim'
+const base = '/home/ubuntu/uniq-simv2'
 const cloudApiBase = 'http://180.210.14.16'
 const dataApiBase = 'http://101.79.1.111:8080/restapi'
 
@@ -9,6 +9,7 @@ const dataApiBase = 'http://101.79.1.111:8080/restapi'
 module.exports = {
   test: false,
   base,
+  dockerBasePath: '/c' + base,
   saltPath: {
     home: base,
     // volume: base + '/data',
@@ -81,10 +82,7 @@ module.exports = {
     },
     optimization: {
       images: [
-        'images4uniq/optimizer:v2.1a.20221012',
-        'images4uniq/optimizer:v1.1a.20220629.d',
-        'images4uniq/optimizer:v1.2a.20220720PM',
-        'images4uniq/optimizer:v2.1a.221012 -- error'
+        'images4uniq/optimizer:v0.1a.20220418',
       ]
     }
   }

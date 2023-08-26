@@ -19,8 +19,10 @@ module.exports = async (req, res, next) => {
 
   try {
 
-    const ft = `${baseDir}/${id}/output/simulate/ft_phase_reward_output.txt`
-    const rl = `${baseDir}/${id}/output/test/rl_phase_reward_output.txt`
+    // const ft = `${baseDir}/${id}/output/simulate/ft_phase_reward_output.txt`
+    // const rl = `${baseDir}/${id}/output/test/rl_phase_reward_output.txt`
+    const ft = `${config.base}/opt/${id}/output/simulate/ft_phase_reward_output.txt`
+    const rl = `${config.base}/opt/${id}/output/test/rl_phase_reward_output.txt`
 
     await fse.access(ft, fs.F_OK)
     await fse.access(rl, fs.F_OK)

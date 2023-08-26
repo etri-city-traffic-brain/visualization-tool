@@ -32,16 +32,23 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
       symbol: [
         {
           markerType: 'ellipse',
-          markerFill: color,
           markerFillOpacity: 0.6,
           markerWidth: 15,
           markerHeight: 15,
           markerLineWidth: 2,
-          textHaloFill: 'blue',
-          textHaloRadius: 1,
-          textName: `${nodeName} ${groupId}`,
-          textDy: -20,
-        }
+          markerFill: color,
+
+          textName: `${nodeName} \n${groupId}`,
+          textLineSpacing: 8,
+          textAlign: 'left',
+          textHorizontalAlignment: 'right',
+          textSize: 12,
+          textFill: '#ffffff',
+          textHaloFill: "black",
+          textHaloRadius: 3,
+          textDx: 10,
+          textDy: 40,
+        },
       ]
     })
       .on('click', async e => {
@@ -58,7 +65,7 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
         e.target.updateSymbol([
           {
             markerFillOpacity: 1,
-            textHaloFill: 'red',
+            // textHaloFill: 'red',
           }
         ])
         e.target.bringToFront()
@@ -67,7 +74,7 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
         e.target.updateSymbol([
           {
             markerFillOpacity: 0.7,
-            textHaloFill: 'blue',
+            // textHaloFill: 'blue',
           }
         ])
       })
@@ -75,7 +82,7 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     trafficLight.properties = feature.properties
     return trafficLight
   }
-
+  let trainResult = []
   async function load() {
     if (!trafficLightsLayer.isVisible()) {
       return
@@ -108,12 +115,15 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     })
     trafficLightsLayer.addGeometry(geometries)
 
-
+    if (trainResult.length > 0) {
+      setOptTrainResult(trainResult)
+    }
   }
 
 
 
   function setOptJunction(junctionIds) {
+
     const tlayer = map.getLayer('trafficLightsLayer')
     const data = []
     tlayer.getGeometries().forEach(g => {
@@ -139,6 +149,55 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     })
     layer.addTo(map)
   }
+
+  function perc2color(perc) {
+    var r, g, b = 0;
+    if (perc < 50) {
+      r = 255;
+      g = Math.round(5.1 * perc);
+    }
+    else {
+      g = 255;
+      r = Math.round(510 - 5.10 * perc);
+    }
+    var h = r * 0x10000 + g * 0x100 + b * 0x1;
+    return '#' + ('000000' + h.toString(16)).slice(-6);
+  }
+
+
+
+  function setOptTrainResult(arr) {
+    trainResult = arr
+    const tlayer = map.getLayer('trafficLightsLayer')
+
+    tlayer.getGeometries().forEach(g => {
+
+      const nodeId = g.properties.NODE_ID
+      const nodeName = signalService.nodeIdToName(nodeId)
+      const groupId = tlUtils.findGroupId(nodeId)
+      arr.forEach(item => {
+        if (item.name === nodeName) {
+          g.updateSymbol([
+
+            {
+              markerFill: perc2color(item.improvedRate),
+
+              textName: `${item.name} \n향샹률:${item.improvedRate} \n통행량: ${item.ftVehPassed}대 \n평균속도:${item.ftAverageSpeed}`,
+              textLineSpacing: 8,
+              textAlign: 'left',
+              textHorizontalAlignment: 'right',
+              textFill: perc2color(item.improvedRate),
+            },
+          ])
+        }
+
+      })
+    })
+
+    // layer.setOptTrainResult(data)
+  }
+
+
   function clearOptJunction() {
     layer.setData([])
   }
@@ -149,5 +208,6 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     load,
     setOptJunction,
     clearOptJunction,
+    setOptTrainResult
   }
 }

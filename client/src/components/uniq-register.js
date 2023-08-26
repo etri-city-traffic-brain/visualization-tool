@@ -1,6 +1,7 @@
 import moment from 'moment'
 
-import simulationService from '@/service/simulation-service'
+// import simulationService from '@/service/simulation-service'
+import optService from '@/service/optimization-service'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
 import { HTTP } from '@/http-common'
@@ -29,10 +30,10 @@ const periodOptions = [
 ]
 
 const areaOptions = [
-  { value: 'doan', text: '도안' },
-  { value: 'cdd3', text: '대전(연구단지)' },
-  { value: 'dj_all', text: '대전전체' },
-  { value: 'sa_1_6_17', text: 'sa_1_6_17' }
+  // { value: 'doan', text: '도안' },
+  // { value: 'cdd3', text: '대전(연구단지)' },
+  // { value: 'dj_all', text: '대전전체' },
+  // { value: 'sa_1_6_17', text: 'sa_1_6_17' }
   // { value: 10, text: '테스트지역' },
   // { value: 250, text: '대전광역시' },
   // { value: 25030, text: '서구' },
@@ -44,10 +45,13 @@ const areaOptions = [
 const scriptOptions = [{ value: 'run.py', text: 'run.py' }]
 
 const actionOptions = [
-  { value: 'offset', text: 'offset - 옵셋 조정' }, // default
-  { value: 'kc', text: 'kc - 즉시 신호 변경' },
-  { value: 'gr', text: 'gr - 녹색시간 조정' },
-  { value: 'gro', text: 'gro - 녹색시간과 옵셋 조정' }
+  // { value: 'offset', text: 'offset - 옵셋 조정' }, // default
+  // { value: 'kc', text: 'kc - 즉시 신호 변경' },
+  // { value: 'gr', text: 'gr - 녹색시간 조정' },
+  // { value: 'gro', text: 'gro - 녹색시간과 옵셋 조정' }
+  { value: 'gt', text: 'gt - 현시 최소최대 만족' },
+  { value: 'ga', text: 'ga - 현시 주기 만족' },
+
 ]
 const methodOptions = [
   { value: 'sappo', text: 'SAPPO' },
@@ -56,17 +60,17 @@ const methodOptions = [
 ]
 const rewardFuncOptions = [
   { value: 'pn', text: 'pn - 통과 차량 수' },
-  { value: 'wt', text: 'wt - 대기 시간' },
-  { value: 'tt', text: 'tt - 통과 소요 시간' },
   { value: 'wq', text: 'wq - 대기 큐 길이' },
-  { value: 'cwq', text: 'cwq - 축적된 대기 큐 길이' }
+  { value: 'wt', text: 'wt - 대기 시간' },
+  // { value: 'tt', text: 'tt - 통과 소요 시간' },
+  // { value: 'cwq', text: 'cwq - 축적된 대기 큐 길이' }
 ]
 
 const stateOptions = [
   { value: 'v', text: 'v - 차량 수' },
   { value: 'd', text: 'd - 차량 밀도' },
   { value: 'vd', text: 'vd - 차량 수와 밀도' },
-  { value: 'vdd', text: 'vdd - 차량 수를 밀도로 나눈 값' }
+  // { value: 'vdd', text: 'vdd - 차량 수를 밀도로 나눈 값' }
 ]
 
 const intervalOptions = [
@@ -107,18 +111,18 @@ export default {
       fromTime: '07:00', //
       toTime: '08:59', //
       periodSelected: periodOptions[0].value, //
-      areaSelected: areaOptions[0].value, //
+      areaSelected: '', //
       scriptSelected: scriptOptions[0].value, //
       intervalSelected: intervalOptions[0].value, //
       actionOptionSelected: actionOptions[0].value, //
       methodOptionSelected: methodOptions[0].value, //
       rewardFuncOptionSelected: rewardFuncOptions[0].value, //
       stateOptionSelected: stateOptions[0].value,
-      junctionId: 'SA 101,SA 107,SA 111,SA 104',
+      junctionId: '',
       epoch: 10,
       extent: null, // current map extent
       // dockerImage: 'images4uniq/optimizer:v1.1a.20220531',
-      dockerImage: 'images4uniq/optimizer:v1.1a.20220629.d',
+      dockerImage: '',
       imageOptions: [],
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
@@ -132,7 +136,8 @@ export default {
       showMap: false,
       showEnv: true,
       modelSavePeriod: 5,
-      center: {}
+      center: {},
+      scenario: []
     }
   },
   async mounted() {
@@ -143,7 +148,17 @@ export default {
       .then(r => r.data)
       .then(d => {
         this.imageOptions = d.optimization.images
+        this.dockerImage = this.imageOptions[0]
       })
+
+    const scenario = await optService.getScenario()
+    this.scenario = scenario
+    this.areaOptions = scenario.map(s => {
+      return {
+        value: s.region, text: s.description,
+      }
+    })
+
 
     // console.log('simulation register ui', this.modalName)
     if (this.modalName === 'create-simulation-modal') {
@@ -175,10 +190,9 @@ export default {
 
   methods: {
     regionChanged(v) {
-      if (v === 'doan') {
-        this.junctionId = 'SA 101,SA 107,SA 111,SA 104'
-      } else if (v === 'cdd3') {
-        this.junctionId = 'SA 1701,SA 1702'
+      const obj = this.scenario.find(item => item.region === v)
+      if (obj) {
+        this.junctionId = obj.tls.join(',')
       }
     },
     openSignalMap() {

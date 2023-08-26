@@ -30,7 +30,7 @@ export default {
     UniqRegister
   },
   mixins: [dragDropMixin, fileMgmtMixin],
-  data () {
+  data() {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
@@ -104,31 +104,33 @@ export default {
       resultFile: null // upload file for model files (.zip)
     }
   },
-  mounted () {
+  mounted() {
     this.dataProvider({ currentPage: this.currentPage })
-    this.reload().then(r => {})
+    this.reload().then(r => { })
   },
   watch: {},
   computed: {},
-  destroyed () {},
+  destroyed() { },
   methods: {
-    getRegionName (v) {
+    getRegionName(v) {
       const m = {
         doan: '도안',
         cdd3: '연구단지'
       }
       return m[v] || ''
     },
-    getActionName (v) {
+    getActionName(v) {
       const o = {
         offset: '옵셋 조정',
         kc: '즉시 신호 변경',
         gr: '녹색시간 조정',
-        gro: '녹색시간과 옵셋 조정'
+        gro: '녹색시간과 옵셋 조정',
+        gt: '현시 최소최대 만족',
+        ga: '현시 주기 만족',
       }
       return o[v] || '모름'
     },
-    getRewardFunctionName (v) {
+    getRewardFunctionName(v) {
       const o = {
         pn: '통과 차량 수',
         wt: '대기 시간',
@@ -138,7 +140,7 @@ export default {
       }
       return o[v] || '모름'
     },
-    uploadModel (obj) {
+    uploadModel(obj) {
       const formData = new window.FormData()
       formData.append('file', this.resultFile)
       this.$swal.showLoading('업로딩')
@@ -159,7 +161,7 @@ export default {
           setTimeout(() => this.$swal.close(), 1000)
         })
     },
-    numberOfJunctions (jId) {
+    numberOfJunctions(jId) {
       const SA = {
         'SA 101': 10,
         'SA 107': 4,
@@ -175,7 +177,7 @@ export default {
       })
       return sum
     },
-    statusColor (status) {
+    statusColor(status) {
       const colors = {
         running: 'bg-blue-400',
         error: 'bg-red-400',
@@ -184,7 +186,7 @@ export default {
       }
       return colors[status] || 'bg-gray-400'
     },
-    async toggleDetails (id, status, hide) {
+    async toggleDetails(id, status, hide) {
       if (!hide) {
         if (status === 'finished') {
           this.$forceUpdate()
@@ -193,26 +195,26 @@ export default {
         this.barChartDataTable[id] = {}
       }
     },
-    showHideStart (value) {
+    showHideStart(value) {
       return value === 'ready' || value === 'stopped'
     },
-    showHideResult (value) {
+    showHideResult(value) {
       return value === 'finished'
     },
-    async updateTable () {
+    async updateTable() {
       this.dataProvider({ currentPage: this.currentPage })
     },
-    hideAlert () {
+    hideAlert() {
       setTimeout(() => {
         this.msg = ''
       }, 2000)
     },
-    showInfo (item) {
+    showInfo(item) {
       if (item.error) {
         this.$swal('Problem', item.error, 'warning')
       }
     },
-    async stopSimulation (id) {
+    async stopSimulation(id) {
       try {
         await simulationService.stopSimulation(id)
         this.updateTable()
@@ -221,12 +223,12 @@ export default {
       }
     },
 
-    async reload () {
+    async reload() {
       this.envs = await optEnvService.get()
       this.envItems = this.envs
       this.envTotalRows = this.envs.length
     },
-    async dataProvider ({ currentPage }) {
+    async dataProvider({ currentPage }) {
       this.isBusy = true
       try {
         const { data, total, perPage } = (
@@ -246,10 +248,10 @@ export default {
         return []
       }
     },
-    status (text) {
+    status(text) {
       return variant[text]
     },
-    async removeSimulation (param) {
+    async removeSimulation(param) {
       const result = await this.$swal({
         title: `${param.id} 시뮬레이션을 삭제합니다.`,
         text: 'Please note that you can not cancel it',
@@ -273,10 +275,10 @@ export default {
         this.makeToast(`fail to delete ${err.message}`, 'warning')
       }
     },
-    hideCreateSimulationDialog () {
+    hideCreateSimulationDialog() {
       this.updateTable()
     },
-    makeToast (msg, variant = 'info') {
+    makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
         title: variant,
         variant,
@@ -286,7 +288,7 @@ export default {
       })
     },
 
-    async saveOptEnvConfig (config) {
+    async saveOptEnvConfig(config) {
       const obj = this.envs.find(env => env.envName === config.envName)
       if (obj) {
         try {
@@ -304,21 +306,21 @@ export default {
       this.$refs.modal.hide()
       await this.reload()
     },
-    openModify (env) {
+    openModify(env) {
       this.currentEnv = env
       this.$refs.modal.show()
     },
-    modalHide () {
+    modalHide() {
       this.currentEnv = null
     },
-    async registerSimulation (env) {
+    async registerSimulation(env) {
       const random = () => `${Math.floor(Math.random() * 1000)}`
       const generateRandomId = (prefix = 'DEFU') =>
         `${prefix
           .substring(0, 4)
           .toUpperCase()}_${moment().year()}${moment().format(
-          'MM'
-        )}_${random().padStart(5, '0')}`
+            'MM'
+          )}_${random().padStart(5, '0')}`
       env.id = generateRandomId(env.role)
       try {
         await simulationService.createSimulation(this.userId, env)
@@ -327,7 +329,7 @@ export default {
       }
       this.updateTable()
     },
-    async remove (id) {
+    async remove(id) {
       await optEnvService.remove(id)
       // this.envs = await optEnvService.get()
       await this.reload()

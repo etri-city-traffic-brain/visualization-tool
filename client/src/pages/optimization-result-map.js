@@ -91,14 +91,14 @@ function setupEventHandler() {
 
   this.$on('salt:status', async status => {
     this.progress = status.progress
-    console.log(status.progress)
     if (status.progress >= 99) {
       this.progress = 100
       setTimeout(() => {
         try {
-          this.getReward().then(() => console.log('state updated'))
-          console.log('update state')
-        } catch (err) { }
+          this.getReward().then(() => { })
+        } catch (err) {
+          log(err.message)
+        }
       }, 5000)
     }
 
@@ -107,43 +107,7 @@ function setupEventHandler() {
     }
   })
 
-  this.$on('optimization:progress', async e => {
-    console.log('opt:progress', e.progress)
-    this.progressOpt = e.progress
-    if (e.progress >= 99) {
-      this.progressOpt = 100
-    }
-    log('optimization:progress', e.progress)
-    try {
-      await this.getReward()
-    } catch (err) { }
-  })
-
-  this.$on('salt:finished', async () => {
-    log('**** SIMULATION FINISHED *****')
-    this.$bvToast.toast('Simulation Finished', {
-      title: 'xxxx',
-      variant: 'info',
-      autoHideDelay: 3000,
-      appendToast: true,
-      toaster: 'b-toaster-top-right'
-    })
-  })
-
-  this.$on('optimization:epoch', e => {
-    // log('*** OPTIMIZATION EPOCH ***')
-    // this.rewards = makeRewardChartData(e.data)
-
-    this.$bvToast.toast('OPTIMIZATION EPOCH', {
-      title: 'OPTIMIZATION EPOCH',
-      variant: 'info',
-      autoHideDelay: 3000,
-      appendToast: true,
-      toaster: 'b-toaster-top-right'
-    })
-  })
-
-  this.$on('optimization:finished', e => {
+  this.$on('optimization:finished', () => {
     // log('*** OPTIMIZATION FINISHED ***')
     // setTimeout(() => this.$swal('신호 최적화 완료'), 2000)
     this.$bvToast.toast('OPTIMIZATION FINISHED', {
@@ -154,7 +118,6 @@ function setupEventHandler() {
       toaster: 'b-toaster-top-right'
     })
     setTimeout(async () => {
-      log('** check status **')
       // await this.updateStatus()
       await this.getReward()
     }, 3000)
@@ -235,7 +198,7 @@ export default {
       apiErrorMessage: '',
       trafficLightManager: null,
       rewardCharts: [],
-      rewardTotal: {}
+      rewardTotal: {},
     }
   },
   destroyed() {
@@ -262,7 +225,6 @@ export default {
       eventBus: this
     })
     const v = this.simulation.configuration.region
-    console.log(v, this.simulation.configuration)
 
     const center = this.simulation.configuration.center
     if (center) {
@@ -314,6 +276,13 @@ export default {
 
     await this.getReward()
 
+    const result = await optimizationService.getOptTrainResult(this.simulationId, 0)
+    console.log(result)
+
+    this.trafficLightManager.setOptTrainResult(result)
+
+
+
   },
   methods: {
     getRegionName(v) {
@@ -359,8 +328,17 @@ export default {
         this.trafficLightManager.setOptJunction(junctionIds)
       }
     },
-    chartClicked(value) {
+    async chartClicked(value) {
       log('chart clicked value:', value)
+      try {
+        const result = await optimizationService.getOptTrainResult(this.simulationId, value)
+        console.log(result)
+
+        this.trafficLightManager.setOptTrainResult(result)
+
+      } catch (err) {
+        log(err.message)
+      }
     },
     resize() {
       // this.mapHeight = window.innerHeight - 220 // update map height to current height
@@ -393,6 +371,9 @@ export default {
         log(e.message)
       }
     },
+    async runSimulate() {
+
+    },
     async runTrain() {
       let isExecuted = confirm("학습을 시작합니다.");
       if (!isExecuted) { return }
@@ -415,22 +396,40 @@ export default {
       }
     },
     async getReward() {
-      const result = await optimizationService.getReward(this.simulationId)
-      this.rewardCharts = []
-      Object.keys(result.data).forEach(key => {
-        const value = result.data[key]
-        const label = new Array(value.length).fill(0).map((v, i) => i)
-        // const reward = value.map(v => Math.floor(v.reward))
-        // const avg = value.map(v => Math.floor(v.rewardAvg))
+      try {
+        const result = await optimizationService.getReward(this.simulationId)
 
-        const reward = value.map(v => Number(v.reward).toFixed(2))
-        const avg = value.map(v => Number(v.rewardAvg).toFixed(2))
+        this.rewardCharts = []
+        Object.keys(result.data).forEach(key => {
+          const value = result.data[key]
+          const label = new Array(value.length).fill(0).map((v, i) => i)
+          // const reward = value.map(v => Math.floor(v.reward))
+          // const avg = value.map(v => Math.floor(v.rewardAvg))
 
-        this.rewardCharts.push(makeRewardChart(key, label, reward, avg))
-      })
+          const reward = value.map(v => Number(v.reward).toFixed(2))
+          const avg = value.map(v => Number(v.rewardAvg).toFixed(2))
 
-      await this.getRewardTotal()
-      await this.updateStatus()
+          this.rewardCharts.push(makeRewardChart(key, label, reward, avg))
+        })
+      } catch (err) {
+        log(err.message)
+      }
+
+      try {
+        await this.getRewardTotal()
+
+      } catch (err) {
+        log(err.message)
+
+      }
+      try {
+        await this.updateStatus()
+
+      } catch (err) {
+        log(err.message)
+
+      }
+
     },
     async stop() {
       this.simulation.status = 'stopping'
