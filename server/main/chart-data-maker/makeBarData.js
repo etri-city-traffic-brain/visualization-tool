@@ -53,7 +53,7 @@ const driver = (from, simulationId, jsonObj) =>
     if (!simulationId) {
       return reject(Error('You maybe missed simulation id'))
     }
-    const simulationDir = `${from}/${simulationId}`
+    const simulationDir = `${from}/${simulationId}/output`
     try {
       const fileNew = `${simulationDir}/bar-data.json`
       // streamUtil.fileToString(fileOrigin).then((strData) => {

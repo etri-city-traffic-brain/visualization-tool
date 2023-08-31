@@ -14,7 +14,7 @@ const DEFAULT_DOCKER_IMAGE = 'images4uniq/optimizer:v0.1a.20220418'
 const options = {
   machineName: undefined, // uses local docker
   currentWorkingDirectory: undefined, // uses current working directory
-  echo: false, // echo command output to stdout/stderr
+  echo: true, // echo command output to stdout/stderr
   env: undefined,
   stdin: undefined
 }
@@ -89,7 +89,7 @@ async function run(simulation, mode, modelNum) {
       `-v ${dockerBasePath}/opt/${simulation.id}/output:/uniq/optimizer/output`,
       `-v ${dockerBasePath}/opt/${simulation.id}/model:/uniq/optimizer/model`,
       `-v ${dockerBasePath}/opt:/uniq/optimizer/opt`,
-      'images4uniq/optimizer:v3.0.20230814',
+      dockerImage,
       'python ./run_modutech.py',
       '--mode simulate',
       `--map ${map}`,
@@ -101,7 +101,7 @@ async function run(simulation, mode, modelNum) {
       `--method ${method}`,
       `--action ${action}`
       // '--men-len 16'
-    ].join(' ')
+    ]
 
     const cmdTrain = [
       `run --rm --name ${simulation.id}`,
@@ -110,7 +110,7 @@ async function run(simulation, mode, modelNum) {
       `-v ${dockerBasePath}/opt/${simulation.id}/output:/uniq/optimizer/output`,
       `-v ${dockerBasePath}/opt/${simulation.id}/model:/uniq/optimizer/model`,
       `-v ${dockerBasePath}/opt:/uniq/optimizer/opt`,
-      'images4uniq/optimizer:v3.0.20230814',
+      dockerImage,
       'python ./run_modutech.py',
       '--mode train',
       `--map ${map}`,
@@ -122,14 +122,15 @@ async function run(simulation, mode, modelNum) {
       `--method ${method}`,
       `--action ${action}`,
       '--mem-len 16'
-    ].join(' ')
+    ]
 
 
-    log(chalk.green(cmdSimulate))
-    log(chalk.yellow(cmdTrain))
+    log(chalk.green(cmdSimulate.join('\n')))
+    log(chalk.yellow(cmdTrain.join('\n')))
 
-    await docker(cmdSimulate, options)
-    return docker(cmdTrain, options)
+    await docker(cmdSimulate.join(' '), options)
+    return docker(cmdTrain.join(' '), options)
+
 
   } else if (mode === 'test') {
     // const cmdSimu = `${makeCmd('simulate', slaves[0])}`
@@ -159,7 +160,7 @@ async function run(simulation, mode, modelNum) {
       `--method ${method}`,
       `--action ${action}`
       // '--men-len 16'
-    ].join(' ')
+    ]
 
     const cmdTest = [
       `run --rm --name ${slaves[1]}`,
@@ -181,13 +182,14 @@ async function run(simulation, mode, modelNum) {
       `--action ${action}`,
       `--model-num ${modelNum}`,
       '--mem-len 16'
-    ].join(' ')
+    ]
 
-    log(chalk.green(cmdTest))
+    log(chalk.yellow(cmdTest.join('\n')))
+    log(chalk.green(cmdSimu.join('\n')))
 
     return Promise.all([
-      docker(cmdTest, options),
-      docker(cmdSimu, options)
+      docker(cmdTest.join(' '), options),
+      docker(cmdSimu.join(' '), options)
     ]
     )
   } else if (mode === 'simulation') {

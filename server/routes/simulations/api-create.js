@@ -126,10 +126,15 @@ const refineParam = param => ({
  *
  */
 async function prepareSimulation(id, body, role, slaves = [], type) {
-  const simInputDir = `${base}/data/${id}`
-  const simOutputDir = `${base}/output/${id}`
+  // const simInputDir = `${base}/data/${id}`
+  // const simOutputDir = `${base}/output/${id}`
+  const simBase = `${base}/sim/${id}`
+  const simInputDir = `${base}/sim/${id}/input`
+  const simOutputDir = `${base}/sim/${id}/output`
 
   try {
+
+    await mkdir(simBase)
     await mkdir(simInputDir)
     await mkdir(simOutputDir)
     await addSimulation({ ...body, id, slaves, role })
@@ -142,7 +147,7 @@ async function prepareSimulation(id, body, role, slaves = [], type) {
 
     log('area Type:', body.configuration.areaType)
     if (body.configuration.areaType != 'area') { // region or area
-      const path = `${base}/routes/scenario_dj_${body.configuration.region}.zip`
+      const path = `${base}/data/scenario_sim/scenario_dj_${body.configuration.region}.zip`
       await unzip(path, { dir: simInputDir })
     } else {
       await downloadScenarioByCoordinate(param, param.area, simInputDir)
@@ -179,8 +184,8 @@ async function prepareOptimization(ids, body) {
   await mkdir(inputDir)
 
   const configFileTrain = makeOptScenario(idTrain, body, 'output/train/')
-  const configFileTest = makeOptScenario(idTrain, body, 'output/test/')
-  const configFileSimulate = makeOptScenario(idTrain, body, 'output/simulate/')
+  const configFileTest = makeOptScenario(idTest, body, 'output/test/')
+  const configFileSimulate = makeOptScenario(idSimulate, body, 'output/simulate/')
 
   try {
     await writeFile(`${inputDir}/${body.configuration.region}_train.scenario.json`, stringify(configFileTrain))

@@ -1,11 +1,18 @@
 const fs = require('fs')
+const util = require('util')
+const readFile = util.promisify(fs.readFile)
 
 const {
-  saltPath: { output }
+  base
 } = require('../../config')
 
 
-module.exports = (req, res) => {
-  const grid = JSON.parse(fs.readFileSync(`${output}/grid_.geojson`, 'utf-8'))
-  res.json(grid)
+module.exports = async (req, res) => {
+  try {
+    const grid = await readFile(`${base}/data/grid_.geojson`, 'utf-8')
+    res.send(grid)
+  } catch (err) {
+    res.send({})
+    console.log(err.message)
+  }
 }

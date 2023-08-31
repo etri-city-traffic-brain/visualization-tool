@@ -75,7 +75,7 @@ const driver = (from, simulationId, jsonObj) =>
     if (!simulationId) {
       return reject(Error('You maybe missed simulation id'))
     }
-    const simulationDir = `${from}/${simulationId}`
+    const simulationDir = `${from}/${simulationId}/output`
     try {
       const fileOrigin = `${simulationDir}/${simulationId}.json`
       const fileNew = `${simulationDir}/histogram-data.json`

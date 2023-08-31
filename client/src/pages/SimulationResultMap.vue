@@ -96,9 +96,9 @@
         </div>
         <div class="p-2 text-white flex justify-between items-center">
           <div class="flex items-center space-x-2">
-            <!-- <span class="text-md"> 지역</span> -->
+            <span class="text-md"> 지역</span>
             <span class="text-md bg-gray-700 px-3 rounded-lg">{{
-              getRegionName(config.region)
+              getRegionName(config.region) || "사용자지정"
             }}</span>
             <!-- <span class="text-md"> 시간</span> -->
             <span class="text-md bg-gray-700 px-3 rounded-lg"

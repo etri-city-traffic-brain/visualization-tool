@@ -119,18 +119,34 @@
 
       <div class="bg-gray-700 mt-2 rounded-lg border w-80">
         <!-- <div class="text-white text-center p-1 text-sm">Total Reward</div> -->
-        <div class="font-bold p-2 text-white text-center">보상그래프</div>
+        <div class="font-bold p-1 text-white text-center">보상그래프</div>
         <!-- 보상 그래프 -->
         <!-- <line-chart
           :chartData="rewards"
           :options="defaultOption({}, chartClicked)"
           :height="220"
         /> -->
-        <line-chart
-          :chartData="rewardTotal"
-          :options="defaultOption({}, chartClicked)"
-          :height="220"
-        />
+        <div class="px-1">
+          <line-chart
+            :chartData="rewardTotal"
+            :options="defaultOption({}, chartClicked)"
+            :height="180"
+          />
+        </div>
+      </div>
+
+      <div class="bg-gray-700 w-80  mt-2">
+        <div class="text-center p-1 text-white">에포크</div>
+        <div class="p-2 h-24 overflow-y-auto">
+          <button
+            v-for="e in epochs"
+            :key="e"
+            class="bg-gray-200 mr-1 rounded text-sm px-1 hover:bg-blue-200"
+            @click="selectEpoch(e)"
+          >
+            {{ e }}
+          </button>
+        </div>
       </div>
 
       <div
@@ -174,12 +190,12 @@
 
       <div class="bg-gray-600 opacity-90 rounded-lg mt-2 p-2 w-80">
         <div>
-          <button
+          <!-- <button
             class="font-bold bg-blue-300 px-2 rounded text-sm hover:bg-blue-600 hover:text-white py-1"
             @click="runSimulate"
           >
             <b-icon icon="play-fill" /> 시뮬레이션
-          </button>
+          </button> -->
           <button
             class="font-bold bg-blue-300 px-2 rounded text-sm hover:bg-blue-600 hover:text-white py-1"
             @click="runTrain"

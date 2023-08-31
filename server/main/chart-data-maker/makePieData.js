@@ -12,7 +12,7 @@ const promiseStream = require('./promiseStream')
 const calcTotalStep = meta =>
   meta.period === 0 ? 0 : meta.duration / meta.period
 
-function makePie (strData) {
+function makePie(strData) {
   // const { meta, data: speedsPerLinks } = JSON.parse(strData);
   const { meta, data: speedsPerLinks } = strData
   const labels = ['막힘', '정체', '원할']
@@ -71,7 +71,7 @@ const driver = (from, simulationId, jsonObj) =>
     if (!simulationId) {
       return reject(Error('You maybe missed simulation id'))
     }
-    const simulationDir = `${from}/${simulationId}`
+    const simulationDir = `${from}/${simulationId}/output`
     try {
       const fileOrigin = `${simulationDir}/${simulationId}.json`
       const fileNew = `${simulationDir}/pie-data.json`

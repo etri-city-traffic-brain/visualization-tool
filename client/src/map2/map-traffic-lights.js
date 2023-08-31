@@ -4,7 +4,7 @@
  */
 
 import * as maptalks from 'maptalks'
-
+import * as d3 from 'd3'
 import extent from './map-extent'
 import mapService from '../service/map-service'
 
@@ -31,21 +31,29 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     const trafficLight = new maptalks.Marker(feature.geometry.coordinates, {
       symbol: [
         {
+          textName: `${groupId}`,
+          textSize: 16,
+          textFill: '#ffffff',
+          textHaloFill: "black",
+          textHaloRadius: 2,
+          textDx: -39,
+        },
+        {
           markerType: 'ellipse',
-          markerFillOpacity: 0.6,
-          markerWidth: 15,
-          markerHeight: 15,
+          markerFillOpacity: 0.9,
+          markerWidth: 20,
+          markerHeight: 20,
           markerLineWidth: 2,
           markerFill: color,
 
-          textName: `${nodeName} \n${groupId}`,
+          textName: `${nodeName}`,
           textLineSpacing: 8,
           textAlign: 'left',
           textHorizontalAlignment: 'right',
           textSize: 12,
           textFill: '#ffffff',
           textHaloFill: "black",
-          textHaloRadius: 3,
+          textHaloRadius: 2,
           textDx: 10,
           textDy: 40,
         },
@@ -151,8 +159,11 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
   }
 
   function perc2color(perc) {
+    if (perc < 0) {
+      return '#ffffff'
+    }
     var r, g, b = 0;
-    if (perc < 50) {
+    if (perc < 20) {
       r = 255;
       g = Math.round(5.1 * perc);
     }
@@ -164,6 +175,9 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     return '#' + ('000000' + h.toString(16)).slice(-6);
   }
 
+  const colorScale = d3.scaleLinear()
+    .domain([-10, 0, 10, 20, 30])
+    .range(['white', 'white', 'orange', 'yellow', 'green'])
 
 
   function setOptTrainResult(arr) {
@@ -178,15 +192,22 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
       arr.forEach(item => {
         if (item.name === nodeName) {
           g.updateSymbol([
-
             {
-              markerFill: perc2color(item.improvedRate),
 
-              textName: `${item.name} \n향샹률:${item.improvedRate} \n통행량: ${item.ftVehPassed}대 \n평균속도:${item.ftAverageSpeed}`,
+            },
+            {
+              // markerFill: perc2color(item.improvedRate),
+              markerFill: colorScale(item.improvedRate),
+
+              textName: `[${item.name}]
+  향샹률:${item.improvedRate} %
+  통행량: ${item.ftVehPassed} 대
+  평균속도:${item.ftAverageSpeed} km`,
               textLineSpacing: 8,
               textAlign: 'left',
               textHorizontalAlignment: 'right',
-              textFill: perc2color(item.improvedRate),
+              // textFill: perc2color(item.improvedRate),
+              textFill: colorScale(item.improvedRate),
             },
           ])
         }

@@ -1,12 +1,13 @@
 const makeBar = require('./makeBarData')
 const makeHistogram = require('./makeHistogramData')
 const makePie = require('./makePieData')
+const makeGrid = require('./makeGridData')
 
 const jobs = [
   makeBar,
   makeHistogram,
-  makePie
-  // makeGrid
+  makePie,
+  makeGrid
 ]
 
 const { log } = console

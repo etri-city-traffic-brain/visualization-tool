@@ -11,12 +11,17 @@ const makeGrid = require('./chart-maker/makeGrid')
 
 const chartDataReader = require('./chart-maker/makeChartData')
 
-const { saltPath: { output } } = require('../../config')
-
-
-const getChartData = chartDataReader(output)
+const { base, saltPath: { output } } = require('../../config')
 
 const fs = require('fs')
+const util = require('util')
+const readFile = util.promisify(fs.readFile)
+
+
+// const getChartData = chartDataReader(output)
+const getChartData = chartDataReader(`${base}/sim`)
+
+
 
 router.use('/', (req, res, next) => {
   const { simulationId } = req.query
@@ -45,7 +50,7 @@ router.get('/histogram', async (req, res, next) => {
       backgroundColor,
       totalData,
       stepDatas,
-    } = await getChartData(simulationId, 'histogram');
+    } = await getChartData(simulationId, 'histogram')
     res.json({
       labels,
       datasets: [{
@@ -68,18 +73,16 @@ router.get('/pie', async (req, res, next) => {
   }
 })
 
+/**
+ * 시뮬레이션 별로 생성된 그리드 데이터셋 반환
+ */
 router.get('/grid', async (req, res, next) => {
   const { simulationId } = req.query
-
-  const path = `${output}/${simulationId}/grid.json`
-
-
+  const path = `${base}/sim/${simulationId}/output/grid-data.json`
   try {
-
-    const r = fs.readFileSync(path, 'utf-8')
-
-    res.send(JSON.parse(r))
+    res.send(await readFile(path, 'utf-8'))
   } catch (err) {
+    console.log(err.message)
     next(err)
   }
 })

@@ -1,9 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+const fs = require('fs')
+const util = require('util')
 
-const readFile = util.promisify(fs.readFile);
-const { join } = path;
+const readFile = util.promisify(fs.readFile)
 
 // module.exports = dir => (simulationId, chartType) => new Promise((resolve, reject) => {
 //   const defaultPath = path.join(dir, simulationId);
@@ -18,9 +16,9 @@ const { join } = path;
 // });
 
 module.exports = targetDir => async (simulationId, chartType) => {
-  const filePath = join(targetDir, simulationId, `${chartType}-data.json`);
+  const filePath = `${targetDir}/${simulationId}/output/${chartType}-data.json`
   if (!fs.existsSync(filePath)) {
-    throw new Error(`File is not exists ${simulationId}-${chartType}`);
+    throw new Error(`File is not exists ${simulationId}-${chartType}`)
   }
-  return JSON.parse(await readFile(filePath));
-};
+  return JSON.parse(await readFile(filePath))
+}

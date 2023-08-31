@@ -141,6 +141,7 @@ export default {
     }
   },
   async mounted() {
+
     HTTP({
       url: '/salt/v1/helper/docker',
       method: 'get'
@@ -185,6 +186,7 @@ export default {
       this.epoch = env.configuration.epoch
       this.dockerImage = env.configuration.dockerImage
       this.modelSavePeriod = env.configuration.modelSavePeriod
+      this.center = env.configuration.center
     }
   },
 

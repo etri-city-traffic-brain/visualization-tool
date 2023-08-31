@@ -32,10 +32,11 @@ const subIds = cellId => {
 
 const pickResultFile = id => {
   const file = fs
-    .readdirSync(`${output}/${id}`)
+    .readdirSync(`${config.base}/sim/${id}/output`)
     .find(file => file.endsWith('.csv'))
   if (!file) return null
-  return `${output}/${id}/${file}`
+  // return `${output}/${id}/${file}`
+  return `${config.base}/sim/${id}/output/${file}`
 }
 
 const cook = ({ simulationId, duration, period }) => {
@@ -108,7 +109,8 @@ const cook = ({ simulationId, duration, period }) => {
         debug('==> insert into DB')
         await recordResult(simulationId, cells)
         debug('insert mongo end')
-        const elapsedTime = await makeChartData(output, simulationId, {
+        // const elapsedTime = await makeChartData(output, simulationId, {
+        const elapsedTime = await makeChartData(`${config.base}/sim/`, simulationId, {
           meta: {
             duration,
             period

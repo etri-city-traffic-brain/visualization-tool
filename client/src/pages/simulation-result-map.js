@@ -507,7 +507,8 @@ export default {
     },
     centerTo() {
       if (this.config.areaType === 'area') {
-        const center = [this.config.area.minX, this.config.area.minY]
+
+        const center = [this.config.area.minX + 0.04, this.config.area.minY + 0.01]
         this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
         return
       }
@@ -527,7 +528,7 @@ export default {
       this.wsClient.init()
     },
     getRegionName(r) {
-      return map[r] || r
+      return map[r] || r || '사용자 지정'
     },
     removeLinkChart(linkId) {
       const idx = this.chart.links.findIndex(obj => obj.linkId === linkId)

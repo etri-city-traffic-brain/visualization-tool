@@ -80,6 +80,12 @@
         <div class="flex-none w-40 text-right">도커 이미지</div>
         <b-form-select v-model="dockerImage" :options="imageOptions" />
       </div>
+      <div class="flex space-x-2 items-center">
+        <div class="flex-none w-40 text-right">Center</div>
+        <div>
+          {{ center }}
+        </div>
+      </div>
     </div>
     <transition name="slide-fade-">
       <div v-if="showMap">

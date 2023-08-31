@@ -18,7 +18,7 @@ const VOLUME_CONTAINER = '/uniq/simulator/salt/volume'
 const RUN_SCRIPT = 'python /uniq/simulator/salt/bin/salt.py'
 
 const buildConfigPath = sId =>
-  `/uniq/simulator/salt/volume/data/${sId}/salt.scenario.json`
+  `/uniq/simulator/salt/volume/sim/${sId}/input/salt.scenario.json`
 
 module.exports = async simulation => {
   const sId = simulation.id

@@ -199,6 +199,8 @@ export default {
       trafficLightManager: null,
       rewardCharts: [],
       rewardTotal: {},
+      epochs: 0,
+      isReady: false,
     }
   },
   destroyed() {
@@ -277,11 +279,8 @@ export default {
     await this.getReward()
 
     const result = await optimizationService.getOptTrainResult(this.simulationId, 0)
-    console.log(result)
 
     this.trafficLightManager.setOptTrainResult(result)
-
-
 
   },
   methods: {
@@ -329,11 +328,8 @@ export default {
       }
     },
     async chartClicked(value) {
-      log('chart clicked value:', value)
       try {
         const result = await optimizationService.getOptTrainResult(this.simulationId, value)
-        console.log(result)
-
         this.trafficLightManager.setOptTrainResult(result)
 
       } catch (err) {
@@ -356,6 +352,9 @@ export default {
     async connectWebSocket() {
       this.wsClient.init()
     },
+    async selectEpoch(v) {
+      this.chartClicked(v)
+    },
     async updateStatus() {
       try {
         const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
@@ -371,12 +370,11 @@ export default {
         log(e.message)
       }
     },
-    async runSimulate() {
-
-    },
     async runTrain() {
-      let isExecuted = confirm("학습을 시작합니다.");
-      if (!isExecuted) { return }
+      let yes = confirm("학습을 시작합니다.");
+      if (!yes) {
+        return
+      }
 
       try {
         this.simulation.status = 'running'
@@ -407,9 +405,9 @@ export default {
           // const avg = value.map(v => Math.floor(v.rewardAvg))
 
           const reward = value.map(v => Number(v.reward).toFixed(2))
-          const avg = value.map(v => Number(v.rewardAvg).toFixed(2))
+          const rewardAvg = value.map(v => Number(v.rewardAvg).toFixed(2))
 
-          this.rewardCharts.push(makeRewardChart(key, label, reward, avg))
+          this.rewardCharts.push(makeRewardChart(key, label, reward, rewardAvg))
         })
       } catch (err) {
         log(err.message)
@@ -452,10 +450,10 @@ export default {
         if (results.length > 0) {
           const total = results[0]
 
-          const label = new Array(total.length).fill(0).map((v, i) => i + 1)
+          const label = new Array(total.length).fill(0).map((v, i) => i)
           const reward = total.map(v => Number(v.reward).toFixed(2))
           const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
-
+          this.epochs = label
           this.rewardTotal = makeRewardChart('total', label, reward, avg)
           this.progressOpt = total.length
         }

@@ -67,7 +67,7 @@ export default {
     SignalMap,
     SignalEditor
   },
-  data () {
+  data() {
     return {
       envName: generateRandomId('Exp'),
       id: generateRandomId(this.role),
@@ -76,13 +76,13 @@ export default {
       toDate: getToday(),
       fromTime: '07:00',
       toTime: '08:59',
-      periodSelected: periodOptions[0].value,
+      periodSelected: periodOptions[1].value,
       intervalSelected: intervalOptions[0].value,
       regionSelected: 'doan',
-      junctionId: 'SA 101,SA 107,SA 111,SA 104',
-      epoch: 10,
+      // junctionId: 'SA 101,SA 107,SA 111,SA 104',
+      // epoch: 10,
       extent: null, // current map extent
-      dockerImage: 'images4uniq/salt:v2.1a.20210915.test_BUS',
+      dockerImage: '',
       periodOptions: [...periodOptions],
       intervalOptions: [...intervalOptions],
       regionOptions: [...regionOptions],
@@ -105,12 +105,12 @@ export default {
       dockerImages: {}
     }
   },
-  destroyed () {
+  destroyed() {
     if (this.map) {
       this.map.remove()
     }
   },
-  mounted () {
+  mounted() {
     setTimeout(() => {
       this.map = makeMap({ mapId: this.mapId, zoom: 13 })
       // setTimeout(() => this.selectRegion(), 200)
@@ -129,7 +129,7 @@ export default {
 
     const env = this.env
     if (this.env) {
-      this.envName = env.envName
+      // this.envName = env.envName
       this.description = env.description
       this.fromDate = env.configuration.fromDate
       this.toDate = env.configuration.toDate
@@ -139,7 +139,7 @@ export default {
       this.scriptSelected = env.configuration.script
       this.intervalSelected = env.configuration.interval
       this.regionSelected = env.configuration.region
-      this.junctionId = env.configuration.junctionId
+      // this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
       this.dockerImage = env.configuration.dockerImage
       this.modelSavePeriod = env.configuration.modelSavePeriod
@@ -185,10 +185,10 @@ export default {
     }
   },
   methods: {
-    getDockerImage () {
+    getDockerImage() {
       return this.dockerImages[this.simulationTypeSelected]
     },
-    getExtentMicro () {
+    getExtentMicro() {
       if (this.rectangleMicro) {
         const e = this.rectangleMicro.getExtent()
         return {
@@ -199,7 +199,7 @@ export default {
         }
       }
     },
-    getExtent () {
+    getExtent() {
       if (this.rectangleMeso) {
         const e = this.rectangleMeso.getExtent()
         return {
@@ -210,7 +210,7 @@ export default {
         }
       }
     },
-    setMesoRegion () {
+    setMesoRegion() {
       const center = this.map.getCenter()
       if (this.rectangleMeso) {
         this.rectangleMeso.setCoordinates(center)
@@ -235,7 +235,7 @@ export default {
         .addTo(this.map)
       rectMeso.startEdit()
     },
-    setMicroRegion () {
+    setMicroRegion() {
       const center = this.map.getCenter()
       if (this.rectangleMicro) {
         this.rectangleMicro.setCoordinates(center.add(-0.02, 0.02))
@@ -265,11 +265,11 @@ export default {
         .addTo(this.map)
       rectMicor.startEdit()
     },
-    resetForm () {
+    resetForm() {
       this.id = generateRandomId(this.role)
       this.description = '...'
     },
-    getCurrentConfig () {
+    getCurrentConfig() {
       const from = moment(`${this.fromDate} ${this.fromTime}`)
       const to = moment(`${this.toDate} ${this.toTime}`)
       const begin = moment.duration(this.fromTime).asSeconds()
@@ -283,7 +283,7 @@ export default {
         description: this.description,
         role: this.role,
         type: this.role,
-        envName: this.envName,
+        // envName: this.envName,
         configuration: {
           // extent: this.extent,
           fromDate: this.fromDate,
@@ -310,27 +310,33 @@ export default {
       }
       return simulationConfig
     },
-    save () {
+    save() {
       this.loading = true
-      if (!this.envName || this.envName.length < 3) {
-        this.$bvToast.toast('환경 이름이 너무 짧거나 비어 있습니다.(3글자이상)')
+      // if (!this.envName || this.envName.length < 3) {
+      //   this.$bvToast.toast('환경 이름이 너무 짧거나 비어 있습니다.(3글자이상)')
+      //   return
+      // }
+      const config = this.getCurrentConfig()
+      // console.log(JSON.stringify(this.getCurrentConfig(), false, 2))
+      if (!config.dockerImage) {
+        alert('도커이미지가 비었음')
         return
       }
       // send event to the parent
-      this.$emit('config:save', this.getCurrentConfig())
-      this.hide()
-      this.loading = false
+      // this.$emit('config:save', this.getCurrentConfig())
+      // this.hide()
+      // this.loading = false
     },
-    hide () {
+    hide() {
       this.$emit('hide')
       this.$bvModal.hide(this.modalName)
       this.resetForm()
     },
-    openInfobox () {
+    openInfobox() {
       this.currentConfig = this.getCurrentConfig()
       this.$refs['config-info'].show()
     },
-    hideInfobox () {
+    hideInfobox() {
       this.$refs['config-info'].hide()
     }
   }
