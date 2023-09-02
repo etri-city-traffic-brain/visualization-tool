@@ -151,21 +151,18 @@ async function prepareSimulation(id, body, role, slaves = [], type) {
       await unzip(path, { dir: simInputDir })
     } else {
       await downloadScenarioByCoordinate(param, param.area, simInputDir)
-      await unzip(simInputDir + '/data.zip', {
-        dir: simInputDir
-      })
+      await unzip(simInputDir + '/data.zip', { dir: simInputDir })
       await unlink(simInputDir + '/data.zip')
     }
     //
     if (param.microArea.minX) {
       await downloadScenarioByCoordinate(param, param.microArea, simInputDir)
-      await unzip(simInputDir + '/data.zip', {
-        dir: simInputDir + '/multiarea'
-      })
+      await unzip(simInputDir + '/data.zip', { dir: simInputDir + '/multiarea' })
       await unlink(simInputDir + '/data.zip')
     }
   } catch (err) {
-    log(err)
+    log(err.message)
+    updateStatus(id, 'error', { error: err.message })
     return err
   }
   updateStatus(id, 'ready', {})

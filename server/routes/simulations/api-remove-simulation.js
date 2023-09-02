@@ -4,9 +4,14 @@ const fs = require('fs')
 const rmdir = util.promisify(require('rimraf'))
 const exists = util.promisify(fs.exists)
 
-const { config, getSimulations, getSimulation } = require('../../globals')
+const {
+  config,
+  getSimulations,
+  getSimulation,
+  mongooseUtils
+} = require('../../globals')
 
-const removeSimulation = require('../../main/simulation-manager/crud/remove')
+const { log } = console
 
 async function remove(req, res) {
   const { params: { id } } = req
@@ -34,7 +39,22 @@ async function remove(req, res) {
   }
 
   if (sim.type === 'simulation') {
-    await removeSimulation(id)
+    const optDir = `${config.base}/sim/${id}`
+
+    try {
+      await getSimulations().remove({ id }).write()
+      await exists(optDir)
+      await rmdir(optDir)
+    } catch (err) {
+      log(err.message)
+    }
+
+    try {
+      await mongooseUtils.dropCollection('simulation_results', id)
+    } catch (err) {
+      log(err.message)
+    }
+
     res.send({ id })
   }
 }

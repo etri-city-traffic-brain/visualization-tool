@@ -242,7 +242,10 @@
                     <div
                       v-for="v of Object.entries(chart.travelTimePerJunction)"
                       :key="v[0]"
-                      class="text-white grid grid-cols-6 px-1"
+                      class="text-white- grid grid-cols-6 px-1"
+                      :style="{
+                        color: getColorForImprovedRate(v[1].improvement_rate)
+                      }"
                     >
                       <div class="border-b col-span-3">
                         <button
@@ -285,6 +288,9 @@
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
+                    </div>
+                    <div class="text-white text-center mt-2">
+                      실험결과 없음
                     </div>
                   </div>
                 </div>
@@ -364,7 +370,9 @@
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
                         </svg>
-                        <!-- <div class="text-md text-white pl-3">데이터 확인중...</div> -->
+                        <div class="text-white pl-3">
+                          실험결과 없음...
+                        </div>
                       </div>
                     </div>
                   </div>

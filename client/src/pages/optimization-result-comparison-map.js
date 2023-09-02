@@ -19,15 +19,17 @@ import SimulationResult from '@/pages/SimulationResult.vue'
 
 // import congestionColor from '@/utils/colors'
 import LineChart from '@/components/charts/LineChart'
+
+
 import UniqCongestionColorBar from '@/components/CongestionColorBar'
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
 import UniqMapChanger from '@/components/UniqMapChanger'
 import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 import toastMixin from '@/components/mixins/toast-mixin'
-import style from '@/components/style'
-import UniqCardTitle from '@/components/func/UniqCardTitle'
 
+import UniqCardTitle from '@/components/func/UniqCardTitle'
+import * as d3 from 'd3'
 import { optimizationService as optSvc } from '@/service'
 import signalService from '@/service/signal-service'
 
@@ -52,6 +54,9 @@ const dataset = (label, color, data) => ({
   data
 })
 
+const colorScale = d3.scaleLinear()
+  .domain([-10, 0, 10, 20, 30])
+  .range(['white', 'white', 'orange', 'yellow', 'green'])
 
 const makeSpeedLineData = (
   dataFt = [],
@@ -342,8 +347,6 @@ export default {
         this.chart2.progress = 0
         this.chart1.progress = 0
       }
-
-      log('test progress:', status.progress)
     })
 
     busFixed.$on('optimization:finished', () => {
@@ -369,8 +372,12 @@ export default {
     window.scrollTo(0, 0)
     window.addEventListener('resize', this.resize.bind(this))
 
+
   },
   methods: {
+    getColorForImprovedRate(v) {
+      return colorScale(v)
+    },
     async updateOptResult(forceUpdate) {
       const start = new Date().getTime()
       const progress = this.chart1.progress
@@ -381,6 +388,9 @@ export default {
           //
           const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
           this.optResult = optResult
+
+          this.simulations[1].trafficLightManager.setOptTestResult(optResult.intersections, 'test')
+          this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')
 
           this.chart.travelTimeChartInView = makeSpeedLineData(
             optResult.simulate.travel_times.filter((v, i) => i % 29 === 0),
@@ -452,7 +462,12 @@ export default {
 
     async selectCrossName(name) {
       this.selectedNode = name
-
+      if (!this.optResult) {
+        return
+      }
+      if (!this.optResult.intersections) {
+        return
+      }
       const d = this.optResult.intersections[name]
       if (d) {
         // this.chart.travelTimeJunctionChart = makeSpeedLineData(

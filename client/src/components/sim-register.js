@@ -53,6 +53,8 @@ const sTypeOptions = [
   { text: '멀티스케일', value: 'multi' }
 ]
 
+const { log } = console
+
 export default {
   name: 'sim-registration',
   props: [
@@ -79,8 +81,6 @@ export default {
       periodSelected: periodOptions[1].value,
       intervalSelected: intervalOptions[0].value,
       regionSelected: 'doan',
-      // junctionId: 'SA 101,SA 107,SA 111,SA 104',
-      // epoch: 10,
       extent: null, // current map extent
       dockerImage: '',
       periodOptions: [...periodOptions],
@@ -110,40 +110,39 @@ export default {
       this.map.remove()
     }
   },
-  mounted() {
+  async mounted() {
     setTimeout(() => {
-      this.map = makeMap({ mapId: this.mapId, zoom: 13 })
       // setTimeout(() => this.selectRegion(), 200)
-    }, 200)
+      this.map = makeMap({ mapId: this.mapId, zoom: 13 })
+    }, 500)
 
-    HTTP({
+    this.dockerImages = await HTTP({
       url: '/salt/v1/helper/docker',
       method: 'get'
     })
       .then(r => r.data)
-      .then(d => {
-        this.dockerImages = d.simulation.images
-        console.log(d.simulation.images)
-        // this.images = d.simulation.images
-      })
+      .then(d => d.simulation.images)
 
-    const env = this.env
-    if (this.env) {
-      // this.envName = env.envName
-      this.description = env.description
-      this.fromDate = env.configuration.fromDate
-      this.toDate = env.configuration.toDate
-      this.fromTime = env.configuration.fromTime.slice(0, 5)
-      this.toTime = env.configuration.toTime.slice(0, 5)
-      this.periodSelected = env.configuration.period
-      this.scriptSelected = env.configuration.script
-      this.intervalSelected = env.configuration.interval
-      this.regionSelected = env.configuration.region
-      // this.junctionId = env.configuration.junctionId
-      this.epoch = env.configuration.epoch
-      this.dockerImage = env.configuration.dockerImage
-      this.modelSavePeriod = env.configuration.modelSavePeriod
-    }
+    this.dockerImage = this.dockerImages.meso[0]
+
+    // const env = this.env
+    // log('env:', env)
+    // if (this.env) {
+    //   // this.envName = env.envName
+    //   this.description = env.description
+    //   this.fromDate = env.configuration.fromDate
+    //   this.toDate = env.configuration.toDate
+    //   this.fromTime = env.configuration.fromTime.slice(0, 5)
+    //   this.toTime = env.configuration.toTime.slice(0, 5)
+    //   this.periodSelected = env.configuration.period
+    //   this.scriptSelected = env.configuration.script
+    //   this.intervalSelected = env.configuration.interval
+    //   this.regionSelected = env.configuration.region
+    //   // this.junctionId = env.configuration.junctionId
+    //   this.epoch = env.configuration.epoch
+    //   this.dockerImage = env.configuration.dockerImage
+    //   this.modelSavePeriod = env.configuration.modelSavePeriod
+    // }
   },
   watch: {
     areaType: function (t) {
@@ -283,9 +282,7 @@ export default {
         description: this.description,
         role: this.role,
         type: this.role,
-        // envName: this.envName,
         configuration: {
-          // extent: this.extent,
           fromDate: this.fromDate,
           toDate: this.toDate,
           fromTime: `${this.fromTime}:00`,
@@ -297,10 +294,7 @@ export default {
           days,
           interval: this.intervalSelected,
           region: this.regionSelected,
-          junctionId: this.junctionId,
           dockerImage: this.dockerImage,
-          script: this.scriptSelected,
-          epoch: this.epoch,
           modelSavePeriod: this.modelSavePeriod,
           simulationType: this.simulationTypeSelected,
           microArea: { ...this.getExtentMicro() },
@@ -311,21 +305,15 @@ export default {
       return simulationConfig
     },
     save() {
-      this.loading = true
-      // if (!this.envName || this.envName.length < 3) {
-      //   this.$bvToast.toast('환경 이름이 너무 짧거나 비어 있습니다.(3글자이상)')
-      //   return
-      // }
       const config = this.getCurrentConfig()
-      // console.log(JSON.stringify(this.getCurrentConfig(), false, 2))
-      if (!config.dockerImage) {
+      if (!config.configuration.dockerImage) {
         alert('도커이미지가 비었음')
         return
       }
-      // send event to the parent
-      // this.$emit('config:save', this.getCurrentConfig())
-      // this.hide()
-      // this.loading = false
+      this.loading = true
+      this.$emit('config:save', this.getCurrentConfig())
+      this.hide()
+      this.loading = false
     },
     hide() {
       this.$emit('hide')

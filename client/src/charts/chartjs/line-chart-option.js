@@ -34,12 +34,12 @@ export default (
       {
         ticks: {
           autoSkip: true,
-          autoSkipPadding: 10,
+          autoSkipPadding: 15,
           maxRotation: 0,
           display: true,
           fontColor,
           callback: function (value, index, values) {
-            return value + '(s)'
+            return value
           }
         }
       }

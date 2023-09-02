@@ -1,6 +1,9 @@
+//    신호최적화 학습 화면
+
 /* eslint-disable no-unused-expressions */
 
 import * as R from 'ramda'
+import * as d3 from 'd3'
 
 import makeMap from '@/map2/make-map'
 import MapManager from '@/map2/map-manager'
@@ -8,7 +11,6 @@ import WebSocketClient from '@/realtime/ws-client'
 import SimulationResult from '@/pages/SimulationResult.vue'
 import bins from '@/stats/histogram'
 import config from '@/stats/config'
-import { optimizationService, simulationService } from '@/service'
 
 import HistogramChart from '@/components/charts/HistogramChart'
 import Doughnut from '@/components/charts/Doughnut'
@@ -23,23 +25,80 @@ import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
 
 import lineChartOption from '@/charts/chartjs/line-chart-option'
-// import donutChartOption from '@/charts/chartjs/donut-chart-option';
+import barChartOption from '@/charts/chartjs/bar-chart-option'
 import makeRewardChartData from '@/charts/chartjs/utils/make-reward-chart'
 import TrafficLightManager from '@/map2/map-traffic-lights'
 import signalGroups from '@/config/junction-config'
-import axios from 'axios'
 
-const makeDonutDefaultDataset = () => ({
-  datasets: [
-    {
-      data: [1, 1, 1],
-      backgroundColor: ['red', 'orange', 'green']
+import { optimizationService, simulationService } from '@/service'
+
+const rewardChartOption = {
+  maintainAspectRatio: false,
+  animation: false,
+  spanGaps: true,
+  responsive: true,
+  showLine: true,
+  title: {
+    display: false
+  },
+  interaction: {
+    mode: 'index'
+  },
+  tooltips: {
+    mode: 'index',
+    intersect: false,
+    enabled: true
+  },
+  scales: {
+    xAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 50,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
+      }
+    ],
+    yAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 15,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
+      }
+    ]
+  },
+  legend: {
+    display: false,
+    labels: {
+      fontColor: 'white',
+      fontSize: 12
     }
-  ],
-  labels: ['막힘', '정체', '원활']
-})
+  },
+}
 
-const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
+const colorScaleImproment = d3.scaleLinear()
+  .domain([-10, 0, 10, 20, 30])
+  .range(['white', 'white', 'orange', 'yellow', 'green'])
+
+function makeDonutDefaultDataset() {
+  return {
+    datasets: [
+      {
+        data: [1, 1, 1],
+        backgroundColor: ['red', 'orange', 'green']
+      }
+    ],
+    labels: ['막힘', '정체', '원활']
+  }
+}
+
+function makeRewardChart(label, labels = [], data = [], data2 = []) {
   return {
     labels,
     label,
@@ -50,23 +109,21 @@ const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
         borderColor: 'skyblue',
         data,
         fill: false,
-        borderWidth: 1,
-        pointRadius: 1
+        borderWidth: 2,
+        pointRadius: 2
       },
       {
-        label: '40avg',
-        backgroundColor: 'red',
-        borderColor: 'red',
+        label: 'reward(40avg)',
+        backgroundColor: 'orange',
+        borderColor: 'orange',
         data: data2,
         fill: false,
-        borderWidth: 1,
-        pointRadius: 1
+        borderWidth: 2,
+        pointRadius: 2
       }
     ]
   }
 }
-
-const { log } = console
 
 function setupEventHandler() {
   this.$on('salt:data', d => {
@@ -108,8 +165,6 @@ function setupEventHandler() {
   })
 
   this.$on('optimization:finished', () => {
-    // log('*** OPTIMIZATION FINISHED ***')
-    // setTimeout(() => this.$swal('신호 최적화 완료'), 2000)
     this.$bvToast.toast('OPTIMIZATION FINISHED', {
       title: 'OPTIMIZATION FINISHED',
       variant: 'info',
@@ -118,13 +173,11 @@ function setupEventHandler() {
       toaster: 'b-toaster-top-right'
     })
     setTimeout(async () => {
-      // await this.updateStatus()
       await this.getReward()
     }, 3000)
   })
 
-  this.$on('map:moved', ({ zoom, extent }) => {
-    this.currentZoom = zoom
+  this.$on('map:moved', ({ extent }) => {
     this.currentExtent = [extent.min, extent.max]
   })
 
@@ -139,13 +192,14 @@ function setupEventHandler() {
 
   this.$on('ws:close', () => {
     this.wsStatus = 'close'
-    // this.makeToast('ws connection closed', 'warning')
   })
 
   this.$on('junction:selected', () => {
     log('junction:selected')
   })
 }
+
+const { log } = console
 
 export default {
   name: 'OptimizationResultMap',
@@ -163,13 +217,6 @@ export default {
     UniqCardTitle
   },
   computed: {
-    progressOfEpoch() {
-      if (this.rewards.labels.length === 0) return 0
-      return (
-        (this.rewards.labels.length / +this.simulation.configuration.epoch) *
-        100
-      )
-    },
     status() {
       return this.simulation.status
     }
@@ -184,9 +231,7 @@ export default {
       mapManager: null,
       showLoading: false,
       congestionColor,
-      currentEdge: null,
       wsClient: null,
-      currentZoom: '',
       currentExtent: '',
       wsStatus: 'ready',
       avgSpeed: 0.0,
@@ -194,13 +239,15 @@ export default {
       progressOpt: 0,
       avgSpeedView: makeDonutDefaultDataset(),
       defaultOption: lineChartOption,
+      rewardChartOption,
+      barChartOption,
       rewards: { labels: [] },
-      apiErrorMessage: '',
       trafficLightManager: null,
       rewardCharts: [],
       rewardTotal: {},
       epochs: 0,
       isReady: false,
+      optTrainResult: []
     }
   },
   destroyed() {
@@ -215,9 +262,7 @@ export default {
 
   async mounted() {
     this.simulationId = this.$route.params ? this.$route.params.id : null
-    // const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
-    // this.simulation = simulation
-    await this.updateStatus()
+
     this.showLoading = true
     this.resize()
     this.map = makeMap({ mapId: this.mapId, zoom: 15 })
@@ -226,36 +271,21 @@ export default {
       simulationId: this.simulationId,
       eventBus: this
     })
-    const v = this.simulation.configuration.region
 
     const center = this.simulation.configuration.center
     if (center) {
       this.map.animateTo({
         center: [center.x, center.y]
       })
-    } else {
-      if (v === 'doan') {
-        this.map.animateTo({
-          center: [127.3396677, 36.3423342]
-          // zoom: 14
-        })
-      } else if (v === 'cdd3') {
-        setTimeout(() => {
-          this.map.animateTo({
-            center: [127.35375270822743, 36.383148078460906]
-            // zoom: 14
-          })
-        }, 1000)
-      }
     }
 
     this.mapManager.loadMapData()
 
+    await this.updateStatus()
+
     this.trafficLightManager = TrafficLightManager(this.map, this.getGroupIds(), this)
     // this.trafficLightManager.setTargetJunctions(this.simulation.configuration.junctionId.split(','))
     this.trafficLightManager.setOptJunction(this.simulation.configuration.junctionId.split(','))
-
-    await this.trafficLightManager.load()
 
     this.wsClient = WebSocketClient({
       simulationId: this.simulationId,
@@ -276,14 +306,18 @@ export default {
       this.showProgressing()
     }
 
+    await this.trafficLightManager.load()
+
     await this.getReward()
 
     const result = await optimizationService.getOptTrainResult(this.simulationId, 0)
-
+    this.optTrainResult = result
     this.trafficLightManager.setOptTrainResult(result)
-
   },
   methods: {
+    getColorForImprovedRate(v) {
+      return colorScaleImproment(v)
+    },
     getRegionName(v) {
       const m = {
         doan: '도안',
@@ -330,6 +364,7 @@ export default {
     async chartClicked(value) {
       try {
         const result = await optimizationService.getOptTrainResult(this.simulationId, value)
+        this.optTrainResult = result
         this.trafficLightManager.setOptTrainResult(result)
 
       } catch (err) {
@@ -370,29 +405,6 @@ export default {
         log(e.message)
       }
     },
-    async runTrain() {
-      let yes = confirm("학습을 시작합니다.");
-      if (!yes) {
-        return
-      }
-
-      try {
-        this.simulation.status = 'running'
-        await optimizationService.runTrain(this.simulationId)
-        this.showProgressing()
-        await this.updateStatus()
-      } catch (err) {
-        log(err.message)
-        this.apiErrorMessage = err.message
-        this.$bvToast.toast('신호학습을 중지하고 다시 시도하세요.', {
-          title: '신호학습 실패',
-          variant: 'danger',
-          autoHideDelay: 3000,
-          appendToast: true,
-          toaster: 'b-toaster-top-right'
-        })
-      }
-    },
     async getReward() {
       try {
         const result = await optimizationService.getReward(this.simulationId)
@@ -401,9 +413,6 @@ export default {
         Object.keys(result.data).forEach(key => {
           const value = result.data[key]
           const label = new Array(value.length).fill(0).map((v, i) => i)
-          // const reward = value.map(v => Math.floor(v.reward))
-          // const avg = value.map(v => Math.floor(v.rewardAvg))
-
           const reward = value.map(v => Number(v.reward).toFixed(2))
           const rewardAvg = value.map(v => Number(v.rewardAvg).toFixed(2))
 
@@ -412,41 +421,14 @@ export default {
       } catch (err) {
         log(err.message)
       }
+      this.getRewardTotal()
+      this.updateStatus()
 
-      try {
-        await this.getRewardTotal()
-
-      } catch (err) {
-        log(err.message)
-
-      }
-      try {
-        await this.updateStatus()
-
-      } catch (err) {
-        log(err.message)
-
-      }
-
-    },
-    async stop() {
-      this.simulation.status = 'stopping'
-      try {
-        await optimizationService.stop(this.simulationId)
-        await this.updateStatus()
-      } catch (err) {
-        log('fail to stop', err.message)
-      }
-      // const { simulation } = await simulationService.getSimulationInfo(this.simulationId)
-      // this.simulation = simulation
-      // this.trafficLightManager.setOptJunction([])
     },
     async getRewardTotal() {
       try {
-        const result = await optimizationService.getRewardTotal(
-          this.simulationId
-        )
-        const results = Object.values(result.data)
+        const result = await optimizationService.getRewardTotal(this.simulationId).then(res => res.data)
+        const results = Object.values(result)
         if (results.length > 0) {
           const total = results[0]
 
@@ -463,14 +445,48 @@ export default {
         }
       } catch (err) {
         log(err)
-        // this.$bvToast.toast('Fail to load reward total', {
-        //   title: 'Error',
-        //   variant: 'danger',
-        //   autoHideDelay: 3000,
-        //   appendToast: true,
-        //   toaster: 'b-toaster-top-right'
-        // })
       }
-    }
+    },
+    async runTrain() {
+      const { value: yes } = await this.$swal({
+        title: '신호최적화 학습을 시작합니다.',
+        text: this.simulation.id,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '시작',
+        cancelButtonText: '취소'
+      })
+
+      if (!yes) {
+        return
+      }
+
+      try {
+        this.simulation.status = 'running'
+        await optimizationService.runTrain(this.simulationId)
+        this.showProgressing()
+        await this.updateStatus()
+      } catch (err) {
+        log(err.message)
+        this.$bvToast.toast('신호학습을 중지하고 다시 시도하세요.', {
+          title: '신호학습 실패',
+          variant: 'danger',
+          autoHideDelay: 3000,
+          appendToast: true,
+          toaster: 'b-toaster-top-right'
+        })
+      }
+    },
+    async stop() {
+      this.simulation.status = 'stopping'
+      try {
+        await optimizationService.stop(this.simulationId)
+        await this.updateStatus()
+      } catch (err) {
+        log('fail to stop', err.message)
+      }
+    },
   }
 }

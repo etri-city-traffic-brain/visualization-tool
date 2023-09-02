@@ -11,6 +11,8 @@ const {
   saltPath: { volumeSim }
 } = config
 
+const { log } = console
+
 const DOCKER_IMAGE_DEFAULT = 'images4uniq/salt:v2.1a.20210915.test_BUS'
 
 const VOLUME_HOST = volumeSim
@@ -21,28 +23,27 @@ const buildConfigPath = sId =>
   `/uniq/simulator/salt/volume/sim/${sId}/input/salt.scenario.json`
 
 module.exports = async simulation => {
-  const sId = simulation.id
-  const img = simulation.configuration.dockerImage
-  const imgName = img || DOCKER_IMAGE_DEFAULT
-  const configPath = buildConfigPath(sId)
+  const simulationId = simulation.id
+  const imgName = simulation.configuration.dockerImage || DOCKER_IMAGE_DEFAULT
+  const configPath = buildConfigPath(simulationId)
   const volume = `${VOLUME_HOST}:${VOLUME_CONTAINER}`
 
-  const sType = simulation.configuration.simulationType // meso | micro | multi
-  console.log('*** start simulation ***', sType)
+  const simulationType = simulation.configuration.simulationType // meso | micro | multi
+  log('*** start simulation ***', simulationType)
 
-  if (sType === 'multi' || sType === 'micro') {
-    const option = sType === 'multi' ? 'with_multi' : 'with_micro'
-    console.log('simulation type:', option)
-    console.log('docker image: ', simulation.configuration.dockerImage)
+  if (simulationType === 'multi' || simulationType === 'micro') {
+    const option = simulationType === 'multi' ? 'with_multi' : 'with_micro'
+    log('simulation type:', option)
+    log('docker image: ', simulation.configuration.dockerImage)
     return docker(
-      `run --rm --name ${sId} -v ${volume} ${imgName} ${RUN_SCRIPT} -s ${configPath} -o ${option}`,
+      `run --rm --name ${simulationId} -v ${volume} ${imgName} ${RUN_SCRIPT} -s ${configPath} -o ${option}`,
       { echo: true }
     )
   }
 
 
   return docker(
-    `run --rm --name ${sId} -v ${volume} ${imgName} ${RUN_SCRIPT} -s ${configPath}`,
+    `run --rm --name ${simulationId} -v ${volume} ${imgName} ${RUN_SCRIPT} -s ${configPath}`,
     { echo: false }
   )
 }

@@ -14,9 +14,11 @@ const {
   }
 } = require('../../config')
 
-async function download (url, targetDir = './') {
+const { log } = console
+
+async function download(url, targetDir = './') {
   const targetFilePath = path.resolve(targetDir, 'data.zip')
-  console.log(url)
+  log(`${url}`)
   try {
     const { data } = await axios({
       url,
@@ -28,7 +30,7 @@ async function download (url, targetDir = './') {
 
     return new Promise((resolve, reject) => {
       data.on('end', () => {
-        console.log(targetFilePath)
+        log(targetFilePath)
         // const stats = fs.statSync(targetFilePath)
         // console.log(stats.size)
         // if (stats.size < 100) {
@@ -43,20 +45,20 @@ async function download (url, targetDir = './') {
     if (error.response) {
       // 요청이 이루어졌으며 서버가 2xx의 범위를 벗어나는 상태 코드로 응답했습니다.
       // console.log(error.response.data);
-      console.log(error.response.status)
+      log(error.response.status)
       // console.log(error.response.headers);
     } else if (error.request) {
       // 요청이 이루어 졌으나 응답을 받지 못했습니다.
       // `error.request`는 브라우저의 XMLHttpRequest 인스턴스 또는
       // Node.js의 http.ClientRequest 인스턴스입니다.
-      console.log(error.request)
+      log(error.request)
     }
 
     return Promise.reject(error)
   }
 }
 
-function makeUrlForScenarioByRegion ({
+function makeUrlForScenarioByRegion({
   include = 0,
   fromDate,
   toDate,
@@ -86,7 +88,7 @@ function makeUrlForScenarioByRegion ({
   return `${urlBaseForScenarioByRegion}${reqestParameter}`
 }
 
-function makeUrlForScenarioByCoordinate (
+function makeUrlForScenarioByCoordinate(
   {
     include = 0,
     fromDate,
@@ -121,11 +123,11 @@ function makeUrlForScenarioByCoordinate (
   return `${urlBaseForScenarioByCoordinate}${reqestParameter}`
 }
 
-async function downloadScenarioByRegion (param, targetDir) {
+async function downloadScenarioByRegion(param, targetDir) {
   return download(makeUrlForScenarioByRegion(param), targetDir)
 }
 
-async function downloadScenarioByCoordinate (param, area, targetDir) {
+async function downloadScenarioByCoordinate(param, area, targetDir) {
   return download(makeUrlForScenarioByCoordinate(param, area), targetDir)
 }
 
