@@ -73,7 +73,7 @@
 
         <div class="p-2 overflow-auto text-white" style="max-height:calc(80vh)">
           <div v-for="v of selected" :key="v.id" class="flex space-x-1 justify-between mb-1">
-            <div :class="'bg-' + v.color + '-200 text-black'" class="rounded w-16 px-1">
+            <div class="text-white rounded w-16 px-1" :style="{ 'background-color': '#' + v.color }">
               {{ v.groupId || "" }}
             </div>
 

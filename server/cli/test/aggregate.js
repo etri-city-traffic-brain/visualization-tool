@@ -1,5 +1,5 @@
 
-const { connect } = require('./db')
+const { connect } = require('../db')
 
 /**
  * 시뮬레이션 결과는 셀단위로 저장 되어 있다고 가정한다.
@@ -9,7 +9,7 @@ const { connect } = require('./db')
  *
  * 화면에서 링크단위로 요청을 하는 경우에는 링크 아이디로 검색후 aggregation 과정을 거친 후 반환하도록 해야 한다.
  */
-async function run () {
+async function run() {
   const { connection } = await connect('simulation_results')
   const collection = 'inventory'
   const option = [

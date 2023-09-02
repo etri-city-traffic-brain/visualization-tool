@@ -2,8 +2,10 @@
 
 const fs = require('fs')
 const fse = require('fs-extra')
-const { connect } = require('./db')
 const chalk = require('chalk')
+
+const { connect } = require('./db')
+
 const { log } = console
 
 // const data = {
@@ -13,7 +15,7 @@ const { log } = console
 //   signals: '../data/map-traffic-light.geojson',
 // };
 
-async function run (connection, collectionName, geojson) {
+async function run(connection, collectionName, geojson) {
   const { db } = connection
   const collection = db.collection(collectionName)
   try {
@@ -32,7 +34,7 @@ async function run (connection, collectionName, geojson) {
   return result
 }
 
-async function importData (collectionName, filePath) {
+async function importData(collectionName, filePath) {
   log('start processing', filePath)
   const { connection } = await connect('map')
   const exists = await fse.pathExists(filePath)
@@ -51,7 +53,7 @@ async function importData (collectionName, filePath) {
 }
 
 if (require.main === module) {
-  importData('signals', './signals.geojson').then(() => {
+  importData('signals', './signals_v2.geojson').then(() => {
     // console.log('finished')
   }).catch(err => console.log(err))
 }
