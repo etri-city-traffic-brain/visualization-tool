@@ -8,7 +8,7 @@ const { WebSocket } = window
 // eslint-disable-next-line no-undef
 const env = process && process.env
 if (env) {
-  log(`Mode: %c${env.NODE_ENV}`, 'color: red')
+  log(`Mode Env: %c${env.NODE_ENV}`, 'color: red')
 }
 // const wsUrl = env.NODE_ENV === 'development' ? 'ws://101.79.1.124:8080' : 'ws://101.79.1.124:8080/'
 const wsUrl =
@@ -33,7 +33,7 @@ const extend = extent => {
   }
 }
 let killed = false
-function Client ({ url = wsUrl, simulationId, eventBus }) {
+function Client({ url = wsUrl, simulationId, eventBus }) {
   if (!eventBus) {
     throw new Error('eventBus is null')
   }
@@ -62,7 +62,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
     killed = false
     init()
   }
-  function init (slaves) {
+  function init(slaves) {
     // log(`init ${simulationId} - ${wsUrl}`)
     if (status === 'open') {
       log('WebSocket is already opened!!')
@@ -127,7 +127,7 @@ function Client ({ url = wsUrl, simulationId, eventBus }) {
   }
 
   // 시뮬레이터로 BBox 설정을 요청한다.
-  function setBoundingBox (simulationId, extent) {
+  function setBoundingBox(simulationId, extent) {
     const { min, max } = extend(extent)
     send({
       simulationId,

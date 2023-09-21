@@ -114,7 +114,7 @@ export default {
     setTimeout(() => {
       // setTimeout(() => this.selectRegion(), 200)
       this.map = makeMap({ mapId: this.mapId, zoom: 13 })
-    }, 500)
+    }, 1)
 
     this.dockerImages = await HTTP({
       url: '/salt/v1/helper/docker',
@@ -146,20 +146,22 @@ export default {
   },
   watch: {
     areaType: function (t) {
-      if (t === 'area') {
-        if (this.rectangleMeso) {
-          this.rectangleMeso.startEdit()
-          this.rectangleMeso.show()
-        } else {
-          this.setMesoRegion()
+      setTimeout(() => {
+        if (t === 'area') {
+          if (this.rectangleMeso) {
+            this.rectangleMeso.startEdit()
+            this.rectangleMeso.show()
+          } else {
+            this.setMesoRegion()
+          }
+          this.regionSelected = null
+          return
         }
-        this.regionSelected = null
-        return
-      }
-      if (this.rectangleMeso) {
-        this.rectangleMeso.endEdit()
-        this.rectangleMeso.hide()
-      }
+        if (this.rectangleMeso) {
+          this.rectangleMeso.endEdit()
+          this.rectangleMeso.hide()
+        }
+      }, 500)
     },
     simulationTypeSelected: function (type) {
       if (type === 'multi') {

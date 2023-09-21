@@ -148,6 +148,7 @@ function setupEventHandler() {
 
   this.$on('salt:status', async status => {
     this.progress = status.progress
+    this.isReady = true
     if (status.progress >= 99) {
       this.progress = 100
       setTimeout(() => {
@@ -304,6 +305,8 @@ export default {
 
     if (this.simulation.status === 'running') {
       this.showProgressing()
+    } else {
+      this.isReady = true
     }
 
     await this.trafficLightManager.load()
@@ -448,6 +451,7 @@ export default {
       }
     },
     async runTrain() {
+      this.isReady = false
       const { value: yes } = await this.$swal({
         title: '신호최적화 학습을 시작합니다.',
         text: this.simulation.id,
