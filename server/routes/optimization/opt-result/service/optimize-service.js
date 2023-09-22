@@ -8,48 +8,6 @@ function OptimizeService() {
     return ft > 0 ? (1 - rl / ft) * 100 : 0
   }
 
-  function optimize_xxx(reportFt, reportRl) {
-    const improvementRate = getFixedNum(getImprovementRate(reportFt.travelTime, reportRl.travelTime))
-    const simulate = {
-      avg_speed: getFixedNum(reportFt.avgSpeed),
-      travel_time: getFixedNum(reportFt.travelTime),
-      travel_times: reportFt.travelTimes.map(travelTime => getFixedNum(travelTime, 2))
-    }
-    const test = {
-      avg_speed: getFixedNum(reportRl.avgSpeed),
-      travel_time: getFixedNum(reportRl.travelTime),
-      travel_times: reportRl.travelTimes.map(travelTime => getFixedNum(travelTime, 2))
-    }
-    const intersections = [
-      Object.keys(reportFt.intersections),
-      Object.keys(reportRl.intersections)
-    ].flat(1).reduce((bucket, rlName) => {
-      if (rlName in bucket) return bucket
-      const obj = { simulate: {}, test: {} }
-      const intersectionFt = reportFt.intersections[rlName] || null
-      const intersectionRl = reportRl.intersections[rlName] || null
-      if (intersectionFt !== null) {
-        obj.simulate.travel_time = getFixedNum(intersectionFt.travelTime)
-        obj.simulate.cumlative_avgs = intersectionFt.cumlativeAvgs.map(cumlativeAvg => getFixedNum(cumlativeAvg, 2))
-        obj.simulate.signal_explain = intersectionFt.signalExplain
-      }
-      if (intersectionRl !== null) {
-        obj.test.travel_time = getFixedNum(intersectionRl.travelTime)
-        obj.test.cumlative_avgs = intersectionRl.cumlativeAvgs.map(cumlativeAvg => getFixedNum(cumlativeAvg, 2))
-        obj.test.signal_explain = intersectionRl.signalExplain
-      }
-      obj.improvement_rate = getFixedNum(getImprovementRate(intersectionFt.travelTime, intersectionRl.travelTime))
-      bucket[rlName] = obj
-      return bucket
-    }, {})
-    return Object.freeze({
-      improvement_rate: improvementRate,
-      simulate,
-      test,
-      intersections
-    })
-  }
-
   function optimize(reportFt, reportRl) {
     const improvementRate = getFixedNum(getImprovementRate(reportFt.travelTime, reportRl.travelTime))
     const simulate = {
