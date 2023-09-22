@@ -168,7 +168,8 @@ export default {
         'SA 111': 2,
         'SA 104': 5,
         'SA 1701': 11,
-        'SA 1702': 8
+        'SA 1702': 8,
+        'SA 28': 12
       }
       const jIds = jId.split(',').map(v => v.trim())
       let sum = 0

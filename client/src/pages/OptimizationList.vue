@@ -39,7 +39,8 @@
 
           <template v-slot:cell(region)="row">
             <div>
-              {{ getRegionName(row.item.configuration.region) }}
+              <!-- {{ getRegionName(row.item.configuration.region) }} -->
+              {{  row.item.configuration.regionName }}
             </div>
           </template>
 
@@ -118,7 +119,8 @@
 
           <template v-slot:cell(region)="row">
             <div>
-              {{ getRegionName(row.item.configuration.region) }}
+              <!-- {{ getRegionName(row.item.configuration.region) }} -->
+              {{ row.item.configuration.regionName }}
             </div>
           </template>
 

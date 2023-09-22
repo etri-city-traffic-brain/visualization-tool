@@ -446,6 +446,7 @@ export default {
           //
           const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
           this.optResult = optResult
+
           log(optResult)
           this.simulations[1].trafficLightManager.setOptTestResult(optResult.intersections, 'test')
           this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')

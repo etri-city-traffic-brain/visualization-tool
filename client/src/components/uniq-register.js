@@ -163,12 +163,10 @@ export default {
     this.scenario = scenario
     this.areaOptions = scenario.map(s => {
       return {
-        value: s.region, text: s.description,
+        value: s.region,
+        text: s.description,
       }
     })
-
-
-
 
     // console.log('simulation register ui', this.modalName)
     if (this.modalName === 'create-simulation-modal') {
@@ -184,6 +182,7 @@ export default {
       this.toTime = env.configuration.toTime.slice(0, 5)
       this.periodSelected = env.configuration.period
       this.areaSelected = env.configuration.region
+
       this.scriptSelected = env.configuration.script
       this.intervalSelected = env.configuration.interval
 
@@ -240,6 +239,8 @@ export default {
       }
 
 
+      const regionName = this.areaOptions.find(v => v.value === this.areaSelected)
+
 
       const simulationConfig = {
         id: this.id,
@@ -250,6 +251,7 @@ export default {
         envName: this.envName,
         configuration: {
           region: this.areaSelected,
+          regionName: regionName.text,
           extent: this.extent,
           fromDate: this.fromDate,
           toDate: this.toDate,
