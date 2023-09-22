@@ -95,11 +95,12 @@
           @selection:finished="selectionFinished"
         >
         </signal-map> -->
-        <junction
+        <SignalGroupSelection
           class=""
           @selection:finished="selectionFinished"
           :height="600"
           groupSelection="true"
+          :signalGroups="signalGroups"
         />
       </div>
     </transition>

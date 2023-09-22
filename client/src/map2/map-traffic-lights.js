@@ -187,14 +187,15 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
 
       Object.entries(testResult).forEach(([key, value]) => {
         if (key === nodeName) {
+
           g.updateSymbol([
             {
             },
             {
               markerFill: colorScale(value.improvement_rate),
               textName: type === 'test'
-                ? `[${key}], 향상률: ${value.improvement_rate} % \n통행량: ${value[type].travel_time} 대`
-                : `[${key}], \n통행량: ${value[type].travel_time} 대`,
+                ? `[${key}]\n 통행시간: ${value[type].travel_time} (s) \n 향상률: ${value.improvement_rate} % \n`
+                : `[${key}]\n 통행시간: ${value[type].travel_time} (s)`,
               textLineSpacing: 8,
               textAlign: 'left',
               textHorizontalAlignment: 'right',
@@ -202,7 +203,6 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
             },
           ])
         }
-
       })
     })
   }

@@ -224,6 +224,7 @@
             <!-- 교차로별 통과시간 향상률 테이블 START -->
             <div class="m-1 space-y-1 flex-1 overflow-auto">
               <div class="p-1 pb-2 bg-gray-800 text-sm rounded h-64">
+                <div class="text-white text-center pb-1">평균 통과시간 향상률</div>
                 <div class="text-sm bg-gray-800">
                   <div
                     v-if="
@@ -231,12 +232,12 @@
                     "
                   >
                     <div
-                      class="text-white font-bold grid grid-cols-6 gap-1 text-center"
+                      class="text-white font-bold grid grid-cols-6 gap-1 text-center text-xs"
                     >
-                      <div class="bg-gray-500 col-span-3">교차로</div>
-                      <div class="bg-gray-500">기존</div>
-                      <div class="bg-gray-500">최적</div>
-                      <div class="bg-gray-500">향상률</div>
+                      <div class="py-1 bg-gray-500 col-span-3">교차로</div>
+                      <div class="py-1 bg-gray-500">기존(초)</div>
+                      <div class="py-1 bg-gray-500">최적(초)</div>
+                      <div class="py-1 bg-gray-500">향상률</div>
                     </div>
 
                     <div
@@ -313,7 +314,7 @@
                     <div class="flex space-x-1 text-sm">
                       <div class="bg-gray-800 p-1 px-2">
                         <button @click.prevent="currentTab = 'total'">
-                          전체 평균통과시간
+                          평균통과시간
                         </button>
                       </div>
                       <div class="bg-gray-600 p-1 px-2">
@@ -327,12 +328,12 @@
                         </button>
                       </div>
                     </div>
-                    <div class="bg-gray-700 px-2">
+                    <div class="bg-blue-400 px-2 rounded">
                       <button
                         @click="isShowAvgTravelChart = !isShowAvgTravelChart"
                         class="text-sm"
                       >
-                        닫기
+                        그래프 닫기
                       </button>
                     </div>
                   </div>
@@ -344,7 +345,7 @@
                     >
                       <line-chart
                         :chartData="chart.travelTimeChartInView"
-                        :options="lineChartOption({})"
+                        :options="lineChartOption"
                         :height="220"
                       />
                     </div>
@@ -386,7 +387,7 @@
                           >
                             <line-chart
                               :chartData="chart.travelTimeJunctionChart"
-                              :options="lineChartOption({})"
+                              :options="lineChartOption"
                               :height="220"
                             />
                           </div>
@@ -423,14 +424,14 @@
         <!-- 평균 통과시간 그래프 END -->
 
         <div
-          class="absolute bottom-0 right-2 bg-gray-700 px-2"
+          class="absolute bottom-0 right-2 bg-blue-400 px-2 rounded"
           v-if="!isShowAvgTravelChart"
         >
           <button
             @click="isShowAvgTravelChart = true"
-            class="text-sm text-white"
+            class="text-sm text-white font-bold"
           >
-            그래프
+            그래프 열기
           </button>
         </div>
 

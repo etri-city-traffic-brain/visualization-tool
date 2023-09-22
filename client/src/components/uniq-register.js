@@ -5,7 +5,8 @@ import optService from '@/service/optimization-service'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
 import { HTTP } from '@/http-common'
-import Junction from '@/pages/JunctionView'
+// import Junction from '@/pages/JunctionView'
+import SignalGroupSelection from '@/pages/SignalGroupSelection'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
 const generateRandomId = (prefix = 'DEFU') =>
@@ -49,8 +50,8 @@ const actionOptions = [
   // { value: 'kc', text: 'kc - 즉시 신호 변경' },
   // { value: 'gr', text: 'gr - 녹색시간 조정' },
   // { value: 'gro', text: 'gro - 녹색시간과 옵셋 조정' }
-  { value: 'gt', text: 'gt - 현시 최소최대 만족' },
   { value: 'ga', text: 'ga - 현시 주기 만족' },
+  { value: 'gt', text: 'gt - 현시 최소최대 만족' },
 
 ]
 const methodOptions = [
@@ -59,17 +60,17 @@ const methodOptions = [
   { value: 'sappo_rnd', text: 'SAPPO_RND' }
 ]
 const rewardFuncOptions = [
-  { value: 'pn', text: 'pn - 통과 차량 수' },
   { value: 'wq', text: 'wq - 대기 큐 길이' },
+  { value: 'pn', text: 'pn - 통과 차량 수' },
   { value: 'wt', text: 'wt - 대기 시간' },
   // { value: 'tt', text: 'tt - 통과 소요 시간' },
   // { value: 'cwq', text: 'cwq - 축적된 대기 큐 길이' }
 ]
 
 const stateOptions = [
+  { value: 'vd', text: 'vd - 차량 수와 밀도' },
   { value: 'v', text: 'v - 차량 수' },
   { value: 'd', text: 'd - 차량 밀도' },
-  { value: 'vd', text: 'vd - 차량 수와 밀도' },
   // { value: 'vdd', text: 'vdd - 차량 수를 밀도로 나눈 값' }
 ]
 
@@ -86,6 +87,8 @@ const intervalOptions = [
   { text: '100 Step', value: 100 }
 ]
 
+const { log } = console
+
 export default {
   name: 'uniq-registration',
   props: [
@@ -99,7 +102,8 @@ export default {
   components: {
     SignalMap,
     SignalEditor,
-    Junction
+    // Junction
+    SignalGroupSelection
   },
   data() {
     return {
@@ -137,7 +141,8 @@ export default {
       showEnv: true,
       modelSavePeriod: 5,
       center: {},
-      scenario: []
+      scenario: [],
+      signalGroups: ['SA 101', 'SA 103']
     }
   },
   async mounted() {
@@ -153,12 +158,16 @@ export default {
       })
 
     const scenario = await optService.getScenario()
+    // console.log(scenario)
+    // this.signalGroups = sce
     this.scenario = scenario
     this.areaOptions = scenario.map(s => {
       return {
         value: s.region, text: s.description,
       }
     })
+
+
 
 
     // console.log('simulation register ui', this.modalName)
@@ -191,10 +200,17 @@ export default {
   },
 
   methods: {
-    regionChanged(v) {
+    async regionChanged(v) {
       const obj = this.scenario.find(item => item.region === v)
       if (obj) {
         this.junctionId = obj.tls.join(',')
+      }
+      const scenario = this.scenario.find(s => {
+        return s.region === v
+      })
+      if (scenario) {
+        const groups = await optService.getSignalGroups(scenario.region)
+        this.signalGroups = groups
       }
     },
     openSignalMap() {

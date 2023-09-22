@@ -54,6 +54,10 @@ function extractSignalGroups(filePath) {
   return group
 }
 
+module.exports = {
+  extractSignalGroups
+}
+
 if (require.main === module) {
   const region = 'doan'
   const path = `/home/ubuntu/uniq-simv2/data/scenario/${region}/${region}.tss.xml`

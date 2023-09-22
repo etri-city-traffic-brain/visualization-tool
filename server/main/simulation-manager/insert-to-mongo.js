@@ -5,7 +5,7 @@ const { db } = require('../../config')
 
 const { log } = console
 
-connectDB(db)
+// connectDB(db)
 
 const {
   useSimulationDB, dropSimulationCollection

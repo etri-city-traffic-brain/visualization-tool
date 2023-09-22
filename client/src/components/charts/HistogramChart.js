@@ -35,7 +35,10 @@ export default {
           yAxes: [{
             ticks: {
               display: true,
-              fontColor: 'white'
+              fontColor: 'white',
+              callback: function (value) {
+                return value.toLocaleString("en-US") + ' (대)'
+              }
             },
             gridLines: { display: false, },
           }]

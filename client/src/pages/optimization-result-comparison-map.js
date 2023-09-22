@@ -39,8 +39,66 @@ import map from '@/region-code'
 import SignalSystem from '@/actions/action-vis'
 import parseAction from '@/actions/action-parser'
 
-import lineChartOption from '@/charts/chartjs/line-chart-option'
-import barChartOption from '@/charts/chartjs/bar-chart-option'
+// import lineChartOption from '@/charts/chartjs/line-chart-option'
+// import barChartOption from '@/charts/chartjs/bar-chart-option'
+
+const lineChartOption = {
+  maintainAspectRatio: false,
+  // animation: false,
+  spanGaps: true, // enable for all datasets
+  responsive: true,
+  showLine: true, // disable for a single dataset
+  title: {
+    display: false
+  },
+  interaction: {
+    mode: 'index'
+  },
+  tooltips: {
+    mode: 'index',
+    intersect: false,
+    enabled: false
+  },
+  scales: {
+    xAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 50,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
+        }
+      }
+    ],
+    yAxes: [
+      {
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 15,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white',
+          callback: function (value, index, values) {
+            return value + '(s)'
+          }
+        }
+      }
+    ]
+  },
+  legend: {
+    display: true,
+    labels: {
+      fontColor: 'white',
+      fontSize: 12
+    }
+  },
+  onClick: function (evt, item) {
+    // if (callback && item.length > 0) {
+    // callback(item[0]._index)
+    // }
+  }
+}
 
 const { log } = window.console
 
@@ -69,22 +127,22 @@ const makeSpeedLineData = (
   const datasets = []
   datasets.push(dataset('기존신호', 'grey', dataFt))
   datasets.push(dataset('최적신호', 'orange', dataRl))
-  if (avgTTFT > 0) {
-    datasets.push(dataset(
-      '기존신호(평균)',
-      'skyblue',
-      new Array(dataRl.length).fill(avgTTFT)
-    ))
-  }
-  if (avgTTRL > 0) {
-    datasets.push(
-      dataset(
-        '최적신호(평균)',
-        'yellow',
-        new Array(dataRl.length).fill(avgTTRL)
-      )
-    )
-  }
+  // if (avgTTFT > 0) {
+  //   datasets.push(dataset(
+  //     '기존신호(평균)',
+  //     'skyblue',
+  //     new Array(dataRl.length).fill(avgTTFT)
+  //   ))
+  // }
+  // if (avgTTRL > 0) {
+  //   datasets.push(
+  //     dataset(
+  //       '최적신호(평균)',
+  //       'yellow',
+  //       new Array(dataRl.length).fill(avgTTRL)
+  //     )
+  //   )
+  // }
   return {
     labels: new Array(dataRl.length).fill(0).map((_, i) => i * filterStep),
     normalized: true,
@@ -388,7 +446,7 @@ export default {
           //
           const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
           this.optResult = optResult
-
+          log(optResult)
           this.simulations[1].trafficLightManager.setOptTestResult(optResult.intersections, 'test')
           this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')
 
@@ -432,10 +490,13 @@ export default {
             this.signalExplain.update(parseAction(this.actionForOpt[1].action))
           }
         } catch (err) {
-          this.statusText = err.message
+          // this.statusText = err.message
+          log(err.message)
           if (err.response) {
-            this.statusText = err.response.data
+            // this.statusText = err.response.data
+            log(err.response.data)
             this.status = 'error'
+
           }
         }
       }

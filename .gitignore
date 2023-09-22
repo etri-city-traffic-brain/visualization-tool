@@ -25,3 +25,4 @@ map-ui/
 # debug message
 output/
 db.json
+*.bak

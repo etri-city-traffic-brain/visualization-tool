@@ -119,6 +119,10 @@ function getScenario() {
   return HTTP.get(`${base}/scenario`).then(res => res.data)
 }
 
+function getSignalGroups(region) {
+  return HTTP.get(`${base}/signal/groups/${region}`).then(res => res.data)
+}
+
 export default {
   runTrain,
   runFixed,
@@ -129,5 +133,6 @@ export default {
   getPhaseReward,
   stop, getSigOptResult,
   getOptTrainResult,
-  getScenario
+  getScenario,
+  getSignalGroups
 }
