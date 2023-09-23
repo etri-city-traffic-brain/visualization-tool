@@ -116,6 +116,7 @@ export default {
       this.centerMarker.bringToFront()
     },
     updateSignalGroups() {
+      console.log('update signal groups', this.signalGroups)
       this.trafficLightsLayer.getGeometries().forEach(g => {
         const obj = this.signalGroups.find(s => {
           const ooo = Object.entries(this.groupMap).find(([key, value]) => {

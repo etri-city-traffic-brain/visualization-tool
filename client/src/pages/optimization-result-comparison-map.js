@@ -127,22 +127,22 @@ const makeSpeedLineData = (
   const datasets = []
   datasets.push(dataset('기존신호', 'grey', dataFt))
   datasets.push(dataset('최적신호', 'orange', dataRl))
-  // if (avgTTFT > 0) {
-  //   datasets.push(dataset(
-  //     '기존신호(평균)',
-  //     'skyblue',
-  //     new Array(dataRl.length).fill(avgTTFT)
-  //   ))
-  // }
-  // if (avgTTRL > 0) {
-  //   datasets.push(
-  //     dataset(
-  //       '최적신호(평균)',
-  //       'yellow',
-  //       new Array(dataRl.length).fill(avgTTRL)
-  //     )
-  //   )
-  // }
+  if (avgTTFT > 0) {
+    datasets.push(dataset(
+      '기존신호(평균)',
+      'skyblue',
+      new Array(dataRl.length).fill(avgTTFT)
+    ))
+  }
+  if (avgTTRL > 0) {
+    datasets.push(
+      dataset(
+        '최적신호(평균)',
+        'yellow',
+        new Array(dataRl.length).fill(avgTTRL)
+      )
+    )
+  }
   return {
     labels: new Array(dataRl.length).fill(0).map((_, i) => i * filterStep),
     normalized: true,
@@ -254,6 +254,17 @@ export default {
         chart1_travelTimeJunction: 0,
         chart2_avgSpeedJunction: 0,
         chart2_travelTimeJunction: 0,
+      },
+      rewardTotal: [],
+      optTestResult: {
+        first: {
+          epoch: 0,
+          result: []
+        },
+        second: {
+          epoch: 0,
+          result: []
+        }
       }
     }
   },
@@ -433,6 +444,21 @@ export default {
 
   },
   methods: {
+
+    getEff(idx) {
+      return (100 - (this.optTestResult.first.result[idx].rlAvgTravelTime / this.optTestResult.second.result[idx].rlAvgTravelTime) * 100).toFixed(2)
+    },
+    getProgressColor(v) {
+      return v > 0 ? 'success' : 'danger'
+    },
+    async loadTestResult(type, epoch) {
+      try {
+        const result = await optSvc.getOptTestResult(this.simulation.id, epoch)
+        this.optTestResult[type].result = result
+      } catch (err) {
+        log(err.message)
+      }
+    },
     getColorForImprovedRate(v) {
       return colorScale(v)
     },
@@ -442,6 +468,10 @@ export default {
       if ((progress > 0 && progress < 100) || forceUpdate) {
         this.statusText = 'chart created...' + +(Date.now() - start) / 1000
 
+
+        // const result = await optSvc.getOptTestResult(this.simulation.id, 0)
+        // this.optTestResult = result
+        // console.log(result)
         try {
           //
           const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
@@ -451,11 +481,23 @@ export default {
           this.simulations[1].trafficLightManager.setOptTestResult(optResult.intersections, 'test')
           this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')
 
+          // this.simulations[1].trafficLightManager.setOptResult2(this.optTestResult, 'test')
+          // this.simulations[0].trafficLightManager.setOptResult2(this.optTestResult, 'simulate')
+
           this.chart.travelTimeChartInView = makeSpeedLineData(
             optResult.simulate.travel_times.filter((v, i) => i % 29 === 0),
             optResult.test.travel_times.filter((v, i) => i % 29 === 0),
             optResult.simulate.travel_time,
             optResult.test.travel_time,
+            29
+          )
+          this.chart.travelTimeChartInViewAcc = makeSpeedLineData(
+            optResult.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
+            optResult.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
+            // optResult.simulate.travel_time,
+            // optResult.test.travel_time,
+            0,
+            0,
             29
           )
 
@@ -468,6 +510,7 @@ export default {
               d.test.travel_time,
               100
             )
+
           }
 
           this.chart.travelTimePerJunction = optResult.intersections
@@ -547,6 +590,13 @@ export default {
           0, // d.test.travel_time,
           10
         )
+        this.chart.travelTimeJunctionChartAcc = makeSpeedLineData(
+          d.simulate.travel_times.filter((v, i) => i % 10 === 0),
+          d.test.travel_times.filter((v, i) => i % 10 === 0),
+          d.simulate.travel_time,
+          d.test.travel_time,
+          10
+        )
       }
 
       this.isShowAvgTravelChart = true
@@ -554,13 +604,15 @@ export default {
       this.currentTab = ''
       this.updateSignalExplain()
 
+      this.simulations[1].trafficLightManager.moveTo(name)
+
     },
 
     async updateRewardTotal() {
       const result = await optSvc.getRewardTotal(this.simulation.id)
 
       const results = Object.values(result.data)
-
+      this.rewardTotal = results[0]
       const total = results[0]
       if (!total) {
         this.statusText = '모델파일 없음'
@@ -568,8 +620,6 @@ export default {
       }
       const labels = new Array(total.length).fill(0).map((v, i) => i)
       const rewards = total.map(v => Number(v.reward).toFixed(2))
-      // const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
-      // this.rewards = makeRewardChart('total', label, reward, avg)
       this.rewards.labels = labels
       this.rewards.values = rewards
     },
@@ -661,9 +711,25 @@ export default {
           )
         }
 
-        return e => {
+        return async e => {
           if (e.target.id === map1.id) {
             moveTo(map2, e.target)
+
+            // const result = await optSvc.getOptTestResult(this.simulation.id, 0)
+            // this.optTestResult = result
+            // try {
+            //   //
+            //   const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
+            //   this.optResult = optResult
+
+            //   log(optResult)
+
+            //   this.simulations[1].trafficLightManager.setOptResult2(this.optTestResult, 'test')
+            //   this.simulations[0].trafficLightManager.setOptResult2(this.optTestResult, 'simulate')
+            // } catch (err) {
+            //   log(err.message)
+            // }
+
           }
         }
       }

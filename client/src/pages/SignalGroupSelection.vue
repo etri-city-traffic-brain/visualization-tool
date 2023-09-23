@@ -10,22 +10,19 @@
       </div>
     </div>
 
-    <div class="absolute left-2 top-1 w-48 rounded px-1 bg-gray-400" v-if="isReady">
-      <div class="overflow-auto"  :style="{ height: mapHeight-30 + 'px' }">
-        <button v-for="group in signalGroups" :key="group"
-        @click="animate(group)"
-        class="w-20 text-white text-sm p-1 rounded m-1 border"
-        :style="{'background-color': getGroupColor(group)}"
-        v-if="getGroupColor(group)"
-        >
+    <div class="absolute left-2 top-1 w-52 rounded px-1 bg-gray-400" v-if="isReady">
+      <div class="overflow-auto" :style="{ height: mapHeight - 30 + 'px' }">
+        <button v-for="group in signalGroups" :key="group" @click="animate(group)"
+          class="w-20 text-white text-sm p-1 rounded m-1 border" :style="{ 'background-color': getGroupColor(group) }"
+          v-if="getGroupColor(group)">
 
-          <span v-if="isAdded(group)" class="flex items-center justify-center" >
-            {{ group }} <input type="checkbox" checked class="ml-1"  @click.stop="delTlGroup(group)">
+          <span v-if="isAdded(group)" class="flex items-center justify-center">
+            {{ group }} <input type="checkbox" checked class="ml-1" @click.stop="delTlGroup(group)">
           </span>
           <span v-else class="flex items-center justify-center space-x-1">{{ group }}
             <input type="checkbox" class="ml-1" @click.stop="addTlGroup(group)"></span>
 
-          </button>
+        </button>
       </div>
     </div>
 

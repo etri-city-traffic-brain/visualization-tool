@@ -5,15 +5,19 @@ function getAvgTT(sumTravelTime, sumPassed) {
 }
 
 function IntersectionCollector() {
-  let signalExplains = []
+  const signalExplains = []
+  const travelTimes = []
   const cumlativeAvgs = []
   const calcSumTravelTime = Calculator.Sum()
   const calcSumPassed = Calculator.Sum()
+  const calcSumTravelTimeStep = Calculator.Sum()
 
   function collect(intersection) {
     signalExplains.push(intersection.actions)
     calcSumTravelTime.calculate(intersection.sumTravelTime)
     calcSumPassed.calculate(intersection.sumPassed)
+    calcSumTravelTimeStep.calculate(intersection.sumTravelTime)
+    travelTimes.push(getAvgTT(intersection.sumTravelTime, intersection.sumPassed))
     cumlativeAvgs.push(getAvgTT(calcSumTravelTime.get(), calcSumPassed.get()))
   }
 
@@ -21,6 +25,7 @@ function IntersectionCollector() {
     const travelTime = getAvgTT(calcSumTravelTime.get(), calcSumPassed.get())
     return Object.freeze({
       travelTime,
+      travelTimes,
       cumlativeAvgs,
       signalExplains
     })
@@ -32,6 +37,7 @@ function IntersectionCollector() {
 function Report() {
   let baseStep = null
   const travelTimes = []
+  const cumlativeAvgs = []
   const intersectionMap = new Map()
   const calcStep = Calculator.Sum()
   const calcAvgSpeed = Calculator.Avg()
@@ -59,7 +65,9 @@ function Report() {
     const { tlName, ...data } = intersection
     if (data.step !== baseStep + calcStep.get()) {
       calcStep.calculate(1)
+      // travelTimes.push(getAvgTT(calcSumTravelTimeStep.get(), calcSumPassed.get()))
       travelTimes.push(getAvgTT(calcSumTravelTimeStep.get(), calcSumPassedStep.get()))
+      cumlativeAvgs.push(getAvgTT(calcSumTravelTime.get(), calcSumPassed.get()))
       calcSumTravelTimeStep.reset()
       calcSumPassedStep.reset()
     }
@@ -89,6 +97,7 @@ function Report() {
       avgSpeed,
       travelTime,
       travelTimes,
+      cumlativeAvgs,
       intersections
     })
   }

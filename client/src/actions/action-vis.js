@@ -67,7 +67,7 @@ function SignalSystem(container, action = { duration: [], offset: 0 }) {
     edges: edges
   }
   const options = {
-    physics: false,
+    physics: true,
     layout: { randomSeed: 2 },
     edges: {
       width: 2,
@@ -77,9 +77,9 @@ function SignalSystem(container, action = { duration: [], offset: 0 }) {
       fixed: true
     },
     interaction: {
-      dragNodes: false,
+      dragNodes: true,
       dragView: false,
-      zoomView: false
+      zoomView: true
     }
   }
   const network = new vis.Network(container, networkData, options)

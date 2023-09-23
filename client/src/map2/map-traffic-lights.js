@@ -175,6 +175,18 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     })
   }
 
+  function moveTo(crossName) {
+    const tlayer = map.getLayer('trafficLightsLayer')
+
+    tlayer.getGeometries().forEach(g => {
+      if (g.properties.NAME === crossName) {
+        map.animateTo({
+          center: [g.getCoordinates().x, g.getCoordinates().y]
+        })
+      }
+    })
+  }
+
   function setOptTestResult(obj, type = 'test') {
     testResult = obj
     tType = type
@@ -207,6 +219,52 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     })
   }
 
+  const optResultMap = {}
+  function setOptResult2(arr, type) {
+
+    optResultMap[type] = arr
+    const tlayer = map.getLayer('trafficLightsLayer')
+    if (!tlayer) {
+      return
+    }
+    tlayer.getGeometries().forEach(g => {
+      const nodeId = g.properties.NODE_ID
+      const nodeName = signalService.nodeIdToName(nodeId)
+      optResultMap[type].forEach(item => {
+        if (item.name === nodeName) {
+          if (type === 'test') {
+            g.updateSymbol([
+              {
+              },
+              {
+                markerFill: colorScale(item.improvedRate),
+                textName: `[${item.name}]\n 향샹률:${item.improvedRate} %\n 통행량: ${item.rlVehPassed} 대\n 평균속도:${item.rlAverageSpeed} km`,
+                textLineSpacing: 8,
+                textAlign: 'left',
+                textHorizontalAlignment: 'right',
+                textFill: colorScale(item.improvedRate),
+              },
+            ])
+          } else {
+            g.updateSymbol([
+              {
+              },
+              {
+                markerFill: colorScale(item.improvedRate),
+                textName: `[${item.name}]\n 통행량: ${item.ftVehPassed} 대\n 평균속도:${item.ftAverageSpeed} km`,
+                textLineSpacing: 8,
+                textAlign: 'left',
+                textHorizontalAlignment: 'right',
+                textFill: colorScale(item.improvedRate),
+              },
+            ])
+          }
+        }
+      })
+    })
+  }
+
+
   function clearOptJunction() {
     layer.setData([])
   }
@@ -218,6 +276,8 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     setOptJunction,
     clearOptJunction,
     setOptTrainResult,
-    setOptTestResult
+    setOptTestResult,
+    setOptResult2,
+    moveTo
   }
 }

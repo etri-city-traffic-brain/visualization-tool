@@ -196,6 +196,9 @@ export default {
       this.modelSavePeriod = env.configuration.modelSavePeriod
       this.center = env.configuration.center
     }
+
+    this.regionChanged(this.areaSelected)
+
   },
 
   methods: {

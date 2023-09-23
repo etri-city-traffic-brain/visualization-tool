@@ -24,7 +24,7 @@ async function csvToObj(file) {
           const target = map[row.tl_name] || []
           if (row.reward) {
             target.push({
-              // phase: row.phase,
+              epoch: row.epoch,
               reward: row.reward,
               rewardAvg: row['40ep_reward']
             })

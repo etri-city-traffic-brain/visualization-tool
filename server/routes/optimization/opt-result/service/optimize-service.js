@@ -13,12 +13,14 @@ function OptimizeService() {
     const simulate = {
       avg_speed: getFixedNum(reportFt.avgSpeed),
       travel_time: getFixedNum(reportFt.travelTime),
-      travel_times: reportFt.travelTimes.map(travelTime => getFixedNum(travelTime, 2))
+      travel_times: reportFt.travelTimes.map(travelTime => getFixedNum(travelTime, 2)),
+      cumlative_avgs: reportFt.cumlativeAvgs.map(cumlativeAvg => getFixedNum(cumlativeAvg, 2))
     }
     const test = {
       avg_speed: getFixedNum(reportRl.avgSpeed),
       travel_time: getFixedNum(reportRl.travelTime),
-      travel_times: reportRl.travelTimes.map(travelTime => getFixedNum(travelTime, 2))
+      travel_times: reportRl.travelTimes.map(travelTime => getFixedNum(travelTime, 2)),
+      cumlative_avgs: reportRl.cumlativeAvgs.map(cumlativeAvg => getFixedNum(cumlativeAvg, 2)),
     }
     const simulateSignalExplain = new Map()
     const intersections = [
@@ -31,6 +33,7 @@ function OptimizeService() {
       const intersectionRl = reportRl.intersections[rlName] || null
       if (intersectionRl !== null) {
         obj.test.travel_time = getFixedNum(intersectionRl.travelTime)
+        obj.test.travel_times = getFixedNum(intersectionRl.travelTimes)
         obj.test.cumlative_avgs = intersectionRl.cumlativeAvgs.map(cumlativeAvg => getFixedNum(cumlativeAvg, 2))
         obj.test.signal_explain = intersectionRl.signalExplains[intersectionRl.signalExplains.length - 1]
         if (!(simulateSignalExplain.has(rlName))) {
@@ -39,6 +42,7 @@ function OptimizeService() {
       }
       if (intersectionFt !== null) {
         obj.simulate.travel_time = getFixedNum(intersectionFt.travelTime)
+        obj.simulate.travel_times = getFixedNum(intersectionFt.travelTimes)
         obj.simulate.cumlative_avgs = intersectionFt.cumlativeAvgs.map(cumlativeAvg => getFixedNum(cumlativeAvg, 2))
       }
       obj.improvement_rate = getFixedNum(getImprovementRate(intersectionFt.travelTime, intersectionRl.travelTime))
