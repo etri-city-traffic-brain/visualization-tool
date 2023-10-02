@@ -4,12 +4,12 @@
       <div>
         신호최적화 환경
       </div>
-      <button v-b-modal.create-simulation-modal class="bg-gray-500 rounded hover:bg-indigo-500">
+      <!-- <button v-b-modal.create-simulation-modal class="bg-gray-500 rounded hover:bg-indigo-500">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
           class="w-5 h-5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
         </svg>
-      </button>
+      </button> -->
     </div>
     <div class="p-2 border-2 border-gray-700 space-y-2">
       <div class="max-h-96 overflow-y-auto">

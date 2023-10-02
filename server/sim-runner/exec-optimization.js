@@ -124,7 +124,7 @@ async function run(simulation, mode, modelNum) {
       `--epoch ${epoch}`,
       `--model-save-period ${modelSavePeriod}`,
       `--model-num ${modelNum}`,
-      '--mem-len 16'
+      // '--mem-len 16'
     ]
 
     const cmdTest = [
@@ -142,11 +142,13 @@ async function run(simulation, mode, modelNum) {
       `--epoch ${epoch}`,
       `--model-save-period ${modelSavePeriod}`,
       `--model-num ${modelNum}`,
+      '--a-lr 0.005',
+      '--c-lr 0.005',
       '--mem-len 16'
     ]
 
-    log(chalk.yellow(cmdTest.join('\n')))
     log(chalk.green(cmdSimu.join('\n')))
+    log(chalk.yellow(cmdTest.join('\n')))
 
     return Promise.all([docker(cmdTest.join(' '), options), docker(cmdSimu.join(' '), options)]
     )

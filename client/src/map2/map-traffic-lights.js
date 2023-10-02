@@ -12,6 +12,8 @@ import OptStatusLayer from './opt-status-layer'
 import signalService from '@/service/signal-service'
 import tlUtils from '@/config/utils'
 
+import colorScale from '@/utils/colors-improve-rate'
+
 const addLayerTo = map => name =>
   new maptalks.VectorLayer(name, [], {}).addTo(map)
 
@@ -143,9 +145,9 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     layer.addTo(map)
   }
 
-  const colorScale = d3.scaleLinear()
-    .domain([-10, 0, 10, 20, 30])
-    .range(['white', 'white', 'orange', 'yellow', 'green'])
+  // const colorScale = d3.scaleLinear()
+  //   .domain([-30, -20, -10, 0, 10, 20, 30, 40, 50])
+  //   .range(['#A9A9A9', 'gray', 'white', '#F0FFFF', 'yellow', 'orange', 'skyblue', 'yellow', '#7FFF00'])
 
   function setOptTrainResult(arr = []) {
     trainResult = arr
@@ -153,11 +155,15 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     if (!tlayer) {
       return
     }
+
+    const matchList = new Set()
+
     tlayer.getGeometries().forEach(g => {
       const nodeId = g.properties.NODE_ID
       const nodeName = signalService.nodeIdToName(nodeId)
       arr.forEach(item => {
         if (item.name === nodeName) {
+          log('update signal', nodeId, nodeName)
           g.updateSymbol([
             {
             },
@@ -170,8 +176,15 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
               textFill: colorScale(item.improvedRate),
             },
           ])
+          matchList.add(g)
         }
       })
+    })
+
+    tlayer.getGeometries().forEach(g => {
+      if (!matchList.has(g)) {
+        g.hide()
+      }
     })
   }
 

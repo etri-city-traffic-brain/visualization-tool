@@ -12,15 +12,15 @@
         <div>
           <div class="flex items-center space-x-1">
             <select v-model="selectedEpoch" size="sm" class="text-black rounded py-1 px-2" style="height:30px">
-              <option v-for="(reward, idx) in rewardTotal" :key="reward.epoch" :value="reward.epoch">
+              <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
                 <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                 <div class="font-bold text-sm">
-                  모델:{{ reward.epoch }} 보상({{ reward.rewardAvg }})
+                  모델:[{{ reward.epoch }}], 보상:[{{ Number(reward.rewardAvg).toFixed(2) }}]
                 </div>
               </option>
             </select>
             <button @click.prevent="runTest"
-              class="bg-indigo-500 p-1 text-sm rounded flex-none h-8 hover:bg-indigo-200 hover:text-black">
+              class="bg-indigo-500 py-1 px-2 text-sm rounded flex-none h-8 hover:bg-indigo-200 hover:text-black">
               모델 {{ selectedEpoch }} 실행 <b-icon icon="play-fill" />
             </button>
             <b-btn @click="stopTest" variant="secondary" size="sm" class="flex-none">
@@ -61,23 +61,43 @@
           <div class="col-span-3">
             <div class="grid grid-cols-2 gap-1">
               <div class="">
-                <div class="">
-                  <div class="w-full tracking-wide text-white text-center text-xl font-bold bg-gray-700 p-1 rounded-t-lg">
-                    기존신호
+                <div class="flex justify-between">
+                  <div class="tracking-wide text-white text-center font-bold bg-gray-700 p-1 px-2 rounded-t-lg ">
+                    <span class="bg-gray-600- px-3 rounded">기존신호</span>
+                  </div>
+                  <div class="w-max">
+                    <div class="flex space-x-1 justify-end">
+                      <div
+                        class="bg-gray-500 px-2 text-center text-2xl font-bold text-gray-100 flex items-center justify-center space-x-2 rounded-lg">
+                        <div class="text-xs">평균속도</div>
+                        <div>
+                          {{ animated.chart1_avgSpeedJunction.toFixed(2)
+                          }}<span class="text-sm">km</span>
+                        </div>
+                      </div>
+                      <div
+                        class="bg-gray-500 px-2 text-center text-2xl font-bold bg-gray-500- text-gray-100  flex items-center justify-center space-x-2 rounded-lg">
+                        <div class="text-xs">통과시간</div>
+                        <div>
+                          {{ animated.chart1_travelTimeJunction.toFixed(2)
+                          }}<span class="text-sm">sec</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="border-2 border-gray-700">
                   <div class="relative">
                     <div :ref="mapIds[0]" :id="mapIds[0]" :style="{ height: mapHeight + 'px' }" />
                     <div class="absolute top-0 w-full">
-                      <b-progress height="1rem">
+                      <b-progress height="1rem" class="no-border-radius" show-progress>
                         <b-progress-bar :value="chart1.progress" variant="secondary">
                           <span> {{ chart1.progress }} %</span>
                         </b-progress-bar>
                       </b-progress>
                     </div>
 
-                    <div class="absolute top-4 w-full">
+                    <!-- <div class="absolute top-4 w-full">
                       <div class="flex space-x-1 justify-end border">
                         <div
                           class="bg-gray-500 px-2 text-center text-2xl font-bold text-gray-100 flex items-center justify-center space-x-2 rounded-lg">
@@ -96,16 +116,44 @@
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </div>
-              <div class="bg-yellow-300 rounded-lg">
+              <div class="">
                 <div class="">
-                  <div
-                    class="w-full tracking-wide text-black text-center text-xl font-bold bg-yellow-300 p-1 rounded-t-lg">
-                    최적신호
+                  <div class="flex justify-between">
+
+                  <div class="tracking-wide text-black text-center font-bold bg-yellow-300 p-1 px-2 rounded-t-lg">
+                    <span class="px-3 rounded">최적신호</span>
                   </div>
+                  <div class="w-max">
+                    <div class="flex space-x-1 justify-end">
+                      <div
+                        class="bg-yellow-200 px-2 text-center text-2xl font-bold flex items-center justify-center space-x-2 rounded-lg">
+                        <div class="text-xs">평균속도</div>
+                        <div class="flex justify-center space-x-2">
+                          <div>
+                            {{ animated.chart2_avgSpeedJunction.toFixed(2)
+                            }}<span class="text-sm">km</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="bg-yellow-200 px-2 text-center text-2xl font-bold flex items-center justify-center space-x-2 rounded-lg">
+                        <div class="text-xs">통과시간</div>
+                        <div class="flex justify-center space-x-2">
+                          <div>
+                            {{ animated.chart2_travelTimeJunction.toFixed(2)
+                            }}<span class="text-sm">sec</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  </div>
+
                 </div>
 
                 <div class="border-2 border-yellow-300">
@@ -120,7 +168,7 @@
                       </b-progress>
                     </div>
 
-                    <div class="absolute top-4 w-full">
+                    <!-- <div class="absolute top-4 w-full">
                       <div class="flex space-x-1 justify-end border">
                         <div
                           class="bg-yellow-300 px-2 text-center text-2xl font-bold flex items-center justify-center space-x-2 rounded-lg">
@@ -130,7 +178,6 @@
                               {{ animated.chart2_avgSpeedJunction.toFixed(2)
                               }}<span class="text-sm">km</span>
                             </div>
-                            <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effSpeed}}<span class="text-xs">%</span></div> -->
                           </div>
                         </div>
                         <div
@@ -141,20 +188,18 @@
                               {{ animated.chart2_travelTimeJunction.toFixed(2)
                               }}<span class="text-sm">sec</span>
                             </div>
-                            <!-- <div class="bg-yellow-100 rounded-xl px-2">{{chart2.effTravelTime}}<span class="text-xs">%</span></div> -->
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </div>
             </div>
-            <!-- </div> -->
           </div>
           <div class="max-w-84 flex flex-column">
             <div class="mx-1">
-              <div class="p-3 bg-green-200 text-center font-bold rounded-lg">
+              <div class="p-3 bg-green-200 text-center font-bold rounded-lg" :style="{'background-color': colorScale(animated.improvement_rate.toFixed(2))}">
                 <div class="">
                   통과시간 향상률
                 </div>
@@ -168,7 +213,7 @@
 
             <!-- 교차로별 통과시간 향상률 테이블 START -->
             <div class="m-1 space-y-1 flex-1 overflow-auto">
-              <div class="p-1 pb-2 bg-gray-800 text-sm rounded h-64">
+              <div class="p-1 pb-2 bg-gray-800- text-sm rounded h-8 h-max">
                 <div class="text-white text-center pb-1">평균 통과시간 향상률</div>
 
                 <!-- <div class="p-1">
@@ -199,7 +244,7 @@
                       <div class="py-1 bg-gray-500 col-span-3">교차로</div>
                       <div class="py-1 bg-gray-500">기존(초)</div>
                       <div class="py-1 bg-gray-500">최적(초)</div>
-                      <div class="py-1 bg-gray-500">향상률</div>
+                      <div class="py-1 bg-gray-500">향상률(%)</div>
                     </div>
 
                     <div v-for="v of Object.entries(chart.travelTimePerJunction)" :key="v[0]"
@@ -208,7 +253,18 @@
                       }">
                       <div class="border-b col-span-3">
                         <button @click="selectCrossName(v[0])" class="hover:text-blue-200">
-                          {{ v[0] }}
+                          <svg v-if="v[1].improvement_rate < 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                          stroke="currentColor" class="w-4 h-4 inline-block">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                          stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18" />
+                        </svg>
+
+                        {{ v[0] }}
                         </button>
                       </div>
                       <div class="border-b text-right">
@@ -443,7 +499,7 @@
           <div class="col-span-5">
             <div class="h-8 flex items-center space-x-1 justify-center">
               <select v-model="optTestResult.first.epoch" size="sm" class="text-black rounded px-2" style="height:30px">
-                <option v-for="(reward, idx) in rewardTotal" :key="reward.epoch" :value="reward.epoch">
+                <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
                   <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                   <div class="font-bold text-sm">
                     모델:{{ reward.epoch }} 보상({{ reward.rewardAvg }})
@@ -468,6 +524,16 @@
                 }">
                   <div class="border-b col-span-3">
                     <button>
+                        <svg v-if="r.improvedRate > 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                          stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18" />
+                        </svg>
+                          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                          stroke="currentColor" class="w-4 h-4 inline-block">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3" />
+                        </svg>
                       {{ r.name.toUpperCase() }}
                     </button>
                   </div>
@@ -525,7 +591,7 @@
             <div class="h-8 flex items-center space-x-1 justify-center">
               <select v-model="optTestResult.second.epoch" size="sm" class="text-black rounded py-1 px-2"
                 style="height:30px">
-                <option v-for="(reward, idx) in rewardTotal" :key="reward.epoch" :value="reward.epoch">
+                <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
                   <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                   <div class="font-bold text-sm">
                     모델:{{ reward.epoch }} 보상({{ reward.rewardAvg }})
@@ -549,6 +615,16 @@
                 }">
                   <div class="border-b col-span-3">
                     <button>
+                      <svg v-if="r.improvedRate > 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                          stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                          stroke="currentColor" class="w-4 h-4 inline-block">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3" />
+                        </svg>
                       {{ r.name.toUpperCase() }}
                     </button>
                   </div>

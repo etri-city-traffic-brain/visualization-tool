@@ -1,6 +1,10 @@
 const fs = require('fs')
 const csv = require('fast-csv')
 
+function asFixedNumber(value) {
+  return Number(value).toFixed(2)
+}
+
 function calc(filePath) {
 
   const stream = fs.createReadStream(filePath)
@@ -8,12 +12,12 @@ function calc(filePath) {
   return new Promise((resolve, reject) => {
     const result = []
     const handleData = row => {
-      // 평균 통행 시간
-      // const avgTravelTime = row.ft_SumTravelTime_sum_0hop / row.ft_VehPassed_sum_0hop
-      const ft_averageTravelTime = row.ft_SumTravelTime_sum_0hop / row.ft_VehPassed_sum_0hop || 1
-      const rl_averageTravelTime = row.rl_SumTravelTime_sum_0hop / row.rl_VehPassed_sum_0hop || 1
 
-      const improvedRate = (ft_averageTravelTime - rl_averageTravelTime) / ft_averageTravelTime * 100
+      const ftAverageTravelTime = row.ft_SumTravelTime_sum_0hop / (row.ft_VehPassed_sum_0hop || 1)
+      const rlAverageTravelTime = row.rl_SumTravelTime_sum_0hop / (row.rl_VehPassed_sum_0hop || 1)
+
+      // 통과시간 개선률(%)
+      const improvedRate = (ftAverageTravelTime - rlAverageTravelTime) / ftAverageTravelTime * 100
 
       if (row.name === 'name') {
         return
@@ -21,16 +25,17 @@ function calc(filePath) {
       result.push({
         name: row.name,
         SA: row.SA,
-        ftAverageSpeed: Number(row.ft_AverageSpeed_mean_0hop).toFixed(2),
-        rlAverageSpeed: row.rl_AverageSpeed_mean_0hop,
 
-        ftVehPassed: Number(row.ft_VehPassed_sum_0hop), // 기존 통행량
-        rlVehPassed: Number(row.rl_VehPassed_sum_0hop), // 기존 통행량
+        ftAverageSpeed: asFixedNumber(row.ft_AverageSpeed_mean_0hop),
+        rlAverageSpeed: asFixedNumber(row.rl_AverageSpeed_mean_0hop),
 
-        ftAvgTravelTime: Number(ft_averageTravelTime.toFixed(2)), // 기존 통행 시간
-        rlAvgTravelTime: Number(rl_averageTravelTime.toFixed(2)),
+        ftVehPassed: asFixedNumber(row.ft_VehPassed_sum_0hop),
+        rlVehPassed: asFixedNumber(row.rl_VehPassed_sum_0hop),
 
-        improvedRate: Number(improvedRate.toFixed(2)) // 통과시간 개선률
+        ftAvgTravelTime: asFixedNumber(ftAverageTravelTime),
+        rlAvgTravelTime: asFixedNumber(rlAverageTravelTime),
+
+        improvedRate: asFixedNumber(improvedRate) // 통과시간 개선률
       })
 
     }

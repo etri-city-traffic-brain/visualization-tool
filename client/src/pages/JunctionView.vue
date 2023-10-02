@@ -54,11 +54,11 @@
             }}</option>
           </select>
           <input @keyup.enter="getTL(nodeId)" v-model="nodeId" class="px-2 border" style="height:34px" />
-          <select type="select" v-model="color" class="p-1 border" style="height:34px">
+          <!-- <select type="select" v-model="color" class="p-1 border" style="height:34px">
             <option v-for="c of colorOptions" :key="c.value" :value="c.value">
               <span>{{ c.text }}</span>
             </option>
-          </select>
+          </select> -->
           <!-- <button
             @click="addNode(nodeId)"
             class="px-1 bg-blue-300 text-black"
@@ -72,23 +72,33 @@
         </div>
 
         <div class="p-2 overflow-auto text-white" style="max-height:calc(80vh)">
-          <div v-for="v of selected" :key="v.id" class="flex space-x-1 justify-between mb-1">
-            <div class="text-white rounded w-16 px-1" :style="{ 'background-color': '#' + v.color }">
-              {{ v.groupId || "" }}
-            </div>
 
-            <div class="w-40 truncate" :title="v.id">{{ v.id }}</div>
-            <div class="w-40 truncate">{{ v.name }}</div>
-            <button class="px-1 text-black text-sm rounded bg-gray-300" @click="del(v.id, v.groupId)"
-              :style_="{ 'background-color': '#' + v.color }">
+          <div>
+            {{  nodeId }}
+            <button class="px-1 text-black text-sm rounded bg-gray-200" @click="addTlGroup(nodeId)">
+              +
+            </button>
+            <button class="px-1 text-black text-sm rounded bg-gray-300" @click="del(null, nodeId)">
               X
             </button>
-            <button class="px-1 text-sm rounded" @click="animate(v.id)" :style="{ 'background-color': '#' + v.color }">
+
+          </div>
+
+          <div v-for="v of selected" :key="v.id" class="flex space-x-1 justify-start mb-1">
+            <!-- <div class="text-white rounded w-16 px-1" :style="{ 'background-color': '#' + v.color }">
+              {{ v.groupId || "" }}
+            </div> -->
+
+            <!-- <div class="w-40 truncate" :title="v.id">{{ v.id }}</div> -->
+            <div class="bg-gray-50 text-black">{{ v.name }}</div>
+            <!-- <button class="px-1 text-black text-sm rounded bg-gray-300" @click="del(v.id, v.groupId)"
+              :style_="{ 'background-color': '#' + v.color }">
+              X
+            </button> -->
+            <button class="px-1 text-sm rounded" @click="animate(v.id)" :style="{ 'background-color': v.color }">
               위치확인
             </button>
-            <button class="px-1 text-black text-sm rounded bg-gray-200" @click="addTlGroup(v.groupId)">
-              추가
-            </button>
+
           </div>
         </div>
       </div>

@@ -39,6 +39,8 @@ import map from '@/region-code'
 import SignalSystem from '@/actions/action-vis'
 import parseAction from '@/actions/action-parser'
 
+import colorScale from '@/utils/colors-improve-rate'
+
 // import lineChartOption from '@/charts/chartjs/line-chart-option'
 // import barChartOption from '@/charts/chartjs/bar-chart-option'
 
@@ -111,10 +113,6 @@ const dataset = (label, color, data) => ({
   pointRadius: 0.5,
   data
 })
-
-const colorScale = d3.scaleLinear()
-  .domain([-10, 0, 10, 20, 30])
-  .range(['white', 'white', 'orange', 'yellow', 'green'])
 
 const makeSpeedLineData = (
   dataFt = [],
@@ -293,6 +291,10 @@ export default {
     window.removeEventListener('resize', this.getWindowHeight)
   },
   computed: {
+    epochList() {
+      // console.log(this.simulation.configuration)
+      return this.rewardTotal.filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0)
+    },
     config() {
       if (this.simulation) {
         return this.simulation.configuration
@@ -444,7 +446,7 @@ export default {
 
   },
   methods: {
-
+    colorScale,
     getEff(idx) {
       return (100 - (this.optTestResult.first.result[idx].rlAvgTravelTime / this.optTestResult.second.result[idx].rlAvgTravelTime) * 100).toFixed(2)
     },
@@ -504,11 +506,19 @@ export default {
           const d = this.optResult.intersections[this.selectedNode]
           if (d) {
             this.chart.travelTimeJunctionChart = makeSpeedLineData(
-              d.simulate.cumlative_avgs.filter((v, i) => i % 100 === 0),
-              d.test.cumlative_avgs.filter((v, i) => i % 100 === 0),
+              d.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
+              d.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
               d.simulate.travel_time,
               d.test.travel_time,
-              100
+              29
+            )
+
+            this.chart.travelTimeJunctionChartAcc = makeSpeedLineData(
+              d.simulate.travel_times.filter((v, i) => i % 29 === 0),
+              d.test.travel_times.filter((v, i) => i % 29 === 0),
+              d.simulate.travel_time,
+              d.test.travel_time,
+              29
             )
 
           }
@@ -565,16 +575,16 @@ export default {
       })
     },
 
-    async selectCrossName(name) {
-      this.selectedNode = name
+    async selectCrossName(crossName) {
+      this.selectedNode = crossName
       if (!this.optResult) {
         return
       }
       if (!this.optResult.intersections) {
         return
       }
-      const d = this.optResult.intersections[name]
-      if (d) {
+      const result = this.optResult.intersections[crossName]
+      if (result) {
         // this.chart.travelTimeJunctionChart = makeSpeedLineData(
         //   d.simulate.cumlative_avgs,
         //   d.test.cumlative_avgs,
@@ -584,18 +594,18 @@ export default {
         // )
 
         this.chart.travelTimeJunctionChart = makeSpeedLineData(
-          d.simulate.cumlative_avgs.filter((v, i) => i % 10 === 0),
-          d.test.cumlative_avgs.filter((v, i) => i % 10 === 0),
+          result.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
+          result.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
           0, // d.simulate.travel_time,
           0, // d.test.travel_time,
-          10
+          29
         )
         this.chart.travelTimeJunctionChartAcc = makeSpeedLineData(
-          d.simulate.travel_times.filter((v, i) => i % 10 === 0),
-          d.test.travel_times.filter((v, i) => i % 10 === 0),
-          d.simulate.travel_time,
-          d.test.travel_time,
-          10
+          result.simulate.travel_times.filter((v, i) => i % 29 === 0),
+          result.test.travel_times.filter((v, i) => i % 29 === 0),
+          result.simulate.travel_time,
+          result.test.travel_time,
+          29
         )
       }
 
@@ -604,7 +614,7 @@ export default {
       this.currentTab = ''
       this.updateSignalExplain()
 
-      this.simulations[1].trafficLightManager.moveTo(name)
+      this.simulations[1].trafficLightManager.moveTo(crossName)
 
     },
 

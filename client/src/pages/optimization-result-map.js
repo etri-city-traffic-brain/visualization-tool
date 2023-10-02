@@ -32,6 +32,8 @@ import signalGroups from '@/config/junction-config'
 
 import { optimizationService, simulationService } from '@/service'
 
+import colorScale from '@/utils/colors-improve-rate'
+
 const rewardChartOption = {
   maintainAspectRatio: false,
   animation: false,
@@ -82,10 +84,6 @@ const rewardChartOption = {
   },
 }
 
-const colorScaleImproment = d3.scaleLinear()
-  .domain([-10, 0, 10, 20, 30])
-  .range(['white', 'white', 'orange', 'yellow', 'green'])
-
 function makeDonutDefaultDataset() {
   return {
     datasets: [
@@ -104,22 +102,23 @@ function makeRewardChart(label, labels = [], data = [], data2 = []) {
     label,
     datasets: [
       {
-        label: 'reward',
-        backgroundColor: 'skyblue',
+        label: '보상',
+        // backgroundColor: 'skyblue',
         borderColor: 'skyblue',
         data,
         fill: false,
-        borderWidth: 2,
-        pointRadius: 2
+        type: 'line',
+        borderWidth: 1,
+        pointRadius: 1
       },
       {
-        label: 'reward(40avg)',
+        label: '보상(40avg)',
         backgroundColor: 'orange',
         borderColor: 'orange',
         data: data2,
         fill: false,
-        borderWidth: 2,
-        pointRadius: 2
+        borderWidth: 1,
+        pointRadius: 1
       }
     ]
   }
@@ -319,7 +318,7 @@ export default {
   },
   methods: {
     getColorForImprovedRate(v) {
-      return colorScaleImproment(v)
+      return colorScale(v)
     },
     getRegionName(v) {
       const m = {
@@ -376,7 +375,7 @@ export default {
     },
     resize() {
       // this.mapHeight = window.innerHeight - 220 // update map height to current height
-      this.mapHeight = window.innerHeight - 50
+      this.mapHeight = window.innerHeight - 135
     },
     makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
