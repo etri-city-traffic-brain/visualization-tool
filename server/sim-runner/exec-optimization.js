@@ -142,8 +142,10 @@ async function run(simulation, mode, modelNum) {
       `--epoch ${epoch}`,
       `--model-save-period ${modelSavePeriod}`,
       `--model-num ${modelNum}`,
-      '--a-lr 0.005',
-      '--c-lr 0.005',
+      // '--a-lr 0.005',
+      // '--c-lr 0.005',
+      '--a-lr 0.0001',
+      '--c-lr 0.0001',
       '--mem-len 16'
     ]
 

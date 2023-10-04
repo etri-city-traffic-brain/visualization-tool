@@ -132,7 +132,7 @@
           </template>
 
           <template v-slot:cell(status)="row">
-            <div :class="statusColor(row.item.status)" class="text-center font-bold p-1 text-sm rounded">
+            <div :class="statusColor(row.item.status)" class="text-center font-bold p-1 px-2 text-sm rounded">
               {{ row.item.status.toUpperCase() }}
             </div>
           </template>
@@ -155,10 +155,10 @@
             <span>{{ row.item.epoch || 0 }}</span>
           </template>
 
-          <template v-slot:cell(statusText)="row">
+          <!-- <template v-slot:cell(statusText)="row">
             <b-alert :variant="statusColor(row.item.status)" class="m-0 p-0" show size="sm">{{
               row.item.status.toUpperCase() }}</b-alert>
-          </template>
+          </template> -->
 
           <template v-slot:cell(actions)="row">
             {{ numberOfJunctions(row.item.configuration.junctionId) }}
@@ -184,7 +184,7 @@
 
           <template v-slot:cell(details)="row">
             <router-link tag="button"
-              class="bg-gray-500 px-2 py-1 rounded text-black text-sm font-bold hover:bg-yellow-700 hover:text-white" :to="{
+              class="bg-indigo-400 px-2 py-1 rounded text-sm font-bold hover:bg-indigo-700" :to="{
                 name: 'OptimizationResultMap',
                 params: { id: row.item.id }
               }">
@@ -228,27 +228,27 @@
           </template>
 
           <template v-slot:row-details="row">
-            <div class="grid grid-cols-2 gap-1">
-              <div class="bg-gray-500 rounded-xl text-black p-4">
+            <div class="grid grid-cols-1 gap-1">
+              <div class="bg-gray-600 rounded-xl text-black p-4">
                 <ul class="list-disc space-y-1 ml-3 p-2 text-white">
                   <li class="">환경: {{ row.item.envName }}</li>
                   <li class="">상태: {{ row.item.status.toUpperCase() }}</li>
-                  <li class="">지역: {{ row.item.configuration.region }}</li>
+                  <li class="">지역: {{ row.item.configuration.regionName }}</li>
                   <li class="">
-                    최적화 대상 교차로: {{ row.item.configuration.junctionId }}
+                    교차로 그룹: {{ row.item.configuration.junctionId }}
                   </li>
                   <li class="">
                     도커이미지: {{ row.item.configuration.dockerImage }}
                   </li>
                 </ul>
               </div>
-              <div class="bg-gray-500 rounded-xl p-4 space-y-1" size="sm">
+              <!-- <div class="bg-gray-500 rounded-xl p-4 space-y-1" size="sm">
                 <b-form-file accept=".zip" v-model="resultFile" placeholder="모델파일(.zip)을 선택하세요.">
                 </b-form-file>
                 <b-btn variant="primary" @click.prevent="uploadModel(row.item)">
                   업로드
                 </b-btn>
-              </div>
+              </div> -->
             </div>
           </template>
         </b-table>

@@ -5,7 +5,6 @@ import optService from '@/service/optimization-service'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
 import { HTTP } from '@/http-common'
-// import Junction from '@/pages/JunctionView'
 import SignalGroupSelection from '@/pages/SignalGroupSelection'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
@@ -26,21 +25,10 @@ const periodOptions = [
   { value: 30 * 60, text: '30분' },
   { value: 60 * 60, text: '1시간' },
   { value: 120 * 60, text: '2시간' }
-  // { value: 240 * 60, text: '4시간' },
-  // { value: 360 * 60, text: '6시간' }
 ]
 
 const areaOptions = [
-  // { value: 'doan', text: '도안' },
-  // { value: 'cdd3', text: '대전(연구단지)' },
-  // { value: 'dj_all', text: '대전전체' },
-  // { value: 'sa_1_6_17', text: 'sa_1_6_17' }
-  // { value: 10, text: '테스트지역' },
-  // { value: 250, text: '대전광역시' },
-  // { value: 25030, text: '서구' },
-  // { value: 25040, text: '유성구' },
-  // { value: 290, text: '세종시' },
-  // { value: 29010, text: '세종특별자치시' }
+
 ]
 
 const scriptOptions = [{ value: 'run.py', text: 'run.py' }]
@@ -102,7 +90,6 @@ export default {
   components: {
     SignalMap,
     SignalEditor,
-    // Junction
     SignalGroupSelection
   },
   data() {
@@ -158,8 +145,7 @@ export default {
       })
 
     const scenario = await optService.getScenario()
-    // console.log(scenario)
-    // this.signalGroups = sce
+
     this.scenario = scenario
     this.areaOptions = scenario.map(s => {
       return {
@@ -168,7 +154,7 @@ export default {
       }
     })
 
-    // console.log('simulation register ui', this.modalName)
+
     if (this.modalName === 'create-simulation-modal') {
       this.showEnv = false
     }
@@ -223,7 +209,7 @@ export default {
       this.description = '...'
     },
     async register() {
-      this.loading = true
+
       const from = moment(`${this.fromDate} ${this.fromTime}`)
       const to = moment(`${this.toDate} ${this.toTime}`)
       const begin = moment.duration(this.fromTime).asSeconds()
@@ -237,7 +223,13 @@ export default {
       }
 
       if (!this.junctionId) {
-        this.$bvToast.toast('대상 교차로가 비었습니다.')
+        this.$bvToast.toast('대상 교차로 그룹이 비었습니다.')
+        return
+      }
+
+      if (!this.center.x) {
+        log('center:', this.center)
+        this.$bvToast.toast('지도의 중앙이 설정되지 않았습니다.')
         return
       }
 
@@ -284,7 +276,7 @@ export default {
         this.$emit('optenvconfig:save', simulationConfig)
       }
       this.hide()
-      this.loading = false
+
     },
     hide() {
       this.$emit('hide')

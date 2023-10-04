@@ -106,6 +106,12 @@ export default {
       this.mapHeight = window.innerHeight - 50 // update map height to current height
     },
     finishTlSelection() {
+
+      if (this.targetGroups.length < 1) {
+        this.$swal('신호 그룹을 하나이상 선택하세요')
+        return
+      }
+
       this.$emit("selection:finished", {
         junctions: this.targetGroups,
         center: this.centerMarker.getCoordinates(),

@@ -11,15 +11,15 @@ const { INIT, SET, STOP } = require('./salt-msg-type').MsgType
 const { EVENT_SET, EVENT_STOP } = require('./event-types')
 
 const MsgHandler = (wsClient, eventBus) => ({
-  [INIT] (msg) {
+  [INIT](msg) {
     Object.assign(wsClient, {
       $simulationId: msg.simulationId
     })
   },
-  [SET] (msg) {
+  [SET](msg) {
     eventBus.emit(EVENT_SET, msg)
   },
-  [STOP] (msg) {
+  [STOP](msg) {
     eventBus.emit(EVENT_STOP, msg)
   }
 })
@@ -32,15 +32,15 @@ const config = require('../config')
 
 const wait = () => new Promise((resolve, reject) => {
   setTimeout(() => {
-    resolve()
+    resolve({})
   }, 300)
 })
 
-function Replayer (send) {
+function Replayer(send) {
   let fileStream = null
   let rl = null
   let needToStop = false
-  async function init (simulationId, file) {
+  async function init(simulationId, file) {
     needToStop = false
     if (fileStream) {
       fileStream.close()
@@ -84,7 +84,7 @@ function Replayer (send) {
       await wait()
     }
   }
-  function stop () {
+  function stop() {
     needToStop = true
     if (fileStream) {
       fileStream.close()
@@ -117,7 +117,7 @@ module.exports = (httpServer) => {
 
   let replayer = Replayer(send)
 
-  function handleReplayMessage (msg) {
+  function handleReplayMessage(msg) {
     const tFile = path.join(config.saltPath.output, msg.simulationId, 'log.txt')
 
     if (msg.type === 'replay' && msg.command === 'start') {
@@ -134,13 +134,13 @@ module.exports = (httpServer) => {
     }
   }
 
-  function handleConnection (client) {
+  function handleConnection(client) {
     const msgHandler = MsgHandler(client, eventBus)
 
     client.on('message', (data) => {
       try {
         const msg = JSON.parse(data)
-        const handler = msgHandler[msg.type] || (() => {})
+        const handler = msgHandler[msg.type] || (() => { })
         handler(msg)
         handleReplayMessage(msg)
       } catch (err) {

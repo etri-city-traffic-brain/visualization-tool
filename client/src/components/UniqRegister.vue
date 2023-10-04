@@ -78,12 +78,18 @@
 
       <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">도커 이미지</div>
-        <b-form-select v-model="dockerImage" :options="imageOptions" />
+        <b-form-select v-model="dockerImage" :options="imageOptions"/>
       </div>
       <div class="flex space-x-2 items-center">
-        <div class="flex-none w-40 text-right">Center</div>
-        <div>
-          {{ center }}
+        <div class="flex-none w-40 text-right">지도 중심</div>
+        <div class="w-full flex space-x-1">
+          <div class="flex space-x-1 items-center">
+            <b-form-input v-model="center.x"></b-form-input>
+          </div>
+          <div class="flex space-x-1 items-center">
+            <b-form-input v-model="center.y"></b-form-input>
+          </div>
+
         </div>
       </div>
     </div>

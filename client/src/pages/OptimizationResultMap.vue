@@ -68,27 +68,14 @@
       </div>
     -->
 
-      <div class="bg-gray-700 w-80 rounded-lg">
-        <div class="font-bold p-1 text-white text-center">전체 보상그래프</div>
-        <div class="px-1">
+      <div class="bg-gray-600 w-80 rounded-lg">
+        <div class="font-bold p-1 text-white text-center ">전체 보상그래프</div>
+        <div class="px-1 bg-gray-700">
           <line-chart :chartData="rewardTotal" :options="defaultOption({}, chartClicked)" :height="180" />
         </div>
       </div>
 
-          <!-- 교차로별 보상 그래프 -->
-    <div class="bg-gray-700 w-80 rounded-lg ">
-      <div class="font-bold p-1 text-white text-center ">교차로별 보상 그래프</div>
-      <div v-for="(chart, idx) of rewardCharts" :key="idx" class="p-1">
-        <div class="text-center text-white py-1">
-          {{ chart.label }}
-        </div>
-        <div class="bg-gray-700 pb-1 pr-1 rounded-b-lg">
-          <line-chart :chartData="chart" :options="rewardChartOption" :height="120" />
-        </div>
-      </div>
-    </div>
-
-      <div class="bg-gray-700 w-80 rounded-lg">
+            <div class="bg-gray-700 w-80 rounded-lg">
         <div class="text-center p-1 text-white">에포크</div>
         <div class="p-2 h-24 overflow-y-auto">
           <button
@@ -101,6 +88,23 @@
           </button>
         </div>
       </div>
+
+          <!-- 교차로별 보상 그래프 -->
+    <div class="bg-gray-600 w-80 rounded-lg ">
+      <div class="font-bold p-1 text-white text-center">교차로별 보상 그래프</div>
+      <div class="h-96 max-h-96- overflow-y-auto space-y-1">
+        <div v-for="(chart, idx) of rewardCharts" :key="idx" class="p-1 bg-gray-700">
+          <div class="text-center text-white py-1">
+            {{ chart.label }}
+          </div>
+          <div class="bg-gray-700 pb-1 pr-1 rounded-b-lg">
+            <line-chart :chartData="chart" :options="rewardChartOption" :height="120" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+
 
       <!-- 최적화 진행률 -->
       <!--

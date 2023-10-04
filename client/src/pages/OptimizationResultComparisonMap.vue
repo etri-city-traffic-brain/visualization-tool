@@ -26,6 +26,9 @@
             <b-btn @click="stopTest" variant="secondary" size="sm" class="flex-none">
               중지 <b-icon icon="stop-fill"></b-icon>
             </b-btn>
+            <b-btn @click="checkStatus" variant="secondary" size="sm">
+            상태 확인
+          </b-btn>
           </div>
         </div>
       </div>
@@ -45,12 +48,10 @@
         <div class="flex pr-2 space-x-2 text-sm items-center text-white">
           <!-- <div> {{  status }}</div> -->
           <!-- <div>{{ statusText }}</div> -->
-          <button @click="showModal" class="bg-gray-400 px-1 text-black rounded hover:bg-blue-400">
-            정보
+          <button @click="showModal" class="text-white bg-indigo-500 px-1 rounded hover:bg-blue-400 hover:text-white">
+            결과비교
           </button>
-          <button @click="checkStatus" class="bg-gray-400 px-1 text-black rounded hover:bg-blue-400">
-            상태 확인
-          </button>
+
         </div>
       </div>
 
