@@ -57,6 +57,17 @@ export default {
       isReady: false
     }
   },
+  computed: {
+    signalGroupsSorted() {
+      const r = this.signalGroups.sort((a, b) => {
+        const an = Number(a.split(' ')[1])
+        const bn = Number(b.split(' ')[1])
+
+        return an - bn
+      })
+      return r
+    }
+  },
   methods: {
     toggleGroupSelection(group) {
       if (this.targetGroups.includes(group)) {
@@ -118,11 +129,11 @@ export default {
       });
     },
     showCenter() {
-      this.centerMarker.setCoordinates(this.map.getCenter())
-      this.centerMarker.bringToFront()
+      const marker = this.centerMarker
+      marker.setCoordinates(this.map.getCenter())
+      marker.bringToFront()
     },
     updateSignalGroups() {
-      console.log('update signal groups', this.signalGroups)
       this.trafficLightsLayer.getGeometries().forEach(g => {
         const obj = this.signalGroups.find(s => {
           const ooo = Object.entries(this.groupMap).find(([key, value]) => {
@@ -183,7 +194,6 @@ export default {
 
     }
   },
-
   async mounted() {
     this.map = makeMap({ mapId: this.mapId, zoom: 12 })
 
@@ -203,8 +213,8 @@ export default {
           'markerLineColor': '#fff',
           'markerPathWidth': 16,
           'markerPathHeight': 23,
-          markerWidth: 30,
-          markerHeight: 35,
+          markerWidth: 32,
+          markerHeight: 46,
           textSize: 20,
         }
       ]

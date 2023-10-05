@@ -12,6 +12,7 @@
           focus
           select
           size="sm"
+          disabled
         ></b-form-input>
       </div>
       <!-- <div class="flex space-x-2 items-center">
@@ -32,14 +33,14 @@
         <!-- <div class="flex-none text-white font-bold">시작</div> -->
         <b-input-group>
           <b-form-input v-model="fromDate" type="date" size="sm" />
-          <b-form-input v-model="fromTime" type="time" size="sm" />
+          <b-form-input v-model="fromTime" type="time" size="sm" class="ml-1"/>
         </b-input-group>
         <!-- </div> -->
         <!-- <div class="flex items-center space-x-2"> -->
         <!-- <div class="flex-none text-white font-bold">종료</div> -->
         <b-input-group>
           <b-form-input v-model="toDate" type="date" size="sm" />
-          <b-form-input v-model="toTime" type="time" size="sm" />
+          <b-form-input v-model="toTime" type="time" size="sm" class="ml-1"/>
         </b-input-group>
         <!-- </div> -->
       </div>
@@ -70,24 +71,25 @@
               class="ml-1"
               @click="showMap = !showMap"
               size="sm"
-              >선택</b-btn
             >
+              지도에서 선택
+            </b-btn >
           </b-input-group-append>
         </b-input-group>
       </div>
 
       <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">도커 이미지</div>
-        <b-form-select v-model="dockerImage" :options="imageOptions"/>
+        <b-form-select v-model="dockerImage" :options="imageOptions" size="sm"/>
       </div>
       <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">지도 중심</div>
         <div class="w-full flex space-x-1">
           <div class="flex space-x-1 items-center">
-            <b-form-input v-model="center.x"></b-form-input>
+            <b-form-input v-model="center.x" size="sm"></b-form-input>
           </div>
           <div class="flex space-x-1 items-center">
-            <b-form-input v-model="center.y"></b-form-input>
+            <b-form-input v-model="center.y" size="sm"></b-form-input>
           </div>
 
         </div>

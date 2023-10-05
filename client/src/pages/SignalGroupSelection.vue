@@ -11,8 +11,9 @@
     </div>
 
     <div class="absolute left-2 top-1 w-52 rounded px-1 bg-gray-400" v-if="isReady">
+      <div class="text-center font-bold p-1">신호그룹 목록</div>
       <div class="overflow-auto" :style="{ height: mapHeight - 30 + 'px' }">
-        <button v-for="group in signalGroups" :key="group" @click="animate(group)"
+        <button v-for="group in signalGroupsSorted" :key="group" @click="animate(group)"
           class="w-20 text-white text-sm p-1 rounded m-1 border" :style="{ 'background-color': getGroupColor(group) }"
           v-if="getGroupColor(group)">
 
@@ -41,7 +42,7 @@
       </div>
       <div class="bg-gray-100 mt-1 text-center">
         <button class="px-2 bg-blue-300 text-white mt-1 hover:bg-blue-500 rounded text-sm " @click="showCenter">
-          설정 아이콘 찾기
+          지도 가운데 지정
         </button>
         <div class="text-sm">
           신호 최적화 화면에서 기본으로 설정할 위치를 반드시 설정하세요.
