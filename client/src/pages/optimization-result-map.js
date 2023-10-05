@@ -3,7 +3,6 @@
 /* eslint-disable no-unused-expressions */
 
 import * as R from 'ramda'
-import * as d3 from 'd3'
 
 import makeMap from '@/map2/make-map'
 import MapManager from '@/map2/map-manager'
@@ -48,7 +47,7 @@ const rewardChartOption = {
   },
   tooltips: {
     mode: 'index',
-    intersect: false,
+    intersect: true,
     enabled: true
   },
   scales: {
@@ -219,7 +218,11 @@ export default {
   computed: {
     status() {
       return this.simulation.status
-    }
+    },
+    epochList() {
+      // console.log(this.simulation.configuration)
+      return this.rewardTotalValue.filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0)
+    },
   },
   data() {
     return {
@@ -247,7 +250,9 @@ export default {
       rewardTotal: {},
       epochs: 0,
       isReady: false,
-      optTrainResult: []
+      optTrainResult: [],
+      epochSelected: 0,
+      rewardTotalValue: []
     }
   },
   destroyed() {
@@ -368,7 +373,7 @@ export default {
         const result = await optimizationService.getOptTrainResult(this.simulationId, value)
         this.optTrainResult = result
         this.trafficLightManager.setOptTrainResult(result)
-
+        this.epochSelected = value
       } catch (err) {
         log(err.message)
       }
@@ -390,6 +395,7 @@ export default {
       this.wsClient.init()
     },
     async selectEpoch(v) {
+
       this.chartClicked(v)
     },
     async updateStatus() {
@@ -433,7 +439,7 @@ export default {
         const results = Object.values(result)
         if (results.length > 0) {
           const total = results[0]
-
+          this.rewardTotalValue = total
           const label = new Array(total.length).fill(0).map((v, i) => i)
           const reward = total.map(v => Number(v.reward).toFixed(2))
           const avg = total.map(v => Number(v.rewardAvg).toFixed(2))

@@ -119,6 +119,10 @@ function getOptTestResult(optId, epoch) {
   return HTTP.get(`${base}/optTestResult?id=${optId}&epoch=${epoch}`).then(res => res.data)
 }
 
+function getOptTestResults(optId) {
+  return HTTP.get(`${base}/optTestResults?id=${optId}`).then(res => res.data)
+}
+
 function getScenario() {
   return HTTP.get(`${base}/scenario`).then(res => res.data)
 }
@@ -139,5 +143,6 @@ export default {
   getOptTrainResult,
   getScenario,
   getSignalGroups,
-  getOptTestResult
+  getOptTestResult,
+  getOptTestResults
 }

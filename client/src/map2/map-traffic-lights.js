@@ -163,7 +163,7 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
       const nodeName = signalService.nodeIdToName(nodeId)
       arr.forEach(item => {
         if (item.name === nodeName) {
-          log('update signal', nodeId, nodeName)
+          // log('update signal', nodeId, nodeName)
           g.updateSymbol([
             {
             },

@@ -21,6 +21,8 @@ router.get('/result', require('./api-optimization-result'))
 
 router.get('/optTrainResult', require('./api-opt-train-result'))
 router.get('/optTestResult', require('./api-opt-test-result'))
+router.get('/optTestResults', require('./api-opt-test-results'))
+
 router.get('/scenario', require('./api-scenario'))
 router.get('/signal/groups/:region', require('./api-signal-groups'))
 

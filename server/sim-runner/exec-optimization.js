@@ -45,6 +45,9 @@ async function run(simulation, mode, modelNum) {
   const rewardFunc = config.rewardFunc
   const runScript = 'python ./run_modutech.py'
 
+  const lr = config.lr
+  const memLen = config.memLen
+
   const duration = [
     `--start-time ${begin}`,
     `--end-time ${end}`,
@@ -81,7 +84,7 @@ async function run(simulation, mode, modelNum) {
       `--action ${action}`,
       `--epoch ${epoch}`,
       `--model-save-period ${modelSavePeriod}`,
-      // '--men-len 16'
+      `--men-len ${memLen}`
     ]
 
     const cmdTrain = [
@@ -98,7 +101,7 @@ async function run(simulation, mode, modelNum) {
       `--action ${action}`,
       `--epoch ${epoch}`,
       `--model-save-period ${modelSavePeriod}`,
-      '--mem-len 16'
+      `--mem-len ${memLen}`
     ]
 
 
@@ -124,7 +127,7 @@ async function run(simulation, mode, modelNum) {
       `--epoch ${epoch}`,
       `--model-save-period ${modelSavePeriod}`,
       `--model-num ${modelNum}`,
-      // '--mem-len 16'
+      `--mem-len ${memLen}`
     ]
 
     const cmdTest = [
@@ -144,9 +147,9 @@ async function run(simulation, mode, modelNum) {
       `--model-num ${modelNum}`,
       // '--a-lr 0.005',
       // '--c-lr 0.005',
-      '--a-lr 0.0001',
-      '--c-lr 0.0001',
-      '--mem-len 16'
+      `--a-lr ${lr}`,
+      `--c-lr ${lr}`,
+      `--mem-len ${memLen}`
     ]
 
     log(chalk.green(cmdSimu.join('\n')))

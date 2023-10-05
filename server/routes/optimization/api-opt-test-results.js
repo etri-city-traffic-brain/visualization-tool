@@ -6,7 +6,7 @@ const { config } = require('../../globals')
 const fs = require('fs')
 
 module.exports = async (req, res, next) => {
-  const { id, epoch } = req.query
+  const { id } = req.query
   if (!id) {
     next(createError(400, 'id is missed'))
     return
@@ -19,35 +19,33 @@ module.exports = async (req, res, next) => {
   try {
     const files = fs.readdirSync(dir)
     if (files.length === 0) {
-      res.send({
-        result: []
-      })
+      res.send([])
       return
     }
 
 
-    const filtered = files.filter(file => file.endsWith(epoch + '.csv'))
-
+    const filtered = files.filter(file => file.startsWith('_state'))
+    console.log('[xxxx] ', filtered)
     if (filtered.length === 0) {
       res.send([])
       return
     }
-    console.log('get test result', id, epoch)
-    console.log('[x] target file: ', filtered[0])
-    const result = await calcOptTrainResult(`${dir}/${filtered[0]}`)
-    // console.log(result)
+
+    const result = filtered.map(v => {
+      return v.substring(v.lastIndexOf('_') + 1, v.lastIndexOf('.'))
+    })
+
+    console.log(result)
 
     res.send(
-      {
-        result
-      }
+
+      result
+
 
     )
   } catch (err) {
     console.log(err.message)
-    res.send({
-      result: []
-    })
+    res.send([])
   }
 
 

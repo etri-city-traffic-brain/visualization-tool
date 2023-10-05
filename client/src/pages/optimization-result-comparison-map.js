@@ -256,14 +256,15 @@ export default {
       rewardTotal: [],
       optTestResult: {
         first: {
-          epoch: 0,
+          epoch: -1,
           result: []
         },
         second: {
-          epoch: 0,
+          epoch: -1,
           result: []
         }
-      }
+      },
+      optTestResults: []
     }
   },
   watch: {
@@ -293,7 +294,9 @@ export default {
   computed: {
     epochList() {
       // console.log(this.simulation.configuration)
-      return this.rewardTotal.filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0)
+      return this.rewardTotal.filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0).filter(v => {
+        return this.optTestResults.includes(v.epoch)
+      })
     },
     config() {
       if (this.simulation) {
@@ -443,6 +446,9 @@ export default {
     window.scrollTo(0, 0)
     window.addEventListener('resize', this.resize.bind(this))
 
+    const result = await optSvc.getOptTestResults(this.simulation.id)
+    this.optTestResults = result
+    // console.log('[xxxx] result', result)
 
   },
   methods: {
@@ -456,10 +462,13 @@ export default {
     async loadTestResult(type, epoch) {
       try {
         const result = await optSvc.getOptTestResult(this.simulation.id, epoch)
-        this.optTestResult[type].result = result
+        this.optTestResult[type].result = result.result
       } catch (err) {
         log(err.message)
       }
+
+
+
     },
     getColorForImprovedRate(v) {
       return colorScale(v)

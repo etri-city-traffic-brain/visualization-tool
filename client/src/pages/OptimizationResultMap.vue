@@ -76,8 +76,8 @@
       </div>
 
             <div class="bg-gray-700 w-80 rounded-lg">
-        <div class="text-center p-1 text-white">에포크</div>
-        <div class="p-2 h-24 overflow-y-auto">
+        <div class="text-center p-1 text-white">에포크 선택</div>
+        <!-- <div class="p-2 h-24 overflow-y-auto">
           <button
             v-for="e in epochs"
             :key="e"
@@ -86,7 +86,19 @@
           >
             {{ e }}
           </button>
+        </div> -->
+
+        <div class="p-1">
+          <select v-model="epochSelected" size="sm" class="text-black rounded px-2 w-full" style="height:30px" @change="selectEpoch(epochSelected)">
+                <option v-for="(reward, idx) in epochList" :key="reward.e" :value="reward.epoch">
+                  <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
+                  <div class="font-bold text-sm">
+                    모델:[{{ reward.epoch }}], 보상:[{{ Number(reward.rewardAvg).toFixed(2) }}]
+                  </div>
+                </option>
+              </select>
         </div>
+
       </div>
 
           <!-- 교차로별 보상 그래프 -->
@@ -141,13 +153,16 @@
 
     <div class="train-result-table-container text-sm text-white rounded-lg p-1">
       <div class="bg-gray-700 p-3 text-center" v-if="optTrainResult && optTrainResult.length > 0">
-        전체 통과시간 향상률
+        전체 통과시간 향상률 에포크:{{ epochSelected }}
         <div class="text-4xl text-center font-bold"
-        :style="{
-          'color': getColorForImprovedRate(optTrainResult[optTrainResult.length-1].improvedRate)
-        }"
+          :style="{
+            'color': getColorForImprovedRate(optTrainResult[optTrainResult.length-1].improvedRate)
+          }"
         >
-          {{  optTrainResult[optTrainResult.length-1].improvedRate }} %
+          <span>
+            {{ optTrainResult[optTrainResult.length-1].improvedRate }}
+          </span>
+          <span class="text-sm">%</span>
         </div>
       </div>
 

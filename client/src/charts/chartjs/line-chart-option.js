@@ -10,13 +10,13 @@ export default (
   title: {
     display: !!title
   },
-  interaction: {
-    mode: 'index'
-  },
+  // interaction: {
+  //   mode: 'index'
+  // },
   tooltips: {
     mode: 'index',
     intersect: false,
-    enabled: false
+    enabled: true
   },
   scales: {
     xAxes: [

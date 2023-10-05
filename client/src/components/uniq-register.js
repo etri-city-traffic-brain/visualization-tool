@@ -75,6 +75,21 @@ const intervalOptions = [
   { text: '100 Step', value: 100 }
 ]
 
+const lrOptions = [
+  { text: '0.0001', value: 0.0001 },
+  { text: '0.005', value: 0.005 },
+]
+
+const memLenOptions = [
+  { text: '16', value: 16 },
+  { text: '32', value: 32 },
+  { text: '64', value: 64 },
+  { text: '128', value: 128 },
+  { text: '256', value: 256 },
+  { text: '512', value: 512 },
+]
+
+
 const { log } = console
 
 export default {
@@ -109,6 +124,8 @@ export default {
       methodOptionSelected: methodOptions[0].value, //
       rewardFuncOptionSelected: rewardFuncOptions[0].value, //
       stateOptionSelected: stateOptions[0].value,
+      lrSelected: lrOptions[0].value,
+      memLenSelected: memLenOptions[0].value,
       junctionId: '',
       epoch: 10,
       extent: null, // current map extent
@@ -123,6 +140,8 @@ export default {
       actionOptions,
       methodOptions,
       rewardFuncOptions,
+      lrOptions: [...lrOptions],
+      memLenOptions: [...memLenOptions],
       loading: false,
       showMap: false,
       showEnv: true,
@@ -181,6 +200,9 @@ export default {
       this.dockerImage = env.configuration.dockerImage
       this.modelSavePeriod = env.configuration.modelSavePeriod
       this.center = env.configuration.center
+
+      this.memLenSelected = env.configuration.memLen
+      this.lrSelected = env.configuration.lr
     }
 
     this.regionChanged(this.areaSelected)
@@ -266,7 +288,9 @@ export default {
           method: this.methodOptionSelected,
           rewardFunc: this.rewardFuncOptionSelected,
           dockerImage: this.dockerImage,
-          center: this.center
+          center: this.center,
+          memLen: this.memLenSelected,
+          lr: this.lrSelected
         }
       }
 

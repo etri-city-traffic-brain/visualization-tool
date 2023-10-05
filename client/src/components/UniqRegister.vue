@@ -184,6 +184,26 @@
             size="sm"
           />
         </div>
+
+        <div class="bg-gray-700 rounded text-center p-1">
+          Learning Rate
+          <b-form-select
+            v-model="lrSelected"
+            :options="lrOptions"
+            class=""
+            size="sm"
+          />
+        </div>
+        <div class="bg-gray-700 rounded text-center p-1">
+          Memory Length
+          <b-form-select
+            v-model="memLenSelected"
+            :options="memLenOptions"
+            class=""
+            size="sm"
+          />
+        </div>
+
       </div>
     </div>
 

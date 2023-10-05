@@ -228,7 +228,7 @@
           </template>
 
           <template v-slot:row-details="row">
-            <div class="grid grid-cols-1 gap-1">
+            <div class="grid grid-cols-2 gap-1">
               <div class="bg-gray-600 rounded-xl text-black p-4">
                 <ul class="list-disc space-y-1 ml-3 p-2 text-white">
                   <li class="">환경: {{ row.item.envName }}</li>
@@ -240,6 +240,13 @@
                   <li class="">
                     도커이미지: {{ row.item.configuration.dockerImage }}
                   </li>
+                </ul>
+              </div>
+              <div class="bg-gray-600 rounded-xl text-black p-4">
+                <ul class="list-disc space-y-1 ml-3 p-2 text-white">
+                  <li class="">Memory Length: {{ row.item.configuration.memLen }}</li>
+                  <li class="">Learning Rate: {{ row.item.configuration.lr }}</li>
+                  <li class="">맵 중앙: {{ row.item.configuration.center }}</li>
                 </ul>
               </div>
               <!-- <div class="bg-gray-500 rounded-xl p-4 space-y-1" size="sm">

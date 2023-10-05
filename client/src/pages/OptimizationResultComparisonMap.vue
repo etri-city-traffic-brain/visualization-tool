@@ -200,11 +200,13 @@
           </div>
           <div class="max-w-84 flex flex-column">
             <div class="mx-1">
-              <div class="p-3 bg-green-200 text-center font-bold rounded-lg" :style="{'background-color': colorScale(animated.improvement_rate.toFixed(2))}">
-                <div class="">
+              <div
+                class="p-3 bg-gray-700 text-center font-bold rounded-lg"
+                >
+                <div class="text-white">
                   통과시간 향상률
                 </div>
-                <div class="text-6xl">
+                <div class="text-6xl" :style="{'color': colorScale(animated.improvement_rate.toFixed(2))}">
                   {{ animated.improvement_rate.toFixed(2)
                   }}<span class="text-lg">%</span>
                 </div>
@@ -328,7 +330,7 @@
                     </div>
                     <div class="bg-blue-400 px-2 rounded">
                       <button @click="isShowAvgTravelChart = !isShowAvgTravelChart" class="text-sm">
-                        그래프 닫기
+                        닫기
                       </button>
                     </div>
                   </div>
@@ -395,7 +397,7 @@
 
         <div class="absolute bottom-0 right-2 bg-blue-400 px-2 rounded" v-if="!isShowAvgTravelChart">
           <button @click="isShowAvgTravelChart = true" class="text-sm text-white font-bold">
-            그래프 열기
+            평균통과시간 차트
           </button>
         </div>
 
@@ -439,10 +441,13 @@
     </div>
 
     <!-- BOTTOM STATUS TEXT -->
-    <div class="flex justify-between bg-gray-800 items-center p-1">
+    <div class="flex justify-between bg-gray-700 items-center p-1 mx-1">
       <div class="text-center text-white px-2 text-xs">
         <span class="text-yellow-200">{{ simulation.id }}</span>
         <span class="text-blue-200">{{ statusText }}</span>
+        <span class="text-blue-200">Learning Rate: {{ simulation.configuration.lr }}</span>
+        <span class="text-blue-200">Memory Length: {{ simulation.configuration.memLen }}</span>
+
       </div>
       <div class="flex space-x-1 items-center text-xs text-white">
         <div v-if="status === 'running'" class="text-center px-3 uppercase w-full">
@@ -464,7 +469,7 @@
     <b-modal size="xl" :title="simulation.id" ref="optenvmodal" header-border-variant="dark" header-bg-variant="dark"
       header-text-variant="light" body-bg-variant="dark" body-text-variant="light" body-border-variant="dark"
       footer-bg-variant="dark" hide-footer header-class="pt-1 pb-0 rounded-0">
-      <div class="text-white text-sm p-2- min-w-max">
+      <div class="text-white text-sm p-2- min-w-max bg-gray-800">
         <div class="bg-gray-600 space-y-1 p-2 rounded mb-2">
           <div class="flex space-x-1">
             <div class="w-20 text-center bg-gray-500 px-1 rounded">지역</div>
@@ -496,10 +501,15 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-12 bg-gray-600 rounded py-2">
+        <div class="grid grid-cols-12 rounded py-2">
           <div class="col-span-5">
             <div class="h-8 flex items-center space-x-1 justify-center">
-              <select v-model="optTestResult.first.epoch" size="sm" class="text-black rounded px-2" style="height:30px">
+              <select
+                v-model="optTestResult.first.epoch"
+                class="text-black rounded px-2 w-full mx-1"
+                style="height:28px"
+                @change="loadTestResult('first', optTestResult.first.epoch)"
+              >
                 <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
                   <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                   <div class="font-bold text-sm">
@@ -507,10 +517,10 @@
                   </div>
                 </option>
               </select>
-              <button class="bg-gray-200 p-1 rounded text-black"
+              <!-- <button class="bg-gray-200 p-1 rounded text-black"
                 @click="loadTestResult('first', optTestResult.first.epoch)">
                 불러오기
-              </button>
+              </button> -->
             </div>
             <div>
               <div class="p-1">
@@ -552,37 +562,67 @@
             </div>
             <div class="p-1">
               <div class="text-white font-bold grid grid-cols-1 text-center">
-                <div class="p-1 bg-gray-500">향상률(%)</div>
+                <div class="p-1 bg-gray-500">통과시간 향상률(%)</div>
               </div>
-              <div v-if="optTestResult.first.result.length === optTestResult.second.result.length"
-                v-for="(r, idx) in optTestResult.first.result" :key="idx" class="grid grid-cols-1" :style="{
+              <div
+                v-if="optTestResult.first.result.length === optTestResult.second.result.length"
+                v-for="(r, idx) in optTestResult.first.result"
+                :key="idx"
+                class="grid grid-cols-1"
+                :style="{
                   color: getColorForImprovedRate(r.improvedRate)
-                }">
-
-                <div class="border-b text-center gird gird-cols-2 items-center justify-center space-x-1">
-                  <b-progress-bar v-if="getEff(idx) < 0" :value="getEff(idx) * -1" animated striped variant="danger">
-                    <span>
-                      <strong>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                          stroke="currentColor" class="w-4 h-4 inline-block">
-                          <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3" />
-                        </svg>
-                        {{ getEff(idx) }}
-                      </strong>
-                    </span>
-                  </b-progress-bar>
-                  <b-progress-bar v-else :value="getEff(idx)" animated striped variant="success">
-                    <span>
-                      <strong>
-                        <svg v-if="getEff(idx) > 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                          stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
-                          <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18" />
-                        </svg>{{ getEff(idx) }}
-                      </strong>
-                    </span>
-                  </b-progress-bar>
+                }"
+              >
+                <div class="border-b text-center grid grid-cols-2 items-center justify-center">
+                  <div class="bg-yellow-400">
+                    <b-progress-bar
+                      v-if="getEff(idx) > 0"
+                      :value="100 - Math.abs(getEff(idx))"
+                      style="background-color: rgba(31,41,55)"
+                    >
+                      <span>
+                        <strong>
+                          {{ Math.abs(getEff(idx)) }} %
+                          <svg v-if="getEff(idx) != 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                          </svg>
+                        </strong>
+                      </span>
+                    </b-progress-bar>
+                  </div>
+                  <div>
+                    <b-progress-bar v-if="getEff(idx) < 0" :value="Math.abs(getEff(idx))" variant="success">
+                      <span>
+                        <strong>
+                          <svg v-if="getEff(idx) != 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                          </svg>
+                          {{ Math.abs(getEff(idx)) }} %
+                        </strong>
+                      </span>
+                    </b-progress-bar>
+                    <div v-else> &nbsp;</div>
+                    <!-- <b-progress-bar v-if="getEff(idx) > 0" :value="Math.abs(getEff(idx))" animated striped variant="">
+                      <span>
+                        <strong>
+                          {{ Math.abs(getEff(idx)) }} %
+                          <svg v-if="getEff(idx) != 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                          </svg>
+                        </strong>
+                      </span>
+                    </b-progress-bar>
+                    <b-progress-bar v-else :value="Math.abs(getEff(idx))" animated striped variant="">
+                      <span>
+                        <strong>
+                          <svg v-if="getEff(idx) != 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                          </svg>
+                          {{ Math.abs(getEff(idx)) }} %
+                        </strong>
+                      </span>
+                    </b-progress-bar> -->
+                  </div>
                 </div>
               </div>
             </div>
@@ -590,8 +630,12 @@
 
           <div class="col-span-5 h-8">
             <div class="h-8 flex items-center space-x-1 justify-center">
-              <select v-model="optTestResult.second.epoch" size="sm" class="text-black rounded py-1 px-2"
-                style="height:30px">
+              <select
+                v-model="optTestResult.second.epoch"
+                class="text-black rounded py-1 px-2  w-full mx-1"
+                style="height:28px"
+                @change="loadTestResult('second', optTestResult.second.epoch)"
+              >
                 <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
                   <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                   <div class="font-bold text-sm">
@@ -599,8 +643,12 @@
                   </div>
                 </option>
               </select>
-              <button class="bg-gray-200 p-1 rounded text-black"
-                @click="loadTestResult('second', optTestResult.second.epoch)">불러오기</button>
+              <!-- <button
+                class="bg-gray-200 p-1 rounded text-black"
+                @click="loadTestResult('second', optTestResult.second.epoch)"
+              >
+                불러오기
+              </button> -->
             </div>
 
             <div>
