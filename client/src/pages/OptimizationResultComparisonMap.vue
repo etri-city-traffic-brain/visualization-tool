@@ -7,7 +7,7 @@
       </div>
     </div>
     <div v-else>
-      <div class="text-white p-2 border-b flex justify-between items-center">
+      <div class="text-white p-1 px-2 border-b border-gray-500 flex justify-between items-center bg-gray-700">
         <div class="font-bold">신호최적화: {{ simulation.id }}</div>
         <div>
           <div class="flex items-center space-x-1">
@@ -34,27 +34,18 @@
           </div>
         </div>
       </div>
-      <div class="text-white p-1 pt-2 flex justify-between border-b- border-gray-200">
-        <div class="space-x-1-">
-          <span class="font-bold text-indigo-100 px-1 p-1 rounded">{{
-            // getRegionName(config.region)
-            config.regionName
-          }}</span>
-          |
-          <span class="font-bold text-indigo-100 px-1 p-1 rounded">{{ config.fromTime }} ~ {{ config.toTime }}</span>
-          |
-          <span class="font-bold text-indigo-100 px-1 p-1 rounded">{{
-            simulation.configuration.junctionId
-          }}</span>
+      <div class="text-white p-1 pt-2 flex justify-between bg-gray-700">
+        <div class="flex space-x-1 items-center">
+          <span class="font-bold text-indigo-100 px-1 ">{{ config.regionName }}</span>
+          <span>|</span>
+          <span class="font-bold text-indigo-100 px-1 ">{{ config.fromTime }} ~ {{ config.toTime }}</span>
+          <span>|</span>
+          <span class="font-bold text-indigo-100 px-1 ">{{ simulation.configuration.junctionId }}</span>
         </div>
         <div class="mx-2">
-          <button
-            @click="showModal"
-            class="px-2 text-white bg-indigo-500 px-1 rounded hover:bg-blue-400 hover:text-white"
-          >
+          <button @click="showModal" class="px-2 text-white bg-indigo-500 px-1 rounded hover:bg-blue-400 hover:text-white">
             <b-icon icon="table"></b-icon> 결과비교
           </button>
-
         </div>
       </div>
 
@@ -68,11 +59,11 @@
                 <div class="flex justify-between">
                   <div class="w-60 bg-gray-700 p-1 px-2 rounded-t-lg">
                     <div class="tracking-wide text-white text-center font-bold ">
-                      기존신호
+                      <b-icon icon="file-earmark-check"></b-icon> 기존신호
                     </div>
 
                   </div>
-                  <div class="w-max-">
+                  <!-- <div class="w-max-">
                     <div class="flex space-x-1 justify-end">
                       <div
                         class="bg-gray-500 px-2 text-center text-2xl font-bold text-gray-100 flex items-center justify-center space-x-2 rounded-lg">
@@ -91,17 +82,36 @@
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> -->
                 </div>
                 <div class="border-2 border-gray-700">
                   <div class="relative">
-                    <div :ref="mapIds[0]" :id="mapIds[0]" :style="{ height: mapHeight + 'px' }" />
+                    <div :ref="mapIdFt" :id="mapIdFt" :style="{ height: mapHeight + 'px' }" />
                     <div class="absolute top-0 w-full">
                       <b-progress height="1rem" class="no-border-radius" show-progress  v-if="chart1.progress != 0">
                         <b-progress-bar :value="chart1.progress" variant="secondary">
                           <span> {{ chart1.progress }} %</span>
                         </b-progress-bar>
                       </b-progress>
+                    </div>
+
+                    <div class="absolute top-4 right-1 w-60 bg-indigo-50">
+                      <div class="grid grid-cols-2 gap-1 text-white font-bold">
+                        <div class="bg-gray-600 p-2 text-center text-2xl rounded-lg">
+                          <div class="text-xs">평균속도</div>
+                          <div>
+                            <span>{{ animated.chart1_avgSpeedJunction.toFixed(2) }}</span>
+                            <span class="text-sm">km</span>
+                          </div>
+                        </div>
+                        <div class="bg-gray-600 p-2 text-center text-2xl rounded-lg">
+                          <div class="text-xs">통과시간</div>
+                          <div>
+                            <span>{{ animated.chart1_travelTimeJunction.toFixed(2) }}</span>
+                            <span class="text-sm">초</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -111,10 +121,10 @@
                 <div class="flex justify-between">
                   <div class="w-60 p-1 bg-yellow-300 rounded-t-lg">
                     <div class="text-black text-center font-bold tracking-wide ">
-                      최적신호
+                      <b-icon icon="file-earmark-code"></b-icon> 최적신호
                     </div>
                   </div>
-                  <div class="w-max">
+                  <!-- <div class="w-max">
                     <div class="flex space-x-1 justify-end">
                       <div
                         class="bg-yellow-200 px-2 text-center text-2xl font-bold flex items-center justify-center space-x-2 rounded-lg">
@@ -136,12 +146,12 @@
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> -->
                 </div>
 
                 <div class="border-2 border-yellow-300">
                   <div class="relative">
-                    <div :ref="mapIds[1]" :id="mapIds[1]" :style="{ height: mapHeight + 'px' }"></div>
+                    <div :ref="mapIdRl" :id="mapIdRl" :style="{ height: mapHeight + 'px' }"></div>
                     <div class="absolute top-0 w-full">
                       <b-progress height="1rem" class="no-border-radius" show-progress v-if="chart2.progress != 0">
                         <b-progress-bar :value="chart2.progress" variant="warning">
@@ -149,10 +159,30 @@
                         </b-progress-bar>
                       </b-progress>
                     </div>
-                    <div class="absolute -left-40 top-8 w-76 bg-gray-600 p-0 text-white" v-if="testResult">
+
+                    <div class="absolute top-4 right-1 w-60 bg-indigo-50">
+                      <div class="grid grid-cols-2 gap-1 text-black font-bold">
+                        <div class="bg-yellow-200 p-2 text-center text-2xl rounded-lg">
+                          <div class="text-xs">평균속도</div>
+                          <div>
+                            <span>{{ animated.chart2_avgSpeedJunction.toFixed(2) }}</span>
+                            <span class="text-sm">km</span>
+                          </div>
+                        </div>
+                        <div class="bg-yellow-200 p-2 text-center text-2xl rounded-lg">
+                          <div class="text-xs">통과시간</div>
+                          <div>
+                            <span>{{ animated.chart2_travelTimeJunction.toFixed(2) }}</span>
+                            <span class="text-sm">초</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="absolute -left-40 top-24 w-76 bg-gray-600 p-0 text-white" v-if="testResult">
                       <div class="flex justify-between bg-gray-500 py-1 px-2">
                         <div class="font-bold">
-                          <b-icon icon="stoplights"></b-icon> {{ selectedNode }}
+                          <b-icon icon="stoplights"></b-icon> {{ crossNameSelected }}
                         </div>
                         <div>
                           <button @click="testResult=null">X</button>
@@ -163,10 +193,10 @@
                           <div class="px-1 w-28 text-right rounded">
                             &nbsp;
                           </div>
-                          <div class="px-1 w-20 text-right bg-gray-500 rounded">
+                          <div class="px-1 w-20 text-center bg-gray-500 rounded">
                             기존신호
                           </div>
-                          <div class="px-1 w-20 text-right bg-yellow-300 rounded text-black">
+                          <div class="px-1 w-20 text-center bg-yellow-300 rounded text-black">
                             최적신호
                           </div>
                         </div>
@@ -221,17 +251,16 @@
           </div>
           <div class="max-w-84 flex flex-column">
             <div class="mx-1">
-              <div
-                class="p-3 bg-gray-700 text-center font-bold rounded-lg"
-                >
+              <div class="p-3 bg-gray-700 font-bold rounded-lg space-y-1" >
                 <div class="text-white">
-                  통과시간 향상률
+                  통과시간 향상률(%)
                 </div>
-                <div class="text-6xl" :style="{'color': colorScale(animated.improvement_rate.toFixed(2))}">
-                  {{ animated.improvement_rate.toFixed(2)
-                  }}<span class="text-lg">%</span>
+                <div class="text-5xl text-center flex justify-center items-baseline space-x-1" :style="{'color': colorScale(animated.improvement_rate.toFixed(2))}">
+                  <span>
+                    {{ animated.improvement_rate.toFixed(2) }}
+                  </span>
+                  <span class="text-3xl">%</span>
                 </div>
-                <!-- {{chart.improvement_rate.toFixed(2)}}<span class="text-lg">%</span> -->
               </div>
             </div>
 
@@ -261,9 +290,8 @@
                   </div>
                 </div> -->
 
-                <div class="text-sm bg-gray-800">
-                  <div v-if="Object.keys(chart.travelTimePerJunction || {}).length > 0
-                    ">
+                <div class="text-sm">
+                  <div v-if="Object.keys(chart.travelTimePerJunction || {}).length > 0">
                     <div class="text-white font-bold grid grid-cols-6 gap-1 text-center text-xs">
                       <div class="py-1 bg-gray-500 col-span-3">교차로</div>
                       <div class="py-1 bg-gray-500">기존(초)</div>
@@ -271,10 +299,14 @@
                       <div class="py-1 bg-gray-500">향상률(%)</div>
                     </div>
 
-                    <div v-for="v of Object.entries(chart.travelTimePerJunction)" :key="v[0]"
-                      class="text-white- grid grid-cols-6 px-1" :style="{
+                    <div
+                      v-for="v of Object.entries(chart.travelTimePerJunction)"
+                      :key="v[0]"
+                      class="text-white- grid grid-cols-6 px-1"
+                      :style="{
                         color: getColorForImprovedRate(v[1].improvement_rate)
-                      }">
+                      }"
+                    >
                       <div class="border-b col-span-3">
                         <button @click="selectCrossName(v[0])" class="hover:text-blue-200">
                           <svg v-if="v[1].improvement_rate < 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -336,8 +368,8 @@
                     </button>
                   </div>
                   <div class="bg-gray-500 font-bold p-1 px-3 rounded-t-lg">
-                    <button @click.prevent="currentTab = ''; selectCrossName(selectedNode);">
-                      {{ selectedNode }}
+                    <button @click.prevent="currentTab = ''; selectCrossName(crossNameSelected);">
+                      {{ crossNameSelected }}
                     </button>
                   </div>
                 </div>
@@ -409,7 +441,7 @@
                     </div>
                     <!-- <div class="absolute top-2 left-2">
                       <div class="text-white text-sm">
-                        {{ selectedNode }}
+                        {{ crossNameSelected }}
                       </div>
                     </div> -->
                   </div>
@@ -421,7 +453,7 @@
         <!-- 평균 통과시간 그래프 END -->
 
         <div class="absolute bottom-0 right-2 bg-blue-400 px-2 rounded" v-if="!isShowAvgTravelChart">
-          <button @click="isShowAvgTravelChart = true" class="text-sm text-white font-bold">
+          <button @click="isShowAvgTravelChart = true; updateSignalExplain()" class="text-sm text-white font-bold">
             평균통과시간 차트
           </button>
         </div>

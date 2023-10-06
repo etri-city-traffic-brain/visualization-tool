@@ -21,17 +21,17 @@ export default function MakeMap({
     minZoom: 12,
     seamlessZoom: false,
     zoomControl: {
-      position: 'top-right',
+      position: 'top-left',
       slider: false,
       zoomLevel: true
     },
-    layerSwitcherControl: {
-      position: 'top-left',
-      baseTitle: 'Base Layers',
-      overlayTitle: 'Layers',
-      excludeLayers: ['c', 'toolLayer'],
-      containerClass: 'maptalks-layer-switcher'
-    },
+    // layerSwitcherControl: {
+    //   position: 'top-left',
+    //   baseTitle: 'Base Layers',
+    //   overlayTitle: 'Layers',
+    //   excludeLayers: ['c', 'toolLayer'],
+    //   containerClass: 'maptalks-layer-switcher'
+    // },
     baseLayer: new maptalks.GroupTileLayer('Base TileLayer', [
       new TileLayer('vworld', {
         urlTemplate:
@@ -44,7 +44,8 @@ export default function MakeMap({
   })
 
   map.on('click', param => {
-    // const coord = param.coordinate.toFixed(7)
+    const coord = param.coordinate.toFixed(7)
+    log(coord)
   })
 
   return map

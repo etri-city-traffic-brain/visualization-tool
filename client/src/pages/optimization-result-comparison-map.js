@@ -17,9 +17,7 @@ import simulationService from '@/service/simulation-service'
 
 import SimulationResult from '@/pages/SimulationResult.vue'
 
-// import congestionColor from '@/utils/colors'
 import LineChart from '@/components/charts/LineChart'
-
 
 import UniqCongestionColorBar from '@/components/CongestionColorBar'
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
@@ -41,15 +39,11 @@ import parseAction from '@/actions/action-parser'
 
 import colorScale from '@/utils/colors-improve-rate'
 
-// import lineChartOption from '@/charts/chartjs/line-chart-option'
-// import barChartOption from '@/charts/chartjs/bar-chart-option'
-
 const lineChartOption = {
   maintainAspectRatio: false,
-  // animation: false,
-  spanGaps: true, // enable for all datasets
+  spanGaps: true,
   responsive: true,
-  showLine: true, // disable for a single dataset
+  showLine: true,
   title: {
     display: false
   },
@@ -81,7 +75,7 @@ const lineChartOption = {
           maxRotation: 0,
           display: true,
           fontColor: 'white',
-          callback: function (value, index, values) {
+          callback: function (value) {
             return value + '(s)'
           }
         }
@@ -95,93 +89,70 @@ const lineChartOption = {
       fontSize: 12
     }
   },
-  onClick: function (evt, item) {
-    // if (callback && item.length > 0) {
-    // callback(item[0]._index)
-    // }
-  }
 }
 
 const { log } = window.console
 
-const dataset = (label, color, data) => ({
-  label,
-  fill: false,
-  borderColor: color,
-  backgroundColor: color,
-  borderWidth: 1,
-  pointRadius: 0.5,
-  data
-})
+function makeTravelTimeChart(dataFt = [], dataRl = [], avgTTFT = 0, avgTTRL = 0,) {
 
-const makeSpeedLineData = (
-  dataFt = [],
-  dataRl = [],
-  avgTTFT = 0,
-  avgTTRL = 0,
-  filterStep = 29
-) => {
+  function dataset(label, color, data) {
+    return {
+      label,
+      fill: false,
+      borderColor: color,
+      backgroundColor: color,
+      borderWidth: 1,
+      pointRadius: 0.5,
+      data
+    }
+  }
+
+  const dataLength = dataRl.length
 
   const datasets = []
   datasets.push(dataset('기존신호', 'grey', dataFt))
   datasets.push(dataset('최적신호', 'orange', dataRl))
   if (avgTTFT > 0) {
-    datasets.push(dataset(
-      '기존신호(평균)',
-      'skyblue',
-      new Array(dataRl.length).fill(avgTTFT)
-    ))
+    datasets.push(dataset('기존신호(평균)', 'skyblue', new Array(dataLength).fill(avgTTFT)))
   }
   if (avgTTRL > 0) {
-    datasets.push(
-      dataset(
-        '최적신호(평균)',
-        'yellow',
-        new Array(dataRl.length).fill(avgTTRL)
-      )
-    )
+    datasets.push(dataset('최적신호(평균)', 'yellow', new Array(dataLength).fill(avgTTRL)))
   }
-  return {
-    labels: new Array(dataRl.length).fill(0).map((_, i) => i * filterStep),
-    normalized: true,
 
+  return {
+    labels: new Array(dataLength).fill(0).map((_, i) => i * dataLength),
+    normalized: true,
     datasets: datasets,
-    avgFt: avgTTFT,
-    avgRl: avgTTRL
   }
 }
 
 const randomId = () => `map-${Math.floor(Math.random() * 100)}`
 
-async function makeSimulationData(region, mapId, slave, eventTarget, mapBus, wsBus, jIds, slaves) {
+async function makeSimulationData(mapId, sId, eventTarget, mapBus, wsBus, jIds, slaves) {
   const map = makeMap({ mapId: mapId, zoom: 16 })
-
   const mapManager = MapManager({
     map: map,
-    simulationId: slave,
+    simulationId: sId,
     eventBus: mapBus
   })
-  log('make websocket for ', slave)
   const wsClient = WebSocketClient({
-    simulationId: slave,
+    simulationId: sId,
     eventBus: wsBus,
-    // region: [127.3449, 36.3873, 127.3807, 36.3694]
     region: map.getExtent()
-    // eventBus: mapBus
   })
   const trafficLightManager = TrafficLightManager(map, jIds, eventTarget)
   await trafficLightManager.load(jIds)
-  // trafficLightManager.setTargetJunctions(jIds)
 
   mapManager.loadMapData()
   wsClient.init(slaves)
+
   return {
     map,
     mapManager,
     wsClient,
     bus: mapBus,
     trafficLightManager,
-    slave
+    slave: sId
   }
 }
 
@@ -200,9 +171,9 @@ export default {
   },
   data() {
     return {
-
       simulation: { configuration: {} }, // means optimization
-      mapIds: [randomId(), randomId()],
+      mapIdFt: randomId(),
+      mapIdRl: randomId(),
       simulations: null,
       mapHeight: 600,
       chart1: { // 기존신호
@@ -218,25 +189,20 @@ export default {
         data: {},
       },
       chart: {
-        avgSpeedChartInView: {}, // realtime chart
-        avgChartJunctions: {},
-        effTravelTime: 0,
         travelTimeJunctionChart: {},
-        improvement_rate: 0,
+        travelTimeJunctionChartAcc: {},
       },
       lineChartOption,
       rewards: {
         labels: [],
         values: []
       },
-      phaseFixed: {},
-      phaseTest: {},
-      testSlave: null,
-      fixedSlave: null,
+      simIdRl: null,
+      simIdFt: null,
       selectedEpoch: 0,
       showEpoch: false,
       trafficLightManager: null,
-      selectedNode: '',
+      crossNameSelected: '',
       showWaitingMsg: false,
       statusMessage: [],
       timer: null,
@@ -315,7 +281,7 @@ export default {
       if (!this.optResult) {
         return [{}, {}]
       }
-      const j = this.optResult.intersections[this.selectedNode]
+      const j = this.optResult.intersections[this.crossNameSelected]
       if (!j) {
         return [{}, {}]
       }
@@ -332,113 +298,112 @@ export default {
 
     const { simulation } = await simulationService.getSimulationInfo(optimizationId)
 
+
     if (!simulation) {
       log("cannot find optimization information")
       return
     }
+
+    optSvc.getOptTestResults(simulation.id).then(result => {
+      this.optTestResults = result
+    })
+
     this.status = simulation.status
     this.simulation = simulation
-    this.fixedSlave = simulation.slaves[1]
-    this.testSlave = simulation.slaves[0]
-
+    this.simIdFt = simulation.slaves[1]
+    this.simIdRl = simulation.slaves[0]
     const simEventBusFixed = new Vue({})
     const simEventBusTest = new Vue({})
-    const buffer = []
+    const bufferSimFt = []
     const wsBus = new Vue({})
+
+    const { junctionId, center } = this.simulation.configuration
+
+    const jIds = junctionId.split(',')
+
     this.simulations = [
       await makeSimulationData(
-        this.simulation.configuration.region,
-        this.mapIds[0],
-        this.fixedSlave,
+        this.mapIdFt,
+        this.simIdFt,
         this,
         simEventBusFixed,
         wsBus,
-        this.simulation.configuration.junctionId.split(','),
-        [this.fixedSlave, this.testSlave]
+        jIds,
+        [this.simIdFt, this.simIdRl]
       ),
       await makeSimulationData(
-        this.simulation.configuration.region,
-        this.mapIds[1],
-        this.testSlave,
+        this.mapIdRl,
+        this.simIdRl,
         this,
         simEventBusTest,
         simEventBusTest,
-        this.simulation.configuration.junctionId.split(','),
-        [this.fixedSlave, this.testSlave]
+        jIds,
+        [this.simIdFt, this.simIdRl]
       )
     ]
+    const mapFt = this.simulations[0].map
 
-    const center = this.simulation.configuration.center
     if (center) {
-      this.simulations[0].map.animateTo({
+      mapFt.animateTo({
         center: [center.x, center.y]
       })
     }
 
     this.initMapEventHandler(this)
 
-    const busFixed = simEventBusFixed
-    const busTest = simEventBusTest
+    const evtBusFt = simEventBusFixed
+    const evtBusRl = simEventBusTest
 
     wsBus.$on('salt:data', data => {
-      buffer.push(data)
+      bufferSimFt.push(data)
     })
 
     let boundingBoxSet = false
 
     // 최적화 시뮬레이션이 수행 속도가 느림
     // 버퍼로부터 데이터 가져와 이벤트 발생
-    busTest.$on('salt:data', () => {
+    evtBusRl.$on('salt:data', () => {
       this.showWaitingMsg = false
-      const dataSim = buffer.splice(0, 1)[0]
-      if (dataSim) {
-        simEventBusFixed.$emit('salt:data', dataSim)
-
-        if (!boundingBoxSet) {
-          setTimeout(() => {
-            const map1 = this.simulations[0].map
-            const map2 = this.simulations[1].map
-            map1.animateTo({
-              center: map1.getCenter(),
-              zoom: map1.getZoom() + 1
-            })
-            map2.animateTo({
-              center: map2.getCenter(),
-              zoom: map2.getZoom() + 1
-            })
-          }, 500)
-          boundingBoxSet = true
-        }
+      const dataSim = bufferSimFt.shift()
+      if (!dataSim) {
+        return
       }
+
+      simEventBusFixed.$emit('salt:data', dataSim)
+
+      if (!boundingBoxSet) {
+        setTimeout(() => mapFt.animateTo({ center: mapFt.getCenter(), zoom: mapFt.getZoom() + 1 }), 500)
+        boundingBoxSet = true
+      }
+
     })
 
-    busTest.$on('salt:status', async status => {
+    evtBusRl.$on('salt:status', async status => {
       this.chart2.progress = status.progress
       this.chart1.progress = status.progress
-      // this.showWaitingMsg = false
 
       if (status.progress >= 99) {
-        this.chart2.progress = 100
         this.chart1.progress = 100
+        this.chart2.progress = 100
       }
 
       if (status.progress > 100) {
-        this.chart2.progress = 0
         this.chart1.progress = 0
+        this.chart2.progress = 0
       }
     })
 
-    busFixed.$on('optimization:finished', () => {
+    evtBusFt.$on('optimization:finished', () => {
 
     })
 
-    busFixed.$on('ws:error', error => {
-      this.makeToast(error.message, 'warning')
+    evtBusFt.$on('ws:error', err => {
+      log(err.message)
     })
 
-    this.$on('junction:clicked', async p => {
-      const crossName = signalService.nodeIdToName(p.nodeId)
-      this.selectedNode = crossName
+    this.$on('junction:clicked', async param => {
+      const crossName = signalService.nodeIdToName(param.nodeId)
+      this.crossNameSelected = crossName
       this.selectCrossName(crossName)
     })
 
@@ -451,14 +416,9 @@ export default {
     window.scrollTo(0, 0)
     window.addEventListener('resize', this.resize.bind(this))
 
-    const result = await optSvc.getOptTestResults(this.simulation.id)
-    this.optTestResults = result
-    // console.log('[xxxx] result', result)
+
 
     this.checkStatus()
-
-
-
   },
   methods: {
     colorScale,
@@ -496,23 +456,23 @@ export default {
           this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')
 
           const step = this.step
-          this.chart.travelTimeChartInView = makeSpeedLineData(
+          this.chart.travelTimeChartInView = makeTravelTimeChart(
             optResult.simulate.travel_times.filter((v, i) => i % step === 0),
             optResult.test.travel_times.filter((v, i) => i % step === 0),
             optResult.simulate.travel_time,
             optResult.test.travel_time,
             step
           )
-          this.chart.travelTimeChartInViewAcc = makeSpeedLineData(
+          this.chart.travelTimeChartInViewAcc = makeTravelTimeChart(
             optResult.simulate.cumlative_avgs.filter((v, i) => i % step === 0),
             optResult.test.cumlative_avgs.filter((v, i) => i % step === 0),
             0, 0,
             step
           )
 
-          const r = this.optResult.intersections[this.selectedNode]
+          const r = this.optResult.intersections[this.crossNameSelected]
           if (r) {
-            this.chart.travelTimeJunctionChart = makeSpeedLineData(
+            this.chart.travelTimeJunctionChart = makeTravelTimeChart(
               r.simulate.travel_times.filter((v, i) => i % step === 0),
               r.test.travel_times.filter((v, i) => i % step === 0),
               r.simulate.travel_time,
@@ -520,7 +480,7 @@ export default {
               step
             )
 
-            this.chart.travelTimeJunctionChartAcc = makeSpeedLineData(
+            this.chart.travelTimeJunctionChartAcc = makeTravelTimeChart(
               r.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
               r.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
               0,
@@ -582,11 +542,8 @@ export default {
     },
 
     async selectCrossName(crossName) {
-      this.selectedNode = crossName
-
-
+      this.crossNameSelected = crossName
       this.isShowAvgTravelChart = true
-
       this.currentTab = ''
       this.updateSignalExplain()
 
@@ -603,23 +560,23 @@ export default {
         return
       }
       const step = this.step
-      this.chart.travelTimeJunctionChart = makeSpeedLineData(
-        r.simulate.travel_times.filter((v, i) => i % step === 0),
-        r.test.travel_times.filter((v, i) => i % step === 0),
+      const stepFilter = (v, i) => i % step === 0
+      this.chart.travelTimeJunctionChart = makeTravelTimeChart(
+        r.simulate.travel_times.filter(stepFilter),
+        r.test.travel_times.filter(stepFilter),
         r.simulate.travel_time,
         r.test.travel_time,
         step
       )
 
-      this.chart.travelTimeJunctionChartAcc = makeSpeedLineData(
-        r.simulate.cumlative_avgs.filter((v, i) => i % step === 0),
-        r.test.cumlative_avgs.filter((v, i) => i % step === 0),
+      this.chart.travelTimeJunctionChartAcc = makeTravelTimeChart(
+        r.simulate.cumlative_avgs.filter(stepFilter),
+        r.test.cumlative_avgs.filter(stepFilter),
         0,
         0,
         step
       )
       this.testResult = r
-      // console.log(r.test)
     },
 
     async updateRewardTotal() {
@@ -675,7 +632,7 @@ export default {
         await simulationService.stopSimulation(this.simulation.id)
         await optSvc.runTest(
           this.simulation.id,
-          this.testSlave,
+          this.simIdRl,
           this.selectedEpoch
         )
       } catch (err) {
@@ -713,7 +670,7 @@ export default {
           if (map1.isZooming() || map2.isZooming()) {
             return
           }
-          obj.buffer = [] // init buffer
+          obj.bufferSimFt = []
           map.animateTo(
             {
               center: target.getCenter(),
@@ -724,10 +681,7 @@ export default {
             }
           )
         }
-
-
         return async e => {
-          // console.log('isMoving', map1.isMoving(), map2.isMoving())
           if (map1.isMoving() || map2.isMoving()) {
             return
           }
@@ -754,14 +708,10 @@ export default {
       } catch (err) {
         log('check status error: ', err.message)
       }
-
       if (this.status === 'finished' || this.status === 'error' || this.status === 'stopped') {
         this.showWaitingMsg = false
         return
       }
-
-
-
       this.checkStatusTimer = setTimeout(() => {
         this.checkStatus()
       }, 5000)

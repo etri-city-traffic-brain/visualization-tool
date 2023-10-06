@@ -5,15 +5,13 @@
       :variant="variant"
       ref="main-nav"
       id="main-nav"
-      class="pl-3 pt-1 pb-1 m-0"
+      class="pl-3 py-1 m-0"
       toggleable="md"
       sticky
     >
       <b-navbar-brand href="#" to="/">
         <div class="">
-          <strong
-            class="flex animate__animated animate__bounceInLeft animate__bounceIn"
-          >
+          <strong class="flex animate__animated animate__bounceInLeft animate__bounceIn" >
             <div class="text-blue-400 animate-bounce ">U</div>
             <div class="animate-bounce-">N</div>
             <div class="animate-bounce-">I</div>
@@ -45,7 +43,7 @@
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item size="sm" to>
-            <!-- <span class="bg-indigo-100 p-1 text-black text-sm rounded-md font-bold">UNIQ</span> -->
+            <span class="text-black text-sm rounded-md font-bold text-blue-200">UNIQ-VIS</span>
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>
