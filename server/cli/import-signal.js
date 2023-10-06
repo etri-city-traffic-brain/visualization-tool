@@ -53,7 +53,7 @@ async function importData(collectionName, filePath) {
 }
 
 if (require.main === module) {
-  importData('signals', './signals_v2.geojson').then(() => {
+  importData('signals', './signals_v3.geojson').then(() => {
     // console.log('finished')
   }).catch(err => console.log(err))
 }

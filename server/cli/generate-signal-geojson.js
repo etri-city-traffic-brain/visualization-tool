@@ -1,17 +1,16 @@
-// tss.xml 파일로 부터 geoJson 생성
+
+// last modified: 2023-10-06
 
 const fs = require('fs')
 
-const xmlToJson = require('./tssXmlToJson')
-
-function feature(NODE_ID, coordinates, signal) {
+function feature(NODE_ID, coordinates, crossName, groupName = '') {
   return {
     type: 'Feature',
     properties: {
-      VERSION: 20150128,
+      VERSION: 20231006,
       NODE_ID,
-      NAME: signal?.crossName,
-      GROUP: signal?.groupName
+      NAME: crossName,
+      GROUP: groupName
     },
     geometry: {
       type: 'Point',
@@ -20,20 +19,15 @@ function feature(NODE_ID, coordinates, signal) {
   }
 }
 
-const signalInfo = xmlToJson('tss.xml')
-
-const { signals } = signalInfo
-
-const signalCsv = fs.readFileSync('./signallist.csv', 'utf-8')
+const signalCsv = fs.readFileSync('./signallist_v3.csv', 'utf-8')
 
 const features = signalCsv.split('\n').map((row) => {
   const values = row.split(',')
 
-  const [nodeId, x, y] = values
+  const [nodeId, crossName, groupName, x, y] = values
+  const groupNameNew = 'SA ' + groupName
 
-  const signal = signals[nodeId]
-
-  return feature(nodeId, [Number(x), Number(y)], signal)
+  return feature(nodeId, [Number(x), Number(y)], crossName, groupNameNew)
 })
 
 const geoJson = {
@@ -48,7 +42,6 @@ const geoJson = {
   features,
 }
 
-//  CSV 형태의 노드 목록을 GEO JSON 객체로 변환한다.
 if (require.main === module) {
-  fs.writeFileSync('signals_v2.geojson', JSON.stringify(geoJson, false, 2))
+  fs.writeFileSync('signals_v3.geojson', JSON.stringify(geoJson, false, 2))
 }
