@@ -1,7 +1,7 @@
 const Calculator = require('./calculator')
 
 function getAvgTT(sumTravelTime, sumPassed) {
-  return sumPassed > 0 ? sumTravelTime / sumPassed : 0
+  return sumPassed > 0 ? sumTravelTime / sumPassed : sumTravelTime
 }
 
 function IntersectionCollector() {
@@ -11,6 +11,8 @@ function IntersectionCollector() {
   const calcSumTravelTime = Calculator.Sum()
   const calcSumPassed = Calculator.Sum()
   const calcSumTravelTimeStep = Calculator.Sum()
+  const avgSpeed = Calculator.Avg()
+  const sumPassed = Calculator.Avg()
 
   function collect(intersection) {
     signalExplains.push(intersection.actions)
@@ -19,6 +21,8 @@ function IntersectionCollector() {
     calcSumTravelTimeStep.calculate(intersection.sumTravelTime)
     travelTimes.push(getAvgTT(intersection.sumTravelTime, intersection.sumPassed))
     cumlativeAvgs.push(getAvgTT(calcSumTravelTime.get(), calcSumPassed.get()))
+    avgSpeed.calculate(intersection.avgSpeed)
+    sumPassed.calculate(intersection.sumPassed)
   }
 
   function get() {
@@ -27,7 +31,9 @@ function IntersectionCollector() {
       travelTime,
       travelTimes,
       cumlativeAvgs,
-      signalExplains
+      signalExplains,
+      avgSpeed: avgSpeed.get(),
+      sumPassed: sumPassed.get()
     })
   }
 

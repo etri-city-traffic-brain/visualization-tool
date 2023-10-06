@@ -29,7 +29,7 @@ import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinishe
 import toastMixin from '@/components/mixins/toast-mixin'
 
 import UniqCardTitle from '@/components/func/UniqCardTitle'
-import * as d3 from 'd3'
+
 import { optimizationService as optSvc } from '@/service'
 import signalService from '@/service/signal-service'
 
@@ -264,7 +264,9 @@ export default {
           result: []
         }
       },
-      optTestResults: []
+      optTestResults: [],
+      step: 29,
+      testResult: null,
     }
   },
   watch: {
@@ -289,11 +291,14 @@ export default {
       clearTimeout(this.timer)
     }
 
+    if (this.checkStatusTimer) {
+      clearTimeout(this.checkStatusTimer)
+    }
+
     window.removeEventListener('resize', this.getWindowHeight)
   },
   computed: {
     epochList() {
-      // console.log(this.simulation.configuration)
       return this.rewardTotal.filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0).filter(v => {
         return this.optTestResults.includes(v.epoch)
       })
@@ -424,7 +429,7 @@ export default {
     })
 
     busFixed.$on('optimization:finished', () => {
-      this.checkStatus()
+
     })
 
     busFixed.$on('ws:error', error => {
@@ -450,15 +455,22 @@ export default {
     this.optTestResults = result
     // console.log('[xxxx] result', result)
 
+    this.checkStatus()
+
+
+
   },
   methods: {
     colorScale,
+
     getEff(idx) {
       return (100 - (this.optTestResult.first.result[idx].rlAvgTravelTime / this.optTestResult.second.result[idx].rlAvgTravelTime) * 100).toFixed(2)
     },
+
     getProgressColor(v) {
       return v > 0 ? 'success' : 'danger'
     },
+
     async loadTestResult(type, epoch) {
       try {
         const result = await optSvc.getOptTestResult(this.simulation.id, epoch)
@@ -466,69 +478,57 @@ export default {
       } catch (err) {
         log(err.message)
       }
-
-
-
     },
     getColorForImprovedRate(v) {
       return colorScale(v)
     },
+
     async updateOptResult(forceUpdate) {
       const start = new Date().getTime()
       const progress = this.chart1.progress
       if ((progress > 0 && progress < 100) || forceUpdate) {
         this.statusText = 'chart created...' + +(Date.now() - start) / 1000
-
-
-        // const result = await optSvc.getOptTestResult(this.simulation.id, 0)
-        // this.optTestResult = result
-        // console.log(result)
         try {
-          //
           const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
           this.optResult = optResult
 
-          log(optResult)
           this.simulations[1].trafficLightManager.setOptTestResult(optResult.intersections, 'test')
           this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')
 
-          // this.simulations[1].trafficLightManager.setOptResult2(this.optTestResult, 'test')
-          // this.simulations[0].trafficLightManager.setOptResult2(this.optTestResult, 'simulate')
-
+          const step = this.step
           this.chart.travelTimeChartInView = makeSpeedLineData(
-            optResult.simulate.travel_times.filter((v, i) => i % 29 === 0),
-            optResult.test.travel_times.filter((v, i) => i % 29 === 0),
+            optResult.simulate.travel_times.filter((v, i) => i % step === 0),
+            optResult.test.travel_times.filter((v, i) => i % step === 0),
             optResult.simulate.travel_time,
             optResult.test.travel_time,
-            29
+            step
           )
           this.chart.travelTimeChartInViewAcc = makeSpeedLineData(
-            optResult.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
-            optResult.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
-            // optResult.simulate.travel_time,
-            // optResult.test.travel_time,
-            0,
-            0,
-            29
+            optResult.simulate.cumlative_avgs.filter((v, i) => i % step === 0),
+            optResult.test.cumlative_avgs.filter((v, i) => i % step === 0),
+            0, 0,
+            step
           )
 
-          const d = this.optResult.intersections[this.selectedNode]
-          if (d) {
+          const r = this.optResult.intersections[this.selectedNode]
+          if (r) {
             this.chart.travelTimeJunctionChart = makeSpeedLineData(
-              d.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
-              d.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
-              d.simulate.travel_time,
-              d.test.travel_time,
-              29
+              r.simulate.travel_times.filter((v, i) => i % step === 0),
+              r.test.travel_times.filter((v, i) => i % step === 0),
+              r.simulate.travel_time,
+              r.test.travel_time,
+              step
             )
 
             this.chart.travelTimeJunctionChartAcc = makeSpeedLineData(
-              d.simulate.travel_times.filter((v, i) => i % 29 === 0),
-              d.test.travel_times.filter((v, i) => i % 29 === 0),
-              d.simulate.travel_time,
-              d.test.travel_time,
+              r.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
+              r.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
+              0,
+              0,
               29
             )
+
+            this.testResult = r
 
           }
 
@@ -553,13 +553,10 @@ export default {
             this.signalExplain.update(parseAction(this.actionForOpt[1].action))
           }
         } catch (err) {
-          // this.statusText = err.message
           log(err.message)
           if (err.response) {
-            // this.statusText = err.response.data
             log(err.response.data)
             this.status = 'error'
-
           }
         }
       }
@@ -586,37 +583,7 @@ export default {
 
     async selectCrossName(crossName) {
       this.selectedNode = crossName
-      if (!this.optResult) {
-        return
-      }
-      if (!this.optResult.intersections) {
-        return
-      }
-      const result = this.optResult.intersections[crossName]
-      if (result) {
-        // this.chart.travelTimeJunctionChart = makeSpeedLineData(
-        //   d.simulate.cumlative_avgs,
-        //   d.test.cumlative_avgs,
-        //   0,// d.simulate.travel_time,
-        //   0,// d.test.travel_time,
-        //   1
-        // )
 
-        this.chart.travelTimeJunctionChart = makeSpeedLineData(
-          result.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
-          result.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
-          0, // d.simulate.travel_time,
-          0, // d.test.travel_time,
-          29
-        )
-        this.chart.travelTimeJunctionChartAcc = makeSpeedLineData(
-          result.simulate.travel_times.filter((v, i) => i % 29 === 0),
-          result.test.travel_times.filter((v, i) => i % 29 === 0),
-          result.simulate.travel_time,
-          result.test.travel_time,
-          29
-        )
-      }
 
       this.isShowAvgTravelChart = true
 
@@ -625,6 +592,34 @@ export default {
 
       this.simulations[1].trafficLightManager.moveTo(crossName)
 
+      if (!this.optResult) {
+        return
+      }
+      if (!this.optResult.intersections) {
+        return
+      }
+      const r = this.optResult.intersections[crossName]
+      if (!r) {
+        return
+      }
+      const step = this.step
+      this.chart.travelTimeJunctionChart = makeSpeedLineData(
+        r.simulate.travel_times.filter((v, i) => i % step === 0),
+        r.test.travel_times.filter((v, i) => i % step === 0),
+        r.simulate.travel_time,
+        r.test.travel_time,
+        step
+      )
+
+      this.chart.travelTimeJunctionChartAcc = makeSpeedLineData(
+        r.simulate.cumlative_avgs.filter((v, i) => i % step === 0),
+        r.test.cumlative_avgs.filter((v, i) => i % step === 0),
+        0,
+        0,
+        step
+      )
+      this.testResult = r
+      // console.log(r.test)
     },
 
     async updateRewardTotal() {
@@ -688,6 +683,7 @@ export default {
         this.status = 'error'
       }
       this.status = 'running'
+      this.checkStatus()
     },
 
     addMessage(msg) {
@@ -706,7 +702,6 @@ export default {
         .then(data => {
           this.addMessage(data.msg)
         })
-      this.checkStatus()
     },
 
     initMapEventHandler(obj) {
@@ -730,25 +725,14 @@ export default {
           )
         }
 
+
         return async e => {
+          // console.log('isMoving', map1.isMoving(), map2.isMoving())
+          if (map1.isMoving() || map2.isMoving()) {
+            return
+          }
           if (e.target.id === map1.id) {
             moveTo(map2, e.target)
-
-            // const result = await optSvc.getOptTestResult(this.simulation.id, 0)
-            // this.optTestResult = result
-            // try {
-            //   //
-            //   const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
-            //   this.optResult = optResult
-
-            //   log(optResult)
-
-            //   this.simulations[1].trafficLightManager.setOptResult2(this.optTestResult, 'test')
-            //   this.simulations[0].trafficLightManager.setOptResult2(this.optTestResult, 'simulate')
-            // } catch (err) {
-            //   log(err.message)
-            // }
-
           }
         }
       }
@@ -763,9 +747,24 @@ export default {
     },
 
     async checkStatus() {
-      simulationService.getSimulationInfo(this.simulation.id).then(data => {
+      try {
+        const data = await simulationService.getSimulationInfo(this.simulation.id)
         this.status = data.simulation.status
-      })
+        log('check status:', this.status)
+      } catch (err) {
+        log('check status error: ', err.message)
+      }
+
+      if (this.status === 'finished' || this.status === 'error' || this.status === 'stopped') {
+        this.showWaitingMsg = false
+        return
+      }
+
+
+
+      this.checkStatusTimer = setTimeout(() => {
+        this.checkStatus()
+      }, 5000)
     }
   }
 }

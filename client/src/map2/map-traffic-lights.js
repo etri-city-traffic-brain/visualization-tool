@@ -219,8 +219,8 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
             {
               markerFill: colorScale(value.improvement_rate),
               textName: type === 'test'
-                ? `[${key}]\n 통행시간: ${value[type].travel_time} (s) \n 향상률: ${value.improvement_rate} % \n`
-                : `[${key}]\n 통행시간: ${value[type].travel_time} (s)`,
+                ? `[${key}]\n평균속도: ${value[type].avg_speed} \n평균 통과차량수: ${value[type].sum_passed} \n통행시간: ${value[type].travel_time} (s) \n향상률: ${value.improvement_rate} % \n`
+                : `[${key}]\n평균속도: ${value[type].avg_speed} \n평균 통과차량수: ${value[type].sum_passed} \n통행시간: ${value[type].travel_time} (s)`,
               textLineSpacing: 8,
               textAlign: 'left',
               textHorizontalAlignment: 'right',
