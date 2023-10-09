@@ -63,6 +63,7 @@
             id="junctionId"
             v-model="junctionId"
             size="sm"
+            disabled
           ></b-form-input>
           <b-input-group-append>
             <b-btn

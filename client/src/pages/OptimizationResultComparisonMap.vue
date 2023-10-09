@@ -15,7 +15,7 @@
               <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
                 <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                 <div class="font-bold text-sm">
-                  모델:[{{ reward.epoch }}], 보상:[{{ Number(reward.rewardAvg).toFixed(2) }}]
+                  모델:[{{ reward.epoch }}], 보상:[{{ Number(reward.rewardAvg).toFixed(2) }}], Tested: {{reward.checked}}
                 </div>
               </option>
             </select>
@@ -382,14 +382,14 @@
 
               <div v-if="currentTab === 'total'" class="bg-gray-800">
                 <div class="text-white p-1 grid grid-cols-2 gap-1" v-if="chart.travelTimeChartInView">
-                  <div class="bg-gray-700 rounded h-60">
+                  <div class="bg-gray-700 rounded h-60 pt-1">
                     <line-chart
                       :chartData="chart.travelTimeChartInView"
                       :options="lineChartOption"
                       :height="220"
                     />
                   </div>
-                  <div class="bg-gray-700 rounded">
+                  <div class="bg-gray-700 rounded pt-1">
                     <line-chart
                       :chartData="chart.travelTimeChartInViewAcc"
                       :options="lineChartOption"
@@ -418,14 +418,14 @@
                   <div class="col-span-3">
                     <div class="text-center text-white">
                       <div class="text-white h-60 grid grid-cols-2 gap-1" v-if="chart.travelTimeJunctionChart">
-                        <div class="bg-gray-700 rounded">
+                        <div class="bg-gray-700 rounded pt-1">
                           <line-chart
                             :chartData="chart.travelTimeJunctionChart"
                             :options="lineChartOption"
                             :height="220"
                           />
                         </div>
-                        <div class="bg-gray-700 rounded">
+                        <div class="bg-gray-700 rounded pt-1">
                           <line-chart
                             :chartData="chart.travelTimeJunctionChartAcc"
                             :options="lineChartOption"
@@ -610,7 +610,7 @@
                 style="height:28px"
                 @change="loadTestResult('first', optTestResult.first.epoch)"
               >
-                <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
+                <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch" v-if="reward.checked">
                   <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                   <div class="font-bold text-sm">
                     모델:{{ reward.epoch }} 보상({{ reward.rewardAvg }})
@@ -721,7 +721,7 @@
                 style="height:28px"
                 @change="loadTestResult('second', optTestResult.second.epoch)"
               >
-                <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
+                <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch" v-if="reward.checked">
                   <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                   <div class="font-bold text-sm">
                     모델:{{ reward.epoch }} 보상({{ reward.rewardAvg }})

@@ -84,7 +84,7 @@ async function run(simulation, mode, modelNum) {
       `--action ${action}`,
       `--epoch ${epoch}`,
       `--model-save-period ${modelSavePeriod}`,
-      `--men-len ${memLen}`
+      `--mem-len ${memLen}`
     ]
 
     const cmdTrain = [

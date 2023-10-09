@@ -194,7 +194,6 @@ export default {
       this.actionOptionSelected = env.configuration.action
       this.methodOptionSelected = env.configuration.method
       this.rewardFuncOptionSelected = env.configuration.rewardFunc
-
       this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
       this.dockerImage = env.configuration.dockerImage
@@ -205,8 +204,8 @@ export default {
       this.lrSelected = env.configuration.lr
     }
 
-    this.regionChanged(this.areaSelected)
-
+    // this.regionChanged(this.areaSelected)
+    // log(this.junctionId)
   },
 
   methods: {

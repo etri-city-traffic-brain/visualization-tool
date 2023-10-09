@@ -56,7 +56,7 @@ function OptimizeService() {
     simulateSignalExplain.forEach((signalExplain, rlName) => {
       intersections[rlName].simulate.signal_explain = signalExplain
     })
-    // console.log(intersections)
+
     return Object.freeze({
       improvement_rate: improvementRate,
       simulate,

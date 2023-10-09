@@ -265,9 +265,13 @@ export default {
   },
   computed: {
     epochList() {
-      return this.rewardTotal.filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0).filter(v => {
-        return this.optTestResults.includes(v.epoch)
-      })
+      return this.rewardTotal.filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0)
+        .map(v => {
+          return {
+            ...v,
+            checked: this.optTestResults.includes(v.epoch)
+          }
+        })
     },
     config() {
       if (this.simulation) {

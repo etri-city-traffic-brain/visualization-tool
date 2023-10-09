@@ -78,7 +78,7 @@ function SignalSystem(container, action = { duration: [], offset: 0 }) {
     },
     interaction: {
       dragNodes: true,
-      dragView: false,
+      dragView: true,
       zoomView: true
     }
   }

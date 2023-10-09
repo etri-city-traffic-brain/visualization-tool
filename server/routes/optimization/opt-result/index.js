@@ -15,12 +15,9 @@ function App() {
       fileService.readByLine(filepathRl, analyseServiceRl.onLine)
     ])
     const reportFt = analyseServiceFt.get()
-
     const reportRl = analyseServiceRl.get()
-    // console.log(reportFt.intersections)
-    // console.log(reportRl.intersections)
     const reportOp = optimizeService.optimize(reportFt, reportRl)
-    // console.log(reportOp.intersections)
+
     return Object.freeze({ reportFt, reportRl, reportOp })
   }
   async function makeReportFiles(filepathFt, filepathRl, dirpathOutput = './') {

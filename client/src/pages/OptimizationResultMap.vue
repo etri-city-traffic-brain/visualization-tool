@@ -104,7 +104,7 @@
           <!-- 교차로별 보상 그래프 -->
     <div class="bg-gray-600 w-80 rounded-lg ">
       <div class="font-bold p-1 text-white text-center">교차로별 보상 그래프</div>
-      <div class="h-96 max-h-96- overflow-y-auto space-y-1">
+      <div class="h-44 max-h-96 overflow-y-auto space-y-1">
         <div v-for="(chart, idx) of rewardCharts" :key="idx" class="p-1 bg-gray-700">
           <div class="text-center text-white py-1">
             {{ chart.label }}
@@ -152,7 +152,7 @@
     </div>
 
     <div class="train-result-table-container text-sm text-white rounded-lg p-1">
-      <div class="bg-gray-700 p-3 text-center" v-if="optTrainResult && optTrainResult.length > 0">
+      <div class="bg-gray-700 p-3 text-center rounded" v-if="optTrainResult && optTrainResult.length > 0">
         전체 통과시간 향상률 에포크:{{ epochSelected }}
         <div class="text-4xl text-center font-bold"
           :style="{
@@ -166,7 +166,7 @@
         </div>
       </div>
 
-      <div class="mt-1 bg-gray-700 ">
+      <div class="mt-1 bg-gray-700 rounded">
         <div class="text-center p-1 font-bold">
           교차로별 통과시간 향상률
         </div>
@@ -244,13 +244,22 @@
         </div>
       </div>
 
-      <div class="">
-        <span class="inline-block text-yellow-500 px-1 animate-pulse rounded"
-          v-if="status === 'running' || status === 'stopping'">
-          status: {{ status }}
-        </span>
-        <span class="inline-block text-blue-300 rounded px-1 " v-else>
-          status: {{ status }}
+      <div class="flex space-x-1">
+        <div>상태:</div>
+        <div class="inline-block text-yellow-500 px-1 rounded flex space-x-1" v-if="status === 'running' || status === 'stopping'">
+          <div>
+            {{ status }}
+          </div>
+          <svg class="animate-spin h-5 w-5 text-white inlie-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+        </div>
+        <span class="inline-block text-blue-300 rounded px-1" v-else>
+          {{ status }}
         </span>
 
         <button class="text-white px-2 rounded text-sm hover:bg-blue-400" @click="getReward">
@@ -271,7 +280,7 @@
             </path>
           </svg>
           <div>
-            실행 준비 중입니다. 잠시후 실행 됩니다.
+            작업 대기중입니다. 잠시후 실행 됩니다.
           </div>
         </div>
       </div>

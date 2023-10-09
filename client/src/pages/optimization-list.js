@@ -35,24 +35,18 @@ export default {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
-        { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'region', label: '지역' },
-        { class: 'text-center', key: 'configuration.period', label: '주기' },
+        { class: 'text-center', key: 'configuration.period', label: '통계주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
         { class: 'text-center', key: 'actions', label: '교차로수' },
         { class: 'text-center', key: 'configuration.epoch', label: '에포크' },
         { class: 'text-center', key: 'configuration.method', label: '모델' },
         { class: 'text-center', key: 'configuration.action', label: '액션' },
-        {
-          class: 'text-center',
-          key: 'configuration.rewardFunc',
-          label: '보상함수'
-        },
-        {
-          class: 'text-center',
-          key: 'configuration.modelSavePeriod',
-          label: '모델저장주기'
-        },
+        { class: 'text-center', key: 'configuration.rewardFunc', label: '보상함수' },
+        { class: 'text-center', key: 'configuration.lr', label: '학습비율' },
+        { class: 'text-center', key: 'configuration.memLen', label: '메모리길이' },
+        { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
+        { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'details', label: '기능' }
       ],
       items: [],
@@ -62,26 +56,17 @@ export default {
       envFields: [
         { class: 'text-center', key: 'envName', label: '아이디' },
         { class: 'text-center', key: 'region', label: '지역' },
-        { class: 'text-center', key: 'configuration.period', label: '주기' },
-        {
-          class: 'text-center',
-          key: 'duration',
-          label: '대상시간'
-        },
+        { class: 'text-center', key: 'description', label: '설명' },
+        { class: 'text-center', key: 'configuration.period', label: '통계주기' },
+        { class: 'text-center', key: 'duration', label: '대상시간' },
         { class: 'text-center', key: 'junctions', label: '교차로수' },
         { class: 'text-center', key: 'epoch', label: '에포크' },
         { class: 'text-center', key: 'configuration.method', label: '모델' },
         { class: 'text-center', key: 'configuration.action', label: '액션' },
-        {
-          class: 'text-center',
-          key: 'configuration.rewardFunc',
-          label: '보상함수'
-        },
-        {
-          class: 'text-center',
-          key: 'configuration.modelSavePeriod',
-          label: '모델저장주기'
-        },
+        { class: 'text-center', key: 'configuration.rewardFunc', label: '보상함수' },
+        { class: 'text-center', key: 'configuration.lr', label: '학습비율' },
+        { class: 'text-center', key: 'configuration.memLen', label: '메모리길이' },
+        { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
         { class: 'text-center', key: 'func', label: '기능' }
       ],
       envItems: [],
@@ -149,7 +134,7 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       })
-        .then(res => console.log(res))
+        .then(res => log(res))
         .catch(err => {
           this.$swal({
             type: 'error',
@@ -319,9 +304,7 @@ export default {
       const generateRandomId = (prefix = 'DEFU') =>
         `${prefix
           .substring(0, 4)
-          .toUpperCase()}_${moment().year()}${moment().format(
-            'MM'
-          )}_${random().padStart(5, '0')}`
+          .toUpperCase()}_${moment().year()}${moment().format('MM')}_${random().padStart(5, '0')}`
       env.id = generateRandomId(env.role)
       try {
         await simulationService.createSimulation(this.userId, env)
