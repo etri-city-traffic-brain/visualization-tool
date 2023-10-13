@@ -58,12 +58,20 @@ const lineChartOption = {
   scales: {
     xAxes: [
       {
+        scaleLabel: {
+          display: true,
+          labelString: '스텝',
+          fontColor: 'white',
+        },
         ticks: {
           autoSkip: true,
           autoSkipPadding: 50,
           maxRotation: 0,
           display: true,
-          fontColor: 'white'
+          fontColor: 'white',
+          callback: function (value) {
+            return value + ''
+          }
         }
       }
     ],
@@ -76,7 +84,7 @@ const lineChartOption = {
           display: true,
           fontColor: 'white',
           callback: function (value) {
-            return value + '(s)'
+            return value + '(초)'
           }
         }
       }
@@ -448,10 +456,10 @@ export default {
     },
 
     async updateOptResult(forceUpdate) {
-      const start = new Date().getTime()
+      // const start = new Date().getTime()
       const progress = this.chart1.progress
       if ((progress > 0 && progress < 100) || forceUpdate) {
-        this.statusText = 'chart created...' + +(Date.now() - start) / 1000
+        // this.statusText = 'chart created...' + +(Date.now() - start) / 1000
         try {
           const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
           this.optResult = optResult
@@ -506,7 +514,7 @@ export default {
           this.chart2.travelTimeJunction = optResult.test.travel_time
           this.chart2.avgSpeedJunction = optResult.test.avg_speed
 
-          this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
+          // this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
 
           if (this.signalExplain === null) {
             setTimeout(() => {
@@ -622,7 +630,7 @@ export default {
     },
 
     resize() {
-      this.mapHeight = window.innerHeight - 205 // update map height to current height
+      this.mapHeight = window.innerHeight - 195 // update map height to current height
     },
 
     async runTest() {

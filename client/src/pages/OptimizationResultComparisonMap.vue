@@ -95,7 +95,7 @@
                       </b-progress>
                     </div>
 
-                    <div class="absolute top-4 right-1 w-60 bg-indigo-50">
+                    <div class="absolute top-4 right-1 w-60">
                       <div class="grid grid-cols-2 gap-1 text-white font-bold">
                         <div class="bg-gray-600 p-2 text-center text-2xl rounded-lg">
                           <div class="text-xs">평균속도</div>
@@ -160,7 +160,7 @@
                       </b-progress>
                     </div>
 
-                    <div class="absolute top-4 right-1 w-60 bg-indigo-50">
+                    <div class="absolute top-4 right-1 w-60">
                       <div class="grid grid-cols-2 gap-1 text-black font-bold">
                         <div class="bg-yellow-200 p-2 text-center text-2xl rounded-lg">
                           <div class="text-xs">평균속도</div>
@@ -498,15 +498,14 @@
       </div>
       <!-- 메인 레이아웃 END -->
     </div>
-
     <!-- BOTTOM STATUS TEXT -->
     <div class="flex justify-between bg-gray-700 items-center p-1 mx-1">
       <div class="text-center text-white px-2 text-xs">
+        <span class="text-gray-200">UNIQ-VIS</span>
         <span class="text-yellow-200">{{ simulation.id }}</span>
         <span class="text-blue-200">{{ statusText }}</span>
         <span class="text-blue-200">Learning Rate: {{ simulation.configuration.lr }}</span>
         <span class="text-blue-200">Memory Length: {{ simulation.configuration.memLen }}</span>
-
       </div>
       <div class="flex space-x-1 items-center text-xs text-white">
         <div v-if="status === 'running'" class="text-center px-3 uppercase w-full flex items-center">

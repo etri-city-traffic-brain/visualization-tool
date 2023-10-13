@@ -10,6 +10,8 @@ function App() {
     const analyseServiceFt = AnalyseService()
     const analyseServiceRl = AnalyseService()
 
+
+
     await Promise.all([
       fileService.readByLine(filepathFt, analyseServiceFt.onLine),
       fileService.readByLine(filepathRl, analyseServiceRl.onLine)

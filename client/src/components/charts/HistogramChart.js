@@ -16,6 +16,7 @@ export default {
             display: false,
             // barPercentage: 1,
             categoryPercentage: 1,
+
             ticks: {
               max: 70,
               fontColor: 'white',
@@ -26,19 +27,33 @@ export default {
           {
             // barPercentage: 1,
             categoryPercentage: 1,
+            scaleLabel: {
+              display: true,
+              labelString: '속도(km)',
+              fontColor: 'white',
+            },
             ticks: {
               display: true,
               fontColor: 'white',
+              // callback: function (value) {
+              //   if (!value) return ''
+              //   return value + ' (km)'
+              // },
             },
             gridLines: { display: false, },
           }],
           yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: '통과차량수',
+              fontColor: 'white',
+            },
             ticks: {
               display: true,
               fontColor: 'white',
-              callback: function (value) {
-                return value.toLocaleString("en-US") + ' (대)'
-              }
+              // callback: function (value) {
+              //   return value.toLocaleString("en-US") + ' (대)'
+              // }
             },
             gridLines: { display: false, },
           }]

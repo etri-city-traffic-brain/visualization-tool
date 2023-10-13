@@ -141,7 +141,7 @@
           </template>
 
           <template v-slot:cell(status)="row">
-            <div :class="statusColor(row.item.status)" class="text-center font-bold p-1 px-2 text-sm rounded">
+            <div :class="statusColor(row.item.status)" class="text-center font-bold p-1 px-2 text-sm rounded-lg">
               {{ row.item.status.toUpperCase() }}
             </div>
           </template>

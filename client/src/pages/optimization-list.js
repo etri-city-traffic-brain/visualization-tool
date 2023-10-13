@@ -35,18 +35,19 @@ export default {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
+        { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'region', label: '지역' },
-        { class: 'text-center', key: 'configuration.period', label: '통계주기' },
+        { class: 'text-center', key: 'description', label: '설명' },
+        // { class: 'text-center', key: 'configuration.period', label: '통계주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
-        { class: 'text-center', key: 'actions', label: '교차로수' },
+        // { class: 'text-center', key: 'actions', label: '교차로수' },
         { class: 'text-center', key: 'configuration.epoch', label: '에포크' },
         { class: 'text-center', key: 'configuration.method', label: '모델' },
         { class: 'text-center', key: 'configuration.action', label: '액션' },
         { class: 'text-center', key: 'configuration.rewardFunc', label: '보상함수' },
         { class: 'text-center', key: 'configuration.lr', label: '학습비율' },
         { class: 'text-center', key: 'configuration.memLen', label: '메모리길이' },
-        { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
-        { class: 'text-center', key: 'status', label: '상태' },
+        // { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
         { class: 'text-center', key: 'details', label: '기능' }
       ],
       items: [],
@@ -57,16 +58,16 @@ export default {
         { class: 'text-center', key: 'envName', label: '아이디' },
         { class: 'text-center', key: 'region', label: '지역' },
         { class: 'text-center', key: 'description', label: '설명' },
-        { class: 'text-center', key: 'configuration.period', label: '통계주기' },
+        // { class: 'text-center', key: 'configuration.period', label: '통계주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
-        { class: 'text-center', key: 'junctions', label: '교차로수' },
+        // { class: 'text-center', key: 'junctions', label: '교차로수' },
         { class: 'text-center', key: 'epoch', label: '에포크' },
         { class: 'text-center', key: 'configuration.method', label: '모델' },
         { class: 'text-center', key: 'configuration.action', label: '액션' },
         { class: 'text-center', key: 'configuration.rewardFunc', label: '보상함수' },
         { class: 'text-center', key: 'configuration.lr', label: '학습비율' },
         { class: 'text-center', key: 'configuration.memLen', label: '메모리길이' },
-        { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
+        // { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
         { class: 'text-center', key: 'func', label: '기능' }
       ],
       envItems: [],
@@ -110,8 +111,8 @@ export default {
         kc: '즉시 신호 변경',
         gr: '녹색시간 조정',
         gro: '녹색시간과 옵셋 조정',
-        gt: '현시 최소최대 만족',
-        ga: '현시 주기 만족',
+        gt: '현시 최소최대 만족(gt)',
+        ga: '현시 주기 만족(ga)',
       }
       return o[v] || '모름'
     },
@@ -120,7 +121,7 @@ export default {
         pn: '통과 차량 수',
         wt: '대기 시간',
         tt: '통과 소요 시간',
-        wq: '대기 큐 길이',
+        wq: '대기 큐 길이(wq)',
         cwq: '축적된 대기 큐 길이'
       }
       return o[v] || '모름'
@@ -165,10 +166,11 @@ export default {
     },
     statusColor(status) {
       const colors = {
-        running: 'bg-blue-400',
-        error: 'bg-red-400',
-        ready: 'bg-gray-400',
-        finished: 'bg-green-400'
+        running: 'text-blue-400',
+        error: 'text-red-400',
+        ready: 'text-gray-400',
+        finished: 'text-green-400',
+        stopped: 'text-yellow-400'
       }
       return colors[status] || 'bg-gray-400'
     },
