@@ -57,11 +57,17 @@ function OptimizeService() {
       intersections[rlName].simulate.signal_explain = signalExplain
     })
 
+    const sortedRlNames = Object.keys(intersections)
+    sortedRlNames.sort()
+
     return Object.freeze({
       improvement_rate: improvementRate,
       simulate,
       test,
-      intersections
+      intersections: sortedRlNames.reduce((obj, rlName) => {
+        obj[rlName] = intersections[rlName]
+        return obj
+      }, {})
     })
   }
 

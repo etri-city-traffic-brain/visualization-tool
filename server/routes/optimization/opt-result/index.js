@@ -16,8 +16,9 @@ function App() {
       fileService.readByLine(filepathFt, analyseServiceFt.onLine),
       fileService.readByLine(filepathRl, analyseServiceRl.onLine)
     ])
-    const reportFt = analyseServiceFt.get()
-    const reportRl = analyseServiceRl.get()
+    const targetMax = Math.min(analyseServiceFt.getMaxStep(), analyseServiceRl.getMaxStep())
+    const reportFt = analyseServiceFt.get(targetMax)
+    const reportRl = analyseServiceRl.get(targetMax)
     const reportOp = optimizeService.optimize(reportFt, reportRl)
 
     return Object.freeze({ reportFt, reportRl, reportOp })
