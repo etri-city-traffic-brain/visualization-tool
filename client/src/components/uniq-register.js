@@ -116,7 +116,7 @@ export default {
       toDate: getToday(), //
       fromTime: '07:00', //
       toTime: '08:59', //
-      periodSelected: periodOptions[0].value, //
+      periodSelected: periodOptions[1].value, //
       areaSelected: '', //
       scriptSelected: scriptOptions[0].value, //
       intervalSelected: intervalOptions[0].value, //
@@ -212,14 +212,18 @@ export default {
     async regionChanged(v) {
       const obj = this.scenario.find(item => item.region === v)
       if (obj) {
-        this.junctionId = obj.tls.join(',')
+        // this.junctionId = obj.tls.join(',')
       }
       const scenario = this.scenario.find(s => {
         return s.region === v
       })
+
       if (scenario) {
         const groups = await optService.getSignalGroups(scenario.region)
-        this.signalGroups = groups
+        this.signalGroups = {
+          targetGroups: scenario.tls,
+          totalGroups: groups
+        }
       }
     },
     openSignalMap() {

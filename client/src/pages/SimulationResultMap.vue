@@ -295,7 +295,7 @@
           <histogram-chart
             class="bar bg-gray-800 p-2"
             :chartData="chart.histogramData"
-            :height="150"
+            :height="200"
           />
         </div>
 
@@ -307,7 +307,7 @@
             <histogram-chart
               class="bar bg-gray-800 p-2"
               :chartData="chart.histogramDataStep"
-              :height="150"
+              :height="200"
             />
           </div>
         </div>

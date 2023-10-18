@@ -39,8 +39,9 @@ const intervalOptions = [
 
 const regionOptions = [
   { text: '대전', value: 'dj' },
-  { text: '유성구', value: 'yuseonggu' },
+  { text: '둔산, 월평', value: 'yuseong' },
   { text: '도안', value: 'doan' },
+  { text: '유성구', value: 'yuseonggu' },
   { text: '서구', value: 'seogu' },
   { text: '동구', value: 'dg' },
   { text: '대덕구', value: 'ddg' },

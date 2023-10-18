@@ -60,7 +60,7 @@ const lineChartOption = {
       {
         scaleLabel: {
           display: true,
-          labelString: '스텝',
+          labelString: '시뮬레이션시간(초)',
           fontColor: 'white',
         },
         ticks: {
@@ -69,23 +69,28 @@ const lineChartOption = {
           maxRotation: 0,
           display: true,
           fontColor: 'white',
-          callback: function (value) {
-            return value + ''
-          }
+          // callback: function (value) {
+          //   return value + ''
+          // }
         }
       }
     ],
     yAxes: [
       {
+        scaleLabel: {
+          display: true,
+          labelString: '통과시간(초)',
+          fontColor: 'white',
+        },
         ticks: {
           autoSkip: true,
           autoSkipPadding: 15,
           maxRotation: 0,
           display: true,
           fontColor: 'white',
-          callback: function (value) {
-            return value + '(초)'
-          }
+          // callback: function (value) {
+          //   return value + '(초)'
+          // }
         }
       }
     ]
@@ -94,14 +99,18 @@ const lineChartOption = {
     display: true,
     labels: {
       fontColor: 'white',
-      fontSize: 12
+      fontSize: 12,
+      filter: function (item, chart) {
+        // Logic to remove a particular legend item goes here
+        return !item.text.includes('hide');
+      }
     }
   },
 }
 
 const { log } = window.console
 
-function makeTravelTimeChart(dataFt = [], dataRl = [], avgTTFT = 0, avgTTRL = 0,) {
+function makeTravelTimeChart(dataFt = [], dataRl = [], avgTTFT = 0, avgTTRL = 0, step) {
 
   function dataset(label, color, data) {
     return {
@@ -116,19 +125,18 @@ function makeTravelTimeChart(dataFt = [], dataRl = [], avgTTFT = 0, avgTTRL = 0,
   }
 
   const dataLength = dataRl.length
-
   const datasets = []
-  datasets.push(dataset('기존신호', 'grey', dataFt))
+  datasets.push(dataset('기존신호', 'gray', dataFt))
   datasets.push(dataset('최적신호', 'orange', dataRl))
   if (avgTTFT > 0) {
-    datasets.push(dataset('기존신호(평균)', 'skyblue', new Array(dataLength).fill(avgTTFT)))
+    datasets.push(dataset('hide', 'lightgray', new Array(dataLength).fill(avgTTFT)))
   }
   if (avgTTRL > 0) {
-    datasets.push(dataset('최적신호(평균)', 'yellow', new Array(dataLength).fill(avgTTRL)))
+    datasets.push(dataset('hide', 'darkorange', new Array(dataLength).fill(avgTTRL)))
   }
 
   return {
-    labels: new Array(dataLength).fill(0).map((_, i) => i * dataLength),
+    labels: new Array(dataLength).fill(0).map((_, i) => i * step),
     normalized: true,
     datasets: datasets,
   }
@@ -182,6 +190,7 @@ export default {
       simulation: { configuration: {} }, // means optimization
       mapIdFt: randomId(),
       mapIdRl: randomId(),
+
       simulations: null,
       mapHeight: 600,
       chart1: { // 기존신호
@@ -212,6 +221,7 @@ export default {
       trafficLightManager: null,
       crossNameSelected: '',
       showWaitingMsg: false,
+      showWaitingMsg2: false,
       statusMessage: [],
       timer: null,
       status: '',
@@ -241,6 +251,7 @@ export default {
       optTestResults: [],
       step: 29,
       testResult: null,
+      waitingMessage: '실행 준비 중입니다. 잠시 후 실행 됩니다.'
     }
   },
   watch: {
@@ -273,7 +284,7 @@ export default {
   },
   computed: {
     epochList() {
-      return this.rewardTotal.filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0)
+      return (this.rewardTotal || []).filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0)
         .map(v => {
           return {
             ...v,
@@ -394,14 +405,19 @@ export default {
       this.chart2.progress = status.progress
       this.chart1.progress = status.progress
 
-      if (status.progress >= 99) {
+      if (status.progress >= 95) {
         this.chart1.progress = 100
         this.chart2.progress = 100
+
+        this.waitingMessage2 = '분석중 입니다. 잠시 기다리세요.'
+        this.showWaitingMsg2 = true
+
       }
 
       if (status.progress > 100) {
         this.chart1.progress = 0
         this.chart2.progress = 0
+        this.showWaitingMsg2 = false
       }
     })
 
@@ -428,11 +444,30 @@ export default {
     window.scrollTo(0, 0)
     window.addEventListener('resize', this.resize.bind(this))
 
-
-
     this.checkStatus()
   },
   methods: {
+    getActionName(v) {
+      const o = {
+        offset: '옵셋 조정',
+        kc: '즉시 신호 변경',
+        gr: '녹색시간 조정',
+        gro: '녹색시간과 옵셋 조정',
+        gt: '현시 최소최대 만족(gt)',
+        ga: '현시 주기 만족(ga)',
+      }
+      return o[v] || '모름'
+    },
+    getRewardFunctionName(v) {
+      const o = {
+        pn: '통과 차량 수',
+        wt: '대기 시간',
+        tt: '통과 소요 시간',
+        wq: '대기 큐 길이(wq)',
+        cwq: '축적된 대기 큐 길이'
+      }
+      return o[v] || '모름'
+    },
     colorScale,
 
     getEff(idx) {
@@ -456,6 +491,7 @@ export default {
     },
 
     async updateOptResult(forceUpdate) {
+      log('update optimization result', new Date())
       // const start = new Date().getTime()
       const progress = this.chart1.progress
       if ((progress > 0 && progress < 100) || forceUpdate) {
@@ -535,6 +571,9 @@ export default {
 
       this.timer = setTimeout(async () => {
         try {
+          if (this.status === 'finished') {
+            return
+          }
           await this.updateOptResult()
         } catch (err) {
           log(err.message)
@@ -639,7 +678,8 @@ export default {
       this.chart2.avgSpeedsInView = []
       this.chart1.avgSpeedsJunctions = []
       this.chart2.avgSpeedsJunctions = []
-
+      this.chart1.progress = 0
+      this.chart2.progress = 0
       try {
         await simulationService.stopSimulation(this.simulation.id)
         await optSvc.runTest(
@@ -720,8 +760,14 @@ export default {
       } catch (err) {
         log('check status error: ', err.message)
       }
+      if (this.status === 'finished') {
+        this.chart1.progress = 100
+        this.chart2.progress = 100
+        this.updateOptResult(true)
+      }
       if (this.status === 'finished' || this.status === 'error' || this.status === 'stopped') {
         this.showWaitingMsg = false
+        this.showWaitingMsg2 = false
         return
       }
       this.checkStatusTimer = setTimeout(() => {

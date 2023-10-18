@@ -15,7 +15,9 @@
               <option v-for="(reward, idx) in epochList" :key="reward.epoch" :value="reward.epoch">
                 <!-- 모델:{{ reward }} 보상({{ rewards.datasets[0].data[idx]}}) -->
                 <div class="font-bold text-sm">
-                  모델:[{{ reward.epoch }}], 보상:[{{ Number(reward.rewardAvg).toFixed(2) }}], Tested: {{reward.checked}}
+                  모델:[{{ reward.epoch }}], 보상:[{{ Number(reward.rewardAvg).toFixed(2) }}],
+                  <span v-if="reward.checked">Tested</span>
+                  <span v-else>Not Tested</span>
                 </div>
               </option>
             </select>
@@ -41,6 +43,8 @@
           <span class="font-bold text-indigo-100 px-1 ">{{ config.fromTime }} ~ {{ config.toTime }}</span>
           <span>|</span>
           <span class="font-bold text-indigo-100 px-1 ">{{ simulation.configuration.junctionId }}</span>
+          <span>|</span>
+          <span class="font-bold text-indigo-100">{{ getActionName(config.action)}}</span>
         </div>
         <div class="mx-2">
           <button @click="showModal" class="px-2 text-white bg-indigo-500 px-1 rounded hover:bg-blue-400 hover:text-white">
@@ -89,7 +93,7 @@
                     <div :ref="mapIdFt" :id="mapIdFt" :style="{ height: mapHeight + 'px' }" />
                     <div class="absolute top-0 w-full">
                       <b-progress height="1rem" class="no-border-radius" show-progress  v-if="chart1.progress != 0">
-                        <b-progress-bar :value="chart1.progress" variant="secondary">
+                        <b-progress-bar :value="chart1.progress" variant="primary">
                           <span> {{ chart1.progress }} %</span>
                         </b-progress-bar>
                       </b-progress>
@@ -154,7 +158,7 @@
                     <div :ref="mapIdRl" :id="mapIdRl" :style="{ height: mapHeight + 'px' }"></div>
                     <div class="absolute top-0 w-full">
                       <b-progress height="1rem" class="no-border-radius" show-progress v-if="chart2.progress != 0">
-                        <b-progress-bar :value="chart2.progress" variant="warning">
+                        <b-progress-bar :value="chart2.progress" variant="progress">
                           <span> {{ chart2.progress }} %</span>
                         </b-progress-bar>
                       </b-progress>
@@ -309,17 +313,6 @@
                     >
                       <div class="border-b col-span-3">
                         <button @click="selectCrossName(v[0])" class="hover:text-blue-200">
-                          <svg v-if="v[1].improvement_rate < 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                          stroke="currentColor" class="w-4 h-4 inline-block">
-                          <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3" />
-                        </svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                          stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
-                          <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18" />
-                        </svg>
-
                         {{ v[0] }}
                         </button>
                       </div>
@@ -364,7 +357,7 @@
                 <div class="flex space-x-1 text-sm">
                   <div class="bg-gray-800 p-1 px-3 rounded-t-lg" >
                     <button @click.prevent="currentTab = 'total'">
-                      평균통과시간
+                      전체교차로
                     </button>
                   </div>
                   <div class="bg-gray-500 font-bold p-1 px-3 rounded-t-lg">
@@ -381,8 +374,10 @@
               </div>
 
               <div v-if="currentTab === 'total'" class="bg-gray-800">
+
                 <div class="text-white p-1 grid grid-cols-2 gap-1" v-if="chart.travelTimeChartInView">
-                  <div class="bg-gray-700 rounded h-60 pt-1">
+                  <div class="bg-gray-700 rounded h-64 pt-1">
+                    <div class="text-center tracking-wider ">순간통과시간</div>
                     <line-chart
                       :chartData="chart.travelTimeChartInView"
                       :options="lineChartOption"
@@ -390,6 +385,7 @@
                     />
                   </div>
                   <div class="bg-gray-700 rounded pt-1">
+                    <div class="text-center tracking-wider">누적통과시간</div>
                     <line-chart
                       :chartData="chart.travelTimeChartInViewAcc"
                       :options="lineChartOption"
@@ -417,8 +413,9 @@
                 <div class="p-1 grid grid-cols-4 gap-1">
                   <div class="col-span-3">
                     <div class="text-center text-white">
-                      <div class="text-white h-60 grid grid-cols-2 gap-1" v-if="chart.travelTimeJunctionChart">
+                      <div class="text-white h-64 grid grid-cols-2 gap-1" v-if="chart.travelTimeJunctionChart">
                         <div class="bg-gray-700 rounded pt-1">
+                          <div class="text-center tracking-wider">순간통과시간</div>
                           <line-chart
                             :chartData="chart.travelTimeJunctionChart"
                             :options="lineChartOption"
@@ -426,6 +423,7 @@
                           />
                         </div>
                         <div class="bg-gray-700 rounded pt-1">
+                          <div class="text-center tracking-wider">누적통과시간</div>
                           <line-chart
                             :chartData="chart.travelTimeJunctionChartAcc"
                             :options="lineChartOption"
@@ -437,7 +435,7 @@
                   </div>
                   <div class="relative">
                     <div class="text-white items-center bg-gray-700 flex-none">
-                      <div ref="actionvis" class="mx-auto w-80 h-60 p-2 max-w-xs"></div>
+                      <div ref="actionvis" class="mx-auto w-80 h-64 p-2 max-w-xs"></div>
                     </div>
                     <!-- <div class="absolute top-2 left-2">
                       <div class="text-white text-sm">
@@ -471,12 +469,33 @@
               </svg>
               <div>
                 <div class="p-2">
-                  실행 준비 중입니다. 잠시 후 실행 됩니다.
+                  시뮬레이션 준비중입니다. 잠시 기다리세요.
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div v-if="showWaitingMsg2" class="absolute top-24 w-full left-auto">
+          <div class="flex justify-center">
+            <div
+              class="border rounded text-center bg-indigo-300 p-5 text-xl font-bold flex items-center space-x-1 justify-center w-92">
+              <svg class="animate-spin h-16 w-16 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
+              <div>
+                <div class="p-2">
+                  결과 분석중 입니다. 잠시 기다리세요.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
 
         <!-- <div v-if="status === 'error'" class="absolute top-24 w-full">
           <div class="flex justify-center">
@@ -544,26 +563,26 @@
         <div class="grid grid-cols-2 bg-gray-800 p-1 rounded">
           <div class="space-y-1 p-2 rounded">
             <div class="flex space-x-1">
-              <div class="w-32 text-center bg-gray-500 px-1 rounded">지역</div>
+              <div class="w-32 text-right bg-gray-500 px-1 rounded">지역</div>
               <div class="">{{ config.regionName }}</div>
             </div>
 
             <div class="flex space-x-1">
-              <div class="w-32 text-center bg-gray-500 px-1 rounded">
+              <div class="w-32 text-right bg-gray-500 px-1 rounded">
                 대상 교차로 그룹
               </div>
               <div>{{ simulation.configuration.junctionId }}</div>
             </div>
             <div class="flex space-x-1">
-              <div class="w-32 text-center bg-gray-500 px-1 rounded">시간</div>
+              <div class="w-32 text-right bg-gray-500 px-1 rounded">시간</div>
               <div>{{ config.fromTime }} ~ {{ config.toTime }}</div>
             </div>
             <div class="flex space-x-1">
-              <div class="w-32 text-center bg-gray-500 px-1 rounded">모델 저장주기</div>
+              <div class="w-32 text-right bg-gray-500 px-1 rounded">모델 저장주기</div>
               <div>{{ config.modelSavePeriod }}</div>
             </div>
             <div class="flex space-x-1 items-center">
-              <div class="w-32 text-center bg-gray-500 px-1 rounded">
+              <div class="w-32 text-right bg-gray-500 px-1 rounded">
                 실행이미지
               </div>
               <div class="">{{ simulation.configuration.dockerImage }}</div>
@@ -573,23 +592,24 @@
             <div class="">
               <div class="space-y-1">
                 <div class="flex space-x-1">
-                  <div class="w-32 text-center bg-gray-500 px-1 rounded">보상함수</div>
-                  <div class="">{{ config.rewardFunc }}</div>
+                  <div class="w-32 text-right bg-gray-500 px-1 rounded">보상함수</div>
+                  <div class="">{{getRewardFunctionName(config.rewardFunc)}} </div>
+
                 </div>
                 <div class="flex space-x-1">
-                    <div class="w-32 text-center bg-gray-500 px-1 rounded">메소드</div>
+                    <div class="w-32 text-right bg-gray-500 px-1 rounded">메소드</div>
                   <div class="">{{ config.method }}</div>
                 </div>
                 <div class="flex space-x-1">
-                  <div class="w-32 text-center bg-gray-500 px-1 rounded">액션</div>
-                  <div class="">{{ config.action}}</div>
+                  <div class="w-32 text-right bg-gray-500 px-1 rounded">액션</div>
+                  <div class="">{{ getActionName(config.action)}}</div>
                 </div>
                 <div class="flex space-x-1">
-                  <div class="w-32 text-center bg-gray-500 px-1 rounded">학습속도</div>
+                  <div class="w-32 text-right bg-gray-500 px-1 rounded">학습속도</div>
                   <div class="">{{ config.lr}}</div>
                 </div>
                 <div class="flex space-x-1">
-                  <div class="w-32 text-center bg-gray-500 px-1 rounded">메모리 길이</div>
+                  <div class="w-32 text-right bg-gray-500 px-1 rounded">메모리 길이</div>
                   <div class="">{{ config.memLen}}</div>
                 </div>
 
@@ -641,7 +661,7 @@
               >
                 <div class="border-b col-span-3">
                   <button>
-                      <svg v-if="r.improvedRate > 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                      <!-- <svg v-if="r.improvedRate > 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
                         <path stroke-linecap="round" stroke-linejoin="round"
                           d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18" />
@@ -650,7 +670,7 @@
                         stroke="currentColor" class="w-4 h-4 inline-block">
                         <path stroke-linecap="round" stroke-linejoin="round"
                           d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3" />
-                      </svg>
+                      </svg> -->
                     {{ r.name.toUpperCase() }}
                   </button>
                 </div>
@@ -749,7 +769,7 @@
               }">
                 <div class="border-b col-span-3">
                   <button>
-                    <svg v-if="r.improvedRate > 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    <!-- <svg v-if="r.improvedRate > 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block">
                         <path stroke-linecap="round" stroke-linejoin="round"
                           d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18" />
@@ -758,7 +778,7 @@
                         stroke="currentColor" class="w-4 h-4 inline-block">
                         <path stroke-linecap="round" stroke-linejoin="round"
                           d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3" />
-                      </svg>
+                      </svg> -->
                     {{ r.name.toUpperCase() }}
                   </button>
                 </div>

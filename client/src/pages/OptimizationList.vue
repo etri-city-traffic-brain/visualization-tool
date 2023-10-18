@@ -121,8 +121,8 @@
               row.toggleDetails();
             toggleDetails(row.item.id, row.item.status, row.detailsShowing);
             ">
-              <b-icon icon="arrow-up" v-if="row.detailsShowing"></b-icon>
-              <b-icon icon="arrow-down" v-else></b-icon>
+              <b-icon icon="triangle" v-if="row.detailsShowing"></b-icon>
+              <b-icon icon="triangle-fill" rotate="180" v-else></b-icon>
             </b-btn>
           </template>
 

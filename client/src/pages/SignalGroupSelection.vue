@@ -12,10 +12,18 @@
 
     <div class="absolute left-2 top-1 w-52 rounded px-1 bg-gray-400" v-if="isReady">
       <div class="text-center font-bold p-1">신호그룹 목록</div>
-      <div class="overflow-auto" :style="{ height: mapHeight - 30 + 'px' }">
-        <button v-for="group in signalGroupsSorted" :key="group" @click="animate(group)"
-          class="w-20 text-white text-sm p-1 rounded m-1 border" :style="{ 'background-color': getGroupColor(group) }"
-          v-if="getGroupColor(group)">
+      <!-- :style="{ height: mapHeight - 30 + 'px' }" -->
+      <div class="overflow-auto h-24"
+      >
+        <button
+          v-for="group in signalGroupsSorted"
+          :key="group"
+          @click="animate(group)"
+          class="w-20 text-white text-sm p-1 rounded m-1 border"
+          :style="{ 'background-color': getGroupColor(group) }"
+          v-if="getGroupColor(group) && isTargetTL(group)"
+
+        >
 
           <span v-if="isAdded(group)" class="flex items-center justify-center">
             {{ group }} <input type="checkbox" checked class="ml-1" @click.stop="delTlGroup(group)">

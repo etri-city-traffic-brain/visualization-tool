@@ -45,15 +45,19 @@ export default {
           yAxes: [{
             scaleLabel: {
               display: true,
-              labelString: '통과차량수',
+              labelString: '통과차량수(대)',
               fontColor: 'white',
             },
             ticks: {
               display: true,
               fontColor: 'white',
-              // callback: function (value) {
-              //   return value.toLocaleString("en-US") + ' (대)'
-              // }
+              callback: function (value) {
+                if (value > 1000) {
+                  return value / 1000 + 'k'
+                }
+                return value
+                // return value.toLocaleString("en-US") + '(대)'
+              }
             },
             gridLines: { display: false, },
           }]

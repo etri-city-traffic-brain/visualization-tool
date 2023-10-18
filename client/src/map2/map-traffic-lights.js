@@ -4,13 +4,10 @@
  */
 
 import * as maptalks from 'maptalks'
-import * as d3 from 'd3'
 import extent from './map-extent'
 import mapService from '../service/map-service'
 
 import OptStatusLayer from './opt-status-layer'
-import signalService from '@/service/signal-service'
-import tlUtils from '@/config/utils'
 
 import colorScale from '@/utils/colors-improve-rate'
 
@@ -26,10 +23,12 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
   const layer = new OptStatusLayer('hello')
 
   function makeTrafficLight(feature, color) {
-    const nodeId = feature.properties.NODE_ID
-    const nodeName = signalService.nodeIdToName(nodeId)
-    const groupId = tlUtils.findGroupId(nodeId)
-
+    // const nodeId = feature.properties.NODE_ID
+    // const nodeName = signalService.nodeIdToName(nodeId)
+    // const groupId = tlUtils.findGroupId(nodeId)
+    // console.log(feature.properties.NAME,)
+    const nodeName = feature.properties.NAME
+    const groupId = feature.properties.GROUP
     const trafficLight = new maptalks.Marker(feature.geometry.coordinates, {
       symbol: [
         {
@@ -87,7 +86,8 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     trafficLightsLayer.clear()
 
     const geometries = features.map((feature, i) => {
-      const groupId = tlUtils.findGroupId(feature.properties.NODE_ID)
+      // const groupId = tlUtils.findGroupId(feature.properties.NODE_ID)
+      const groupId = feature.properties.GROUP
 
       let color = 'gray'
       if (groupIds.length && groupIds.includes(groupId)) {
@@ -159,8 +159,10 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
     const matchList = new Set()
 
     tlayer.getGeometries().forEach(g => {
-      const nodeId = g.properties.NODE_ID
-      const nodeName = signalService.nodeIdToName(nodeId)
+      // const nodeId = g.properties.NODE_ID
+      // console.log(g.properties.N)
+      // const nodeName = signalService.nodeIdToName(nodeId)
+      const nodeName = g.properties.NAME
       arr.forEach(item => {
         if (item.name === nodeName) {
           // log('update signal', nodeId, nodeName)
@@ -207,9 +209,9 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
 
     tlayer.getGeometries().forEach(g => {
 
-      const nodeId = g.properties.NODE_ID
-      const nodeName = signalService.nodeIdToName(nodeId)
-
+      // const nodeId = g.properties.NODE_ID
+      // const nodeName = signalService.nodeIdToName(nodeId)
+      const nodeName = g.properties.NAME
       Object.entries(testResult).forEach(([key, value]) => {
         if (key === nodeName) {
 
@@ -241,8 +243,9 @@ export default function SaltTrafficLightsLoader(map, groupIds, events) {
       return
     }
     tlayer.getGeometries().forEach(g => {
-      const nodeId = g.properties.NODE_ID
-      const nodeName = signalService.nodeIdToName(nodeId)
+      // const nodeId = g.properties.NODE_ID
+      // const nodeName = signalService.nodeIdToName(nodeId)
+      const nodeName = g.properties.NAME
       optResultMap[type].forEach(item => {
         if (item.name === nodeName) {
           if (type === 'test') {

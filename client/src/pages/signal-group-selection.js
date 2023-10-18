@@ -59,7 +59,7 @@ export default {
   },
   computed: {
     signalGroupsSorted() {
-      const r = this.signalGroups.sort((a, b) => {
+      const r = this.signalGroups.totalGroups.sort((a, b) => {
         const an = Number(a.split(' ')[1])
         const bn = Number(b.split(' ')[1])
 
@@ -81,6 +81,11 @@ export default {
     },
     isAdded(group) {
       return this.targetGroups.includes(group)
+    },
+    isTargetTL(group) {
+
+      const t = this.signalGroups.targetGroups.find(g => g === group)
+      return t ? true : false
     },
     animate(groupId) {
       const g = this.trafficLightsLayer.getGeometries().find(g => {
@@ -135,7 +140,7 @@ export default {
     },
     updateSignalGroups() {
       this.trafficLightsLayer.getGeometries().forEach(g => {
-        const obj = this.signalGroups.find(s => {
+        const obj = this.signalGroups.totalGroups.find(s => {
           const ooo = Object.entries(this.groupMap).find(([key, value]) => {
             if (value.includes(g.$nodeId)) {
               return true
@@ -195,6 +200,7 @@ export default {
     }
   },
   async mounted() {
+    log('-->', this.signalGroups)
     this.map = makeMap({ mapId: this.mapId, zoom: 12 })
 
     if (this.height) {
@@ -231,7 +237,8 @@ export default {
     this.groupOptions = Object.keys(groupMap2).sort()
     this.groupMap = groupMap2
     this.geometries = features.map(feature => {
-      const crossName = signalService.nodeIdToName(feature.properties.NODE_ID)
+      // const crossName = signalService.nodeIdToName(feature.properties.NODE_ID)
+      const crossName = feature.properties.NAME
       const trafficLight = new maptalks.Marker(feature.geometry.coordinates, {
         id: feature.properties.NODE_ID,
         symbol: [

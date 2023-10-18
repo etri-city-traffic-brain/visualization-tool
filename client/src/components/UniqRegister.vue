@@ -57,7 +57,7 @@
         </b-input-group>
       </div>
       <div class="flex space-x-2 items-center" v-if="intersectionField">
-        <div class="flex-none w-40 text-right">대상 교차로</div>
+        <div class="flex-none w-40 text-right">대상 교차로 그룹</div>
         <b-input-group>
           <b-form-input
             id="junctionId"
@@ -83,7 +83,7 @@
         <div class="flex-none w-40 text-right">도커 이미지</div>
         <b-form-select v-model="dockerImage" :options="imageOptions" size="sm"/>
       </div>
-      <div class="flex space-x-2 items-center">
+      <!-- <div class="flex space-x-2 items-center">
         <div class="flex-none w-40 text-right">지도 중심</div>
         <div class="w-full flex space-x-1">
           <div class="flex space-x-1 items-center">
@@ -94,7 +94,7 @@
           </div>
 
         </div>
-      </div>
+      </div> -->
     </div>
     <transition name="slide-fade-">
       <div v-if="showMap">
@@ -189,7 +189,7 @@
         </div>
 
         <div class="bg-gray-700 rounded text-center p-1">
-          Learning Rate
+          학습비율
           <b-form-select
             v-model="lrSelected"
             :options="lrOptions"
@@ -198,7 +198,7 @@
           />
         </div>
         <div class="bg-gray-700 rounded text-center p-1">
-          Memory Length
+          메모리길이
           <b-form-select
             v-model="memLenSelected"
             :options="memLenOptions"
