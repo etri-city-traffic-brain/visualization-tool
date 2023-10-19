@@ -51,11 +51,15 @@ export default {
             ticks: {
               display: true,
               fontColor: 'white',
-              callback: function (value) {
-                if (value > 1000) {
-                  return value / 1000 + 'k'
+              callback: function (value, i, j) {
+                if (i % 2 === 0) {
+                  if (value > 1000) {
+                    return value / 1000 + 'k'
+                  } else {
+                    return value
+                  }
                 }
-                return value
+                return ''
                 // return value.toLocaleString("en-US") + '(대)'
               }
             },

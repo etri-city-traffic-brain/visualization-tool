@@ -84,18 +84,25 @@ export default map => {
             lineColor: color(speed)
           })
         }
-      }
-      const road = speedByEdgeId[edgeId]
-      if (road) {
-        let speed = road.speed
-        if (geometry.properties.SPEEDLH <= 30) {
-          // speed = road.speed * 2
-          speed = (speed / 30) * 50
+      } else {
+        const road = speedByEdgeId[edgeId]
+        if (road) {
+          let speed = road.speed
+          if (geometry.properties.SPEEDLH <= 30) {
+            // speed = road.speed * 2
+            speed = (speed / 30) * 50
+          }
+          geometry.updateSymbol({
+            lineWidth: calcLineWidth(map.getZoom()),
+            lineColor: color(speed)
+
+          })
+        } else {
+          geometry.updateSymbol({
+            lineWidth: calcLineWidth(map.getZoom()),
+            lineColor: color(50)
+          })
         }
-        geometry.updateSymbol({
-          lineWidth: calcLineWidth(map.getZoom()),
-          lineColor: color(speed)
-        })
       }
     })
   }

@@ -10,7 +10,7 @@ const { dockerCommand: docker } = require('docker-cli-js')
 const options = {
   machineName: undefined, // uses local docker
   currentWorkingDirectory: undefined, // uses current working directory
-  echo: true, // echo command output to stdout/stderr
+  echo: false, // echo command output to stdout/stderr
   env: undefined,
   stdin: undefined
 }

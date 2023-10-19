@@ -1,10 +1,8 @@
 <template>
   <div>
     <div class="fixed z-50 inset-auto h-full top-60" v-if="showWaitingMsg">
-      <div class="w-screen p-2">
-        <div
-          class="flex justify-center space-x-2 bg-green-300 p-5 text-xl font-bold rounded-lg"
-        >
+      <div class="w-screen p-2 flex justify-center">
+        <div class="flex justify-center space-x-2 bg-blue-300 p-5 text-xl font-bold rounded-lg w-92">
           <div>
             <svg
               class="animate-spin h-8 w-8"
@@ -144,6 +142,12 @@
         >
           처음위치
         </button>
+        <button
+          class="bg-gray-600 text-white text-xs p-1 rounded hover:bg-blue-400 hover:text-black"
+          @click="showGrid"
+        >
+          그리드뷰
+        </button>
       </div>
       <div class="absolute bottom-2 flex justify-center items-center w-full">
         <div class="bg-gray-600 rounded">
@@ -194,7 +198,7 @@
         </div>
       </div>
     </div>
-    <div class="fixed left-0 bottom-20 w-full">
+    <div class="fixed right-0 top-44 w-80">
       <SimulationDetailsOnRunning
         v-if="simulation.status === 'running'"
         :simulation="simulation"
@@ -317,7 +321,7 @@
         </div> -->
       </div>
       <div
-        class="fixed top-64 right-1 opacity-90 space-y-1"
+        class="fixed top-40 right-1 opacity-90- space-y-1"
         v-if="simulation.status === 'finished'"
       >
         <div class="bg-gray-700 rounded h-52 p-2">

@@ -188,7 +188,9 @@
               <div class="border-b col-span-3">
                 <svg v-if="r.improvedRate < 0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block"> <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25L12 21m0 0l-3.75-3.75M12 21V3" /> </svg>
                 <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block"> <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75L12 3m0 0l3.75 3.75M12 3v18" /> </svg>
-                {{ r.name.toUpperCase() }}
+
+                 <span v-if="r.name.indexOf('由') >= 0">리베라네거리</span>
+                 <span v-else>{{ r.name.toUpperCase() }}</span>
               </div>
               <div class="border-b text-right">{{ r.ftAvgTravelTime }}</div>
               <div class="border-b text-right">{{ r.rlAvgTravelTime }}</div>

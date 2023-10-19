@@ -313,7 +313,8 @@
                     >
                       <div class="border-b col-span-3">
                         <button @click="selectCrossName(v[0])" class="hover:text-blue-200">
-                        {{ v[0] }}
+                        <span v-if="v[0].indexOf('由') >= 0">리베라네거리</span>
+                        <span v-else>{{ v[0] }}</span>
                         </button>
                       </div>
                       <div class="border-b text-right">

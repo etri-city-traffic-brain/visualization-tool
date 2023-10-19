@@ -69,7 +69,8 @@ const defaultOption = (xTitle = '', yTitle) => ({
           maxRotation: 0,
           display: true,
           fontColor: 'white'
-        }
+        },
+        gridLines: { display: false, },
       }
     ],
     yAxes: [
@@ -89,7 +90,8 @@ const defaultOption = (xTitle = '', yTitle) => ({
           callback: function (value) {
             return value
           }
-        }
+        },
+        gridLines: { display: false, },
       },
       {
         id: 'B',
@@ -290,7 +292,7 @@ export default {
 
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
 
-    setTimeout(() => this.centerTo(), 1000)
+    // setTimeout(() => this.centerTo(), 1000)
     await this.updateSimulation()
     this.resize()
 
@@ -379,8 +381,26 @@ export default {
     // this.simulation.status = 'running'
     // this.progress = 20
 
+    // const center = [this.config.area.minX + 0.04, this.config.area.minY + 0.01]
+    // const c = this.map.getCenter()
+    // const center = [c.x + 0.001, c.y - 0.001]
+    // this.map.animateTo({ center, zoom: 18 }, { duration: 500 })
+
+    // setTimeout(() => {
+    //   const c = this.map.getCenter()
+    //   const center = [c.x + 0.0001, c.y - 0.0001]
+    //   this.map.animateTo({ center }, { duration: 500 })
+    // }, 200)
+
+    setTimeout(() => this.centerTo(), 500)
+
   },
   methods: {
+    showGrid() {
+      const c = this.map.getCenter()
+      const center = [c.x, c.y]
+      this.map.animateTo({ center, zoom: 13 }, { duration: 500 })
+    },
     showModal() {
       this.$refs.simmodal.show()
     },
@@ -419,6 +439,14 @@ export default {
         this.statusText = err.message
       }
       setTimeout(() => this.updateSimulation(), 5000)
+
+
+      setTimeout(() => {
+        const c = this.map.getCenter()
+        const center = [c.x + 0.001, c.y - 0.001]
+        this.map.animateTo({ center, zoom: 17 }, { duration: 500 })
+      }, 200)
+
     },
 
     stop() {
@@ -509,11 +537,11 @@ export default {
       if (this.config.areaType === 'area') {
 
         const center = [this.config.area.minX + 0.04, this.config.area.minY + 0.01]
-        this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
+        this.map.animateTo({ center, zoom: 16 }, { duration: 1000 })
         return
       }
       const center = region[this.config.region] || region.doan
-      this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
+      this.map.animateTo({ center, zoom: 16 }, { duration: 1000 })
     },
     makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
