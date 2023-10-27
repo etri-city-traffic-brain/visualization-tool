@@ -194,6 +194,7 @@
           </div>
         </template>
       </b-table>
+
       <b-alert :show="msg.length > 0" :variant="variant">
         <b-spinner small type="grow" /> {{ msg }}
         <b-spinner small type="grow" />

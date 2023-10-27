@@ -112,6 +112,10 @@ export default {
         //   name: "교통데이터 분석"
         // },
         {
+          path: "RouteList",
+          name: "수요생성"
+        },
+        {
           path: "Junction",
           name: "교차로 조회"
         }

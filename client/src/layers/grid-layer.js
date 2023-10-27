@@ -65,9 +65,13 @@ async function loadGrid(gridLayer, simulationId) {
   setTimeout(() => updateGrid(simulationId, 0, gridLayer), 500)
 }
 
-function makeGridLayer(map, simulationId) {
+function makeGridLayer(map, simulationId, showGrid) {
   const layer = new VectorLayer('gridLayer', [], {})
+
   map.on('zoomend moveend', async (event) => {
+    if (!showGrid) {
+      return
+    }
     const map = event.target;
     if (map.getZoom() <= 14) {
       await loadGrid(layer, simulationId);

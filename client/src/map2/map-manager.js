@@ -37,12 +37,12 @@ const { log } = console
  * @param {string} param.simulationId - Simulation id
  * @param {Object} param.eventBus - Vue Object as event bus
  */
-function MapManager({ map, simulationId, eventBus, useSaltLink = true }) {
+function MapManager({ map, simulationId, eventBus, useSaltLink = true, grid = true }) {
   let currentSpeedsPerLink = {}
   let currentStep = 0
 
   const edgeLayer = makeEdgeLayer(map, eventBus)
-  const gridLayer = makeGridLayer(map, simulationId)
+  const gridLayer = makeGridLayer(map, simulationId, grid)
   const canvasLayer = makeCanvasLayer(
     map,
     edgeLayer.getGeometries.bind(edgeLayer),
