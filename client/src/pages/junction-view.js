@@ -3,13 +3,12 @@
 // 전체 교차로 목록을 조회 후
 // 사용자가 입력한 값에 따라 해당 노드를 보여지도록
 
-import makeMap from '@/map2/make-map'
 import * as maptalks from 'maptalks'
+
+import makeMap from '@/map2/make-map'
 import extent from '@/map2/map-extent'
 import mapService from '@/service/map-service'
 import signalService from '@/service/signal-service'
-
-// import groupMap from '@/config/signal-group'
 
 const { log } = console
 
@@ -129,51 +128,24 @@ export default {
         this.targetGroups.splice(idx, 1)
       }
     },
-
     getTL(groupId) {
       this.selected = []
 
       if (this.type === 'id') {
-        const objs = this.geometries.filter(g => {
-          return g.$nodeId.includes(groupId)
+        this.geometries.filter(g => g.$nodeId.includes(groupId)).forEach(g => {
+          this.add(g.$nodeId, 'gray', g.$groupId, g.$crossName)
         })
-        objs.forEach(obj => {
-          const nodeId = obj.$nodeId
-          const ooo = Object.entries(this.groupMap).find(([key, value]) => {
-            if (value.includes(nodeId)) {
-              return true
-            }
-          }) || {}
-
-          const tlName = signalService.nodeIdToName(nodeId)
-          this.add(nodeId, this.color, ooo[0], tlName)
+      } else if (this.type === 'name') {
+        this.geometries.filter(g => g.$crossName.includes(groupId)).forEach(g => {
+          this.add(g.$nodeId, 'gray', g.$groupId, g.$crossName)
         })
       } else if (this.type === 'group') {
         const nodIds = this.groupMap[groupId] || []
-
-        nodIds.forEach(nodeId => {
-          const tlName = signalService.nodeIdToName(nodeId)
-
+        nodIds.forEach(({ nodeId, nodeName }) => {
           const color = this.groupColor[groupId] || getColor()
           this.groupColor[groupId] = color
-          this.add(nodeId, color, groupId, tlName)
+          this.add(nodeId, color, groupId, nodeName)
         })
-      } else if (this.type === 'name') {
-        const objs = this.geometries.filter(g => {
-          return g.$crossName.includes(groupId)
-        })
-        objs.forEach(obj => {
-          const nodeId = obj.$nodeId
-          const ooo = Object.entries(this.groupMap).find(([key, value]) => {
-            if (value.includes(nodeId)) {
-              return true
-            }
-          }) || {}
-
-          const tlName = signalService.nodeIdToName(nodeId)
-          this.add(nodeId, this.color, ooo[0], tlName)
-        })
-
       }
     },
     addNode(groupId) {
@@ -253,7 +225,6 @@ export default {
       this.centerMarker.bringToFront()
     }
   },
-
   async mounted() {
 
     this.map = makeMap({ mapId: this.mapId, zoom: 12 })
@@ -283,21 +254,25 @@ export default {
     const tmpLayer = new maptalks.VectorLayer('tmp-01s', [], {}).addTo(this.map)
 
     const { features } = await mapService.getTrafficLights(extent(this.map))
-    // console.log(features)
-    const groupMap2 = features.reduce((acc, cur) => {
+    this.groupMap = features.reduce((acc, cur) => {
       const nodes = acc[cur.properties.GROUP] || []
-      nodes.push(cur.properties.NODE_ID)
+      nodes.push({
+        nodeId: cur.properties.NODE_ID,
+        nodeName: cur.properties.NAME,
+        groupId: cur.properties.GROUP
+      })
       acc[cur.properties.GROUP] = nodes
       return acc
     }, {})
-    // console.log(Object.keys(groupMap).length)
-    // console.log(Object.keys(groupMap2).length)
-    this.groupOptions = Object.keys(groupMap2).sort()
-    this.groupMap = groupMap2
+
+
+    this.groupOptions = Object.keys(this.groupMap).sort()
     this.geometries = features.map(feature => {
-      const crossName = signalService.nodeIdToName(feature.properties.NODE_ID)
-      const trafficLight = new maptalks.Marker(feature.geometry.coordinates, {
-        id: feature.properties.NODE_ID,
+      const crossName = feature.properties.NAME
+      const coordinates = feature.geometry.coordinates
+      const nodeId = feature.properties.NODE_ID
+      const trafficLight = new maptalks.Marker(coordinates, {
+        id: nodeId,
         symbol: [
           {
             markerType: 'ellipse',
@@ -306,39 +281,33 @@ export default {
             markerWidth: 5,
             markerHeight: 5,
             textSize: 20,
-            // textFill: 'white',
-            // textHaloFill: 'blue',
-            // textHaloRadius: 1,
-            // textName: feature.target.$crossName + '[' + feature.target.$groupId + ']' || '',
-
           }
         ]
       })
         .on('mouseenter', e => {
-          // if (!e.target.$groupId) {
-          //   return
-          // }
-          // e.target.updateSymbol([
-          //   {
-          //     markerFillOpacity: 1,
-          //     textName: `${e.target.$groupId}(${e.target.$nodeId})`
-          //   }
-          // ])
+          if (!e.target.$groupId) {
+            return
+          }
+          e.target.updateSymbol([
+            {
+              markerFillOpacity: 1,
+              textName: `${e.target.$groupId}(${e.target.$crossName})`
+            }
+          ])
           e.target.bringToFront()
+
         })
-        .on('mouseout', e => {
-          // if (!e.target.$groupId) {
-          //   return
-          // }
-          // e.target.updateSymbol([
-          //   {
-          //     textName: `${e.target.$groupId}(${e.target.$crossName})`
-          //   }
-          // ])
+        .on('mouseout', (e) => {
+          e.target.updateSymbol([
+            {
+              markerFillOpacity: 1,
+              textName: ``
+            }
+          ])
         })
       trafficLight.$crossName = crossName
       trafficLight.$nodeId = feature.properties.NODE_ID
-
+      trafficLight.$groupId = feature.properties.GROUP
       return trafficLight
     })
 

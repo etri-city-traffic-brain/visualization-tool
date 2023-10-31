@@ -13,14 +13,14 @@ module.exports = async (req, res) => {
   const { extent } = parseMapReqParam(req);
   const { db } = mongoose.connection;
   const nodes = await db.collection('signals').find({
-    geometry: {
-      $geoWithin: {
-        $geometry: {
-          type: 'Polygon',
-          coordinates: [bboxpolygon(extent)],
-        },
-      },
-    },
+    // geometry: {
+    //   $geoWithin: {
+    //     $geometry: {
+    //       type: 'Polygon',
+    //       coordinates: [bboxpolygon(extent)],
+    //     },
+    //   },
+    // },
     // 'properties.SPEEDLH' : { $gt: speed },
   }).toArray();
   res.json({

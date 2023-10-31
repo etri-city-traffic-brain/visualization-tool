@@ -3,6 +3,7 @@
 // 입력으로 받은 GeoJSON을 MongoDB 에 추가한다.
 // GeoJSON은 edge.xml 을 사용하여 변환한 결과물이다.
 const fs = require('fs')
+const path = require('path')
 const fse = require('fs-extra')
 const chalk = require('chalk')
 
@@ -10,10 +11,10 @@ const { connect } = require('./db')
 
 const { log } = console
 
-async function insertBulk (collection, geojson) {
+async function insertBulk(collection, geojson) {
   try {
     log('drop existing collection')
-    await collection.drop()
+    // await collection.drop()
   } catch (err) {
     // ignore
     log(err.message)
@@ -28,7 +29,7 @@ async function insertBulk (collection, geojson) {
   return result
 }
 
-async function loadData (dbName, collectionName, filePath) {
+async function loadData(dbName, collectionName, filePath) {
   log('target file:', chalk.green(filePath))
   const { connection } = await connect(dbName)
   const exists = await fse.pathExists(filePath)
@@ -50,16 +51,21 @@ async function loadData (dbName, collectionName, filePath) {
   }
 }
 
-function makeLoader (db) {
+function makeLoader(db) {
   return loadData.bind(null, db)
 }
 
 if (require.main === module) {
+
+  // fse.readdir('d://tmp/sejeong_data').then(list => {
+  //   console.log(list)
+  // })
+
   if (process.argv.length < 3) {
     log('usage:', 'node import-map [directory path]')
     process.exit(1)
   }
-  const DATABASE = 'map_v2'
+  const DATABASE = 'map'
   const targetDir = process.argv[2]
   const load = makeLoader(DATABASE)
 
@@ -69,9 +75,15 @@ if (require.main === module) {
       return
     }
 
+    // daejeon
     // await load('ulinks', `${dir}/link.geojson`)
-    await load('ucells', `${targetDir}/cell.geojson`)
+    // await load('ucells', `${targetDir}/cell.geojson`)
     // await load('ucells', `${targetDir}/sample.geojson`)
+
+    // sejeong
+    // await load('ulinks', `${targetDir}/sejeong_edge.link.geojson`)
+    await load('ucells', `${targetDir}/sejeong_edge.cell.geojson`)
+
     process.exit(1)
   })
 }

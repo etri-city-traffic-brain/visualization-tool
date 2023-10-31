@@ -80,7 +80,7 @@ const makeOptScenario = (
         link: `../../data/scenario/${region}/${region}.edge.xml`,
         connection: `../../data/scenario/${region}/${region}.connection.xml`,
         trafficLightSystem: `../../data/scenario/${region}/${region}.tss.xml`,
-        route: `../../data/route/${region}/${region}_20220601.rou.xml`
+        route: `../../data/route/${region}/${region}_20220617.rou.xml`
       },
       parameter: {
         minCellLength: 30.0,

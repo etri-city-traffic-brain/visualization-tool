@@ -18,7 +18,7 @@ function makeDong(feature, color) {
 
   dong.updateSymbol({
     lineColor: 'black',
-    lineWidth: 1,
+    lineWidth: 2,
     polygonFill: color,
     opacity: 0.6,
     textFill: 'black',
@@ -28,8 +28,7 @@ function makeDong(feature, color) {
 
   const dongCenter = toGeometry(center(feature))
 
-  // const size = Math.floor(Math.random() * 60)
-  const size = 0
+  const size = 10
 
   dongCenter.updateSymbol({
     'markerType': 'ellipse',
@@ -112,8 +111,6 @@ export default {
 
     const dongCenters = []
 
-
-
     const onlyYuseong = (feature) => feature.properties.adm_nm.indexOf('유성') >= 0
 
     features
@@ -126,8 +123,8 @@ export default {
 
       });
 
-    dongCenters.forEach((c) => {
-      layerRoute.addGeometry(c)
+    dongCenters.forEach((dong) => {
+      layerRoute.addGeometry(dong)
     })
 
     const line1 = makeArrow(dongCenters[0], dongCenters[1], 5)
