@@ -82,6 +82,7 @@ module.exports = {
     },
     optimization: {
       images: [
+        'images4uniq/optimizer:v3.0.20231101',
         'images4uniq/optimizer:v3.0.20230814',
       ]
     }

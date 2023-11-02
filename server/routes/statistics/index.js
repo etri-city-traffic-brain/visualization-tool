@@ -83,7 +83,8 @@ router.get('/grid', async (req, res, next) => {
     res.send(await readFile(path, 'utf-8'))
   } catch (err) {
     console.log(err.message)
-    next(err)
+    // next(err)
+    res.send({})
   }
 })
 

@@ -99,6 +99,7 @@ function Replayer(send) {
 
 module.exports = (httpServer) => {
   const wss = new WebSocket.Server({ server: httpServer })
+
   const eventBus = Object.create(events.EventEmitter.prototype)
 
   // send message to all web clients
