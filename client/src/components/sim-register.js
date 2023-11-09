@@ -38,7 +38,8 @@ const intervalOptions = [
 ]
 
 const regionOptions = [
-  { text: '세종', value: 'sejong' },
+  { text: '세종(1,2생활권)', value: 'sejong' },
+  { text: '세종(행정중심복합도시)', value: 'sejong2' },
   { text: '대전', value: 'dj' },
   { text: '둔산, 월평', value: 'yuseong' },
   { text: '도안', value: 'doan' },
