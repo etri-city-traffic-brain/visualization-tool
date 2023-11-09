@@ -1,8 +1,28 @@
 <template>
   <div>
-    <div class="fixed z-50 inset-auto h-full top-60" v-if="showWaitingMsg">
+    <div class="fixed z-50 h-16 left-20 top-20 space-y-1">
+      <div class="bg-gray-600 text-white text-center font-bold py-1">
+        {{ id }}
+      </div>
+      <div class="bg-indigo-50">
+        <b-btn @click="toggleTod">T-OD <input type="checkbox" v-model="showTod"/></b-btn>
+        <b-btn @click="toggleLinksFrom">TRIP 출발링크 <input type="checkbox" v-model="showLinkFrom"/> </b-btn>
+        <b-btn @click="toggleLinksTo">TRIP 도착링크 <input type="checkbox" v-model="showLinkTo"/> </b-btn>
+        <b-btn @click="startTripVisualization">트립가시화</b-btn>
+
+      </div>
+      <div class="flex space-x-1 items-center">
+        <b-form-input type="range" max="24" :value="currentStep" @change="onStepChanged" @input="onInput"></b-form-input>
+        <div class="text-lg font-bold bg-indigo-100 rounded-lg px-1">{{ currentStep.toString().padStart(2,'0') }}:00</div>
+      </div>
+      <div>
+        <b-btn size="sm" @click="previous">이전</b-btn>
+        <b-btn size="sm" @click="next">다음</b-btn>
+      </div>
+    </div>
+    <div class="fixed z-50 inset-auto h-full top-60" v-if="showLoading">
       <div class="w-screen p-2 flex justify-center">
-        <div class="flex justify-center space-x-2 bg-blue-300 p-5 text-xl font-bold rounded-lg w-92">
+        <div class="flex justify-center space-x-2 bg-gray-100- p-5 text-xl font-bold rounded-xl w-92">
           <div>
             <svg
               class="animate-spin h-8 w-8"
@@ -26,7 +46,12 @@
             </svg>
           </div>
           <div>
-            실행결과 분석 중...
+            <div>
+              {{ message }}
+            </div>
+            <div>
+              <button @click="showLoading=false">닫기</button>
+            </div>
           </div>
         </div>
       </div>

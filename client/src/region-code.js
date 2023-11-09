@@ -7,5 +7,6 @@ export default {
   dg: '동구',
   ddg: '대덕구',
   jg: '중구',
-  cdd3: '연구단지'
+  cdd3: '연구단지',
+  sejong: '세종'
 }

@@ -129,7 +129,8 @@ export default {
         "OptimizationResultMap",
         "SimulationResultMap",
         "OptimizationResultComparisonMap",
-        "Junction"
+        "Junction",
+        "RouteVis"
       ];
       return !hides.includes(this.currentRouteName);
     }

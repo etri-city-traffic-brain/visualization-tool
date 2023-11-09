@@ -44,8 +44,8 @@ export default function MakeMap({
   })
 
   map.on('click', param => {
-    // const coord = param.coordinate.toFixed(7)
-    // log(coord)
+    const coord = param.coordinate.toFixed(7)
+    log(coord)
   })
 
   return map

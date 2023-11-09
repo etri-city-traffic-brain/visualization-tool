@@ -31,20 +31,36 @@ function makeArrow(from, to, volume = 3) {
 
   const line = lineString(scaledPoints, { name: 'line1' })
 
-  const offsetLine = lineOffset(line, 0.2)
+  const offsetLine = lineOffset(line, 0.1)
 
-  return new maptalks.LineString(offsetLine.geometry.coordinates, {
-    arrowStyle: 'classic', // arrow-style : now we only have classic
-    arrowPlacement: 'point', // arrow's placement: vertex-first, vertex-last, vertex-firstlast, point
-    visible: true,
-    draggable: false,
-    dragShadow: false, // display a shadow during dragging
-    drawOnAxis: null,  // force dragging stick on a axis, can be: x, y
-    symbol: {
-      lineColor: 'blue',
-      lineWidth: volume
-    }
-  });
+  try {
+    return new maptalks.LineString(offsetLine.geometry.coordinates, {
+      arrowStyle: 'classic', // arrow-style : now we only have classic
+      arrowPlacement: 'point', // arrow's placement: vertex-first, vertex-last, vertex-firstlast, point
+      visible: true,
+      draggable: false,
+      dragShadow: false, // display a shadow during dragging
+      drawOnAxis: null,  // force dragging stick on a axis, can be: x, y
+      symbol: {
+        lineColor: 'orange',
+        lineWidth: volume
+      }
+    });
+
+  } catch (err) {
+    return new maptalks.LineString(line.geometry.coordinates, {
+      arrowStyle: 'classic', // arrow-style : now we only have classic
+      arrowPlacement: 'point', // arrow's placement: vertex-first, vertex-last, vertex-firstlast, point
+      visible: false,
+      draggable: false,
+      dragShadow: false, // display a shadow during dragging
+      drawOnAxis: null,  // force dragging stick on a axis, can be: x, y
+      symbol: {
+        lineColor: 'black',
+        lineWidth: volume
+      }
+    });
+  }
 }
 
 
