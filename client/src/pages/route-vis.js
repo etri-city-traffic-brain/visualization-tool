@@ -66,14 +66,27 @@ async function getDaejeonDongs() {
   return axios({ url: '/salt/v1/route/dong', method: 'get' }).then(res => res.data)
 }
 
-const updateTrip = async (map, trip) => {
-  for (let step in trip) {
-    const volume = trip[step]
-    const target = map[step]
+const updateTrip = async (linkPoints, trips, showLabel) => {
+  for (let linkId in trips) {
+    const volume = trips[linkId]
+    const circle = linkPoints[linkId]
 
-    if (target) {
-      target.setRadius(volume * 10)
+    if (!circle) {
+      continue
     }
+
+    if (volume > 10 && showLabel.getZoom() > 14) {
+      circle.updateSymbol({
+        textName: volume,
+        textSize: 12,
+        textFill: 'black',
+        textHaloFill: 'white',
+        textHaloRadius: 1
+      })
+    }
+
+
+    circle.setRadius(volume * 10)
   }
 }
 
@@ -110,7 +123,9 @@ export default {
       showLinkTo: true,
       showTod: true,
       tod: {},
-      message: ''
+      message: '',
+      min: 0,
+      max: 0
     }
   },
   destroyed() {
@@ -144,9 +159,11 @@ export default {
     this.resize()
     this.centerTo()
     try {
-      await this.loadLinks()
+
       this.message = '링크 목록 조회 완료'
+      this.makeToast("링크목록 조회완료")
       await this.loadDong()
+      this.makeToast("행정동 조회완료")
 
       this.message = 'Loading OD Metrix'
       await this.loadTODMetrix()
@@ -155,6 +172,7 @@ export default {
       this.showLoading = false
 
       this.message = ''
+      this.loadLinks()
     } catch (err) {
       this.message = "데이터가 준비되지 않았습니다."
       log(err.message)
@@ -169,21 +187,34 @@ export default {
       if (this.currentStep < 1) {
         return
       }
-      this.onStepChanged(this.currentStep - 1)
+      this.onStepChanged({
+        target: {
+          value: this.currentStep - 1
+        }
+      })
     },
     next() {
       if (this.currentStep >= 23) {
         this.currentStep = 0
-        this.onStepChanged(this.currentStep)
+        this.onStepChanged({
+          target: {
+            value: this.currentStep
+          }
+        })
         return
       }
-      this.onStepChanged(this.currentStep + 1)
+      this.onStepChanged({
+        target: {
+          value: this.currentStep + 1
+        }
+      })
     },
-    onInput(v) {
-      this.currentStep = v
+    onInput(e) {
+      this.currentStep = e.target.value
     },
-    async onStepChanged(step) {
-      this.currentStep = step
+    async onStepChanged(e) {
+      const step = e.target.value
+      this.currentStep = Number(step)
 
       if (!this.trip) {
         await this.loadTrip()
@@ -191,8 +222,8 @@ export default {
       const tripFrom = this.trip.from[step]
       const tripTo = this.trip.to[step]
 
-      updateTrip(this.linkMapFrom, tripFrom)
-      updateTrip(this.linkMapTo, tripTo)
+      updateTrip(this.linkMapFrom, tripFrom, this.map)
+      updateTrip(this.linkMapTo, tripTo, this.map)
 
       if (this.tod[step]) {
         this.updateOD(this.tod[step])
@@ -210,8 +241,8 @@ export default {
         }
         const tripFrom = this.trip.from[step]
         const tripTo = this.trip.to[step]
-        updateTrip(this.linkMapFrom, tripFrom)
-        updateTrip(this.linkMapTo, tripTo)
+        updateTrip(this.linkMapFrom, tripFrom, this.map)
+        updateTrip(this.linkMapTo, tripTo, this.map)
         this.currentStep = step
 
         if (this.tod[step]) {
@@ -251,6 +282,7 @@ export default {
     },
     async updateOD(odm) {
       this.layerRoute.clear()
+      // console.log(odm)
       const arrows = odm.map((od) => {
         const dongO = this.dongCenters[od[0]]
         const dongD = this.dongCenters[od[1]]
@@ -258,7 +290,11 @@ export default {
         if (!dongO || !dongD) {
           return
         }
-        const arrow = makeArrow(dongO, dongD, Math.log(volume))
+
+        const scaledValue = (volume - this.min) / (2000 - this.min);
+
+        // const arrow = makeArrow(dongO, dongD, Math.log(volume) * 1.2)
+        const arrow = makeArrow(dongO, dongD, scaledValue * 10)
         if (!arrow) {
           return
         }
@@ -271,10 +307,14 @@ export default {
           textHaloFill: volumeColor(volume),
           textHaloRadius: 2
         })
+
+
+
         return arrow
 
       }).filter(v => v)
       this.layerRoute.addGeometry(arrows)
+
     },
     showModal() {
       this.$refs.simmodal.show()
@@ -294,10 +334,10 @@ export default {
     makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
         title: 'Notification',
-        autoHideDelay: 5000,
+        autoHideDelay: 3000,
         appendToast: false,
         variant,
-        toaster: 'b-toaster-bottom-right'
+        toaster: 'b-toaster-top-right'
       })
     },
 
@@ -306,19 +346,35 @@ export default {
         url: `/salt/v1/route/trip/${this.id}/tod`,
         method: 'get'
       }).then(res => res.data)
+
+      const x = Object.values(this.tod).map(arr => arr.map(a => a[2]))
+      let values = []
+      x.forEach(v => {
+        // console.log(v)
+        values = values.concat(v)
+      })
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      this.min = min
+      this.max = max
+
+      console.log('min:', min, 'max:', max)
     },
+
 
     async loadLinks() {
       this.links = await axios({
         url: '/salt/v1/map/yuseong'
       }).then(res => res.data)
 
-      const pointsFrom = this.links.features.map(feature => {
+      const fasterThan30 = feature => feature.properties.SPEEDLH >= 20
+      const pointsFrom = this.links.features.filter(fasterThan30).map(feature => {
         const point = toPoint(feature, 'blue')
         this.linkMapFrom[feature.properties.LINK_ID] = point
         return point
       })
-      const pointsTo = this.links.features.map(feature => {
+
+      const pointsTo = this.links.features.filter(fasterThan30).map(feature => {
         const point = toPoint(feature, 'red')
         this.linkMapTo[feature.properties.LINK_ID] = point
         return point
@@ -333,6 +389,7 @@ export default {
         url: `/salt/v1/route/trip/${this.id}/from`,
         method: 'get'
       }).then(res => res.data)
+
     },
 
     async loadDong() {
