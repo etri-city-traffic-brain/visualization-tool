@@ -1,23 +1,23 @@
 const fs = require('fs-extra')
-// const csv = require('neat-csv')
 const csv = require('csv-parser')
-// const fs = require('fs')
 
 const { config } = require('../../globals')
 
-async function read (simulationId) {
-  // const file = `/home/ubuntu/uniq-sim/output/${simulationId}/train/train_epoch_tl_reward.txt`
-  const file = `${config.base}/data/${simulationId}/output/train/train_epoch_tl_reward.txt`
+const file = 'train_epoch_tl_reward.txt'
+
+async function read(simulationId) {
+
+  const filePath = `${config.base}/opt/${simulationId}/output/train/${file}`
 
   try {
-    await fs.access(file, fs.F_OK)
-    return csvToObj(file)
+    await fs.access(filePath, fs.F_OK)
+    return csvToObj(filePath)
   } catch (err) {
     return {}
   }
 }
 
-async function csvToObj (file) {
+async function csvToObj(file) {
   const map = Object.create({})
   return new Promise((resolve, reject) => {
     try {

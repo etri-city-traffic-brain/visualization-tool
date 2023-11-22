@@ -7,7 +7,7 @@ mongoose.set('useNewUrlParser', true)
 mongoose.set('useFindAndModify', false)
 mongoose.set('useCreateIndex', true)
 
-function start ({ mongodbUrl, mongoOption }) {
+function start({ mongodbUrl, mongoOption }) {
   const { connection } = mongoose
   let lastReconnectAttempt // saves the timestamp of the last reconnect attempt
 
@@ -17,7 +17,7 @@ function start ({ mongodbUrl, mongoOption }) {
     const now = new Date().getTime()
     // check if the last reconnection attempt was too early
     if (lastReconnectAttempt && now - lastReconnectAttempt < 5000) {
-    // if it does, delay the next attempt
+      // if it does, delay the next attempt
       const delay = 5000 - (now - lastReconnectAttempt)
       debug(chalk.blue(`reconnecting to MongoDB in ${delay}mills`))
       setTimeout(() => {

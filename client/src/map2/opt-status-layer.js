@@ -10,18 +10,25 @@ const options = {
 }
 
 class OptStatusLayer extends maptalks.Layer {
-  constructor (id, data, options) {
+  constructor(id, data, options) {
     super(id, options)
     this.data = data
   }
 
-  setData (data) {
+  setData(data) {
     this.data = data
     return this
   }
 
-  getData () {
+  setOptTrainResult(data) {
+    this.optTrainResult = data
+  }
+
+  getData() {
     return this.data
+  }
+  getOptTrainResult() {
+    return this.optTrainResult || []
   }
 }
 
@@ -29,11 +36,11 @@ OptStatusLayer.mergeOptions(options)
 
 let angle = 0
 class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
-  checkResources () {
+  checkResources() {
     return []
   }
 
-  draw () {
+  draw() {
     const colors = this.layer.options.color
     const now = Date.now()
     const rndIdx = Math.round(now / 300 % colors.length)
@@ -44,7 +51,7 @@ class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
     this.completeRender()
   }
 
-  drawOnInteracting (evtParam) {
+  drawOnInteracting(evtParam) {
     if (!this._drawnData || this._drawnData.length === 0) {
       return
     }
@@ -55,16 +62,16 @@ class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
     this._drawData(this._drawnData, color)
   }
 
-  onSkipDrawOnInteracting () { }
+  onSkipDrawOnInteracting() { }
 
-  needToRedraw () {
+  needToRedraw() {
     if (this.layer.options.animation) {
       return true
     }
     return super.needToRedraw()
   }
 
-  _drawData (data, color, p) {
+  _drawData(data, color, p) {
     if (!Array.isArray(data)) {
       return
     }
@@ -81,16 +88,16 @@ class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
       if (!containerExtent.contains(point)) {
         return
       }
-      const text = d.text + (p || '')
-      const len = ctx.measureText(text)
-      ctx.fillText(text, point.x - len.width / 2, point.y)
+      // const text = d.text + (p || '')
+      // const len = ctx.measureText(text)
+      // ctx.fillText(text, point.x - len.width / 2, point.y)
       drawn.push(d)
 
       // radar
       ctx.save()
       ctx.beginPath()
       ctx.strokeStyle = color
-      ctx.fillStyle = 'gray'
+      ctx.fillStyle = 'skyblue'
       ctx.globalAlpha = 0.5
       ctx.translate(point.x - 3, point.y + 15)
       angle += 0.5
@@ -99,10 +106,12 @@ class OptStatusLayerRenderer extends maptalks.renderer.CanvasRenderer {
       const y = map.distanceToPoint(0, 50, map.getZoom())
       ctx.arc(0, 0, y.y, (Math.PI / 180) * (angle % 360), (Math.PI / 180) * (360), true)
       ctx.closePath()
-      // ctx.stroke()
       ctx.fill()
       ctx.restore()
+
     })
+
+    // console.log(this.layer.getOptTrainResult())
 
     return drawn
   }

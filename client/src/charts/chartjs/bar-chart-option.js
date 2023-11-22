@@ -1,7 +1,7 @@
 const barChartOption = () => ({
   title: {
     display: false,
-    text: 'Chart.js Bar Chart - Stacked'
+    text: ''
   },
   legend: {
     display: false
@@ -14,7 +14,7 @@ const barChartOption = () => ({
   scales: {
     xAxes: [
       {
-        stacked: true,
+        stacked: false,
         ticks: {
           autoSkip: true,
           autoSkipPadding: 50,

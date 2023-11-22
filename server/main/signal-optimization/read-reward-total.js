@@ -3,18 +3,18 @@ const csv = require('csv-parser')
 
 const { config } = require('../../globals')
 
-async function read (simulationId) {
-  // const file = `/home/ubuntu/uniq-sim/output/${simulationId}/train/train_epoch_total_reward.txt`
-  const file = `${config.base}/data/${simulationId}/output/train/train_epoch_total_reward.txt`
-
-  await fs.access(file, fs.F_OK)
-
-  const d = await csvToObj(file)
-  console.log(d)
-  return d
+async function read(simulationId) {
+  const file = `${config.base}/opt/${simulationId}/output/train/train_epoch_total_reward.txt`
+  try {
+    await fs.access(file, fs.F_OK)
+    return csvToObj(file)
+  } catch (err) {
+    console.log(err.message)
+    return {}
+  }
 }
 
-async function csvToObj (file) {
+async function csvToObj(file) {
   const map = Object.create({})
   return new Promise((resolve, reject) => {
     try {
@@ -24,7 +24,7 @@ async function csvToObj (file) {
           const target = map[row.tl_name] || []
           if (row.reward) {
             target.push({
-              // phase: row.phase,
+              epoch: row.epoch,
               reward: row.reward,
               rewardAvg: row['40ep_reward']
             })

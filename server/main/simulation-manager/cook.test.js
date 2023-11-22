@@ -8,8 +8,9 @@ if (require.main === module) {
   connectDB(db)
 
   setTimeout(async () => {
+    const start = Date.now()
     await cook({
-      simulationId: 'SIMU_202209_00089',
+      simulationId: 'SIMU_202307_00448',
       duration: 7080,
       period: 300
     })

@@ -18,6 +18,7 @@ router.get('/', (req, res) => {
     if (err) {
       console.log(err.message)
       res.send(createError(500, 'fail to read file'))
+      return
     }
     const lines = data.split('\n')
     result = lines.reduce((acc, line) => {

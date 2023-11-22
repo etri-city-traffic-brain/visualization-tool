@@ -4,11 +4,12 @@ const FileAsync = require('lowdb/adapters/FileAsync')
 
 const TABLE_SIMULATION = 'simulations'
 const TABLE_OPTENV = 'optenv'
+const TABLE_ROUTE = 'routes'
 
-let database, tableSimulation, tableOptEnv
+let database, tableSimulation, tableOptEnv, tableRoute
 
 module.exports = {
-  start ({ lowDBFile }) {
+  start({ lowDBFile }) {
     low(new FileAsync(lowDBFile))
       .then(db => {
         debug('LowDB connected...')
@@ -19,17 +20,24 @@ module.exports = {
         if (!database.has(TABLE_OPTENV).value()) {
           database.defaults({ optenv: [] }).write()
         }
+        if (!database.has(TABLE_ROUTE).value()) {
+          database.defaults({ routes: [] }).write()
+        }
 
         tableSimulation = database.get(TABLE_SIMULATION)
         tableOptEnv = database.get(TABLE_OPTENV)
+        tableRoute = database.get(TABLE_ROUTE)
         // console.log(tableOptEnv)
       })
       .catch(err => debug('LowDB connection failed...', err.message))
   },
-  getSimulations () {
+  getSimulations() {
     return tableSimulation
   },
-  getOptEnvs () {
+  getOptEnvs() {
     return tableOptEnv
+  },
+  getRoutes() {
+    return tableRoute
   }
 }

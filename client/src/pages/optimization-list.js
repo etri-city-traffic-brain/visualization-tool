@@ -30,62 +30,48 @@ export default {
     UniqRegister
   },
   mixins: [dragDropMixin, fileMgmtMixin],
-  data () {
+  data() {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'region', label: '지역' },
-        { class: 'text-center', key: 'configuration.period', label: '주기' },
+        { class: 'text-center', key: 'description', label: '설명' },
+        // { class: 'text-center', key: 'configuration.period', label: '통계주기' },
         { class: 'text-center', key: 'duration', label: '대상시간' },
-        { class: 'text-center', key: 'actions', label: '교차로수' },
+        // { class: 'text-center', key: 'actions', label: '교차로수' },
         { class: 'text-center', key: 'configuration.epoch', label: '에포크' },
         { class: 'text-center', key: 'configuration.method', label: '모델' },
         { class: 'text-center', key: 'configuration.action', label: '액션' },
-        {
-          class: 'text-center',
-          key: 'configuration.rewardFunc',
-          label: '보상함수'
-        },
-        {
-          class: 'text-center',
-          key: 'configuration.modelSavePeriod',
-          label: '모델저장주기'
-        },
+        { class: 'text-center', key: 'configuration.rewardFunc', label: '보상함수' },
+        { class: 'text-center', key: 'configuration.lr', label: '학습비율' },
+        { class: 'text-center', key: 'configuration.memLen', label: '메모리길이' },
+        // { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
         { class: 'text-center', key: 'details', label: '기능' }
       ],
       items: [],
       currentPage: 1,
-      perPage: 10,
+      perPage: 20,
       totalRows: 0,
       envFields: [
         { class: 'text-center', key: 'envName', label: '아이디' },
         { class: 'text-center', key: 'region', label: '지역' },
-        { class: 'text-center', key: 'configuration.period', label: '주기' },
-        {
-          class: 'text-center',
-          key: 'duration',
-          label: '대상시간'
-        },
-        { class: 'text-center', key: 'junctions', label: '교차로수' },
+        { class: 'text-center', key: 'description', label: '설명' },
+        // { class: 'text-center', key: 'configuration.period', label: '통계주기' },
+        { class: 'text-center', key: 'duration', label: '대상시간' },
+        // { class: 'text-center', key: 'junctions', label: '교차로수' },
         { class: 'text-center', key: 'epoch', label: '에포크' },
         { class: 'text-center', key: 'configuration.method', label: '모델' },
         { class: 'text-center', key: 'configuration.action', label: '액션' },
-        {
-          class: 'text-center',
-          key: 'configuration.rewardFunc',
-          label: '보상함수'
-        },
-        {
-          class: 'text-center',
-          key: 'configuration.modelSavePeriod',
-          label: '모델저장주기'
-        },
+        { class: 'text-center', key: 'configuration.rewardFunc', label: '보상함수' },
+        { class: 'text-center', key: 'configuration.lr', label: '학습비율' },
+        { class: 'text-center', key: 'configuration.memLen', label: '메모리길이' },
+        // { class: 'text-center', key: 'configuration.modelSavePeriod', label: '모델저장주기' },
         { class: 'text-center', key: 'func', label: '기능' }
       ],
       envItems: [],
-      envCurrentPage: 0,
+      envCurrentPage: 1,
       envPerPage: 5,
       envTotalRows: 0,
 
@@ -104,41 +90,43 @@ export default {
       resultFile: null // upload file for model files (.zip)
     }
   },
-  mounted () {
+  mounted() {
     this.dataProvider({ currentPage: this.currentPage })
-    this.reload().then(r => {})
+    this.reload().then(r => { })
   },
   watch: {},
   computed: {},
-  destroyed () {},
+  destroyed() { },
   methods: {
-    getRegionName (v) {
+    getRegionName(v) {
       const m = {
         doan: '도안',
         cdd3: '연구단지'
       }
       return m[v] || ''
     },
-    getActionName (v) {
+    getActionName(v) {
       const o = {
         offset: '옵셋 조정',
         kc: '즉시 신호 변경',
         gr: '녹색시간 조정',
-        gro: '녹색시간과 옵셋 조정'
+        gro: '녹색시간과 옵셋 조정',
+        gt: '현시 최소최대 만족(gt)',
+        ga: '현시 주기 만족(ga)',
       }
       return o[v] || '모름'
     },
-    getRewardFunctionName (v) {
+    getRewardFunctionName(v) {
       const o = {
         pn: '통과 차량 수',
         wt: '대기 시간',
         tt: '통과 소요 시간',
-        wq: '대기 큐 길이',
+        wq: '대기 큐 길이(wq)',
         cwq: '축적된 대기 큐 길이'
       }
       return o[v] || '모름'
     },
-    uploadModel (obj) {
+    uploadModel(obj) {
       const formData = new window.FormData()
       formData.append('file', this.resultFile)
       this.$swal.showLoading('업로딩')
@@ -147,7 +135,7 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       })
-        .then(res => console.log(res))
+        .then(res => log(res))
         .catch(err => {
           this.$swal({
             type: 'error',
@@ -159,14 +147,15 @@ export default {
           setTimeout(() => this.$swal.close(), 1000)
         })
     },
-    numberOfJunctions (jId) {
+    numberOfJunctions(jId) {
       const SA = {
         'SA 101': 10,
         'SA 107': 4,
         'SA 111': 2,
         'SA 104': 5,
         'SA 1701': 11,
-        'SA 1702': 8
+        'SA 1702': 8,
+        'SA 28': 12
       }
       const jIds = jId.split(',').map(v => v.trim())
       let sum = 0
@@ -175,16 +164,17 @@ export default {
       })
       return sum
     },
-    statusColor (status) {
+    statusColor(status) {
       const colors = {
-        running: 'bg-blue-400',
-        error: 'bg-red-400',
-        ready: 'bg-gray-400',
-        finished: 'bg-green-400'
+        running: 'text-blue-400',
+        error: 'text-red-400',
+        ready: 'text-gray-400',
+        finished: 'text-green-400',
+        stopped: 'text-yellow-400'
       }
       return colors[status] || 'bg-gray-400'
     },
-    async toggleDetails (id, status, hide) {
+    async toggleDetails(id, status, hide) {
       if (!hide) {
         if (status === 'finished') {
           this.$forceUpdate()
@@ -193,26 +183,26 @@ export default {
         this.barChartDataTable[id] = {}
       }
     },
-    showHideStart (value) {
+    showHideStart(value) {
       return value === 'ready' || value === 'stopped'
     },
-    showHideResult (value) {
+    showHideResult(value) {
       return value === 'finished'
     },
-    async updateTable () {
+    async updateTable() {
       this.dataProvider({ currentPage: this.currentPage })
     },
-    hideAlert () {
+    hideAlert() {
       setTimeout(() => {
         this.msg = ''
       }, 2000)
     },
-    showInfo (item) {
+    showInfo(item) {
       if (item.error) {
         this.$swal('Problem', item.error, 'warning')
       }
     },
-    async stopSimulation (id) {
+    async stopSimulation(id) {
       try {
         await simulationService.stopSimulation(id)
         this.updateTable()
@@ -221,12 +211,12 @@ export default {
       }
     },
 
-    async reload () {
+    async reload() {
       this.envs = await optEnvService.get()
       this.envItems = this.envs
       this.envTotalRows = this.envs.length
     },
-    async dataProvider ({ currentPage }) {
+    async dataProvider({ currentPage }) {
       this.isBusy = true
       try {
         const { data, total, perPage } = (
@@ -246,10 +236,10 @@ export default {
         return []
       }
     },
-    status (text) {
+    status(text) {
       return variant[text]
     },
-    async removeSimulation (param) {
+    async removeSimulation(param) {
       const result = await this.$swal({
         title: `${param.id} 시뮬레이션을 삭제합니다.`,
         text: 'Please note that you can not cancel it',
@@ -273,10 +263,10 @@ export default {
         this.makeToast(`fail to delete ${err.message}`, 'warning')
       }
     },
-    hideCreateSimulationDialog () {
+    hideCreateSimulationDialog() {
       this.updateTable()
     },
-    makeToast (msg, variant = 'info') {
+    makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
         title: variant,
         variant,
@@ -286,7 +276,7 @@ export default {
       })
     },
 
-    async saveOptEnvConfig (config) {
+    async saveOptEnvConfig(config) {
       const obj = this.envs.find(env => env.envName === config.envName)
       if (obj) {
         try {
@@ -304,21 +294,19 @@ export default {
       this.$refs.modal.hide()
       await this.reload()
     },
-    openModify (env) {
+    openModify(env) {
       this.currentEnv = env
       this.$refs.modal.show()
     },
-    modalHide () {
+    modalHide() {
       this.currentEnv = null
     },
-    async registerSimulation (env) {
+    async registerSimulation(env) {
       const random = () => `${Math.floor(Math.random() * 1000)}`
       const generateRandomId = (prefix = 'DEFU') =>
         `${prefix
           .substring(0, 4)
-          .toUpperCase()}_${moment().year()}${moment().format(
-          'MM'
-        )}_${random().padStart(5, '0')}`
+          .toUpperCase()}_${moment().year()}${moment().format('MM')}_${random().padStart(5, '0')}`
       env.id = generateRandomId(env.role)
       try {
         await simulationService.createSimulation(this.userId, env)
@@ -327,7 +315,7 @@ export default {
       }
       this.updateTable()
     },
-    async remove (id) {
+    async remove(id) {
       await optEnvService.remove(id)
       // this.envs = await optEnvService.get()
       await this.reload()

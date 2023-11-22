@@ -27,10 +27,15 @@ export default {
     SimRegister
   },
   mixins: [dragDropMixin, fileMgmtMixin],
-  data () {
+  data() {
     return {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
+        {
+          class: 'text-center',
+          key: 'configuration.simulationType',
+          label: '타입'
+        },
         { class: 'text-center', key: 'id', label: '아이디' },
         { class: 'text-center', key: 'status', label: '상태' },
         { class: 'text-center', key: 'region', label: '지역' },
@@ -69,7 +74,7 @@ export default {
       expanded: false
     }
   },
-  mounted () {
+  mounted() {
     this.dataProvider({ currentPage: this.currentPage })
     this.interval = setInterval(async () => {
       if (this.autoRefresh) {
@@ -77,11 +82,20 @@ export default {
       }
     }, 3000)
   },
-  destroyed () {
+  destroyed() {
     clearInterval(this.interval)
   },
   methods: {
-    calcDuration (configuration) {
+    getClassByType(type) {
+      if (type === 'multi') {
+        return 'bg-blue-200'
+      } else if (type === 'micro') {
+        return 'bg-yellow-200'
+      } else {
+        return 'bg-green-200'
+      }
+    },
+    calcDuration(configuration) {
       if (configuration.status === 'finished') {
         return calcInterval(configuration.started, configuration.ended)
       } else if (configuration.status === 'running') {
@@ -91,7 +105,7 @@ export default {
         )
       }
     },
-    statusColor (status) {
+    statusColor(status) {
       const colors = {
         running: 'primary',
         error: 'danger',
@@ -100,10 +114,10 @@ export default {
       }
       return colors[status] || 'secondary'
     },
-    getRegionName (code) {
+    getRegionName(code) {
       return map[code] || map[0]
     },
-    async toggleDetails (id, status, hide) {
+    async toggleDetails(id, status, hide) {
       if (!hide) {
         if (status === 'finished') {
           this.barChartDataTable[id] = await statisticsService.getSummaryChart(
@@ -115,27 +129,27 @@ export default {
         this.barChartDataTable[id] = {}
       }
     },
-    showHideStart (value) {
+    showHideStart(value) {
       return value === 'ready' || value === 'stopped'
     },
-    showHideResult (value) {
+    showHideResult(value) {
       return value === 'finished'
     },
-    async updateTable () {
+    async updateTable() {
       // this.$refs['simulations-table'].refresh()
       this.dataProvider({ currentPage: this.currentPage })
     },
-    hideAlert () {
+    hideAlert() {
       setTimeout(() => {
         this.msg = ''
       }, 2000)
     },
-    showInfo (item) {
+    showInfo(item) {
       if (item.error) {
         this.$swal('Problem', item.error, 'warning')
       }
     },
-    async startSimulation (id) {
+    async startSimulation(id) {
       const { value: yes } = await this.$swal({
         title: '시뮬레이션을 시작합니다.',
         text: id,
@@ -173,11 +187,11 @@ export default {
         clearInterval(interval)
       }
     },
-    async stopSimulation (id) {
+    async stopSimulation(id) {
       await simulationService.stopSimulation(id)
       this.updateTable()
     },
-    async dataProvider ({ currentPage }) {
+    async dataProvider({ currentPage }) {
       this.isBusy = true
       try {
         const { data, total, perPage } = (
@@ -196,7 +210,7 @@ export default {
         return []
       }
     },
-    async saveSim (env) {
+    async saveSim(env) {
       try {
         this.msg = '시뮬레이션 준비중...'
         await simulationService.createSimulation(this.userId, env)
@@ -207,21 +221,21 @@ export default {
         this.msg = ''
       }
     },
-    async removeSimulation (param) {
-      // const result = await this.$swal({
-      //   title: `${param.id} 시뮬레이션을 삭제합니다.`,
-      //   text: 'Please note that you can not cancel it',
-      //   type: 'warning',
-      //   showCancelButton: true,
-      //   confirmButtonColor: '#3085d6',
-      //   cancelButtonColor: '#d33',
-      //   confirmButtonText: 'Delete',
-      //   cancelButtonText: 'Cancel',
-      // });
+    async removeSimulation(param) {
+      const result = await this.$swal({
+        title: `시뮬레이션을 삭제합니다.`,
+        text: param.id,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+      });
 
-      // if (!result.value) {
-      //   return;
-      // }
+      if (!result.value) {
+        return;
+      }
       // this.msg = `${param.id}를 삭제하고 있습니다.`
       try {
         await simulationService.remove(param.id)
@@ -231,10 +245,10 @@ export default {
         this.makeToast(`fail to delete ${err.message}`, 'warning')
       }
     },
-    hideCreateSimulationDialog () {
+    hideCreateSimulationDialog() {
       // this.updateTable()
     },
-    makeToast (msg, variant = 'info') {
+    makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
         title: variant,
         variant,
@@ -243,7 +257,7 @@ export default {
         toaster: 'b-toaster-bottom-right'
       })
     },
-    sColor (value) {
+    sColor(value) {
       const c = {
         running: 'bg-green-500',
         error: 'bg-red-500',

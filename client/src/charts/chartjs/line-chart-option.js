@@ -2,20 +2,21 @@ export default (
   { title, displayLegend = true, fontColor = 'white' } = {},
   callback
 ) => ({
-  animation: false,
+  maintainAspectRatio: false,
+  // animation: false,
   spanGaps: true, // enable for all datasets
   responsive: true,
   showLine: true, // disable for a single dataset
   title: {
     display: !!title
   },
-  interaction: {
-    mode: 'index'
-  },
+  // interaction: {
+  //   mode: 'index'
+  // },
   tooltips: {
     mode: 'index',
     intersect: false,
-    enabled: false
+    enabled: true
   },
   scales: {
     xAxes: [
@@ -33,12 +34,12 @@ export default (
       {
         ticks: {
           autoSkip: true,
-          autoSkipPadding: 10,
+          autoSkipPadding: 15,
           maxRotation: 0,
           display: true,
           fontColor,
           callback: function (value, index, values) {
-            return value + '(s)'
+            return value
           }
         }
       }

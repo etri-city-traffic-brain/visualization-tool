@@ -10,7 +10,7 @@ const { log } = console
  * @param {Array} vehicleTypes
  * @param {*} VehicleFactory
   */
-function makeVehicles ({ startLocation, vehicles = [], VehicleFactory }) {
+function makeVehicles({ startLocation, vehicles = [], VehicleFactory }) {
   const [vehicleTypes, edgeChunks] = vehicles
   const result = []
 
@@ -24,7 +24,11 @@ function makeVehicles ({ startLocation, vehicles = [], VehicleFactory }) {
 
     let angle = angleBetween(edgeChunks[i] || startLocation, edgeChunks[i + 1] || startLocation)
     if (angle === 0) {
-      angle = result[i - 1].angle
+      if (!result[i - 1]) {
+        angle = 0
+      } else {
+        angle = result[i - 1].angle
+      }
     }
     const v = VehicleFactory.of(carType, {
       start: {

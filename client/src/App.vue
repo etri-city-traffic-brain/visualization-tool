@@ -1,20 +1,18 @@
 <template>
-  <div id="app" class="bg-gray-600">
+  <div id="app">
     <b-navbar
       type="dark"
       :variant="variant"
       ref="main-nav"
       id="main-nav"
-      class="pl-3 pt-1 pb-1 m-0"
+      class="pl-3 py-1 m-0"
       toggleable="md"
       sticky
     >
       <b-navbar-brand href="#" to="/">
         <div class="">
-          <strong
-            class="flex animate__animated animate__bounceInLeft animate__bounceIn"
-          >
-            <div class="text-blue-400 animate-bounce ">U</div>
+          <strong class="flex animate__animated animate__bounceInLeft animate__bounceIn" >
+            <div class="text-blue-400 animate-bounce- ">U</div>
             <div class="animate-bounce-">N</div>
             <div class="animate-bounce-">I</div>
             <div class="animate-bounce-">Q</div>
@@ -45,7 +43,7 @@
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item size="sm" to>
-            <!-- <span class="bg-indigo-100 p-1 text-black text-sm rounded-md font-bold">UNIQ</span> -->
+            <span class="text-black text-sm rounded-md font-bold text-blue-200">UNIQ-VIS</span>
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>
@@ -114,6 +112,10 @@ export default {
         //   name: "교통데이터 분석"
         // },
         {
+          path: "RouteList",
+          name: "수요생성"
+        },
+        {
           path: "Junction",
           name: "교차로 조회"
         }
@@ -122,13 +124,13 @@ export default {
   },
   methods: {
     showOrHide() {
-      console.log(this.currentRouteName);
       const hides = [
         "Intro",
         "OptimizationResultMap",
         "SimulationResultMap",
         "OptimizationResultComparisonMap",
-        "Junction"
+        "Junction",
+        "RouteVis"
       ];
       return !hides.includes(this.currentRouteName);
     }
@@ -137,9 +139,7 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-}
+
 
 .godo {
   font-family: "Godo";
@@ -184,4 +184,17 @@ export default {
     url("//cdn.jsdelivr.net/korean-webfonts/1/corps/godo/Godo/GodoM.woff")
       format("woff");
 }
+
+@import url("//fonts.googleapis.com/earlyaccess/notosanskr.css");
+
+html,
+body {
+  font-family: "Noto Sans KR", sans-serif;
+}
+
+#app {
+  /* font-family: "Avenir", Helvetica, Arial, sans-serif; */
+   font-family: "Noto Sans KR", sans-serif;
+}
+
 </style>

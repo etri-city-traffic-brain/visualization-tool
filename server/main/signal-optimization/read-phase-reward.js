@@ -1,16 +1,20 @@
 const fse = require('fs-extra')
 const fs = require('fs')
 const csv = require('csv-parser')
+
 const { config } = require('../../globals')
 
 const baseDir = `${config.base}/data`
 
-async function read (simulationId, type) {
+async function read(simulationId, type) {
+  console.log('[xxx] read phase reward')
   let file
   if (type === 'ft') {
-    file = `${baseDir}/${simulationId}/output/simulate/ft_phase_reward_output.txt`
+    // file = `${baseDir}/${simulationId}/output/simulate/ft_phase_reward_output.txt`
+    file = `${config.base}/opt/${simulationId}/output/simulate/ft_phase_reward_output.txt`
   } else {
-    file = `${baseDir}/${simulationId}/output/test/rl_phase_reward_output.txt`
+    // file = `${baseDir}/${simulationId}/output/test/rl_phase_reward_output.txt`
+    file = `${config.base}/opt/${simulationId}/output/test/rl_phase_reward_output.txt`
   }
 
   try {
@@ -24,7 +28,7 @@ async function read (simulationId, type) {
   }
 }
 
-async function csvToObj (file) {
+async function csvToObj(file) {
   const map = Object.create({})
   return new Promise((resolve, reject) => {
     let i = 0

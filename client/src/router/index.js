@@ -15,13 +15,16 @@ import OptimizationList from '@/pages/OptimizationList'
 import OptimizationResultMap from '@/pages/OptimizationResultMap'
 import OptimizationResultComparisonMap from '@/pages/OptimizationResultComparisonMap'
 
-import Admin from '@/pages/Admin'
+// import Admin from '@/pages/Admin'
 
 import OptEnvList from '@/pages/OptEnvList'
 
-import Dashboard from '@/pages/Dashboard.vue'
+// import Dashboard from '@/pages/Dashboard.vue'
 
 import Junction from '@/pages/JunctionView.vue'
+
+import RouteList from '@/pages/RouteList.vue'
+import RouteVis from '@/pages/RouteVis.vue'
 
 Vue.use(Router)
 
@@ -50,8 +53,10 @@ export default new Router({
     route('/SimulationComparisonResult', SimulationComparisonResult),
     route('/SignalEditor', SignalEditor),
     route('/OptEnvList', OptEnvList),
-    route('/Dashboard', Dashboard, true),
+    // route('/Dashboard', Dashboard, true),
     route('/Junction', Junction),
-    route('/Admin', Admin)
+    // route('/Admin', Admin),
+    route('/RouteList', RouteList),
+    route('/RouteVis/:id', RouteVis),
   ]
 })

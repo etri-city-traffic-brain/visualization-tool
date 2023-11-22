@@ -7,4 +7,5 @@ router.get('/links', require('./links'))
 router.get('/traffic_lights', require('./traffic-lights'))
 router.get('/grids', require('./grid'))
 router.get('/links/:linkId', require('./links'))
+router.get('/yuseong', require('./yuseong'))
 module.exports = router

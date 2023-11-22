@@ -5,9 +5,8 @@ const streamUtil = require('./promiseStream')
  * @param {string} strData
  * @return {object}
  */
-function makeBar (strData) {
+function makeBar(strData) {
   const { meta, data } = strData
-  console.log(meta)
   const formater = value => (value < 10 ? `0${value}` : `${value}`)
 
   let labelValue = 0
@@ -54,7 +53,7 @@ const driver = (from, simulationId, jsonObj) =>
     if (!simulationId) {
       return reject(Error('You maybe missed simulation id'))
     }
-    const simulationDir = `${from}/${simulationId}`
+    const simulationDir = `${from}/${simulationId}/output`
     try {
       const fileNew = `${simulationDir}/bar-data.json`
       // streamUtil.fileToString(fileOrigin).then((strData) => {

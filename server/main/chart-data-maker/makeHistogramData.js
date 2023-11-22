@@ -6,22 +6,28 @@ const promiseStream = require('./promiseStream')
  * @return {object}
  */
 
+function getColor(value, min, max) {
+  if (value > max) value = max
+  var v = (value - min) / (max - min)
+  var hue = ((1 - v) * 120).toString(10)
+  return ['hsl(', hue, ',100%,50%)'].join('')
+}
+
 const calcTotalStep = meta =>
   meta.period === 0 ? 0 : meta.duration / meta.period
 
-function makeHistogram (strData) {
-  const filledArray = (value = 0) => size => new Array(size).fill(value)
-  // const { meta, data: speedsPerLinks } = JSON.parse(strData);
+const Filler = (value = 0) => size => new Array(size).fill(value)
+
+function makeHistogram(strData) {
+
   const { meta, data: speedsPerLinks } = strData
   const labels = [0, 10, 20, 30, 40, 50, 60, 70, '']
-  const backgroundColorArray = filledArray('rgba(70, 130, 180, 1)')
 
   const TOTAL_STEP = calcTotalStep(meta)
   const LABEL_SIZE = labels.length
-  const backgroundColor = backgroundColorArray(LABEL_SIZE)
 
   const linkIds = Object.keys(speedsPerLinks)
-  const fillArrayZero = filledArray()
+  const zeroFill = Filler()
 
   const getBucketId = value => {
     const index = Math.floor(value / 10)
@@ -35,7 +41,7 @@ function makeHistogram (strData) {
       const bucketId = getBucketId(linkSpeeds[stepIndex])
       bucket[bucketId] += 1
       return bucket
-    }, fillArrayZero(LABEL_SIZE))
+    }, zeroFill(LABEL_SIZE))
 
     stepDatas.push(stepData)
   }
@@ -45,13 +51,16 @@ function makeHistogram (strData) {
       const linkSpeeds = speedsPerLinks[linkId].values
       const bucketId = getBucketId(
         linkSpeeds.reduce((sumOfSpeed, speed) => sumOfSpeed + speed, 0) /
-          linkSpeeds.length
+        linkSpeeds.length
       )
       bucket[bucketId] = bucket[bucketId] + 1
       return bucket
-    }, fillArrayZero(LABEL_SIZE))
+    }, zeroFill(LABEL_SIZE))
     return summaryData
   })()
+
+  const backgroundColor = totalData.map(data => getColor(data, 0, Math.max(...totalData)))
+
 
   return {
     labels,
@@ -66,7 +75,7 @@ const driver = (from, simulationId, jsonObj) =>
     if (!simulationId) {
       return reject(Error('You maybe missed simulation id'))
     }
-    const simulationDir = `${from}/${simulationId}`
+    const simulationDir = `${from}/${simulationId}/output`
     try {
       const fileOrigin = `${simulationDir}/${simulationId}.json`
       const fileNew = `${simulationDir}/histogram-data.json`

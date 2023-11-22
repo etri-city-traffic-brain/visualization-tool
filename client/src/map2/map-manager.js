@@ -15,14 +15,15 @@ import makeId from './make-id'
 import makeGeometry from './make-geometry'
 import simulationService from '../service/simulation-service'
 import mapService from '../service/map-service'
-import axios from 'axios'
+
 import {
   makeEdgeLayer,
   makeCanvasLayer,
   makeToolLayer,
   makeVdsLayer,
   makeCctvLayer,
-  makeRseLayer
+  makeRseLayer,
+  makeGridLayer,
 } from '../layers'
 
 const ZOOM_MINIMUM = 14
@@ -36,12 +37,12 @@ const { log } = console
  * @param {string} param.simulationId - Simulation id
  * @param {Object} param.eventBus - Vue Object as event bus
  */
-function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
+function MapManager({ map, simulationId, eventBus, useSaltLink = true, grid = true }) {
   let currentSpeedsPerLink = {}
   let currentStep = 0
 
   const edgeLayer = makeEdgeLayer(map, eventBus)
-  // const gridLayer = makeGridLayer(map)
+  const gridLayer = makeGridLayer(map, simulationId, grid)
   const canvasLayer = makeCanvasLayer(
     map,
     edgeLayer.getGeometries.bind(edgeLayer),
@@ -53,11 +54,11 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     edgeLayer.getGeometries.bind(edgeLayer),
     eventBus
   )
-  const vdsLayer = makeVdsLayer(
-    map,
-    edgeLayer.getGeometries.bind(edgeLayer),
-    eventBus
-  )
+  // const vdsLayer = makeVdsLayer(
+  //   map,
+  //   edgeLayer.getGeometries.bind(edgeLayer),
+  //   eventBus
+  // )
   const cctvLayer = makeCctvLayer(
     map,
     edgeLayer.getGeometries.bind(edgeLayer),
@@ -74,14 +75,15 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
   map.addLayer(toolLayer)
   map.addLayer(rseLayer)
   map.addLayer(cctvLayer)
-  map.addLayer(vdsLayer)
+  // map.addLayer(vdsLayer)
+  map.addLayer(gridLayer)
 
   rseLayer.hide()
   cctvLayer.hide()
-  vdsLayer.hide()
+  // vdsLayer.hide()
   toolLayer.hide() // default hide
 
-  function toggleFocusTool () {
+  function toggleFocusTool() {
     const showHide = toolLayer.isVisible()
       ? toolLayer.hide.bind(toolLayer)
       : toolLayer.show.bind(toolLayer)
@@ -155,27 +157,23 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
       .on('mouseover', edgeMouseOver)
       .on('mouseout', edgeMouseOut)
 
-  async function updateSimulationResult () {
+  async function updateSimulationResult() {
     if (simulationId) {
-      currentSpeedsPerLink = await simulationService.getSimulationResult(
-        simulationId,
-        extent(map)
-      )
+      currentSpeedsPerLink = await simulationService.getSimulationResult(simulationId, extent(map))
       edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
       // gridLayer.updateGrid(simulationId, currentStep)
+      updateGrid()
     }
   }
 
-  function addFeatures (features) {
-    const g = features.forEach(feature => {
+  function addFeatures(features) {
+    features.forEach(feature => {
       const f = R.compose(addEventHandler, makeGeometry)(feature)
       edgeLayer.addGeometry(f)
     })
-
-    // edgeLayer.addGeometry(g)
   }
 
-  async function loadMapData (event) {
+  async function loadMapData(event) {
     if (!useSaltLink) {
       eventBus.$emit('map:loaded')
       return
@@ -208,21 +206,32 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     await updateSimulationResult()
   }
 
-  function changeStep (step) {
+  function updateGrid() {
+    const zoom = map.getZoom()
+    if (zoom <= 14) {
+      gridLayer.updateGrid(simulationId, currentStep)
+    }
+  }
+
+  function changeStep(step) {
     currentStep = step
     edgeLayer.updateCongestion(currentSpeedsPerLink, currentStep)
     // gridLayer.updateGrid(simulationId, currentStep)
+    updateGrid()
   }
 
   const handleZoomEvent = async event => {
-    console.log('zoom event ***')
     const zoom = map.getZoom()
+    // gridLayer.updateGrid(simulationId, currentStep)
+    updateGrid()
     if (zoom <= ZOOM_MINIMUM) {
-      // gridLayer.updateGrid(simulationId, currentStep)
       return
     } else {
       await loadMapData(event.type)
     }
+
+
+
     if (eventBus) {
       const data = {
         zoom,
@@ -236,27 +245,24 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
     }
   }
 
-  function getEdgesInView () {
-    // const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
-    // const { features } = await mapService.getMap(extent(map))
+  // function getEdgesInView() {
+  // const edgesExisted = edgeLayer.getGeometries().map(geometry => geometry.getId())
+  // const { features } = await mapService.getMap(extent(map))
 
-    // console.log(currentSpeedsPerLink)
-    return currentSpeedsPerLink
-  }
+  // console.log(currentSpeedsPerLink)
+  // return currentSpeedsPerLink
+  // }
 
   map.on('zoomend moveend', handleZoomEvent)
-
-  // map.on('zoomend', () => { console.log('zoom end') })
-  // map.on('moveend', () => { console.log('move end') })
 
   return {
     loadMapData,
     changeStep,
     toggleFocusTool,
     map,
-    getEdgesInView,
+    // getEdgesInView,
     bus: eventBus,
-    showRse (rseId, links) {
+    showRse(rseId, links) {
       console.log('showRse')
       edgeLayer.getGeometries().forEach(feature => {
         const linkId = feature.properties.LINK_ID
@@ -290,7 +296,7 @@ function MapManager ({ map, simulationId, eventBus, useSaltLink = true }) {
         })
       })
     },
-    getCurrentLinks () {
+    getCurrentLinks() {
       return edgeLayer.getGeometries()
     },
     edgeLayer

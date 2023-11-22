@@ -26,7 +26,7 @@ module.exports = (port = 1337) => {
       return
     }
     const header = Header(buffer)
-    console.log(header)
+    // console.log(header)
     const handler = saltMsgHandler.get(header.type)
     if (!handler) {
       bufferManager.setBuffer(socket, buffer)

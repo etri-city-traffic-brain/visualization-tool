@@ -7,7 +7,7 @@
  */
 
 import Vue from 'vue'
-
+import gsap from 'gsap'
 import makeMap from '@/map2/make-map'
 import MapManager from '@/map2/map-manager'
 
@@ -17,24 +17,19 @@ import simulationService from '@/service/simulation-service'
 
 import SimulationResult from '@/pages/SimulationResult.vue'
 
-import congestionColor from '@/utils/colors'
 import LineChart from '@/components/charts/LineChart'
+
 import UniqCongestionColorBar from '@/components/CongestionColorBar'
 import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
 import UniqMapChanger from '@/components/UniqMapChanger'
-
 import SimulationDetailsOnRunning from '@/components/SimulationDetailsOnRunning'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
+import toastMixin from '@/components/mixins/toast-mixin'
 
 import UniqCardTitle from '@/components/func/UniqCardTitle'
+
 import { optimizationService as optSvc } from '@/service'
-
 import signalService from '@/service/signal-service'
-
-import toastMixin from '@/components/mixins/toast-mixin'
-import lineChartOption from '@/charts/chartjs/line-chart-option'
-import barChartOption from '@/charts/chartjs/bar-chart-option'
-import style from '@/components/style'
 
 import TrafficLightManager from '@/map2/map-traffic-lights'
 import map from '@/region-code'
@@ -42,194 +37,138 @@ import map from '@/region-code'
 import SignalSystem from '@/actions/action-vis'
 import parseAction from '@/actions/action-parser'
 
+import colorScale from '@/utils/colors-improve-rate'
+
+const lineChartOption = {
+  maintainAspectRatio: false,
+  spanGaps: true,
+  responsive: true,
+  showLine: true,
+  title: {
+    display: false
+  },
+  interaction: {
+    mode: 'index'
+  },
+  tooltips: {
+    mode: 'index',
+    intersect: false,
+    enabled: false
+  },
+  scales: {
+    xAxes: [
+      {
+        scaleLabel: {
+          display: true,
+          labelString: '시뮬레이션시간(초)',
+          fontColor: 'white',
+        },
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 50,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white',
+          // callback: function (value) {
+          //   return value + ''
+          // }
+        }
+      }
+    ],
+    yAxes: [
+      {
+        scaleLabel: {
+          display: true,
+          labelString: '통과시간(초)',
+          fontColor: 'white',
+        },
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 15,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white',
+          // callback: function (value) {
+          //   return value + '(초)'
+          // }
+        }
+      }
+    ]
+  },
+  legend: {
+    display: true,
+    labels: {
+      fontColor: 'white',
+      fontSize: 12,
+      filter: function (item, chart) {
+        // Logic to remove a particular legend item goes here
+        return !item.text.includes('hide');
+      }
+    }
+  },
+}
+
 const { log } = window.console
 
-const calcAvg = (values = []) => {
-  if (!Array.isArray(values)) {
-    return 0
-  }
+function makeTravelTimeChart(dataFt = [], dataRl = [], avgTTFT = 0, avgTTRL = 0, step) {
 
-  if (values.length === 0) {
-    return 0
-  }
-
-  return (
-    values.reduce((acc, cur) => {
-      return acc + cur
-    }, 0) / values.length
-  )
-}
-
-function zeroFill (len) {
-  return new Array(len).fill(0)
-}
-
-function calcAverage (data) {
-  const values = Object.values(data)
-  if (values.length < 1) {
-    return [0, [], [], 0, 0, 0]
-  }
-
-  let sumAvgSpeed = 0
-  let sumPassed = 0
-  let sumTravelTime = 0
-  let cnt = 0
-
-  let sumTravelTimes
-  let sumPasseds
-  let avgSpeeds
-
-  const avgTravelTimesPerStep = Object.create(null)
-
-  for (let i = 0; i < values.length; i++) {
-    const steps = values[i].length
-    sumTravelTimes = zeroFill(steps)
-    sumPasseds = zeroFill(steps)
-    avgSpeeds = zeroFill(steps)
-
-    // 교차로
-    for (let j = 0; j < steps; j++) {
-      const target = values[i][j]
-      sumTravelTimes[j] += Number(target.sumTravelTime)
-      sumPasseds[j] += Number(target.sumPassed)
-      avgSpeeds[j] += Number(target.avgSpeed)
-      sumAvgSpeed = sumAvgSpeed + Number(target.avgSpeed)
-      sumPassed = sumPassed + Number(target.sumPassed)
-      sumTravelTime = sumTravelTime + Number(target.sumTravelTime)
-      cnt += 1
-
-      const tt = avgTravelTimesPerStep[target.step] || []
-
-      const avgTT = target.sumTravelTime / target.sumPassed
-
-      if (!Number.isNaN(avgTT)) {
-        tt.push(avgTT)
-      }
-
-      avgTravelTimesPerStep[target.step] = tt
+  function dataset(label, color, data) {
+    return {
+      label,
+      fill: false,
+      borderColor: color,
+      backgroundColor: color,
+      borderWidth: 1,
+      pointRadius: 0.5,
+      data
     }
   }
 
-  let avgTravelTimes = Object.values(avgTravelTimesPerStep).map(calcAvg)
-
-  return [sumTravelTime / sumPassed, avgTravelTimes, sumAvgSpeed / cnt]
-}
-
-const dataset = (label, color, data) => ({
-  label,
-  fill: false,
-  borderColor: color,
-  backgroundColor: color,
-  borderWidth: 1,
-  pointRadius: 1,
-  data
-})
-
-const makeRewardChart = (label, labels = [], data = [], data2 = []) => {
-  return {
-    labels,
-    label,
-    datasets: [
-      {
-        label: 'reward',
-        backgroundColor: 'skyblue',
-        borderColor: 'skyblue',
-        data,
-        fill: false,
-        borderWidth: 1,
-        pointRadius: 1
-      },
-      {
-        label: '40avg',
-        backgroundColor: 'red',
-        borderColor: 'red',
-        data: data2,
-        fill: false,
-        borderWidth: 1,
-        pointRadius: 1
-      }
-    ]
+  const dataLength = dataRl.length
+  const datasets = []
+  datasets.push(dataset('기존신호', 'gray', dataFt))
+  datasets.push(dataset('최적신호', 'orange', dataRl))
+  if (avgTTFT > 0) {
+    datasets.push(dataset('hide', 'lightgray', new Array(dataLength).fill(avgTTFT)))
   }
-}
-
-const makeSpeedLineData = (
-  dataFt = [],
-  dataRl = [],
-  avgTTRL = 0,
-  avgTTFT = 0
-) => {
-  let avgFt = dataFt.reduce((acc, cur) => (acc += ~~cur), 0) / dataFt.length
-  let avgRl = dataRl.reduce((acc, cur) => (acc += ~~cur), 0) / dataRl.length
-
-  avgFt = avgFt.toFixed(2)
-  avgRl = avgRl.toFixed(2)
+  if (avgTTRL > 0) {
+    datasets.push(dataset('hide', 'darkorange', new Array(dataLength).fill(avgTTRL)))
+  }
 
   return {
-    labels: new Array(dataRl.length).fill(0).map((_, i) => i),
+    labels: new Array(dataLength).fill(0).map((_, i) => i * step),
     normalized: true,
-
-    datasets: [
-      dataset(
-        '기존신호(평균)',
-        'skyblue',
-        new Array(dataRl.length).fill(avgTTFT)
-      ),
-      dataset(
-        '최적신호(평균)',
-        'yellow',
-        new Array(dataRl.length).fill(avgTTRL)
-      ),
-      dataset('기존신호', 'grey', dataFt),
-      dataset('최적신호', 'orange', dataRl)
-    ],
-    avgFt: avgFt,
-    avgRl: avgRl
+    datasets: datasets,
   }
 }
 
 const randomId = () => `map-${Math.floor(Math.random() * 100)}`
 
-const initSimulationData = async (
-  region,
-  mapId,
-  slave,
-  eventTarget,
-  mapBus,
-  wsBus,
-  jIds,
-  slaves
-) => {
-  const center =
-    region === 'cdd3' ? [127.3549527, 36.385148] : [127.3396677, 36.3423342]
-
-  const map = makeMap({ mapId: mapId, zoom: 16, center })
-
+async function makeSimulationData(mapId, sId, eventTarget, mapBus, wsBus, jIds, slaves) {
+  const map = makeMap({ mapId: mapId, zoom: 16 })
   const mapManager = MapManager({
     map: map,
-    simulationId: slave,
+    simulationId: sId,
     eventBus: mapBus
   })
-
   const wsClient = WebSocketClient({
-    simulationId: slave,
+    simulationId: sId,
     eventBus: wsBus,
-    // region: [127.3449, 36.3873, 127.3807, 36.3694]
     region: map.getExtent()
-    // eventBus: mapBus
   })
-  const trafficLightManager = TrafficLightManager(map, null, eventTarget)
-  await trafficLightManager.load()
-  trafficLightManager.setTargetJunctions(jIds)
+  const trafficLightManager = TrafficLightManager(map, jIds, eventTarget)
+  await trafficLightManager.load(jIds)
 
   mapManager.loadMapData()
   wsClient.init(slaves)
+
   return {
     map,
     mapManager,
     wsClient,
     bus: mapBus,
     trafficLightManager,
-    slave
+    slave: sId
   }
 }
 
@@ -246,81 +185,88 @@ export default {
     UniqMapChanger,
     UniqCardTitle
   },
-  data () {
+  data() {
     return {
-      status: '',
       simulation: { configuration: {} }, // means optimization
-      mapIds: [randomId(), randomId()],
+      mapIdFt: randomId(),
+      mapIdRl: randomId(),
+
       simulations: null,
-      log,
-      mapHeight: 600, // map view height
-      sidebar: false,
-      currentStep: 1,
-      congestionColor,
-      currentEdge: null,
-      playBtnToggle: false,
-      player: null,
-      chart1: {
-        avgSpeedsInView: [],
-        avgSpeedsJunctions: [],
-        avgSpeedInView: 0,
+      mapHeight: 600,
+      chart1: { // 기존신호
         avgSpeedJunction: 0,
         travelTimeJunction: 0,
-        avgSpeed: 0,
         progress: 0,
-        speedsPerJunction: {},
-        action: ''
+        data: {},
       },
-      chart2: {
-        avgSpeedsInView: [],
-        avgSpeedsJunctions: [],
-        avgSpeedInView: 0,
+      chart2: { // 최적신호
         avgSpeedJunction: 0,
         travelTimeJunction: 0,
-        avgSpeed: 0,
         progress: 0,
-        speedsPerJunction: {},
-        efficiency1: 0,
-        effSpeed: 0,
-        action: ''
+        data: {},
       },
       chart: {
-        avgSpeedChartInView: {}, // realtime chart
-        avgChartJunctions: {},
-        junctionSpeeds: {},
-        effTravelTime: 0
-      },
-
-      bottomStyle: { ...style.bottomStyle },
-      playerStyle: { ...style.playerStyle },
-      chartContainerStyle: {
-        borderRadius: 0,
-        height: this.mapHeight + 'px',
-        overflow: 'auto'
+        travelTimeJunctionChart: {},
+        travelTimeJunctionChartAcc: {},
       },
       lineChartOption,
-      barChartOption,
       rewards: {
-        labels: []
+        labels: [],
+        values: []
       },
-      phaseFixed: {},
-      phaseTest: {},
-      testSlave: null,
-      fixedSlave: null,
+      simIdRl: null,
+      simIdFt: null,
       selectedEpoch: 0,
       showEpoch: false,
       trafficLightManager: null,
-      selectedNode: '',
+      crossNameSelected: '',
       showWaitingMsg: false,
-      avgSpeedJunction: 0,
+      showWaitingMsg2: false,
       statusMessage: [],
       timer: null,
+      status: '',
       statusText: '',
-      // speedView: false,
-      ss: null
+      signalExplain: null,
+      isShowAvgTravelChart: true,
+      currentTab: 'total',
+      optResult: {},
+      animated: {
+        improvement_rate: 0,
+        chart1_avgSpeedJunction: 0,
+        chart1_travelTimeJunction: 0,
+        chart2_avgSpeedJunction: 0,
+        chart2_travelTimeJunction: 0,
+      },
+      rewardTotal: [],
+      optTestResult: {
+        first: {
+          epoch: -1,
+          result: []
+        },
+        second: {
+          epoch: -1,
+          result: []
+        }
+      },
+      optTestResults: [],
+      step: 29,
+      testResult: null,
+      waitingMessage: '실행 준비 중입니다. 잠시 후 실행 됩니다.'
     }
   },
-  destroyed () {
+  watch: {
+    optResult(value) {
+      gsap.to(this.animated, {
+        improvement_rate: value.improvement_rate,
+        chart1_avgSpeedJunction: value.simulate.avg_speed,
+        chart1_travelTimeJunction: value.simulate.travel_time,
+        chart2_avgSpeedJunction: value.test.avg_speed,
+        chart2_travelTimeJunction: value.test.travel_time,
+      })
+    },
+
+  },
+  destroyed() {
     this.simulations.forEach(({ map, wsClient }) => {
       map.remove()
       wsClient.close()
@@ -330,290 +276,415 @@ export default {
       clearTimeout(this.timer)
     }
 
+    if (this.checkStatusTimer) {
+      clearTimeout(this.checkStatusTimer)
+    }
+
     window.removeEventListener('resize', this.getWindowHeight)
   },
   computed: {
-    config () {
+    epochList() {
+      return (this.rewardTotal || []).filter(v => v.epoch % this.simulation.configuration.modelSavePeriod === 0)
+        .map(v => {
+          return {
+            ...v,
+            checked: this.optTestResults.includes(v.epoch)
+          }
+        })
+    },
+    config() {
       if (this.simulation) {
         return this.simulation.configuration
       } else {
         return {}
       }
     },
-    travelTimePerJunction () {
-      const keys = Object.keys(this.chart2.speedsPerJunction)
-      const ttsFt = this.chart1.speedsPerJunction
-      const ttsRl = this.chart2.speedsPerJunction
-      const result = {}
-      for (let i = 0; i < keys.length; i++) {
-        const jId = keys[i]
-        const vFt = ttsFt[jId] || []
-        const vRl = ttsRl[jId] || []
-        const ttFt = calcAvg(vFt.map(v => Number(v.avgTravelTime))).toFixed(2)
-        const ttRl = calcAvg(vRl.map(v => Number(v.avgTravelTime))).toFixed(2)
-        result[jId] = [ttFt, ttRl, (((ttFt - ttRl) / ttFt) * 100).toFixed(2)]
-      }
-      return result
-    },
-    actionForOpt () {
-      const info = this.chart2.speedsPerJunction
-      const s = this.selectedNode
-      const t = info[s]
 
-      if (t) {
-        return [t[0], t[t.length - 1]]
+    actionForOpt() {
+      if (!this.optResult) {
+        return [{}, {}]
       }
-      return [{}, {}]
+      const j = this.optResult.intersections[this.crossNameSelected]
+      if (!j) {
+        return [{}, {}]
+      }
+      return [j.simulate.signal_explain, j.test.signal_explain] // step first and step last
     }
   },
-  async mounted () {
-    window.scrollTo(0, 0)
+  async mounted() {
+    const optimizationId = this.$route.params.id
 
-    const optId = this.$route.params ? this.$route.params.id : null
-
-    const { simulation } = await simulationService.getSimulationInfo(optId)
-
-    if (!simulation) {
+    if (!optimizationId) {
+      log("optimization id is missed")
       return
     }
+
+    const { simulation } = await simulationService.getSimulationInfo(optimizationId)
+
+
+    if (!simulation) {
+      log("cannot find optimization information")
+      return
+    }
+
+    optSvc.getOptTestResults(simulation.id).then(result => {
+      this.optTestResults = result
+    })
+
     this.status = simulation.status
     this.simulation = simulation
-    this.fixedSlave = simulation.slaves[1]
-    this.testSlave = simulation.slaves[0]
-
-    this.resize()
-
+    this.simIdFt = simulation.slaves[1]
+    this.simIdRl = simulation.slaves[0]
     const simEventBusFixed = new Vue({})
     const simEventBusTest = new Vue({})
-    const buffer = []
+    const bufferSimFt = []
     const wsBus = new Vue({})
+
+    const { junctionId, center } = this.simulation.configuration
+
+    const jIds = junctionId.split(',')
+
     this.simulations = [
-      await initSimulationData(
-        this.simulation.configuration.region,
-        this.mapIds[0],
-        this.fixedSlave,
+      await makeSimulationData(
+        this.mapIdFt,
+        this.simIdFt,
         this,
         simEventBusFixed,
         wsBus,
-        this.simulation.configuration.junctionId.split(','),
-        [this.fixedSlave, this.testSlave]
+        jIds,
+        [this.simIdFt, this.simIdRl]
       ),
-      await initSimulationData(
-        this.simulation.configuration.region,
-        this.mapIds[1],
-        this.testSlave,
+      await makeSimulationData(
+        this.mapIdRl,
+        this.simIdRl,
         this,
         simEventBusTest,
         simEventBusTest,
-        this.simulation.configuration.junctionId.split(','),
-        [this.fixedSlave, this.testSlave]
+        jIds,
+        [this.simIdFt, this.simIdRl]
       )
     ]
+    const mapFt = this.simulations[0].map
+
+    if (center) {
+      mapFt.animateTo({
+        center: [center.x, center.y]
+      })
+    }
 
     this.initMapEventHandler(this)
 
-    const busFixed = simEventBusFixed
-    const busTest = simEventBusTest
+    const evtBusFt = simEventBusFixed
+    const evtBusRl = simEventBusTest
 
     wsBus.$on('salt:data', data => {
-      buffer.push(data)
+      bufferSimFt.push(data)
     })
 
     let boundingBoxSet = false
 
     // 최적화 시뮬레이션이 수행 속도가 느림
     // 버퍼로부터 데이터 가져와 이벤트 발생
-    busTest.$on('salt:data', () => {
-      const dataSim = buffer.splice(0, 1)[0]
-      if (dataSim) {
-        simEventBusFixed.$emit('salt:data', dataSim)
-
-        if (!boundingBoxSet) {
-          setTimeout(() => {
-            const map1 = this.simulations[0].map
-            const map2 = this.simulations[1].map
-            map1.animateTo({
-              center: map1.getCenter(),
-              zoom: map1.getZoom() + 1
-            })
-            map2.animateTo({
-              center: map2.getCenter(),
-              zoom: map2.getZoom() + 1
-            })
-          }, 500)
-          boundingBoxSet = true
-        }
+    evtBusRl.$on('salt:data', () => {
+      this.showWaitingMsg = false
+      const dataSim = bufferSimFt.shift()
+      if (!dataSim) {
+        return
       }
+
+      simEventBusFixed.$emit('salt:data', dataSim)
+
+      if (!boundingBoxSet) {
+        setTimeout(() => mapFt.animateTo({ center: mapFt.getCenter(), zoom: mapFt.getZoom() + 1 }), 500)
+        boundingBoxSet = true
+      }
+
     })
 
-    busTest.$on('salt:status', async status => {
+    evtBusRl.$on('salt:status', async status => {
       this.chart2.progress = status.progress
       this.chart1.progress = status.progress
-      this.showWaitingMsg = false
 
-      if (status.progress >= 99) {
-        this.chart2.progress = 100
+      if (status.progress >= 95) {
         this.chart1.progress = 100
+        this.chart2.progress = 100
+
+        this.waitingMessage2 = '분석중 입니다. 잠시 기다리세요.'
+        this.showWaitingMsg2 = true
+
+      }
+
+      if (status.progress > 100) {
+        this.chart1.progress = 0
+        this.chart2.progress = 0
+        this.showWaitingMsg2 = false
       }
     })
 
-    busFixed.$on('optimization:finished', () => {
-      this.checkStatus()
+    evtBusFt.$on('optimization:finished', () => {
+
     })
 
-    // wsBus.$on('salt:status', async () => {})
-    // wsBus.$on('salt:finished', async () => {})
-    // busFixed.$on('salt:data', () => {})
-    // busTest.$on('salt:finished', () => {})
-    // busFixed.$on('ws:close', () => {})
-    // this.$on('signalGroup:clicked', () => {})
-
-    busFixed.$on('ws:error', error => {
-      this.makeToast(error.message, 'warning')
+    evtBusFt.$on('ws:error', err => {
+      log(err.message)
     })
 
-    this.$on('junction:clicked', async p => {
-      const crossName = signalService.nodeIdToName(p.nodeId)
-      this.selectedNode = crossName
-
-      this.initSignaSystem()
+    this.$on('junction:clicked', async param => {
+      const crossName = signalService.nodeIdToName(param.nodeId)
+      this.crossNameSelected = crossName
+      this.selectCrossName(crossName)
     })
 
-    const updateReward = async forceUpdate => {
-      const start = new Date().getTime()
+    this.updateOptResult(true)
+    this.updateRewardTotal()
+
+    this.initKeyListener()
+    this.resize()
+
+    window.scrollTo(0, 0)
+    window.addEventListener('resize', this.resize.bind(this))
+
+    this.checkStatus()
+  },
+  methods: {
+    getActionName(v) {
+      const o = {
+        offset: '옵셋 조정',
+        kc: '즉시 신호 변경',
+        gr: '녹색시간 조정',
+        gro: '녹색시간과 옵셋 조정',
+        gt: '현시 최소최대 만족(gt)',
+        ga: '현시 주기 만족(ga)',
+      }
+      return o[v] || '모름'
+    },
+    getRewardFunctionName(v) {
+      const o = {
+        pn: '통과 차량 수',
+        wt: '대기 시간',
+        tt: '통과 소요 시간',
+        wq: '대기 큐 길이(wq)',
+        cwq: '축적된 대기 큐 길이'
+      }
+      return o[v] || '모름'
+    },
+    colorScale,
+
+    getEff(idx) {
+      return (100 - (this.optTestResult.first.result[idx].rlAvgTravelTime / this.optTestResult.second.result[idx].rlAvgTravelTime) * 100).toFixed(2)
+    },
+
+    getProgressColor(v) {
+      return v > 0 ? 'success' : 'danger'
+    },
+
+    async loadTestResult(type, epoch) {
+      try {
+        const result = await optSvc.getOptTestResult(this.simulation.id, epoch)
+        this.optTestResult[type].result = result.result
+      } catch (err) {
+        log(err.message)
+      }
+    },
+    getColorForImprovedRate(v) {
+      return colorScale(v)
+    },
+
+    async updateOptResult(forceUpdate) {
+      log('update optimization result', new Date())
+      // const start = new Date().getTime()
       const progress = this.chart1.progress
       if ((progress > 0 && progress < 100) || forceUpdate) {
-        this.statusText = 'loading...'
+        // this.statusText = 'chart created...' + +(Date.now() - start) / 1000
+        try {
+          const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
+          this.optResult = optResult
 
-        const [dataRl, dataFt] = await Promise.all([
-          optSvc.getPhaseReward(this.simulation.id, 'rl').then(res => res.data),
-          optSvc.getPhaseReward(this.simulation.id, 'ft').then(res => res.data)
-        ])
-        log(new Date().getTime() - start)
-        this.statusText = '데이터 로드 완료'
+          this.simulations[1].trafficLightManager.setOptTestResult(optResult.intersections, 'test')
+          this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')
 
-        this.chart1.speedsPerJunction = dataFt // simulate
-        this.chart2.speedsPerJunction = dataRl // optimization
+          const step = this.step
+          this.chart.travelTimeChartInView = makeTravelTimeChart(
+            optResult.simulate.travel_times.filter((v, i) => i % step === 0),
+            optResult.test.travel_times.filter((v, i) => i % step === 0),
+            optResult.simulate.travel_time,
+            optResult.test.travel_time,
+            step
+          )
+          this.chart.travelTimeChartInViewAcc = makeTravelTimeChart(
+            optResult.simulate.cumlative_avgs.filter((v, i) => i % step === 0),
+            optResult.test.cumlative_avgs.filter((v, i) => i % step === 0),
+            0, 0,
+            step
+          )
 
-        const [avgTTRL, avgTTRLs, avgSpdRl] = calcAverage(dataRl)
+          const r = this.optResult.intersections[this.crossNameSelected]
+          if (r) {
+            this.chart.travelTimeJunctionChart = makeTravelTimeChart(
+              r.simulate.travel_times.filter((v, i) => i % step === 0),
+              r.test.travel_times.filter((v, i) => i % step === 0),
+              r.simulate.travel_time,
+              r.test.travel_time,
+              step
+            )
 
-        const [avgTTFT, avgTTFTs, avgSpdFt] = calcAverage(dataFt)
+            this.chart.travelTimeJunctionChartAcc = makeTravelTimeChart(
+              r.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
+              r.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
+              0,
+              0,
+              29
+            )
 
-        this.chart.effTravelTime = ((avgTTFT - avgTTRL) / avgTTFT) * 100
+            this.testResult = r
 
-        this.chart.travelTimeChartInView = makeSpeedLineData(
-          avgTTFTs,
-          avgTTRLs,
-          avgTTRL,
-          avgTTFT
-        )
+          }
 
-        this.statusText = '평균통과시간 계산완료'
+          this.chart.travelTimePerJunction = optResult.intersections
 
-        // this.chart1.avgSpeedJunction = this.chart.avgSpeedChartInView.avgFt
-        // this.chart2.avgSpeedJunction = this.chart.avgSpeedChartInView.avgRl
-        this.chart1.avgSpeedJunction = avgSpdFt ? avgSpdFt.toFixed(2) : ''
-        this.chart2.avgSpeedJunction = avgSpdRl ? avgSpdRl.toFixed(2) : ''
+          this.chart.effTravelTime = optResult.improvement_rate
 
-        this.chart1.travelTimeJunction = avgTTFT
-        this.chart2.travelTimeJunction = avgTTRL
-        this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
+          this.chart1.travelTimeJunction = optResult.simulate.travel_time
+          this.chart1.avgSpeedJunction = optResult.simulate.avg_speed
 
-        if (this.ss === null) {
-          setTimeout(() => {
-            this.initSignaSystem()
-          }, 2000)
-        } else {
-          const str2 = this.actionForOpt[1].action
-          const o2 = parseAction(str2)
-          this.statusText = '신호정보 업데이트'
-          this.sss && this.ss.update(o2.offset, o2.duration)
+          this.chart2.travelTimeJunction = optResult.test.travel_time
+          this.chart2.avgSpeedJunction = optResult.test.avg_speed
+
+          // this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
+
+          if (this.signalExplain === null) {
+            setTimeout(() => {
+              this.updateSignalExplain()
+            }, 2000)
+          } else {
+            this.statusText = '신호정보 업데이트'
+            this.signalExplain.update(parseAction(this.actionForOpt[1].action))
+          }
+        } catch (err) {
+          log(err.message)
+          if (err.response) {
+            log(err.response.data)
+            this.status = 'error'
+          }
         }
       }
 
       this.timer = setTimeout(async () => {
         try {
-          await updateReward()
+          if (this.status === 'finished') {
+            return
+          }
+          await this.updateOptResult()
         } catch (err) {
           log(err.message)
         }
       }, 4000)
-    }
-
-    updateReward(true)
-    window.addEventListener('resize', this.resize)
-
-    const result = await optSvc.getRewardTotal(this.simulation.id)
-
-    const results = Object.values(result.data)
-
-    const total = results[0]
-    if (!total) {
-      this.statusText = '모델파일 없음'
-      return
-    }
-    const label = new Array(total.length).fill(0).map((v, i) => i)
-    const reward = total.map(v => Number(v.reward).toFixed(2))
-    const avg = total.map(v => Number(v.rewardAvg).toFixed(2))
-
-    this.rewards = makeRewardChart('total', label, reward, avg)
-  },
-  methods: {
-    initSignaSystem () {
-      const container = this.$refs.actionvis
-
-      if (this.actionForOpt.length < 1) {
-        return
-      }
-      const actionFt = this.actionForOpt[0].action
-
-      const rFt = parseAction(actionFt)
-      if (!rFt) {
-        log('parse action failed:', actionFt)
-        return
-      }
-      this.ss = SignalSystem(container, {
-        offset: rFt.offset,
-        duration: rFt.duration
-      })
-      const actionRl = this.actionForOpt[1].action
-      const rRl = parseAction(actionRl)
-      this.ss.update(rRl.offset, rRl.duration)
-
-      log('대상교차로:', this.selectedNode)
-      log('기존신호:', this.actionForOpt[0].action)
-      log('최적신호:', this.actionForOpt[1].action)
     },
 
-    getRegionName (region) {
+    initKeyListener() {
+      document.addEventListener('keydown', event => {
+        if (event.key === 'c') { // 'c'
+          this.isShowAvgTravelChart = !this.isShowAvgTravelChart
+          if (!this.currentTab) {
+            this.updateSignalExplain()
+          }
+        }
+      })
+    },
+
+    async selectCrossName(crossName) {
+      this.crossNameSelected = crossName
+      this.isShowAvgTravelChart = true
+      this.currentTab = ''
+      this.updateSignalExplain()
+
+      this.simulations[1].trafficLightManager.moveTo(crossName)
+
+      if (!this.optResult) {
+        return
+      }
+      if (!this.optResult.intersections) {
+        return
+      }
+      const r = this.optResult.intersections[crossName]
+      if (!r) {
+        return
+      }
+      const step = this.step
+      const stepFilter = (v, i) => i % step === 0
+      this.chart.travelTimeJunctionChart = makeTravelTimeChart(
+        r.simulate.travel_times.filter(stepFilter),
+        r.test.travel_times.filter(stepFilter),
+        r.simulate.travel_time,
+        r.test.travel_time,
+        step
+      )
+
+      this.chart.travelTimeJunctionChartAcc = makeTravelTimeChart(
+        r.simulate.cumlative_avgs.filter(stepFilter),
+        r.test.cumlative_avgs.filter(stepFilter),
+        0,
+        0,
+        step
+      )
+      this.testResult = r
+    },
+
+    async updateRewardTotal() {
+      const result = await optSvc.getRewardTotal(this.simulation.id)
+
+      const results = Object.values(result.data)
+      this.rewardTotal = results[0]
+      const total = results[0]
+      if (!total) {
+        this.statusText = '모델파일 없음'
+        return
+      }
+      const labels = new Array(total.length).fill(0).map((v, i) => i)
+      const rewards = total.map(v => Number(v.reward).toFixed(2))
+      this.rewards.labels = labels
+      this.rewards.values = rewards
+    },
+
+    updateSignalExplain() {
+      const container = this.$refs.actionvis
+      if (!container) {
+        setTimeout(() => {
+          this.updateSignalExplain()
+        }, 100)
+        return
+      }
+
+      this.signalExplain = SignalSystem(container, parseAction(this.actionForOpt[0]))
+      this.signalExplain.update(parseAction(this.actionForOpt[1]))
+
+    },
+
+    getRegionName(region) {
       return map[region] || region
     },
-    // toggleView () {
-    //   this.speedView = !this.speedView
-    // },
-    showModal () {
+
+    showModal() {
       this.$refs.optenvmodal.show()
     },
-    calcEfficency (v1, v2) {
-      v1 = Number(v1)
-      v2 = Number(v2)
-      return ((100 * (v2 - v1)) / ((v2 + v1) / 2)).toFixed(2)
+
+    resize() {
+      this.mapHeight = window.innerHeight - 195 // update map height to current height
     },
-    resize () {
-      this.mapHeight = window.innerHeight - 50 // update map height to current height
-    },
-    async runTest () {
+
+    async runTest() {
       this.showWaitingMsg = true
       this.chart1.avgSpeedsInView = []
       this.chart2.avgSpeedsInView = []
       this.chart1.avgSpeedsJunctions = []
       this.chart2.avgSpeedsJunctions = []
-
+      this.chart1.progress = 0
+      this.chart2.progress = 0
       try {
         await simulationService.stopSimulation(this.simulation.id)
         await optSvc.runTest(
           this.simulation.id,
-          this.testSlave,
+          this.simIdRl,
           this.selectedEpoch
         )
       } catch (err) {
@@ -621,14 +692,17 @@ export default {
         this.status = 'error'
       }
       this.status = 'running'
+      this.checkStatus()
     },
-    addMessage (msg) {
+
+    addMessage(msg) {
       this.statusMessage.push(msg)
       if (this.statusMessage.length > 100) {
         this.statusMessage.shift()
       }
     },
-    async stopTest () {
+
+    async stopTest() {
       this.status = 'stopping'
       this.addMessage('stop ' + this.simulation.id)
       await optSvc
@@ -637,9 +711,9 @@ export default {
         .then(data => {
           this.addMessage(data.msg)
         })
-      this.checkStatus()
     },
-    initMapEventHandler (obj) {
+
+    initMapEventHandler(obj) {
       const map1 = this.simulations[0].map
       const map2 = this.simulations[1].map
 
@@ -648,7 +722,7 @@ export default {
           if (map1.isZooming() || map2.isZooming()) {
             return
           }
-          obj.buffer = [] // init buffer
+          obj.bufferSimFt = []
           map.animateTo(
             {
               center: target.getCenter(),
@@ -659,8 +733,10 @@ export default {
             }
           )
         }
-
-        return e => {
+        return async e => {
+          if (map1.isMoving() || map2.isMoving()) {
+            return
+          }
           if (e.target.id === map1.id) {
             moveTo(map2, e.target)
           }
@@ -675,10 +751,28 @@ export default {
       map1.on('zoomend', map1ToMap2)
       map2.on('zoomend', map2ToMap1)
     },
-    async checkStatus () {
-      simulationService.getSimulationInfo(this.simulation.id).then(data => {
+
+    async checkStatus() {
+      try {
+        const data = await simulationService.getSimulationInfo(this.simulation.id)
         this.status = data.simulation.status
-      })
+        log('check status:', this.status)
+      } catch (err) {
+        log('check status error: ', err.message)
+      }
+      if (this.status === 'finished') {
+        this.chart1.progress = 100
+        this.chart2.progress = 100
+        this.updateOptResult(true)
+      }
+      if (this.status === 'finished' || this.status === 'error' || this.status === 'stopped') {
+        this.showWaitingMsg = false
+        this.showWaitingMsg2 = false
+        return
+      }
+      this.checkStatusTimer = setTimeout(() => {
+        this.checkStatus()
+      }, 5000)
     }
   }
 }

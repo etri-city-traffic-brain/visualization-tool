@@ -62,7 +62,7 @@
       </div>
 
 
-      <div class="grid grid-cols-2 gap-1 mt-1">
+    <div class="grid grid-cols-2 gap-1 mt-1">
       <div v-if="pieData !== null" >
         <div class="bg-gray-700 text-center font-bold text-white p-1">
           혼잡도 분포
@@ -74,7 +74,7 @@
           스텝별 혼잡도 분포
         </div>
         <doughnut class="p-2 bg-gray-700" :chartData="pieDataStep" style="height:160px" />
-    </div>
+      </div>
     </div>
   </div>
   <div v-else>

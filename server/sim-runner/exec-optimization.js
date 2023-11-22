@@ -1,13 +1,11 @@
 const chalk = require('chalk')
 
 const {
-  saltPath: { volume: volumePath }
+  dockerBasePath
 } = require('../config')
 
 const { log } = console
 const { dockerCommand: docker } = require('docker-cli-js')
-
-const DEFAULT_DOCKER_IMAGE = 'images4uniq/optimizer:v0.1a.20220418'
 
 const options = {
   machineName: undefined, // uses local docker
@@ -17,6 +15,9 @@ const options = {
   stdin: undefined
 }
 
+const MODE_TRAIN = 'train'
+const MODE_TEST = 'test'
+
 /**
  * 도커 명령을 사용해서 신호 최적화 컨테이너 실행
  *
@@ -25,7 +26,7 @@ const options = {
  * @param {Number} modelNum
  * @returns {Promise}
  */
-async function run (simulation, mode, modelNum) {
+async function run(simulation, mode, modelNum) {
   if (!simulation || !mode) {
     log('check argruments: simulation or mode is missed')
     return false
@@ -34,52 +35,132 @@ async function run (simulation, mode, modelNum) {
   const config = simulation.configuration
   const slaves = simulation.slaves
   const epoch = config.epoch
-  const dockerImage = config.dockerImage || DEFAULT_DOCKER_IMAGE
+  const dockerImage = config.dockerImage
   const begin = config.begin
   const end = config.end + 60
-  const modelSavePeriod = config.modelSavePeriod || 20
-  const map = config.region
+  const modelSavePeriod = config.modelSavePeriod || 1
   const targetTL = config.junctionId // ex) comma seperated string ex) "SA 101,SA 111",
-  // const targetTL = 'SA 1701' // ex) comma seperated string ex) "SA 101,SA 111",
   const action = config.action
   const method = config.method
   const rewardFunc = config.rewardFunc
-  const volume = `${volumePath}/${simulation.id}:/uniq/optimizer/io`
+  const runScript = 'python ./run_modutech.py'
 
-  const makeCmd = (mode, name) => {
-    const args = [
-      `run --rm --name ${name} -v ${volume} ${dockerImage}`,
-      'python ./run.py',
-      `--mode ${mode}`,
-      `--map ${map}`,
-      `--start-time ${begin} --end-time ${end}`,
-      `--epoch ${epoch}`,
-      '--io-home io',
-      '--scenario-file-path io/scenario',
+  const lr = config.lr
+  const memLen = config.memLen
+
+  const duration = [
+    `--start-time ${begin}`,
+    `--end-time ${end}`,
+  ]
+
+  const volumes = [
+    `-v ${dockerBasePath}/data:/uniq/data`,
+    `-v ${dockerBasePath}/opt/${simulation.id}/input:/uniq/optimizer/input`,
+    `-v ${dockerBasePath}/opt/${simulation.id}/output:/uniq/optimizer/output`,
+    `-v ${dockerBasePath}/opt/${simulation.id}/model:/uniq/optimizer/model`,
+    `-v ${dockerBasePath}/opt:/uniq/optimizer/opt`,
+  ]
+  const map = `--map ${config.region}`
+
+  const run = id => `run --rm --name ${id}`
+
+  const trainModeParam = '--mode train'
+  const testModeParam = '--mode test'
+  const simulateModeParam = '--mode simulate'
+
+  if (mode === MODE_TRAIN) {
+
+    const cmdSimulate = [
+      run(simulation.id),
+      ...volumes,
+      dockerImage,
+      runScript,
+      simulateModeParam,
+      map,
+      ...duration,
       `--target-TL "${targetTL}"`,
-      `--model-save-period ${modelSavePeriod}`,
-      '--result-comp False',
       `--reward-func ${rewardFunc}`,
       `--method ${method}`,
-      `--action ${action}`
+      `--action ${action}`,
+      `--epoch ${epoch}`,
+      `--model-save-period ${modelSavePeriod}`,
+      `--mem-len ${memLen}`
     ]
-    return args.join(' ')
-    // return `run --rm --name ${name} -v ${volume} ${dockerImage} python ./run.py --mode ${mode} --map ${map} --start-time ${begin} --end-time ${end} --epoch ${epoch} --io-home io --scenario-file-path io/scenario --target-TL "${targetTL}" --model-save-period ${modelSavePeriod} --result-comp False --reward-func ${rewardFunc} --action ${action}`
+
+    const cmdTrain = [
+      run(simulation.id),
+      ...volumes,
+      dockerImage,
+      runScript,
+      trainModeParam,
+      map,
+      ...duration,
+      `--target-TL "${targetTL}"`,
+      `--reward-func ${rewardFunc}`,
+      `--method ${method}`,
+      `--action ${action}`,
+      `--epoch ${epoch}`,
+      `--model-save-period ${modelSavePeriod}`,
+      `--mem-len ${memLen}`
+    ]
+
+
+    log(chalk.green(cmdSimulate.join('\n')))
+    log(chalk.yellow(cmdTrain.join('\n')))
+
+    await docker(cmdSimulate.join(' '), options)
+    return docker(cmdTrain.join(' '), options)
+  }
+  if (mode === MODE_TEST) {
+    const cmdSimu = [
+      run(slaves[0]),
+      ...volumes,
+      dockerImage,
+      runScript,
+      simulateModeParam,
+      map,
+      ...duration,
+      `--target-TL "${targetTL}"`,
+      `--reward-func ${rewardFunc}`,
+      `--method ${method}`,
+      `--action ${action}`,
+      `--epoch ${epoch}`,
+      `--model-save-period ${modelSavePeriod}`,
+      `--model-num ${modelNum}`,
+      `--mem-len ${memLen}`
+    ]
+
+    const cmdTest = [
+      run(slaves[1]),
+      ...volumes,
+      dockerImage,
+      runScript,
+      testModeParam,
+      map,
+      ...duration,
+      `--target-TL "${targetTL}"`,
+      `--reward-func ${rewardFunc}`,
+      `--method ${method}`,
+      `--action ${action}`,
+      `--epoch ${epoch}`,
+      `--model-save-period ${modelSavePeriod}`,
+      `--model-num ${modelNum}`,
+      // '--a-lr 0.005',
+      // '--c-lr 0.005',
+      `--a-lr ${lr}`,
+      `--c-lr ${lr}`,
+      `--mem-len ${memLen}`
+    ]
+
+    log(chalk.green(cmdSimu.join('\n')))
+    log(chalk.yellow(cmdTest.join('\n')))
+
+    return Promise.all([docker(cmdTest.join(' '), options), docker(cmdSimu.join(' '), options)]
+    )
   }
 
-  if (mode === 'train') {
-    const cmd = `${makeCmd('train', simulation.id)}`
-    log(chalk.green(cmd))
-    return docker(cmd, options)
-  } else if (mode === 'test') {
-    const cmdSimu = `${makeCmd('simulate', slaves[0])}`
-    const cmdTest = `${makeCmd('test', slaves[1])} --model-num ${modelNum}`
-    log(chalk.green(cmdSimu))
-    log(chalk.green(cmdTest))
-    return Promise.all([docker(cmdTest, options), docker(cmdSimu, options)])
-  } else {
-    return Promise.reject(new Error('unknown mode'))
-  }
+  return Promise.reject(new Error('unknown mode'))
+
 }
 
 module.exports = run

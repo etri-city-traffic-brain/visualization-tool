@@ -5,7 +5,7 @@ import color from '@/utils/colors'
 // const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1.5
 const calcLineWidth = zoom => (Math.abs(17 - zoom) + 1.5) * 1
 
-function updateCongestion (edgeLayer, map, linkSpeeds = {}, step = 0) {
+function updateCongestion(edgeLayer, map, linkSpeeds = {}, step = 0) {
   if (Object.keys(linkSpeeds).length === 0) {
     return
   }
@@ -51,14 +51,14 @@ export default map => {
 
   map.on('zoomend moveend', event => {
     const map = event.target
-    if (map.getZoom() >= 19 || map.getZoom() <= 14) {
-      // layer.hide()
+    if (map.getZoom() >= 19 || map.getZoom() <= 13) {
+      edgeLayer.hide()
     } else {
-      // layer.show()
+      edgeLayer.show()
     }
   })
 
-  function updateRealtimeSpeed (speedByEdgeId = {}) {
+  function updateRealtimeSpeed(speedByEdgeId = {}) {
     edgeLayer.getGeometries().forEach(geometry => {
       let edgeId = geometry.getId()
       if (!edgeId.includes('_')) {
@@ -84,18 +84,25 @@ export default map => {
             lineColor: color(speed)
           })
         }
-      }
-      const road = speedByEdgeId[edgeId]
-      if (road) {
-        let speed = road.speed
-        if (geometry.properties.SPEEDLH <= 30) {
-          // speed = road.speed * 2
-          speed = (speed / 30) * 50
+      } else {
+        const road = speedByEdgeId[edgeId]
+        if (road) {
+          let speed = road.speed
+          if (geometry.properties.SPEEDLH <= 30) {
+            // speed = road.speed * 2
+            speed = (speed / 30) * 50
+          }
+          geometry.updateSymbol({
+            lineWidth: calcLineWidth(map.getZoom()),
+            lineColor: color(speed)
+
+          })
+        } else {
+          geometry.updateSymbol({
+            lineWidth: calcLineWidth(map.getZoom()),
+            lineColor: color(50)
+          })
         }
-        geometry.updateSymbol({
-          lineWidth: calcLineWidth(map.getZoom()),
-          lineColor: color(speed)
-        })
       }
     })
   }

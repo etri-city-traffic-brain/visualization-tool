@@ -17,7 +17,7 @@ const { currentTimeFormatted, updateStatus } = require('../../globals')
 
 const makeChartData = require('../chart-data-maker')
 const recordResult = require('./insert-to-mongo')
-debug('xxxx')
+
 const config = require('../../config')
 const { output } = config.saltPath
 
@@ -32,16 +32,16 @@ const subIds = cellId => {
 
 const pickResultFile = id => {
   const file = fs
-    .readdirSync(`${output}/${id}`)
+    .readdirSync(`${config.base}/sim/${id}/output`)
     .find(file => file.endsWith('.csv'))
   if (!file) return null
-  return `${output}/${id}/${file}`
+  // return `${output}/${id}/${file}`
+  return `${config.base}/sim/${id}/output/${file}`
 }
 
 const cook = ({ simulationId, duration, period }) => {
   updateStatus(simulationId, 'processing')
-  debug('Start cooking simulation result', simulationId)
-  console.log('start cooking....')
+  debug('start cooking simulation result - ', simulationId)
   if (!simulationId) {
     return Promise.reject(new Error('simulation id missed'))
   }
@@ -69,40 +69,48 @@ const cook = ({ simulationId, duration, period }) => {
 
     const cells = {}
     const start = Date.now()
-
+    let cnt = 0
     const handleData = row => {
-      // salt specific annotation
-      // we have to ignore it
+      // salt specific annotation we have to ignore it
+      cnt += 1
       if (row.id && row.id === 'simulation') {
+        return
+      }
+      // ignore first line
+      if (cnt === 1) {
         return
       }
       const { linkId, cellId } = subIds(row.id)
 
       const cell = cells[cellId] || {}
-      const speed = Number((+row.speed).toFixed(1))
-      if (speed >= 0) {
-        cell.linkId = linkId
-        cell.cellId = cellId
-        cell.values = cell.values || []
-        cell.travelTimes = cell.travelTimes || []
-        cell.vehPassed = cell.vehPassed || []
-        cell.waitingTime = cell.waitingTime || []
 
-        cell.values.push(speed)
-        cell.travelTimes.push(Number(row.sumTravelTime))
-        cell.vehPassed.push(Number(row.vehPassed))
-        cell.waitingTime.push(Number(row.waitingTime))
-        cells[cellId] = cell
-      }
+      cell.linkId = linkId
+      cell.cellId = cellId
+
+      cell.values = cell.values || []
+      cell.travelTimes = cell.travelTimes || []
+      cell.vehPassed = cell.vehPassed || []
+      cell.waitingTime = cell.waitingTime || []
+
+      cell.values.push(Number((row.speed)))
+      cell.travelTimes.push(Number(row.sumTravelTime))
+      cell.vehPassed.push(Number(row.vehPassed))
+      cell.waitingTime.push(Number(row.waitingTime))
+
+      cells[cellId] = cell
+
+
     }
 
     const handleEnd = async () => {
       stream.close()
+      console.log('total:', cnt)
       try {
         debug('==> insert into DB')
         await recordResult(simulationId, cells)
         debug('insert mongo end')
-        const elapsedTime = await makeChartData(output, simulationId, {
+        // const elapsedTime = await makeChartData(output, simulationId, {
+        const elapsedTime = await makeChartData(`${config.base}/sim/`, simulationId, {
           meta: {
             duration,
             period

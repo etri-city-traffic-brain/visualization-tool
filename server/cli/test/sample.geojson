@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "name": "cell",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "LINK_ID": "-552800227_0_0",
+        "SPEEDLH": 10
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            127.44817357507135,
+            36.3599416571385
+          ],
+          [
+            127.44817357507134,
+            36.3599416571385
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -26,11 +26,11 @@ import userState from '@/user-state'
 import region from '@/map2/region'
 import map from '@/region-code'
 
-// import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
 import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinished'
-// import HistogramChart from '@/components/charts/HistogramChart'
-// import Doughnut from '@/components/charts/Doughnut'
-// import BarChart from '@/components/charts/BarChart'
+import HistogramChart from '@/components/charts/HistogramChart'
+import Doughnut from '@/components/charts/Doughnut'
+
+// import UniqSimulationResultExt from '@/components/UniqSimulationResultExt'
 // import D3SpeedBar from '@/charts/d3/D3SpeedBar'
 // import axios from 'axios'
 // import * as d3 from 'd3'
@@ -39,12 +39,13 @@ import SimulationDetailsOnFinished from '@/components/SimulationDetailsOnFinishe
 // import bins from '@/stats/histogram'
 // import config from '@/stats/config'
 // import { labels } from '../utils/color-of-congestion'
+// import { simulationService } from '@/service'
 
 const defaultOption = (xTitle = '', yTitle) => ({
   responsive: true,
   title: {
     display: false,
-    text: 'Line Chart'
+    text: xTitle
   },
   tooltips: {
     mode: 'index',
@@ -68,11 +69,13 @@ const defaultOption = (xTitle = '', yTitle) => ({
           maxRotation: 0,
           display: true,
           fontColor: 'white'
-        }
+        },
+        gridLines: { display: false, },
       }
     ],
     yAxes: [
       {
+        id: 'A',
         scaleLabel: {
           display: true,
           labelString: yTitle || '속도(km/h)',
@@ -84,10 +87,26 @@ const defaultOption = (xTitle = '', yTitle) => ({
           maxRotation: 0,
           display: true,
           fontColor: 'white',
-          callback: function (value, index, ticks) {
+          callback: function (value) {
             return value
-            // return value + ' km/h'
           }
+        },
+        gridLines: { display: false, },
+      },
+      {
+        id: 'B',
+        scaleLabel: {
+          display: true,
+          labelString: '통행량',
+          fontColor: 'white'
+        },
+        position: 'right',
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 20,
+          maxRotation: 0,
+          display: true,
+          fontColor: 'white'
         }
       }
     ]
@@ -101,58 +120,43 @@ const defaultOption = (xTitle = '', yTitle) => ({
   }
 })
 
-function makeLinkCompChart (data) {
-  // console.log(data)
+function makeLinkCompChart(data, mean) {
   const ll = data.map(d => d.data.length)
-  const maxValue = Math.max(...ll)
   const minValue = Math.min(...ll)
 
-  const maxIdx = data.findIndex(d => d.data.length === maxValue)
-
-  // console.log('maxIdx:', maxIdx)
-  const dataset = (label, color, data) => ({
+  const dataset = (label, color, data, id) => ({
     label,
     fill: false,
+    type: id === 'B' ? 'bar' : 'line',
     borderColor: color,
     backgroundColor: color,
     borderWidth: 2,
     pointRadius: 1,
-    data
+    data,
+    yAxisID: id
   })
-  const labels = new Array(data[maxIdx].data.length)
-    .fill(0)
-    .map((_, i) => i + '')
-  const datasets = data.map(d => {
-    return dataset(d.label, d.color, d.data.slice(0, minValue))
+
+  const datasets = data.map((d, i) => {
+    let id = i === 0 ? 'A' : 'B'
+    return dataset(d.label, d.color, d.data.slice(0, minValue), id)
   })
   return {
-    labels: labels.slice(0, minValue),
-    datasets
+    labels: mean.labels,
+    datasets: [mean.dataset, ...datasets]
   }
 }
-
-// function stepToTime (step, startTime, periodSec) {
-//   const hourStart = startTime.substring(0, 2)
-//   const periodMin = periodSec / 60
-//   let hour = Number(hourStart) - 1
-//   if (step % 60 === 0) {
-//     hour += 1
-//   }
-//   const hh = (hour + '').padStart(2, '0')
-//   const mm = ((step % 60) + '').padStart(2, '0')
-//   const r = hh + ':' + mm
-//   return
-// }
 
 const makeLinkSpeedChartData = (data1, startTime, periodSec) => {
   const dataset = (label, color, data) => ({
     label,
+    type: 'line',
     fill: false,
     borderColor: color,
     backgroundColor: color,
     borderWidth: 2,
     pointRadius: 1,
-    data
+    data,
+    order: 0
   })
 
   const hourStart = startTime.substring(0, 2)
@@ -173,7 +177,7 @@ const makeLinkSpeedChartData = (data1, startTime, periodSec) => {
 
   return {
     labels: labels,
-    datasets: [dataset('링크속도', '#7FFFD4', data1)]
+    datasets: [dataset('평균속도', '#7FFF00', data1)]
   }
 }
 
@@ -187,9 +191,11 @@ export default {
     SimulationDetailsOnFinished,
     LineChart,
     UniqCongestionColorBar,
-    UniqMapChanger
+    UniqMapChanger,
+    HistogramChart,
+    Doughnut
   },
-  data () {
+  data() {
     return {
       defaultOption,
       userState,
@@ -219,8 +225,13 @@ export default {
         linkWaitingTime: [],
         links: [],
         pieData: [],
-        pieDataStep: []
+        pieDataStep: [],
+
+        histogramData: null,
+        histogramDataStep: null
       },
+      // histogramData: [],
+      // histogramDataStep: null,
       // currentZoom: '',
       // currentExtent: '',
       // wsStatus: 'ready',
@@ -234,10 +245,11 @@ export default {
 
       showWaitingMsg: false,
       speedsByEdgeId: {},
-      statusText: ''
+      statusText: '',
+      isShowAvgSpeedChart: true
     }
   },
-  destroyed () {
+  destroyed() {
     if (this.map) {
       this.map.remove()
     }
@@ -250,17 +262,37 @@ export default {
     window.removeEventListener('resize', this.resize.bind(this))
   },
   computed: {
-    config () {
+    config() {
       return this.simulation.configuration
     }
   },
-  async mounted () {
+  async mounted() {
+    document.addEventListener('keydown', event => {
+      // if (event.ctrlKey && event.keyCode === 90) {
+      //   this.isShowAvgTravelChart = !this.isShowAvgTravelChart
+      // }
+      if (event.keyCode === 67) {
+        this.isShowAvgSpeedChart = !this.isShowAvgSpeedChart
+
+        // window.scrollTo(0, 1000)
+        setTimeout(() => {
+          window.scrollTo({
+            left: 0,
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+          })
+        }, 500)
+      }
+    })
+
     this.simulationId = this.$route.params ? this.$route.params.id : null
     this.showLoading = true
 
+    // this.histogramData = await statisticsService.getHistogramChart(this.simulationId)
+
     this.map = makeMap({ mapId: this.mapId, zoom: 16 })
 
-    setTimeout(() => this.centerTo(), 1000)
+    // setTimeout(() => this.centerTo(), 1000)
     await this.updateSimulation()
     this.resize()
 
@@ -344,15 +376,38 @@ export default {
     // this.$on('ws:close', () => {})
 
     window.addEventListener('resize', this.resize.bind(this))
+
+    // test
+    // this.simulation.status = 'running'
+    // this.progress = 20
+
+    // const center = [this.config.area.minX + 0.04, this.config.area.minY + 0.01]
+    // const c = this.map.getCenter()
+    // const center = [c.x + 0.001, c.y - 0.001]
+    // this.map.animateTo({ center, zoom: 18 }, { duration: 500 })
+
+    // setTimeout(() => {
+    //   const c = this.map.getCenter()
+    //   const center = [c.x + 0.0001, c.y - 0.0001]
+    //   this.map.animateTo({ center }, { duration: 500 })
+    // }, 200)
+
+    setTimeout(() => this.centerTo(), 500)
+
   },
   methods: {
-    showModal () {
+    showGrid() {
+      const c = this.map.getCenter()
+      const center = [c.x, c.y]
+      this.map.animateTo({ center, zoom: 13 }, { duration: 500 })
+    },
+    showModal() {
       this.$refs.simmodal.show()
     },
-    hideModal () {
+    hideModal() {
       this.$refs.simmodal.hide()
     },
-    startReplay () {
+    startReplay() {
       this.wsClient.send({
         simulationId: this.simulationId,
         type: 'replay',
@@ -360,7 +415,7 @@ export default {
         step: 0
       })
     },
-    stopReplay () {
+    stopReplay() {
       this.wsClient.send({
         simulationId: this.simulationId,
         type: 'replay',
@@ -370,9 +425,11 @@ export default {
     },
     ...stepperMixin,
 
-    async startSimulation () {
+    async startSimulation() {
       log('start simulation')
       this.simulation.status = 'running'
+      this.simulation.error = ''
+      this.statusText = ''
       this.resize()
       try {
         await simSvc.startSimulation(this.simulationId, this.userState.userId)
@@ -382,90 +439,84 @@ export default {
         this.statusText = err.message
       }
       setTimeout(() => this.updateSimulation(), 5000)
+
+
+      setTimeout(() => {
+        const c = this.map.getCenter()
+        const center = [c.x + 0.001, c.y - 0.001]
+        this.map.animateTo({ center, zoom: 17 }, { duration: 500 })
+      }, 200)
+
     },
 
-    stop () {
+    stop() {
       this.$emit('salt:stop', this.simulationId)
       simSvc.stopSimulation(this.simulationId).then(() => {
         this.updateSimulation()
       })
     },
-    addLog (text) {
+    addLog(text) {
       this.logs.push(`${new Date().toLocaleTimeString()} ${text}`)
       if (this.logs.length > 5) {
         this.logs.shift()
       }
     },
-    toggleFocusTool () {
+    toggleFocusTool() {
       this.mapManager.toggleFocusTool()
     },
-    toggleState () {
+    toggleState() {
       return this.playBtnToggle ? '중지' : '시작'
     },
-    async updateSimulation () {
+    async updateSimulation() {
       const { simulation, ticks } = await simSvc.getSimulationInfo(
         this.simulationId
       )
       this.simulation = simulation
       this.slideMax = ticks - 1
     },
-    async updateChart () {
+    async updateChart() {
       this.stepPlayer = StepPlayer(this.slideMax, this.stepForward.bind(this))
-      this.chart.histogramDataStep = await statisticsService.getHistogramChart(
-        this.simulationId,
-        0
-      )
-      this.chart.histogramData = await statisticsService.getHistogramChart(
-        this.simulationId
-      )
-      this.chart.pieDataStep = await statisticsService.getPieChart(
-        this.simulationId,
-        0
-      )
-      this.chart.pieData = await statisticsService.getPieChart(
-        this.simulationId
-      )
-      this.speedsPerStep = await statisticsService.getSummaryChart(
-        this.simulationId
-      )
-
-      // this.pieData = await statisticsService.getPieChart(this.simulationId)
-      // this.pieDataStep = await statisticsService.getPieChart(
-      //   this.simulationId,
-      //   0
-      // )
+      this.chart.histogramDataStep = await statisticsService.getHistogramChart(this.simulationId, 0)
+      this.chart.histogramData = await statisticsService.getHistogramChart(this.simulationId)
+      this.chart.pieDataStep = await statisticsService.getPieChart(this.simulationId, 0)
+      this.chart.pieData = await statisticsService.getPieChart(this.simulationId)
+      this.speedsPerStep = await statisticsService.getSummaryChart(this.simulationId)
 
       this.chart.linkMeanSpeeds = makeLinkSpeedChartData(
         this.speedsPerStep.datasets[0].data,
         this.simulation.configuration.fromTime,
         this.simulation.configuration.period
       )
+
+      this.chart.linkSpeeds = {
+        labels: this.chart.linkMeanSpeeds.labels,
+        datasets: this.chart.linkMeanSpeeds.datasets
+      }
     },
-    edgeSpeed () {
+    edgeSpeed() {
       if (this.currentEdge && this.currentEdge.speeds) {
         return this.currentEdge.speeds[this.currentStep] || 0
       }
       return 0
     },
-    resize () {
-      // this.mapHeight = window.innerHeight - 150 // update map height to current height
-      console.log('resize')
+    resize() {
+      // this.mapHeight = window.innerHeight - 150
       if (this.simulation.status === 'finished') {
-        this.mapHeight = window.innerHeight - 350 // update map height to current height
+        this.mapHeight = window.innerHeight - 150
       } else {
-        this.mapHeight = window.innerHeight - 170 // update map height to current height
+        this.mapHeight = window.innerHeight - 138
       }
     },
-    togglePlay () {
+    togglePlay() {
       if (this.currentStep >= this.slideMax) {
         this.currentStep = 0
       }
       this.playBtnToggle = !this.playBtnToggle
-      ;(this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(
-        this
-      )()
+        ; (this.playBtnToggle ? this.stepPlayer.start : this.stepPlayer.stop).bind(
+          this
+        )()
     },
-    async stepChanged (step) {
+    async stepChanged(step) {
       setTimeout(() => {
         if (step >= this.slideMax) {
           this.currentStep = 0
@@ -482,11 +533,17 @@ export default {
           await statisticsService.getHistogramChart(this.simulationId, step)
       }
     },
-    centerTo () {
+    centerTo() {
+      if (this.config.areaType === 'area') {
+
+        const center = [this.config.area.minX + 0.04, this.config.area.minY + 0.01]
+        this.map.animateTo({ center, zoom: 16 }, { duration: 1000 })
+        return
+      }
       const center = region[this.config.region] || region.doan
-      this.map.animateTo({ center, zoom: 15 }, { duration: 1000 })
+      this.map.animateTo({ center, zoom: 16 }, { duration: 1000 })
     },
-    makeToast (msg, variant = 'info') {
+    makeToast(msg, variant = 'info') {
       this.$bvToast.toast(msg, {
         title: 'Notification',
         autoHideDelay: 5000,
@@ -495,32 +552,43 @@ export default {
         toaster: 'b-toaster-bottom-right'
       })
     },
-    async connectWebSocket () {
+    async connectWebSocket() {
       this.wsClient.init()
     },
-    getRegionName (r) {
-      return map[r] || r
+    getRegionName(r) {
+      return map[r] || r || '사용자 지정'
     },
-    removeLinkChart (linkId) {
+    removeLinkChart(linkId) {
       const idx = this.chart.links.findIndex(obj => obj.linkId === linkId)
       if (idx >= 0) {
         this.chart.links.splice(idx, 1)
       }
     },
-    async updateLinkChart (linkId, vdsId) {
+    async updateLinkChart(linkId, vdsId) {
       try {
         const linkData = await simSvc.getValueByLinkOrCell(
           this.simulationId,
           linkId
         )
 
-        this.chart.linkSpeeds = makeLinkCompChart([
-          { label: 'simulation', color: '#FF8C00', data: linkData.values }
-        ])
+        this.chart.linkSpeeds = makeLinkCompChart(
+          [
+            { label: '링크속도', color: '#FF8C00', data: linkData.values },
+            { label: '통행량', color: '#5F9EA0', data: linkData.vehPassed }
+          ],
+          {
+            labels: this.chart.linkMeanSpeeds.labels,
+            dataset: this.chart.linkMeanSpeeds.datasets[0]
+          }
+        )
+        // this.chart.linkSpeeds.labels = this.chart.linkMeanSpeeds.labels
+        // this.chart.linkSpeeds.datasets.push(
+        //   this.chart.linkMeanSpeeds.datasets[0]
+        // )
 
-        this.chart.linkVehPassed = makeLinkCompChart([
-          { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
-        ])
+        // this.chart.linkVehPassed = makeLinkCompChart([
+        //   { label: 'simulation', color: '#7FFF00', data: linkData.vehPassed }
+        // ])
       } catch (err) {
         log(err.message)
       }

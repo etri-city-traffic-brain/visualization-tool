@@ -1,9 +1,11 @@
 import moment from 'moment'
 
-import simulationService from '@/service/simulation-service'
+// import simulationService from '@/service/simulation-service'
+import optService from '@/service/optimization-service'
 import SignalMap from '@/components/SignalMap'
 import SignalEditor from '@/pages/SignalEditor'
 import { HTTP } from '@/http-common'
+import SignalGroupSelection from '@/pages/SignalGroupSelection'
 
 const random = () => `${Math.floor(Math.random() * 1000)}`
 const generateRandomId = (prefix = 'DEFU') =>
@@ -23,30 +25,22 @@ const periodOptions = [
   { value: 30 * 60, text: '30분' },
   { value: 60 * 60, text: '1시간' },
   { value: 120 * 60, text: '2시간' }
-  // { value: 240 * 60, text: '4시간' },
-  // { value: 360 * 60, text: '6시간' }
 ]
 
 const areaOptions = [
-  { value: 'doan', text: '도안' },
-  { value: 'cdd3', text: '대전(연구단지)' },
-  { value: 'dj_all', text: '대전전체' },
-  { value: 'sa_1_6_17', text: 'sa_1_6_17' }
-  // { value: 10, text: '테스트지역' },
-  // { value: 250, text: '대전광역시' },
-  // { value: 25030, text: '서구' },
-  // { value: 25040, text: '유성구' },
-  // { value: 290, text: '세종시' },
-  // { value: 29010, text: '세종특별자치시' }
+
 ]
 
 const scriptOptions = [{ value: 'run.py', text: 'run.py' }]
 
 const actionOptions = [
-  { value: 'offset', text: 'offset - 옵셋 조정' }, // default
-  { value: 'kc', text: 'kc - 즉시 신호 변경' },
-  { value: 'gr', text: 'gr - 녹색시간 조정' },
-  { value: 'gro', text: 'gro - 녹색시간과 옵셋 조정' }
+  // { value: 'offset', text: 'offset - 옵셋 조정' }, // default
+  // { value: 'kc', text: 'kc - 즉시 신호 변경' },
+  // { value: 'gr', text: 'gr - 녹색시간 조정' },
+  // { value: 'gro', text: 'gro - 녹색시간과 옵셋 조정' }
+  { value: 'ga', text: 'ga - 현시 주기 만족' },
+  { value: 'gt', text: 'gt - 현시 최소최대 만족' },
+
 ]
 const methodOptions = [
   { value: 'sappo', text: 'SAPPO' },
@@ -54,18 +48,18 @@ const methodOptions = [
   { value: 'sappo_rnd', text: 'SAPPO_RND' }
 ]
 const rewardFuncOptions = [
+  { value: 'wq', text: 'wq - 대기 큐 길이' },
   { value: 'pn', text: 'pn - 통과 차량 수' },
   { value: 'wt', text: 'wt - 대기 시간' },
-  { value: 'tt', text: 'tt - 통과 소요 시간' },
-  { value: 'wq', text: 'wq - 대기 큐 길이' },
-  { value: 'cwq', text: 'cwq - 축적된 대기 큐 길이' }
+  // { value: 'tt', text: 'tt - 통과 소요 시간' },
+  // { value: 'cwq', text: 'cwq - 축적된 대기 큐 길이' }
 ]
 
 const stateOptions = [
+  { value: 'vd', text: 'vd - 차량 수와 밀도' },
   { value: 'v', text: 'v - 차량 수' },
   { value: 'd', text: 'd - 차량 밀도' },
-  { value: 'vd', text: 'vd - 차량 수와 밀도' },
-  { value: 'vdd', text: 'vdd - 차량 수를 밀도로 나눈 값' }
+  // { value: 'vdd', text: 'vdd - 차량 수를 밀도로 나눈 값' }
 ]
 
 const intervalOptions = [
@@ -81,6 +75,23 @@ const intervalOptions = [
   { text: '100 Step', value: 100 }
 ]
 
+const lrOptions = [
+  { text: '0.0001', value: 0.0001 },
+  { text: '0.005', value: 0.005 },
+]
+
+const memLenOptions = [
+  { text: '16', value: 16 },
+  { text: '32', value: 32 },
+  { text: '64', value: 64 },
+  { text: '128', value: 128 },
+  { text: '256', value: 256 },
+  { text: '512', value: 512 },
+]
+
+
+const { log } = console
+
 export default {
   name: 'uniq-registration',
   props: [
@@ -93,9 +104,10 @@ export default {
   ],
   components: {
     SignalMap,
-    SignalEditor
+    SignalEditor,
+    SignalGroupSelection
   },
-  data () {
+  data() {
     return {
       envName: generateRandomId('Exp'), //
       id: generateRandomId(this.role), //
@@ -104,19 +116,21 @@ export default {
       toDate: getToday(), //
       fromTime: '07:00', //
       toTime: '08:59', //
-      periodSelected: periodOptions[0].value, //
-      areaSelected: areaOptions[0].value, //
+      periodSelected: periodOptions[1].value, //
+      areaSelected: '', //
       scriptSelected: scriptOptions[0].value, //
       intervalSelected: intervalOptions[0].value, //
       actionOptionSelected: actionOptions[0].value, //
       methodOptionSelected: methodOptions[0].value, //
       rewardFuncOptionSelected: rewardFuncOptions[0].value, //
       stateOptionSelected: stateOptions[0].value,
-      junctionId: 'SA 101,SA 107,SA 111,SA 104',
+      lrSelected: lrOptions[0].value,
+      memLenSelected: memLenOptions[0].value,
+      junctionId: '',
       epoch: 10,
       extent: null, // current map extent
       // dockerImage: 'images4uniq/optimizer:v1.1a.20220531',
-      dockerImage: 'images4uniq/optimizer:v1.1a.20220629.d',
+      dockerImage: '',
       imageOptions: [],
       periodOptions: [...periodOptions],
       areaOptions: [...areaOptions],
@@ -126,13 +140,19 @@ export default {
       actionOptions,
       methodOptions,
       rewardFuncOptions,
+      lrOptions: [...lrOptions],
+      memLenOptions: [...memLenOptions],
       loading: false,
       showMap: false,
       showEnv: true,
-      modelSavePeriod: 20
+      modelSavePeriod: 5,
+      center: {},
+      scenario: [],
+      signalGroups: ['SA 101', 'SA 103']
     }
   },
-  async mounted () {
+  async mounted() {
+
     HTTP({
       url: '/salt/v1/helper/docker',
       method: 'get'
@@ -140,9 +160,20 @@ export default {
       .then(r => r.data)
       .then(d => {
         this.imageOptions = d.optimization.images
+        this.dockerImage = this.imageOptions[0]
       })
 
-    // console.log('simulation register ui', this.modalName)
+    const scenario = await optService.getScenario()
+
+    this.scenario = scenario
+    this.areaOptions = scenario.map(s => {
+      return {
+        value: s.region,
+        text: s.description,
+      }
+    })
+
+
     if (this.modalName === 'create-simulation-modal') {
       this.showEnv = false
     }
@@ -156,37 +187,54 @@ export default {
       this.toTime = env.configuration.toTime.slice(0, 5)
       this.periodSelected = env.configuration.period
       this.areaSelected = env.configuration.region
+
       this.scriptSelected = env.configuration.script
       this.intervalSelected = env.configuration.interval
 
       this.actionOptionSelected = env.configuration.action
       this.methodOptionSelected = env.configuration.method
       this.rewardFuncOptionSelected = env.configuration.rewardFunc
-
       this.junctionId = env.configuration.junctionId
       this.epoch = env.configuration.epoch
       this.dockerImage = env.configuration.dockerImage
       this.modelSavePeriod = env.configuration.modelSavePeriod
+      this.center = env.configuration.center
+
+      this.memLenSelected = env.configuration.memLen
+      this.lrSelected = env.configuration.lr
     }
+
+    // this.regionChanged(this.areaSelected)
+    // log(this.junctionId)
   },
 
   methods: {
-    regionChanged (v) {
-      if (v === 'doan') {
-        this.junctionId = 'SA 101,SA 107,SA 111,SA 104'
-      } else if (v === 'cdd3') {
-        this.junctionId = 'SA 1701,SA 1702'
+    async regionChanged(v) {
+      const obj = this.scenario.find(item => item.region === v)
+      if (obj) {
+        // this.junctionId = obj.tls.join(',')
+      }
+      const scenario = this.scenario.find(s => {
+        return s.region === v
+      })
+
+      if (scenario) {
+        const groups = await optService.getSignalGroups(scenario.region)
+        this.signalGroups = {
+          targetGroups: scenario.tls,
+          totalGroups: groups
+        }
       }
     },
-    openSignalMap () {
+    openSignalMap() {
       this.$refs['signal-map'].show()
     },
-    resetForm () {
+    resetForm() {
       this.id = generateRandomId(this.role)
       this.description = '...'
     },
-    async register () {
-      this.loading = true
+    async register() {
+
       const from = moment(`${this.fromDate} ${this.fromTime}`)
       const to = moment(`${this.toDate} ${this.toTime}`)
       const begin = moment.duration(this.fromTime).asSeconds()
@@ -199,6 +247,21 @@ export default {
         return
       }
 
+      if (!this.junctionId) {
+        this.$bvToast.toast('대상 교차로 그룹이 비었습니다.')
+        return
+      }
+
+      if (!this.center.x) {
+        log('center:', this.center)
+        this.$bvToast.toast('지도의 중앙이 설정되지 않았습니다.')
+        return
+      }
+
+
+      const regionName = this.areaOptions.find(v => v.value === this.areaSelected)
+
+
       const simulationConfig = {
         id: this.id,
         user: this.userId,
@@ -208,6 +271,7 @@ export default {
         envName: this.envName,
         configuration: {
           region: this.areaSelected,
+          regionName: regionName.text,
           extent: this.extent,
           fromDate: this.fromDate,
           toDate: this.toDate,
@@ -226,7 +290,10 @@ export default {
           action: this.actionOptionSelected,
           method: this.methodOptionSelected,
           rewardFunc: this.rewardFuncOptionSelected,
-          dockerImage: this.dockerImage
+          dockerImage: this.dockerImage,
+          center: this.center,
+          memLen: this.memLenSelected,
+          lr: this.lrSelected
         }
       }
 
@@ -236,21 +303,22 @@ export default {
         this.$emit('optenvconfig:save', simulationConfig)
       }
       this.hide()
-      this.loading = false
+
     },
-    hide () {
+    hide() {
       this.$emit('hide')
       this.$bvModal.hide(this.modalName)
       this.resetForm()
     },
-    selectJunction (junction) {
+    selectJunction(junction) {
       this.$refs['signal-map'].hide()
       // this.junctionId = junction.id
     },
-    selectionFinished ({ junctions, extent }) {
+    selectionFinished({ junctions, extent, center }) {
       this.junctionId = junctions.join(',')
       this.extent = extent
       this.showMap = false
+      this.center = center
     }
   }
 }
