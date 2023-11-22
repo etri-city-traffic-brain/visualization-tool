@@ -52,7 +52,7 @@ export default {
       ],
       items: [],
       currentPage: 1,
-      perPage: 10,
+      perPage: 20,
       totalRows: 0,
       envFields: [
         { class: 'text-center', key: 'envName', label: '아이디' },

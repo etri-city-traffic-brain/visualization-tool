@@ -1,10 +1,10 @@
 
-const paginate = require('paginate-array');
+const paginate = require('paginate-array')
 
-const { getSimulations } = require('../../globals');
+const { getSimulations } = require('../../globals')
 
-const DEFAULT_PAGE = 1;
-const DEFAULT_PER_PAGE = 15;
+const DEFAULT_PAGE = 1
+const DEFAULT_PER_PAGE = 15
 
 module.exports = (req, res) => {
   const {
@@ -12,21 +12,22 @@ module.exports = (req, res) => {
     perPage = DEFAULT_PER_PAGE,
     user = '',
     type
-  } = req.query;
+  } = req.query
 
-  let array;
+  let array
   if (type === 'optimization') {
     array = getSimulations()
       .filter({ type, role: 'training' })
       .sortBy('created', 'asc')
       .value()
-      .reverse();
+      .reverse()
+    res.json(paginate(array, page, 100))
   } else {
     array = getSimulations()
       .filter({ role: 'simulation' })
       .sortBy('created', 'asc')
       .value()
-      .reverse();
+      .reverse()
+    res.json(paginate(array, page, perPage))
   }
-  res.json(paginate(array, page, perPage));
-};
+}

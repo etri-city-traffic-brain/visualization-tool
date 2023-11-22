@@ -273,7 +273,7 @@
           <b-spinner small type="grow" /> {{ msg }}
           <b-spinner small type="grow" />
         </b-alert>
-        <b-pagination class="mt-1" :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" />
+        <!-- <b-pagination class="mt-1" :total-rows="totalRows" :per-page="perPage" v-model="currentPage" align="center" /> -->
       </div>
     </div>
 

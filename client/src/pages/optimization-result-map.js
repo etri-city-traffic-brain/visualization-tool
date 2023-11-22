@@ -268,6 +268,8 @@ export default {
   async mounted() {
     this.simulationId = this.$route.params ? this.$route.params.id : null
 
+    await this.updateStatus()
+
     this.showLoading = true
     this.resize()
     this.map = makeMap({ mapId: this.mapId, zoom: 15 })
@@ -278,11 +280,13 @@ export default {
     })
 
     const center = this.simulation.configuration.center
+
     if (center) {
       this.map.animateTo({
         center: [center.x, center.y]
       })
     }
+
 
     this.mapManager.loadMapData()
 
