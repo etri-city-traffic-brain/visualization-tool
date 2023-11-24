@@ -8,4 +8,6 @@ router.get('/traffic_lights', require('./traffic-lights'))
 router.get('/grids', require('./grid'))
 router.get('/links/:linkId', require('./links'))
 router.get('/yuseong', require('./yuseong'))
+router.get('/sejong', require('./sejong'))
+
 module.exports = router
