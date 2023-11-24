@@ -13,6 +13,12 @@ const getToday = () => format(new Date())
 
 const { log } = console
 
+const regionOptions = [
+  { text: '세종', value: 'sejong' },
+  { text: '도안', value: 'yuseong' },
+  { text: '유성', value: 'yuseong' },
+]
+
 export default {
   name: 'sim-registration',
   props: [
@@ -28,9 +34,10 @@ export default {
       toDate: getToday(),
       fromTime: '07:00',
       toTime: '08:59',
-      regionSelected: 'doan',
+      region: 'yuseong',
       extent: null, // current map extent
       loading: false,
+      regionOptions: [...regionOptions],
       env: {
         "region_target": "DJ",
         "day_target": "20220630",
@@ -97,6 +104,7 @@ export default {
           toDate: this.toDate,
           fromTime: `${this.fromTime}:00`,
           toTime: `${this.toTime}:00`,
+          region: this.region,
           begin,
           end,
           day,

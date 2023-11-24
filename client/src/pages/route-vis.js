@@ -3,7 +3,7 @@
 import axios from 'axios'
 
 import { scaleLinear, interpolateHcl } from 'd3'
-
+import simSvc from '@/service/simulation-service'
 const volumeColor = scaleLinear()
   .domain([0, 500, 1000])
   .range([
@@ -51,6 +51,10 @@ function makeDong(feature, color) {
     'markerHeight': size
   })
 
+  dong.on('click', (x) => {
+    console.log('click', x.target.properties.adm_cd)
+  })
+
   return { dong, center: dongCenter }
 }
 
@@ -63,7 +67,11 @@ function randomColor() {
 }
 
 async function getDaejeonDongs() {
-  return axios({ url: '/salt/v1/route/dong', method: 'get' }).then(res => res.data)
+  return axios({ url: '/salt/v1/route/dong/get', method: 'get' }).then(res => res.data)
+}
+
+async function getSejongDongs() {
+  return axios({ url: '/salt/v1/route/dong/get?region=sejong', method: 'get' }).then(res => res.data)
 }
 
 const updateTrip = async (linkPoints, trips, showLabel) => {
@@ -141,6 +149,17 @@ export default {
   },
   async mounted() {
     this.id = this.$route.params ? this.$route.params.id : null
+
+
+    const rr = await axios({
+      url: '/salt/v1/route/' + this.id,
+      method: 'get'
+    }).then(res => res.data)
+    this.simulation = rr
+
+
+
+
 
     this.layerLinkFrom = new maptalks.VectorLayer('linkLayerFrom', [], {})
     this.layerLinkTo = new maptalks.VectorLayer('linkLayerTo', [], {})
@@ -350,7 +369,6 @@ export default {
       const x = Object.values(this.tod).map(arr => arr.map(a => a[2]))
       let values = []
       x.forEach(v => {
-        // console.log(v)
         values = values.concat(v)
       })
       const min = Math.min(...values);
@@ -363,9 +381,13 @@ export default {
 
 
     async loadLinks() {
-      this.links = await axios({
-        url: '/salt/v1/map/yuseong'
-      }).then(res => res.data)
+
+      if (this.simulation.configuration.region === 'sejong') {
+        this.links = await axios({ url: '/salt/v1/map/sejong' }).then(res => res.data)
+
+      } else {
+        this.links = await axios({ url: '/salt/v1/map/yuseong' }).then(res => res.data)
+      }
 
       const fasterThan30 = feature => feature.properties.SPEEDLH >= 20
       const pointsFrom = this.links.features.filter(fasterThan30).map(feature => {
@@ -393,33 +415,61 @@ export default {
     },
 
     async loadDong() {
-      const dongGeojson = await getDaejeonDongs()
-      const { features } = dongGeojson
 
-      const onlyYuseong = (feature) => {
-        // return feature.properties.adm_nm.indexOf('유성') >= 0 ||
-        //   feature.properties.adm_cd === '2503066' ||
-        //   feature.properties.adm_cd === '2503070'
+      let dongGeojson
+      if (this.simulation.configuration.region === 'sejong') {
+        dongGeojson = await getSejongDongs()
+        const { features } = dongGeojson
 
-        return [
-          '2503066',
-          '2503070',
-          '2504054',
-          '2504059',
-          '2504064',
-          '2504065',
-        ].indexOf(feature.properties.adm_cd) >= 0
+        const onlySejong = (feature) => {
+          return [
+            '2901060',
+            '2901059',
+            '2901056',
+            '2901067',
+            '2901061',
+            '2901064',
+            '2901066',
+            '2901061',
+            '2901053',
+            '2901068'
+          ].indexOf(feature.properties.adm_cd) >= 0
+        }
 
+        features
+          .filter(onlySejong)
+          .forEach((feature) => {
+            const color = randomColor()
+            const { dong, center } = makeDong(feature, color)
+            this.layerDong.addGeometry(dong);
+            this.dongCenters[center.properties.adm_cd] = center
+          });
+      } else {
+        dongGeojson = await getDaejeonDongs()
+        const { features } = dongGeojson
+
+        const onlyYuseong = (feature) => {
+
+          return [
+            '2503066',
+            '2503070',
+            '2504054',
+            '2504059',
+            '2504064',
+            '2504065',
+          ].indexOf(feature.properties.adm_cd) >= 0
+
+        }
+
+        features
+          .filter(onlyYuseong)
+          .forEach((feature) => {
+            const color = randomColor()
+            const { dong, center } = makeDong(feature, color)
+            this.layerDong.addGeometry(dong);
+            this.dongCenters[center.properties.adm_cd] = center
+          });
       }
-
-      features
-        .filter(onlyYuseong)
-        .forEach((feature) => {
-          const color = randomColor()
-          const { dong, center } = makeDong(feature, color)
-          this.layerDong.addGeometry(dong);
-          this.dongCenters[center.properties.adm_cd] = center
-        });
     },
   }
 }

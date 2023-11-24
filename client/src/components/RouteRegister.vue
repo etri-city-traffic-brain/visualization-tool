@@ -13,14 +13,21 @@
         <div class="px-1 w-40 text-black bg-gray-300 rounded uppercase font-bold">설명</div>
         <input class="flex-1 border rounded px-1 text-black w-full" id="description" v-model="description" />
       </div>
+      <div>&nbsp;</div>
+      <div class="flex space-x-2 text-white">
+        <div class="px-1 w-40 text-black bg-gray-300 rounded uppercase font-bold">대상지역</div>
+        <div class="flex w-32">
+          <b-form-select v-model="region" :options="regionOptions" size="sm"></b-form-select>
+        </div>
+      </div>
     </div>
 
     <div class="p-2 space-y-2">
       <div class="text-white font-bold">환경변수</div>
       <div class="grid grid-cols-2 gap-1">
-        <div v-for="[key, value] in Object.entries(env)" :key="key" class="flex space-x-2">
+        <div v-for="key of Object.keys(env)" :key="key" class="flex space-x-2">
           <div class="px-1 w-40 text-black bg-gray-300 rounded uppercase font-bold">{{  key }}</div>
-          <input v-model="value" class="flex-1 border rounded px-1 w-max" />
+          <input v-model="env[key]" class="flex-1 border rounded px-1 w-max" />
         </div>
       </div>
     </div>
