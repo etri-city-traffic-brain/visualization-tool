@@ -1,14 +1,15 @@
 <template>
   <div>
     <div class="fixed z-50 h-16 right-2 top-12 space-y-1 w-max">
-      <div class="text-black text-center font-bold p-1 px-2">
-        {{ id }}
+      <div class="text-white text-center font-bold p-1 px-2 bg-gray-500 rounded-b-xl">
+        <div>{{ id }}</div>
       </div>
     </div>
-    <div class="fixed z-50 left-2 bottom-2 w-full">
-      <div class="flex items-center justify-end space-x-2 bg-gray-700 p-2 w-max rounded">
+    <!-- control bar -->
+    <div class="fixed z-50 left-2 bottom-4 w-full flex justify-center">
+      <div class="flex items-center justify-end space-x-2 bg-gray-700 p-2 w-max rounded min-w-max">
         <div class="w-max">
-          <button class="bg-gray-600 text-white px-1 rounded" @click="toggleTod">T-OD <input type="checkbox" v-model="showTod"/></button>
+          <button class="bg-gray-500 text-white px-1 rounded" @click="toggleTod">TOD <input type="checkbox" v-model="showTod"/></button>
           <button class="bg-blue-600 text-white px-1 rounded" @click="toggleLinksFrom">TRIP 출발 <input type="checkbox" v-model="showLinkFrom"/> </button>
           <button class="bg-red-600 text-white px-1 rounded" @click="toggleLinksTo">TRIP 도착 <input type="checkbox" v-model="showLinkTo"/> </button>
         </div>

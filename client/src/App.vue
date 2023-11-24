@@ -2,10 +2,9 @@
   <div id="app">
     <b-navbar
       type="dark"
-      :variant="variant"
       ref="main-nav"
       id="main-nav"
-      class="pl-3 py-1 m-0"
+      class="pl-3 py-1 m-0 bg-gray-700"
       toggleable="md"
       sticky
     >
