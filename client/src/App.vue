@@ -2,10 +2,9 @@
   <div id="app">
     <b-navbar
       type="dark"
-      :variant="variant"
       ref="main-nav"
       id="main-nav"
-      class="pl-3 py-1 m-0"
+      class="pl-3 py-1 m-0 bg-gray-700"
       toggleable="md"
       sticky
     >
@@ -107,10 +106,10 @@ export default {
         //   path: 'SignalEditor',
         //   name: '신호편집'
         // },
-        // {
-        //   path: "Dashboard",
-        //   name: "교통데이터 분석"
-        // },
+        {
+          path: "Dashboard",
+          name: "교통데이터 분석"
+        },
         {
           path: "RouteList",
           name: "수요생성"

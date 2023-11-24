@@ -71,7 +71,7 @@
       title="수요생성"
       id="create-route-modal"
       ref="create-route-modal"
-      size="lg"
+      size="xl"
       header-border-variant="dark"
       header-bg-variant="dark"
       header-text-variant="light"

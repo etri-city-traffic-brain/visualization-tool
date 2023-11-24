@@ -14,7 +14,7 @@
 
       <div class="flex space-x-2">
         <div class="flex space-x-2 text-white items-center">
-          <div class="text-sm w-28 text-right">시작</div>
+          <div class="text-sm w-28 text-right">시작시간</div>
           <div class="flex space-x-2-">
             <!-- <div class="text-black">
               <input
@@ -24,16 +24,16 @@
               />
             </div> -->
             <div class="text-black">
-              <input v-model="fromTime" type="time" class="border rounded px-1" />
+              <input v-model="fromTime" type="time" class="border rounded px-1 w-32" />
             </div>
           </div>
         </div>
         <div class="flex space-x-2 text-white items-center">
-          <div class="text-sm">종료</div>
+          <div class="text-sm">종료시간</div>
           <!-- <div class="text-black">
             <input v-model="toDate" type="date" class="border rounded px-1" />
           </div> -->
-          <div class="text-black">
+          <div class="text-black w-32">
             <input v-model="toTime" type="time" class="border rounded px-1" />
           </div>
         </div>
@@ -42,33 +42,47 @@
       <div class="flex space-x-2">
         <div class="flex text-white space-x-2 items-center">
           <div class="flex-none text-sm w-28 text-right">통계주기</div>
-          <b-form-select class="" v-model="periodSelected" :options="periodOptions" size="sm" />
+          <div class="w-32">
+            <b-form-select v-model="periodSelected" :options="periodOptions" size="sm" />
+          </div>
         </div>
+
+      </div>
+
+      <div class="flex space-x-2">
         <div class="flex text-white space-x-2 items-center">
-          <div class="flex-none text-sm">가시화주기</div>
-          <b-form-select v-model="intervalSelected" :options="intervalOptions" size="sm" />
+          <div class="w-28 text-right flex-none text-sm">가시화주기</div>
+          <div class="w-32">
+            <b-form-select v-model="intervalSelected" :options="intervalOptions" size="sm" />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex text-white space-x-2 items-center">
+        <div class="flex-none text-sm w-28 text-right">시뮬레이션 타입</div>
+        <div class="w-80">
+          <b-form-select v-model="simulationTypeSelected" :options="simulationTypeOptions" size="sm" />
         </div>
       </div>
 
       <div class="flex text-white space-x-2 items-center">
         <div class="flex-none text-sm w-28 text-right">대상지역</div>
-        <div class="flex">
+        <div class="flex w-32">
           <b-form-select v-model="areaType" :options="areaTypeOptions" size="sm"></b-form-select>
         </div>
         <div v-if="areaType === 'region'">
-          <b-form-select v-model="regionSelected" :options="regionOptions" size="sm" />
+          <div class="w-32">
+            <b-form-select v-model="regionSelected" :options="regionOptions" size="sm" />
+          </div>
         </div>
         <div v-else>지도에서 선택하세요</div>
       </div>
 
-      <div class="flex text-white space-x-2 items-center">
-        <div class="flex-none text-sm w-28 text-right">시뮬레이션 타입</div>
-        <b-form-select v-model="simulationTypeSelected" :options="simulationTypeOptions" size="sm" />
-      </div>
-
       <div class="flex space-x-2 items-center">
-        <div class="flex-none text-white text-sm w-28 text-right">이미지</div>
-        <b-form-select v-model="dockerImage" :options="getDockerImage()" size="sm" />
+        <div class="flex-none text-white text-sm w-28 text-right">실행 이미지</div>
+        <div class="w-80">
+          <b-form-select v-model="dockerImage" :options="getDockerImage()" size="sm" />
+        </div>
         <!-- <b-form-input v-model="dockerImage" type="text" size="sm" class="w-max"/> -->
       </div>
     </div>

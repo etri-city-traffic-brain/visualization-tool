@@ -1,24 +1,29 @@
 <template>
   <div>
-    <div class="fixed z-50 h-16 left-20 top-20 space-y-1">
-      <div class="bg-gray-600 text-white text-center font-bold py-1">
-        {{ id }}
+    <div class="fixed z-50 h-16 right-2 top-12 space-y-1 w-max">
+      <div class="text-white text-center font-bold p-1 px-2 bg-gray-500 rounded-b-xl">
+        <div>{{ id }}</div>
       </div>
-      <div class="">
-        <button class="bg-gray-600 text-white px-1 rounded" @click="toggleTod">T-OD <input type="checkbox" v-model="showTod"/></button>
-        <button class="bg-blue-600 text-white px-1 rounded" @click="toggleLinksFrom">TRIP 출발 <input type="checkbox" v-model="showLinkFrom"/> </button>
-        <button class="bg-red-600 text-white px-1 rounded" @click="toggleLinksTo">TRIP 도착 <input type="checkbox" v-model="showLinkTo"/> </button>
-        <button class="bg-gray-600 text-white px-1 rounded" @click="startTripVisualization">가시화 시작</button>
+    </div>
+    <!-- control bar -->
+    <div class="fixed z-50 left-2 bottom-4 w-full flex justify-center">
+      <div class="flex items-center justify-end space-x-2 bg-gray-700 p-2 w-max rounded min-w-max">
+        <div class="w-max">
+          <button class="bg-gray-500 text-white px-1 rounded" @click="toggleTod">TOD <input type="checkbox" v-model="showTod"/></button>
+          <button class="bg-blue-600 text-white px-1 rounded" @click="toggleLinksFrom">TRIP 출발 <input type="checkbox" v-model="showLinkFrom"/> </button>
+          <button class="bg-red-600 text-white px-1 rounded" @click="toggleLinksTo">TRIP 도착 <input type="checkbox" v-model="showLinkTo"/> </button>
+        </div>
+        <div class="flex space-x-1 items-center w-96">
+          <input type="range" max="24" :value="currentStep" @change="onStepChanged" @input="onInput"></input>
+          <div class="text-lg font-bold bg-indigo-100 rounded-lg px-1">{{ currentStep.toString().padStart(2,'0') }}:00</div>
+        </div>
+        <div>
+          <b-btn size="sm" @click="previous">이전</b-btn>
+          <b-btn size="sm" @click="next">다음</b-btn>
+          <b-btn size="sm" variant="primary" @click="startTripVisualization">가시화 시작</b-btn>
+        </div>
+      </div>
 
-      </div>
-      <div class="flex space-x-1 items-center">
-        <input type="range" max="24" :value="currentStep" @change="onStepChanged" @input="onInput"></input>
-        <div class="text-lg font-bold bg-indigo-100 rounded-lg px-1">{{ currentStep.toString().padStart(2,'0') }}:00</div>
-      </div>
-      <div>
-        <b-btn size="sm" @click="previous">이전</b-btn>
-        <b-btn size="sm" @click="next">다음</b-btn>
-      </div>
     </div>
     <div class="fixed z-50 inset-auto h-full top-60" v-if="showLoading">
       <div class="w-screen p-2 flex justify-center">
@@ -90,7 +95,7 @@ input[type="range"]:focus {
 /***** Chrome, Safari, Opera and Edge Chromium styles *****/
 /* slider track */
 input[type="range"]::-webkit-slider-runnable-track {
-   background-color: #053a5f;
+   background-color: #5588ac;
    border-radius: 0.5rem;
    height: 0.5rem;
 }
@@ -108,8 +113,8 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]:focus::-webkit-slider-thumb {
-  border: 1px solid #053a5f;
-  outline: 3px solid #053a5f;
+  border: 1px solid #7ea5c2;
+  outline: 3px solid #7095af;
   outline-offset: 0.125rem;
 }
 
