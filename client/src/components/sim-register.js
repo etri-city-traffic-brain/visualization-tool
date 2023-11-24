@@ -17,11 +17,11 @@ const format = date => moment(date).format('YYYY-MM-DD')
 const getToday = () => format(new Date())
 
 const periodOptions = [
-  { value: 5 * 60, text: '5분' },
-  { value: 10 * 60, text: '10분' },
-  { value: 30 * 60, text: '30분' },
-  { value: 60 * 60, text: '1시간' },
-  { value: 120 * 60, text: '2시간' }
+  { value: 5 * 60, text: '5 분' },
+  { value: 10 * 60, text: '10 분' },
+  { value: 30 * 60, text: '30 분' },
+  { value: 60 * 60, text: '60 분' },
+  { value: 120 * 60, text: '120 분' }
 ]
 
 const intervalOptions = [
@@ -57,10 +57,10 @@ const regionOptionsLightweight = [
 ]
 
 const sTypeOptions = [
-  { text: '메소', value: 'meso' },
-  { text: '마이크로', value: 'micro' },
-  { text: '멀티스케일', value: 'multi' },
-  { text: '경량', value: 'lightweight' }
+  { text: '메소스케일 시뮬레이션', value: 'meso' },
+  { text: '마이크로스케일 시뮬레이션', value: 'micro' },
+  { text: '멀티스케일 시뮬레이션', value: 'multi' },
+  { text: '경량 시뮬레이션', value: 'lightweight' }
 ]
 
 const { log } = console
