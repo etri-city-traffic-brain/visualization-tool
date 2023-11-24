@@ -91,6 +91,8 @@ export default {
         return 'bg-blue-200'
       } else if (type === 'micro') {
         return 'bg-yellow-200'
+      } else if (type === 'lightweight') {
+        return 'bg-indigo-200'
       } else {
         return 'bg-green-200'
       }

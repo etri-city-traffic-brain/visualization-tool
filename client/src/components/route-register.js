@@ -31,6 +31,35 @@ export default {
       regionSelected: 'doan',
       extent: null, // current map extent
       loading: false,
+      env: {
+        "region_target": "DJ",
+        "day_target": "20220630",
+        "hour_target": "00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23",
+        "taz_target": "code/taz_target.csv",
+        "vds_target": "code/vds_target.csv",
+        "zone2taz": "code/zone2taz.csv",
+        "vds2stdlink": "code/vds2stdlink.csv",
+
+        "od_raw": "raw/2019_OD_MOD_DJ_SJ.csv",
+        "vds_raw": "raw/MRT_TF_INFO_2022M06_TARGET.csv",
+        "vds_raw_dir": "",
+        "od_raw_target": "raw/TAZ_TARGET_2019_OD_MOD_DJ_SJ.csv",
+        "vds_raw_target": "raw/VDS_TARGET_1H_MRT_TF_INFO_2022M06.csv",
+
+        "log_file": "product/log_file.txt",
+        "od_matrix": "product/OD_MATRIX.csv",
+        "t_od_matrix": "product/T_OD_MATRIX.csv",
+        "trip_data": "product/TRIP.csv",
+
+        "vds_table": "product/VDS_TARGET_VW_1H.csv",
+        "vds_renewal": "false",
+
+        "rt_dist": "product/RT_DIST.csv",
+        "rt_next": "product/RT_NEXT.csv",
+        "rt_renewal": "false",
+
+        "weightType": "0"
+      }
     }
   },
   destroyed() {
@@ -72,7 +101,8 @@ export default {
           end,
           day,
           days,
-        }
+        },
+        env: this.env
       }
     },
     save() {

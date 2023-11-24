@@ -24,7 +24,7 @@ export default {
   components: {
     LineChart
   },
-  data () {
+  data() {
     return {
       showVds: false,
       map: null,
@@ -72,7 +72,7 @@ export default {
       }
     }
   },
-  mounted () {
+  mounted() {
     this.$on('link:selected', async link => {
       this.loadVdsStats(link)
     })
@@ -121,7 +121,7 @@ export default {
   },
   methods: {
     defaultOption,
-    async loadVdsStats (link) {
+    async loadVdsStats(link) {
       const vdsId = link.vdsId
       if (!vdsId) return
 
@@ -148,16 +148,16 @@ export default {
       }
       this.showVds = true
     },
-    showModal () {
+    showModal() {
       // this.$refs['cctv-modal'].show()
     },
-    hideModal () {
+    hideModal() {
       this.$refs['cctv-modal'].hide()
     },
-    loadLinks () {
+    loadLinks() {
       loadLinks(this.mapManager, this.threeLayer)
     },
-    updateDtg () {
+    updateDtg() {
       if (!this.dtgShow) return
       const links = this.mapManager.getCurrentLinks()
 
@@ -184,7 +184,7 @@ export default {
       })
     },
 
-    hideDtg () {
+    hideDtg() {
       this.dtgShow = false
       const links = this.mapManager.getCurrentLinks()
 
@@ -200,7 +200,7 @@ export default {
       })
     },
 
-    analizeDtg () {
+    analizeDtg() {
       this.dtgShow = true
       axios({
         url: `/salt/v1/dashboard/dtg?date=${this.dtgDate}`,
@@ -209,7 +209,6 @@ export default {
         .then(res => res.data)
         .then(dtgData => {
           this.dtgData = dtgData
-          console.log(dtgData)
           this.updateDtg()
         })
         .catch(err => {
@@ -217,12 +216,12 @@ export default {
         })
     },
 
-    loadLineTrail (num) {
+    loadLineTrail(num) {
       loadLineTrip(this, num)
     }
   },
 
-  destroyed () {
+  destroyed() {
     if (this.map) {
       this.map.remove()
     }

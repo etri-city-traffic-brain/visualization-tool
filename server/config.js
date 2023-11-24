@@ -76,6 +76,10 @@ module.exports = {
           'images4uniq/salt:v2.1a.221019',
           'images4uniq/salt:v2.1a.20210915.test_BUS'
         ],
+        lightweight: [
+          'images4uniq/salt:v2.1a.221019',
+          'images4uniq/salt:v2.1a.20210915.test_BUS'
+        ],
         micro: ['images4uniq/salt:v2.1a.20230228.test_mult_scale'],
         multi: ['images4uniq/salt:v2.1a.20230228.test_mult_scale']
       }

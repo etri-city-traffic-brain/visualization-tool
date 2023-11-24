@@ -44,6 +44,6 @@ module.exports = async simulation => {
 
   return docker(
     `run --rm --name ${simulationId} -v ${volume} ${imgName} ${RUN_SCRIPT} -s ${configPath}`,
-    { echo: false }
+    { echo: true }
   )
 }

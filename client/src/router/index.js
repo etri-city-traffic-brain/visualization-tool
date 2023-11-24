@@ -19,7 +19,7 @@ import OptimizationResultComparisonMap from '@/pages/OptimizationResultCompariso
 
 import OptEnvList from '@/pages/OptEnvList'
 
-// import Dashboard from '@/pages/Dashboard.vue'
+import Dashboard from '@/pages/Dashboard.vue'
 
 import Junction from '@/pages/JunctionView.vue'
 
@@ -53,7 +53,7 @@ export default new Router({
     route('/SimulationComparisonResult', SimulationComparisonResult),
     route('/SignalEditor', SignalEditor),
     route('/OptEnvList', OptEnvList),
-    // route('/Dashboard', Dashboard, true),
+    route('/Dashboard', Dashboard, true),
     route('/Junction', Junction),
     // route('/Admin', Admin),
     route('/RouteList', RouteList),
