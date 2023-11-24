@@ -50,10 +50,17 @@ const regionOptions = [
   { text: '중구', value: 'jg' }
 ]
 
+const regionOptionsLightweight = [
+  { text: '세종', value: 'sejong_lightweight' },
+  { text: '도안', value: 'doan_lightweight' },
+  { text: '유성', value: 'yuseong_lightweight' },
+]
+
 const sTypeOptions = [
   { text: '메소', value: 'meso' },
   { text: '마이크로', value: 'micro' },
-  { text: '멀티스케일', value: 'multi' }
+  { text: '멀티스케일', value: 'multi' },
+  { text: '경량', value: 'lightweight' }
 ]
 
 const { log } = console
@@ -186,11 +193,19 @@ export default {
       if (type === 'micro') {
         this.microArea = {}
       }
+      if (type === 'lightweight') {
+        this.regionOptions = [...regionOptionsLightweight]
+      } else {
+        this.regionOptions = [...regionOptions]
+      }
     }
   },
   methods: {
     getDockerImage() {
-      return this.dockerImages[this.simulationTypeSelected]
+      // console.log('getDockerImage()')
+      return this.dockerImages[this.simulationTypeSelected] || [
+        'images4uniq/salt:v2.1a.221019'
+      ]
     },
     getExtentMicro() {
       if (this.rectangleMicro) {

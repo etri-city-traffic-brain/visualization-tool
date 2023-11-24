@@ -9,5 +9,8 @@ export default {
   jg: '중구',
   cdd3: '연구단지',
   sejong: '세종(1,2생활권)',
-  sejong2: '행정중심복합도시'
+  sejong2: '행정중심복합도시',
+  sejong_lightweight: '세종',
+  doan_lightweight: '도안',
+  yuseong_lightweight: '유성'
 }
