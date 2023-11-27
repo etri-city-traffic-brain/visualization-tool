@@ -19,7 +19,7 @@ const symbolHighlight = {
 
 let vdsTable
 
-function VdsLayer (map, getEdges, eventBus) {
+function VdsLayer(map, getEdges, eventBus) {
   if (!vdsTable) {
     axios({
       url: '/salt/v1/vds',
@@ -27,6 +27,7 @@ function VdsLayer (map, getEdges, eventBus) {
     })
       .then(res => res.data)
       .then(data => {
+        // console.log(data)
         vdsTable = data
       })
   }
@@ -35,7 +36,7 @@ function VdsLayer (map, getEdges, eventBus) {
   map.on('zoomend moveend', () => {
     update()
   })
-  function update () {
+  function update() {
     layer.clear()
     const circles = getEdges()
       .map(edge => {
