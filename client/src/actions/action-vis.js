@@ -125,6 +125,9 @@ function SignalSystem(container, action = { duration: [], offset: 0 }) {
 
   return {
     update(action) {
+      if (!action) {
+        return
+      }
       durUpdated = action.duration
       offsetUpdated = action.offset
       network.redraw()

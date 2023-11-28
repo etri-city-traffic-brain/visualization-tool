@@ -183,13 +183,13 @@
                       </div>
                     </div>
 
-                    <div class="absolute -left-40 top-24 w-76 bg-gray-600 p-0 text-white" v-if="testResult">
+                    <div class="absolute -left-40 top-24 w-76 bg-gray-600 p-0 text-white" v-if="showPopup">
                       <div class="flex justify-between bg-gray-500 py-1 px-2">
                         <div class="font-bold">
                           <b-icon icon="stoplights"></b-icon> {{ crossNameSelected }}
                         </div>
                         <div>
-                          <button @click="testResult=null">X</button>
+                          <button @click="showPopup=false">X</button>
                         </div>
                       </div>
                       <div class="p-2 text-sm space-y-1">
