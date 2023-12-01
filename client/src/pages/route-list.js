@@ -12,6 +12,7 @@ export default {
       fields: [
         { class: 'text-center', key: 'num', label: '#' },
         { class: 'text-center', key: 'id', label: '아이디' },
+        { class: 'text-center', key: 'status', label: '진행상태' },
         { class: 'text-center', key: 'description', label: '설명' },
         { class: 'text-center', key: 'env.region_target', label: '지역코드' },
         { class: 'text-center', key: 'env.day_target', label: '대상날짜' },

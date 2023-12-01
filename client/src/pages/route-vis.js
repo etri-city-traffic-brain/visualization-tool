@@ -2,8 +2,8 @@
 
 import axios from 'axios'
 
-import { scaleLinear, interpolateHcl } from 'd3'
-import simSvc from '@/service/simulation-service'
+import { scaleLinear } from 'd3'
+
 const volumeColor = scaleLinear()
   .domain([0, 500, 1000])
   .range([
@@ -66,6 +66,17 @@ function randomColor() {
     Math.floor(127 * Math.random()) + ')'
 }
 
+async function updateStatus(id, status) {
+  return axios({
+    url: `/salt/v1/route/${id}`,
+    method: 'post',
+    data: {
+      id,
+      status
+    }
+  })
+}
+
 async function getDaejeonDongs() {
   return axios({ url: '/salt/v1/route/dong/get', method: 'get' }).then(res => res.data)
 }
@@ -92,16 +103,35 @@ const updateTrip = async (linkPoints, trips, showLabel) => {
         textHaloRadius: 1
       })
     }
-
-
     circle.setRadius(volume * 10)
   }
 }
 
-const wait = () => {
+const wait = (t = 100) => {
   return new Promise((resolve) => {
-    setTimeout(resolve, 100)
+    setTimeout(resolve, t)
   })
+}
+
+async function getSimulation(id) {
+  return axios({
+    url: `/salt/v1/route/${id}`,
+    method: 'get'
+  }).then(res => res.data)
+}
+
+async function getTod(id, region) {
+  return axios({
+    url: `/salt/v1/route/trip/${id}/tod?region=${region}`,
+    method: 'get'
+  }).then(res => res.data)
+}
+
+async function getTrip(id, region) {
+  return axios({
+    url: `/salt/v1/route/trip/${id}/from?region=${region}`,
+    method: 'get'
+  }).then(res => res.data)
 }
 
 export default {
@@ -127,13 +157,28 @@ export default {
       linkMapTo: {},
       currentStep: 0,
       trip: null,
-      showLinkFrom: true,
-      showLinkTo: true,
       showTod: true,
+      showLinkFrom: false,
+      showLinkTo: false,
       tod: {},
       message: '',
       min: 0,
-      max: 0
+      max: 0,
+      statuses: [
+        { value: 'ready', label: 'READY', delay: 1000 },
+        { value: 'runDijkstra', label: 'RUN DIJKSTRA', delay: 1000 },
+        { value: 'runOD2Trips', label: 'RUN OD2TRIPS', delay: 1000 * 2 },
+        { value: 'runRouter', label: 'RUN ROUTER', delay: 1000 * 5 },
+        { value: 'runSimulator', label: 'RUN SIMULATION', delay: 1000 * 5 },
+        { value: 'runCalibrator', label: 'RUN CALIBRATOR', delay: 1000 * 3 },
+        { value: 'runOD2Trips2', label: 'RUN OD2TRIPS', delay: 1000 * 5 },
+        { value: 'runRouter2', label: 'RUN ROUTER', delay: 1000 * 5 },
+        { value: 'runSimulator2', label: 'RUN SIMULATION', delay: 1000 * 8 },
+        { value: 'runCalibrator2', label: 'RUN CALIBRATOR', delay: 1000 * 3 },
+        { value: 'finished', label: 'FINISHED', delay: 1000 },
+      ],
+      status: 'ready',
+      isRunning: false,
     }
   },
   destroyed() {
@@ -146,20 +191,42 @@ export default {
     config() {
       return this.simulation.configuration
     },
+
+    // status() {
+    //   return this.simulation.status || 'ready'
+    // },
+
+    statusColor() {
+      return ''
+    }
   },
   async mounted() {
     this.id = this.$route.params ? this.$route.params.id : null
 
+    this.simulation = await getSimulation(this.id)
 
-    const rr = await axios({
-      url: '/salt/v1/route/' + this.id,
-      method: 'get'
-    }).then(res => res.data)
-    this.simulation = rr
+    const oneMin = 60 * 1000
 
+    const elapsed = (this.simulation.created, Date.now() - new Date(this.simulation.created).getTime())
 
-
-
+    // 준비상태가 아니면 시간에 따라 상태를 업데이트하여
+    //
+    if (this.simulation.status !== 'ready') {
+      if (elapsed > oneMin) {
+        this.status = 'runOD2Trips'
+      } if (elapsed > oneMin * 2) {
+        this.status = 'runRouter'
+      }
+      if (elapsed > oneMin * 3) {
+        this.status = 'runSimulator2'
+      }
+      if (elapsed > oneMin * 5) {
+        this.status = 'finished'
+      }
+      updateStatus(this.id, this.status)
+    } else {
+      this.status = this.simulation.status
+    }
 
     this.layerLinkFrom = new maptalks.VectorLayer('linkLayerFrom', [], {})
     this.layerLinkTo = new maptalks.VectorLayer('linkLayerTo', [], {})
@@ -201,7 +268,49 @@ export default {
 
 
   },
+  watch: {
+    status() {
+      if (this.status === 'runRouter') {
+        this.startTripVisualization()
+        log('watch', this.status)
+      }
+      if (this.status === 'runCalibrator2') {
+        this.showLinkFrom = true
+        this.showLinkTo = true
+        this.showTod = false
+        this.startTripVisualization()
+      }
+    },
+    showLinkFrom(v) {
+      if (v) {
+        this.layerLinkFrom.show()
+      } else {
+        this.layerLinkFrom.hide()
+      }
+    },
+    showLinkTo(v) {
+      if (v) {
+        this.layerLinkTo.show()
+      } else {
+        this.layerLinkTo.hide()
+      }
+    },
+    showTod(v) {
+      if (v) {
+        this.layerRoute.show()
+      } else {
+        this.layerRoute.hide()
+      }
+    }
+  },
   methods: {
+    async generateRoute() {
+      for (let s of this.statuses) {
+        await wait(s.delay)
+        this.status = s.value
+        updateStatus(this.id, this.status)
+      }
+    },
     previous() {
       if (this.currentStep < 1) {
         return
@@ -250,12 +359,20 @@ export default {
     },
 
     async startTripVisualization() {
+      if (this.isRunning) {
+        log('already running')
+        return
+      }
+
+      this.isRunning = true
       if (!this.trip) {
         await this.loadTrip()
       }
 
       for (let step in this.trip.from) {
         if (Number.isNaN(step) || step === 'NaN') {
+          this.currentStep = 0
+          this.isRunning = false
           return
         }
         const tripFrom = this.trip.from[step]
@@ -268,36 +385,20 @@ export default {
           this.updateOD(this.tod[step])
         }
 
-        await wait()
+        await wait(200)
       }
-    },
-    toggleLinksFrom() {
-      if (this.layerLinkFrom.isVisible()) {
-        this.layerLinkFrom.hide()
-        this.showLinkFrom = false
-      } else {
-        this.layerLinkFrom.show()
-        this.showLinkFrom = true
-      }
+      this.currentStep = 0
+      this.isRunning = false
 
     },
+    toggleLinksFrom() {
+      this.showLinkFrom = !this.showLinkFrom
+    },
     toggleLinksTo() {
-      if (this.layerLinkTo.isVisible()) {
-        this.showLinkTo = false
-        this.layerLinkTo.hide()
-      } else {
-        this.showLinkTo = true
-        this.layerLinkTo.show()
-      }
+      this.showLinkTo = !this.showLinkTo
     },
     toggleTod() {
-      if (this.layerRoute.isVisible()) {
-        this.showTod = false
-        this.layerRoute.hide()
-      } else {
-        this.showTod = true
-        this.layerRoute.show()
-      }
+      this.showTod = !this.showTod
     },
     async updateOD(odm) {
       this.layerRoute.clear()
@@ -344,7 +445,6 @@ export default {
     resize() {
       this.mapHeight = window.innerHeight - 50
     },
-
     centerTo() {
       const center = region[this.config.region] || region.doan
       this.map.animateTo({ center, zoom: 13 }, { duration: 10 })
@@ -361,10 +461,14 @@ export default {
     },
 
     async loadTODMetrix() {
-      this.tod = await axios({
-        url: `/salt/v1/route/trip/${this.id}/tod`,
-        method: 'get'
-      }).then(res => res.data)
+
+
+      this.tod = await getTod(this.id, this.simulation.configuration.region)
+      // this.tod = await axios({
+      //   url: `/salt/v1/route/trip/${this.id}/tod?region=${this.simulation.configuration.region}`,
+      //   method: 'get'
+      // }).then(res => res.data)
+
 
       const x = Object.values(this.tod).map(arr => arr.map(a => a[2]))
       let values = []
@@ -375,10 +479,7 @@ export default {
       const max = Math.max(...values);
       this.min = min
       this.max = max
-
-      console.log('min:', min, 'max:', max)
     },
-
 
     async loadLinks() {
 
@@ -404,13 +505,22 @@ export default {
 
       this.layerLinkFrom.addGeometry(pointsFrom)
       this.layerLinkTo.addGeometry(pointsTo)
+
+      this.layerLinkFrom.hide()
+      this.layerLinkTo.hide()
+
     },
 
     async loadTrip() {
-      this.trip = await axios({
-        url: `/salt/v1/route/trip/${this.id}/from`,
-        method: 'get'
-      }).then(res => res.data)
+      const region = this.simulation.configuration.region
+
+
+
+      this.trip = await getTrip(this.id, region)
+      // this.trip = await axios({
+      //   url: `/salt/v1/route/trip/${this.id}/from?region=${region}`,
+      //   method: 'get'
+      // }).then(res => res.data)
 
     },
 

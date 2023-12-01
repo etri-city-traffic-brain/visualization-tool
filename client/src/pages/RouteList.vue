@@ -47,6 +47,17 @@
         :per-page="perPage"
         class="mt-1"
       >
+      <template v-slot:cell(status)="row">
+        <div class="bg-gray-200 w-full rounded px-2 text-black uppercase text-sm font-bold" v-if="row.item.status === 'ready'">
+          {{  row.item.status }}
+        </div>
+        <div class="bg-blue-200 w-full rounded px-2 text-black uppercase text-sm font-bold" v-else-if="row.item.status === 'finished'">
+          {{  row.item.status }}
+        </div>
+        <div class="bg-green-200 w-full rounded px-2 text-black uppercase text-sm font-bold" v-else>
+          {{  row.item.status }}
+        </div>
+      </template>
         <template v-slot:cell(tools)="row">
            <!-- <button class="bg-gray-500 text-white rounded px-2 hover:bg-gray-700">
             수요생성

@@ -5,6 +5,8 @@ router.delete('/:id', require('./api-remove'))
 router.get('/:id', require('./api-get'))
 router.get('/', require('./api-list'))
 
+router.post('/:id', require('./api-update'))
+
 router.get('/dong/get', require('./dong'))
 router.get('/trip/:id/from', require('./trip-from'))
 // router.get('/trip/:id/to', require('./trip-to'))

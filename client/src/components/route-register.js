@@ -110,6 +110,7 @@ export default {
           day,
           days,
         },
+        status: 'ready',
         env: this.env
       }
     },
