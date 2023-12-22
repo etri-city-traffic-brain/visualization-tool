@@ -1,7 +1,7 @@
 import moment from 'moment'
-
+import * as maptalks from 'maptalks'
 import makeMap from '@/map2/make-map'
-
+import region from '@/map2/region'
 const random = () => `${Math.floor(Math.random() * 1000)}`
 const generateRandomId = (prefix = 'DEFU') =>
   `${prefix.substring(0, 4).toUpperCase()}_${moment().year()}${moment().format(
@@ -15,12 +15,12 @@ const { log } = console
 
 const regionOptions = [
   { text: '세종', value: 'sejong' },
-  { text: '도안', value: 'yuseong' },
+  { text: '도안', value: 'doan' },
   { text: '유성', value: 'yuseong' },
 ]
 
 export default {
-  name: 'sim-registration',
+  name: 'route-registration',
   props: [
     'modalName',
   ],
@@ -28,6 +28,9 @@ export default {
   },
   data() {
     return {
+      map: null,
+      mapId: `map-${Math.floor(Math.random() * 100)}`,
+      rect: null,
       id: generateRandomId('ROUTE'),
       description: '...',
       fromDate: getToday(),
@@ -66,7 +69,8 @@ export default {
         "rt_renewal": "false",
 
         "weightType": "0"
-      }
+      },
+      isEnvShow: false,
     }
   },
   destroyed() {
@@ -77,10 +81,39 @@ export default {
   async mounted() {
     setTimeout(() => {
       this.map = makeMap({ mapId: this.mapId, zoom: 13 })
+      const center = this.map.getCenter()
+      this.rect = new maptalks.Rectangle(
+        center.add(-0.05, 0),
+        5000,
+        3500,
+        {
+          symbol: {
+            lineColor: '#34495e',
+            lineWidth: 2,
+            polygonFill: 'rgb(216,115,149)',
+            polygonOpacity: 0.1,
+            textName: '영역선택',
+            textPlacement: '영역선택',
+            textSize: 20,
+            textDy: -20
+          }
+        }
+      )
+      new maptalks.VectorLayer('layerRouteMap')
+        .addGeometry([this.rect])
+        .addTo(this.map)
+      this.rect.startEdit()
     }, 1)
   },
   watch: {
+    region(v) {
 
+      const center = region[v]
+      this.map.animateTo({ center }, { duration: 1000 })
+      setTimeout(() => {
+        this.rect.setCoordinates(this.map.getCenter())
+      }, 1200)
+    }
   },
   methods: {
     resetForm() {

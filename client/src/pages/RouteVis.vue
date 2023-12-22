@@ -6,6 +6,12 @@
       </div>
     </div>
 
+    <!-- <div class="fixed z-50 h-16 left-2 top-12 space-y-1 w-full ">
+      <div class="w-96 bg-indigo-50 p-5 m-auto">
+        {{  status }}
+      </div>
+    </div> -->
+
     <div class="fixed z-50 h-16 left-10 top-18 space-y-1 w-max p-3">
       <div class="">
         <div class="grid grid-cols-1">
@@ -18,7 +24,13 @@
               :class="s.value === status ? 'bg-blue-200' : 'bg-gray-500 text-white'"
             >
               <div class="flex space-x-1 items-center">
-                <div class="text-center w-full">{{ s.label }}</div>
+                <div v-if="s.value === status" class="text-center w-full  ">
+                  <span v-if="!['finished', 'ready'].includes(status)" class="animate__animated animate__flash animate__infinite">{{ s.label }}</span>
+                  <span v-else>{{ s.label }}</span>
+                </div>
+                <div v-else>
+                  {{ s.label }}
+                </div>
                 <div v-if="s.value === status">
                   <b-icon v-if="!['finished', 'ready'].includes(status)" icon="arrow-clockwise" animation="spin-pulse" font-scale="1.5"></b-icon>
                 </div>

@@ -165,17 +165,17 @@ export default {
       min: 0,
       max: 0,
       statuses: [
-        { value: 'ready', label: 'READY', delay: 1000 },
-        { value: 'runDijkstra', label: 'RUN DIJKSTRA', delay: 1000 },
-        { value: 'runOD2Trips', label: 'RUN OD2TRIPS', delay: 1000 * 2 },
-        { value: 'runRouter', label: 'RUN ROUTER', delay: 1000 * 5 },
-        { value: 'runSimulator', label: 'RUN SIMULATION', delay: 1000 * 5 },
-        { value: 'runCalibrator', label: 'RUN CALIBRATOR', delay: 1000 * 3 },
-        { value: 'runOD2Trips2', label: 'RUN OD2TRIPS', delay: 1000 * 5 },
-        { value: 'runRouter2', label: 'RUN ROUTER', delay: 1000 * 5 },
-        { value: 'runSimulator2', label: 'RUN SIMULATION', delay: 1000 * 8 },
-        { value: 'runCalibrator2', label: 'RUN CALIBRATOR', delay: 1000 * 3 },
-        { value: 'finished', label: 'FINISHED', delay: 1000 },
+        { value: 'ready', label: '준비', delay: 1000 * 2 },
+        { value: 'runDijkstra', label: '경로탐색', delay: 1000 * 2 },
+        { value: 'runOD2Trips', label: 'OD-Matrix 생성', delay: 1000 * 2 },
+        { value: 'runRouter', label: '경로할당', delay: 1000 * 5 },
+        { value: 'runSimulator', label: '모의실험', delay: 1000 * 5 },
+        { value: 'runCalibrator', label: '보정', delay: 1000 * 3 },
+        { value: 'runOD2Trips2', label: '트립생성', delay: 1000 * 5 },
+        { value: 'runRouter2', label: '경로할당', delay: 1000 * 5 },
+        { value: 'runSimulator2', label: '모의실험', delay: 1000 * 8 },
+        { value: 'runCalibrator2', label: '검증보정', delay: 1000 * 3 },
+        { value: 'finished', label: '완료', delay: 1000 },
       ],
       status: 'ready',
       isRunning: false,
@@ -208,24 +208,25 @@ export default {
     const oneMin = 60 * 1000
 
     const elapsed = (this.simulation.created, Date.now() - new Date(this.simulation.created).getTime())
-
+    this.status = this.simulation.status
     // 준비상태가 아니면 시간에 따라 상태를 업데이트하여
     //
-    if (this.simulation.status !== 'ready') {
-      if (elapsed > oneMin) {
-        this.status = 'runOD2Trips'
-      } if (elapsed > oneMin * 2) {
-        this.status = 'runRouter'
-      }
-      if (elapsed > oneMin * 3) {
-        this.status = 'runSimulator2'
-      }
-      if (elapsed > oneMin * 5) {
-        this.status = 'finished'
-      }
-      updateStatus(this.id, this.status)
-    } else {
-      this.status = this.simulation.status
+    if (this.simulation.status === 'finished') {
+      //
+    } else if (this.simulation.status !== 'ready') {
+      // if (elapsed > oneMin) {
+      //   this.status = 'runOD2Trips'
+      // } if (elapsed > oneMin * 2) {
+      //   this.status = 'runRouter'
+      // }
+      // if (elapsed > oneMin * 3) {
+      //   this.status = 'runSimulator2'
+      // }
+      // if (elapsed > oneMin * 5) {
+      //   this.status = 'finished'
+      // }
+      // updateStatus(this.id, this.status)
+      this.generateRoute()
     }
 
     this.layerLinkFrom = new maptalks.VectorLayer('linkLayerFrom', [], {})
@@ -271,8 +272,10 @@ export default {
   watch: {
     status() {
       if (this.status === 'runRouter') {
+        this.showLinkFrom = false
+        this.showLinkTo = false
+        this.showTod = true
         this.startTripVisualization()
-        log('watch', this.status)
       }
       if (this.status === 'runCalibrator2') {
         this.showLinkFrom = true
@@ -305,7 +308,17 @@ export default {
   },
   methods: {
     async generateRoute() {
-      for (let s of this.statuses) {
+      const idx = this.statuses.findIndex(s => s.value === this.status)
+      let sss = []
+      if (idx >= 0) {
+        sss = this.statuses.slice(idx)
+      } else {
+        sss = this.statuses.slice()
+      }
+      if (this.status === 'finished') {
+        sss = this.statuses.slice()
+      }
+      for (let s of sss) {
         await wait(s.delay)
         this.status = s.value
         updateStatus(this.id, this.status)
