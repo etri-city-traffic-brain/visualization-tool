@@ -2,12 +2,12 @@
 
 교통 시뮬레이션 및 신호 최적화 가시화 도구(이하 UNIQ-VIS)는 교통 시뮬레이션 및 신호 최적화를 위한 설정 및 실행 결과 가시화 기능을 제공한다.
 
-![스크린샷_20221118_023813](https://user-images.githubusercontent.com/2037433/203231188-d9abdfda-f559-4b19-8f8d-bc846876fbe8.png)
+![so1](https://github.com/etri-city-traffic-brain/visualization-tool/assets/2037433/a5d86ac2-f6f8-4c07-8443-b3f47dc1fbd1)
 
 ## 주요기능
 
-1. 교통 시뮬레이션 결과 가시화
-2. 다중 교차로 신호 최적화 결과 가시화
+1. SALT(교통시뮬레이터) 연동 및 시뮬레이션 결과 가시화
+2. 교차로 신호 최적화 연동 및 최적화 결과 가시화
 
 ## 프로젝트 구성
 
