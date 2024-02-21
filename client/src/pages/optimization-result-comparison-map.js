@@ -222,7 +222,6 @@ export default {
       crossNameSelected: '',
       showWaitingMsg: false,
       showWaitingMsg2: false,
-      statusMessage: [],
       timer: null,
       status: '',
       statusText: '',
@@ -407,7 +406,6 @@ export default {
     evtBusRl.$on('salt:status', async status => {
 
       if (status.progress > 1 && status.progress < 1000) {
-        // this.count += 1
         if (this.needToMove) {
           const mapFt = this.simulations[0].map
           if (center) {
@@ -511,97 +509,6 @@ export default {
     },
     getColorForImprovedRate(v) {
       return colorScale(v)
-    },
-
-    async updateOptResult(forceUpdate) {
-      log('update optimization result', new Date())
-      // const start = new Date().getTime()
-      const progress = this.chart1.progress
-      if ((progress > 0 && progress < 100) || forceUpdate) {
-        // this.statusText = 'chart created...' + +(Date.now() - start) / 1000
-        try {
-          const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
-          this.optResult = optResult
-
-          this.simulations[1].trafficLightManager.setOptTestResult(optResult.intersections, 'test')
-          this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')
-
-          const step = this.step
-          this.chart.travelTimeChartInView = makeTravelTimeChart(
-            optResult.simulate.travel_times.filter((v, i) => i % step === 0),
-            optResult.test.travel_times.filter((v, i) => i % step === 0),
-            optResult.simulate.travel_time,
-            optResult.test.travel_time,
-            step
-          )
-          this.chart.travelTimeChartInViewAcc = makeTravelTimeChart(
-            optResult.simulate.cumlative_avgs.filter((v, i) => i % step === 0),
-            optResult.test.cumlative_avgs.filter((v, i) => i % step === 0),
-            0, 0,
-            step
-          )
-
-          const r = this.optResult.intersections[this.crossNameSelected]
-          if (r) {
-            this.chart.travelTimeJunctionChart = makeTravelTimeChart(
-              r.simulate.travel_times.filter((v, i) => i % step === 0),
-              r.test.travel_times.filter((v, i) => i % step === 0),
-              r.simulate.travel_time,
-              r.test.travel_time,
-              step
-            )
-
-            this.chart.travelTimeJunctionChartAcc = makeTravelTimeChart(
-              r.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
-              r.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
-              0,
-              0,
-              29
-            )
-
-            this.testResult = r
-
-          }
-
-          this.chart.travelTimePerJunction = optResult.intersections
-
-          this.chart.effTravelTime = optResult.improvement_rate
-
-          this.chart1.travelTimeJunction = optResult.simulate.travel_time
-          this.chart1.avgSpeedJunction = optResult.simulate.avg_speed
-
-          this.chart2.travelTimeJunction = optResult.test.travel_time
-          this.chart2.avgSpeedJunction = optResult.test.avg_speed
-
-          // this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
-
-          if (this.signalExplain === null) {
-            setTimeout(() => {
-              this.updateSignalExplain()
-            }, 2000)
-          } else {
-            this.statusText = '신호정보 업데이트'
-            this.signalExplain.update(parseAction(this.actionForOpt[1].action))
-          }
-        } catch (err) {
-          log(err)
-          if (err.response) {
-            log(err.response.data)
-            this.status = 'error'
-          }
-        }
-      }
-
-      this.timer = setTimeout(async () => {
-        try {
-          // if (this.status === 'finished') {
-          //   return
-          // }
-          await this.updateOptResult()
-        } catch (err) {
-          log(err.message)
-        }
-      }, 5000)
     },
 
     initKeyListener() {
@@ -721,22 +628,13 @@ export default {
       // this.updateOptResult()
     },
 
-    addMessage(msg) {
-      this.statusMessage.push(msg)
-      if (this.statusMessage.length > 100) {
-        this.statusMessage.shift()
-      }
-    },
-
     async stopTest() {
       this.status = 'stopping'
-      this.addMessage('stop ' + this.simulation.id)
+
       await optSvc
         .stop(this.simulation.id, 'slave')
         .then(r => r.data)
-        .then(data => {
-          this.addMessage(data.msg)
-        })
+        .catch((err) => log(err.message))
     },
 
     initMapEventHandler(obj) {
@@ -799,6 +697,93 @@ export default {
       this.checkStatusTimer = setTimeout(() => {
         this.checkStatus()
       }, 5000)
-    }
+    },
+
+    async updateOptResult(forceUpdate) {
+      log('update optimization result', new Date())
+
+      const progress = this.chart1.progress
+      if ((progress > 0 && progress < 100) || forceUpdate) {
+        try {
+          const optResult = await optSvc.getSigOptResult(this.simulation.id).then(res => res.data)
+          this.optResult = optResult
+
+          this.simulations[1].trafficLightManager.setOptTestResult(optResult.intersections, 'test')
+          this.simulations[0].trafficLightManager.setOptTestResult(optResult.intersections, 'simulate')
+
+          const step = this.step
+          this.chart.travelTimeChartInView = makeTravelTimeChart(
+            optResult.simulate.travel_times.filter((v, i) => i % step === 0),
+            optResult.test.travel_times.filter((v, i) => i % step === 0),
+            optResult.simulate.travel_time,
+            optResult.test.travel_time,
+            step
+          )
+          this.chart.travelTimeChartInViewAcc = makeTravelTimeChart(
+            optResult.simulate.cumlative_avgs.filter((v, i) => i % step === 0),
+            optResult.test.cumlative_avgs.filter((v, i) => i % step === 0),
+            0, 0,
+            step
+          )
+
+          const r = this.optResult.intersections[this.crossNameSelected]
+          if (r) {
+            this.chart.travelTimeJunctionChart = makeTravelTimeChart(
+              r.simulate.travel_times.filter((v, i) => i % step === 0),
+              r.test.travel_times.filter((v, i) => i % step === 0),
+              r.simulate.travel_time,
+              r.test.travel_time,
+              step
+            )
+
+            this.chart.travelTimeJunctionChartAcc = makeTravelTimeChart(
+              r.simulate.cumlative_avgs.filter((v, i) => i % 29 === 0),
+              r.test.cumlative_avgs.filter((v, i) => i % 29 === 0),
+              0,
+              0,
+              29
+            )
+
+            this.testResult = r
+
+          }
+
+          this.chart.travelTimePerJunction = optResult.intersections
+
+          this.chart.effTravelTime = optResult.improvement_rate
+
+          this.chart1.travelTimeJunction = optResult.simulate.travel_time
+          this.chart1.avgSpeedJunction = optResult.simulate.avg_speed
+
+          this.chart2.travelTimeJunction = optResult.test.travel_time
+          this.chart2.avgSpeedJunction = optResult.test.avg_speed
+
+          // this.statusText = 'updated... ' + (Date.now() - start) / 1000 + ' sec'
+
+          if (this.signalExplain === null) {
+            setTimeout(() => {
+              this.updateSignalExplain()
+            }, 2000)
+          } else {
+            this.statusText = '신호정보 업데이트'
+            this.signalExplain.update(parseAction(this.actionForOpt[1].action))
+          }
+        } catch (err) {
+          log(err)
+          if (err.response) {
+            log(err.response.data)
+            this.status = 'error'
+          }
+        }
+      }
+
+      this.timer = setTimeout(async () => {
+        try {
+          await this.updateOptResult()
+        } catch (err) {
+          log(err.message)
+        }
+      }, 5000)
+    },
   }
 }
