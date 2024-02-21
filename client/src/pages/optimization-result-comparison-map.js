@@ -251,7 +251,10 @@ export default {
       optTestResults: [],
       step: 29,
       testResult: null,
-      waitingMessage: '실행 준비 중입니다. 잠시 후 실행 됩니다.'
+      waitingMessage: '실행 준비 중입니다. 잠시 후 실행 됩니다.',
+      needToMove: true,
+      factor: 0.001,
+      showPopup: false
     }
   },
   watch: {
@@ -386,7 +389,7 @@ export default {
     // 최적화 시뮬레이션이 수행 속도가 느림
     // 버퍼로부터 데이터 가져와 이벤트 발생
     evtBusRl.$on('salt:data', () => {
-      this.showWaitingMsg = false
+      // this.showWaitingMsg = false
       const dataSim = bufferSimFt.shift()
       if (!dataSim) {
         return
@@ -402,6 +405,22 @@ export default {
     })
 
     evtBusRl.$on('salt:status', async status => {
+
+      if (status.progress > 1 && status.progress < 1000) {
+        // this.count += 1
+        if (this.needToMove) {
+          const mapFt = this.simulations[0].map
+          if (center) {
+            mapFt.animateTo({
+              center: [center.x - this.factor, center.y]
+            })
+            this.factor += 0.001
+          }
+          this.needToMove = false
+        }
+      }
+
+
       this.chart2.progress = status.progress
       this.chart1.progress = status.progress
 
@@ -409,7 +428,6 @@ export default {
         this.chart1.progress = 100
         this.chart2.progress = 100
 
-        this.waitingMessage2 = '분석중 입니다. 잠시 기다리세요.'
         this.showWaitingMsg2 = true
 
       }
@@ -419,6 +437,11 @@ export default {
         this.chart2.progress = 0
         this.showWaitingMsg2 = false
       }
+    })
+
+    evtBusFt.$on('salt:data', () => {
+
+      this.showWaitingMsg = false
     })
 
     evtBusFt.$on('optimization:finished', () => {
@@ -561,7 +584,7 @@ export default {
             this.signalExplain.update(parseAction(this.actionForOpt[1].action))
           }
         } catch (err) {
-          log(err.message)
+          log(err)
           if (err.response) {
             log(err.response.data)
             this.status = 'error'
@@ -571,14 +594,14 @@ export default {
 
       this.timer = setTimeout(async () => {
         try {
-          if (this.status === 'finished') {
-            return
-          }
+          // if (this.status === 'finished') {
+          //   return
+          // }
           await this.updateOptResult()
         } catch (err) {
           log(err.message)
         }
-      }, 4000)
+      }, 5000)
     },
 
     initKeyListener() {
@@ -596,6 +619,7 @@ export default {
       this.crossNameSelected = crossName
       this.isShowAvgTravelChart = true
       this.currentTab = ''
+      this.showPopup = true
       this.updateSignalExplain()
 
       this.simulations[1].trafficLightManager.moveTo(crossName)
@@ -680,6 +704,7 @@ export default {
       this.chart2.avgSpeedsJunctions = []
       this.chart1.progress = 0
       this.chart2.progress = 0
+      this.needToMove = true
       try {
         await simulationService.stopSimulation(this.simulation.id)
         await optSvc.runTest(
@@ -692,7 +717,8 @@ export default {
         this.status = 'error'
       }
       this.status = 'running'
-      this.checkStatus()
+      // this.checkStatus()
+      // this.updateOptResult()
     },
 
     addMessage(msg) {
@@ -763,12 +789,12 @@ export default {
       if (this.status === 'finished') {
         this.chart1.progress = 100
         this.chart2.progress = 100
-        this.updateOptResult(true)
+        // this.updateOptResult(true)
       }
       if (this.status === 'finished' || this.status === 'error' || this.status === 'stopped') {
         this.showWaitingMsg = false
         this.showWaitingMsg2 = false
-        return
+        //   return
       }
       this.checkStatusTimer = setTimeout(() => {
         this.checkStatus()

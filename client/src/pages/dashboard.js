@@ -17,8 +17,6 @@ import {
   makeLinkSpeedChartData
 } from '../dashboard/dtg-stats.js'
 
-const { log, warn } = console
-
 export default {
   name: 'Dashboard',
   components: {
@@ -74,6 +72,7 @@ export default {
   },
   mounted() {
     this.$on('link:selected', async link => {
+      console.log('link:selected', link)
       this.loadVdsStats(link)
     })
     this.map = makeMap({ mapId: this.mapId, zoom: 15 })
@@ -218,6 +217,7 @@ export default {
 
     loadLineTrail(num) {
       loadLineTrip(this, num)
+      this.useTrip = true
     }
   },
 

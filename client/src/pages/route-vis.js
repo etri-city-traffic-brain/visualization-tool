@@ -423,21 +423,59 @@ export default {
 
         const onlySejong = (feature) => {
           return [
-            '2901060',
+            '2901031',
+            '2901061',
+            '2901062',
+            '2901053',
             '2901059',
             '2901056',
-            '2901067',
-            '2901061',
+            '2901060',
             '2901064',
-            '2901066',
-            '2901061',
-            '2901053',
-            '2901068'
+
+
+            // '2901060',
+            // '2901059',
+            // '2901056',
+            // '2901067',
+            // '2901061',
+            // '2901064',
+            // '2901066',
+            // '2901061',
+            // '2901053',
+            // '2901068'
           ].indexOf(feature.properties.adm_cd) >= 0
         }
 
         features
           .filter(onlySejong)
+          .forEach((feature) => {
+            const color = randomColor()
+            const { dong, center } = makeDong(feature, color)
+            this.layerDong.addGeometry(dong);
+            this.dongCenters[center.properties.adm_cd] = center
+          });
+      } else if (this.simulation.configuration.region === 'doan') {
+        dongGeojson = await getDaejeonDongs()
+        const { features } = dongGeojson
+
+        const onlyYuseong = (feature) => {
+
+          return [
+            '2503066',
+            '2503070',
+            '2504054',
+            '2504059',
+            '2504064',
+            '2504065',
+            '2504065',
+            '2504054',
+
+          ].indexOf(feature.properties.adm_cd) >= 0
+
+        }
+
+        features
+          .filter(onlyYuseong)
           .forEach((feature) => {
             const color = randomColor()
             const { dong, center } = makeDong(feature, color)
@@ -451,12 +489,17 @@ export default {
         const onlyYuseong = (feature) => {
 
           return [
+            '2503064',
+            '2503065',
             '2503066',
-            '2503070',
-            '2504054',
-            '2504059',
+            '2503067',
+            '2503068',
+            '2503060',
+            '2503069',
             '2504064',
+            '2504054',
             '2504065',
+
           ].indexOf(feature.properties.adm_cd) >= 0
 
         }

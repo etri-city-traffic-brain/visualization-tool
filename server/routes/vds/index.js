@@ -6,7 +6,7 @@ const path = require('path')
 const { config } = require('../../globals')
 
 const vdsFile = config.base + '/vds/vds2link.csv'
-
+console.log(config.base)
 let result = null
 
 router.get('/', (req, res) => {

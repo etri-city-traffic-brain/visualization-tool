@@ -54,11 +54,11 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true, grid = tr
     edgeLayer.getGeometries.bind(edgeLayer),
     eventBus
   )
-  // const vdsLayer = makeVdsLayer(
-  //   map,
-  //   edgeLayer.getGeometries.bind(edgeLayer),
-  //   eventBus
-  // )
+  const vdsLayer = makeVdsLayer(
+    map,
+    edgeLayer.getGeometries.bind(edgeLayer),
+    eventBus
+  )
   const cctvLayer = makeCctvLayer(
     map,
     edgeLayer.getGeometries.bind(edgeLayer),
@@ -75,7 +75,7 @@ function MapManager({ map, simulationId, eventBus, useSaltLink = true, grid = tr
   map.addLayer(toolLayer)
   map.addLayer(rseLayer)
   map.addLayer(cctvLayer)
-  // map.addLayer(vdsLayer)
+  map.addLayer(vdsLayer)
   map.addLayer(gridLayer)
 
   rseLayer.hide()
